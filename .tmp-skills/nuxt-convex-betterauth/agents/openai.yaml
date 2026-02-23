@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nuxt Convex + Better Auth"
+  short_description: "Nuxt Convex and Better Auth integration guide"
+  default_prompt: "Use this skill to configure and integrate nuxt-convex with @onmax/nuxt-better-auth (and optional @convex-dev/better-auth) in Nuxt, including SSR-safe authenticated realtime queries, route protection, file uploads, and troubleshooting."

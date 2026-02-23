@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cloudflare AI Search (AutoRAG)"
+  short_description: "Cloudflare AI Search and AutoRAG workflows"
+  default_prompt: "Use $cloudflare-ai-search-autorag to design, configure, and troubleshoot a Cloudflare AI Search (AutoRAG) pipeline end to end."

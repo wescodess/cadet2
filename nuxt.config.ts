@@ -7,7 +7,25 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/tailwind.css'],
 
-  modules: ['shadcn-nuxt'],
+  modules: ['@nuxthub/core', 'nuxt-convex', '@onmax/nuxt-better-auth', 'shadcn-nuxt'],
+
+  runtimeConfig: {
+    cloudflareAiSearch: {
+      accountId: '',
+      apiToken: '',
+      instanceName: '',
+      instanceId: '',
+    },
+  },
+
+  hub: {
+    db: 'postgresql',
+  },
+
+  convex: {
+    // Keep disabled unless you need file uploads right now.
+    storage: false,
+  },
 
   shadcn: {
     /**
