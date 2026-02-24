@@ -1,0 +1,5 @@
+interface:
+  display_name: "Cloudflare AI Gateway"
+  short_description: "AI routing, caching, fallbacks, and observability"
+  default_prompt: "Use $cloudflare-ai-gateway to configure or debug Cloudflare AI Gateway endpoints, caching, rate limiting, fallbacks, and logging/analytics."
+

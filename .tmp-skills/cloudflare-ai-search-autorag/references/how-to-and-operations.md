@@ -17,6 +17,31 @@ Read these pages based on the request:
 - `/ai-search/how-to/brower-rendering-autorag-tutorial/`
   - Website-to-RAG workflow using Browser Rendering (docs route includes `brower` typo).
 
+## AutoRAG Launch Blog (Architecture + Tutorial Context)
+
+Read `https://blog.cloudflare.com/introducing-autorag-on-cloudflare/` when the user needs:
+
+- the "why AutoRAG / AI Search exists" product framing
+- a concise under-the-hood explanation of indexing vs querying
+- a Browser Rendering -> Worker -> R2 -> AutoRAG starter pattern
+
+Launch blog architecture notes (still useful, even after product rename to AI Search):
+
+- AutoRAG/AI Search is built from Cloudflare platform building blocks:
+  - `R2` (source files)
+  - `Workers AI` (markdown conversion, embeddings, generation, optional query rewrite)
+  - `Vectorize` (vector storage / retrieval)
+  - `AI Gateway` (model tracking/control)
+- The platform runs two core processes:
+  - `indexing` (asynchronous background cycles)
+  - `querying` (synchronous request path)
+- The blog’s indexing pipeline summary aligns with current docs:
+  - ingest -> markdown conversion -> chunking -> embedding -> vector storage
+- The blog’s querying pipeline summary aligns with current docs:
+  - query -> optional rewrite -> embedding -> vector search -> metadata/content retrieval -> response generation
+
+Use the launch blog for conceptual explanations and demos, but prefer current docs/API references for exact endpoints, parameters, limits, and supported models.
+
 ## Operational Decision Guide
 
 ### Choose R2 vs Website source
@@ -130,4 +155,3 @@ Use retrieval-only mode to confirm relevance, then adjust:
 4. Validate one retrieval-only and one retrieve+generate query.
 5. Validate metadata filter behavior with a known tenant/file boundary.
 6. If website source: validate recrawl path with changed content and sync job.
-

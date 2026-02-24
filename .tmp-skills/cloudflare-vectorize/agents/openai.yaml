@@ -1,0 +1,5 @@
+interface:
+  display_name: "Cloudflare Vectorize"
+  short_description: "Vectorize index setup, querying, and debugging"
+  default_prompt: "Use $cloudflare-vectorize to build or debug a Cloudflare Vectorize index, Worker binding, and vector query pipeline."
+

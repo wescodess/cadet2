@@ -29,6 +29,7 @@ Use this skill to build and operate Cloudflare AI Search (formerly AutoRAG) end 
 ## High-Value Rules
 
 - Prefer official Cloudflare docs pages and Cloudflare API reference as primary sources.
+- Use the AutoRAG launch blog for product architecture context and quick onboarding examples when users ask "how it works under the hood" or want a dashboard-first walkthrough.
 - Use Chrome MCP to fetch docs directly (`chrome_get_web_content`, `chrome_network_request`) when the user asks for current details.
 - Use `https://developers.cloudflare.com/ai-search/llms-full.txt` as the fastest comprehensive snapshot, then open specific pages for exact behavior.
 - Treat models, limits/pricing, and release notes as volatile. Re-check them live before final recommendations.
@@ -47,6 +48,7 @@ Use this skill to build and operate Cloudflare AI Search (formerly AutoRAG) end 
    - `Fix indexing/crawling issue`
    - `Ops/limits/release-note verification`
 2. Read `references/docs-inventory.md` and choose only the relevant page set.
+   - If the user asks about AutoRAG internals, launch context, or the Browser Rendering -> R2 tutorial, also read the AutoRAG launch blog notes in `references/how-to-and-operations.md`.
 3. If the user asked for "latest/current", fetch the relevant docs pages with Chrome MCP first.
 4. Implement with the smallest viable path (dashboard example, REST call, or Worker binding).
 5. Validate behavior with a known query and inspect:
@@ -103,7 +105,7 @@ Prefer `chrome_network_request` for raw text/HTML and `chrome_get_web_content` f
 - `references/query-apis-and-bindings.md`
   - REST query APIs, Workers binding methods, parameter semantics, response shapes, Cloudflare API management endpoints.
 - `references/how-to-and-operations.md`
-  - How-to coverage, operational practices, limits/pricing snapshot, release-note watchpoints.
+  - How-to coverage, operational practices, launch blog architecture notes, limits/pricing snapshot, release-note watchpoints.
 
 ## Scope Notes
 

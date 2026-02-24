@@ -1,0 +1,5 @@
+interface:
+  display_name: "Cloudflare Workers AI"
+  short_description: "Workers AI setup, model selection, and troubleshooting"
+  default_prompt: "Use $cloudflare-workers-ai to build, debug, or optimize a Cloudflare Workers AI integration using Worker bindings or the REST API."
+

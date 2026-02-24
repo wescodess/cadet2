@@ -7,12 +7,14 @@ Last verified with Chrome MCP on 2026-02-22.
 - AI Search docs root: `https://developers.cloudflare.com/ai-search/`
 - AI Search LLM export (preferred for broad coverage): `https://developers.cloudflare.com/ai-search/llms-full.txt`
 - Cloudflare API resource reference (AI Search): `https://developers.cloudflare.com/api/resources/ai_search/`
+- AutoRAG launch blog (architecture + tutorial context): `https://blog.cloudflare.com/introducing-autorag-on-cloudflare/`
 - AI Search MCP server repo link (from docs sidebar): `https://github.com/cloudflare/mcp-server-cloudflare/tree/main/apps/autorag`
 
 ## Naming Notes
 
 - Product name is now `AI Search`.
 - Docs still mention former name `AutoRAG`.
+- The launch blog uses `AutoRAG` and is still useful for understanding the original product architecture and component mapping (Workers AI + Vectorize + AI Gateway + R2).
 - Some query endpoints and examples still use `.../autorag/rags/{AUTORAG_NAME}/...`.
 - Cloudflare API resource management uses `.../ai-search/...`.
 
@@ -113,4 +115,3 @@ From the AI Search API reference page payload/snippets, the resource set include
    - `/configuration/models/supported-models/`
    - `/platform/limits-pricing/`
    - `/platform/release-note/`
-
