@@ -16,6 +16,24 @@ export default defineNuxtConfig({
       instanceName: '',
       instanceId: '',
     },
+    cloudflareAiGateway: {
+      accountId: '',
+      gatewayId: '',
+      baseUrl: '',
+      apiToken: '',
+    },
+    openRouter: {
+      apiKey: '',
+      defaultModel: '',
+      appName: '',
+      appUrl: '',
+    },
+    rag: {
+      defaultTenantId: 'default',
+      adminUserIds: '',
+      adminEmails: '',
+      schedulerSecret: '',
+    },
   },
 
   hub: {

@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as ragIngestionInternal from "../ragIngestionInternal.js";
+import type * as ragSources from "../ragSources.js";
+import type * as ragSourcesInternal from "../ragSourcesInternal.js";
 import type * as tasks from "../tasks.js";
 
 import type {
@@ -17,6 +20,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  ragIngestionInternal: typeof ragIngestionInternal;
+  ragSources: typeof ragSources;
+  ragSourcesInternal: typeof ragSourcesInternal;
   tasks: typeof tasks;
 }>;
 

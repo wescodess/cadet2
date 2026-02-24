@@ -36,6 +36,18 @@ const { loggedIn, ready } = useUserSession()
       >
         Open AI Search Playground
       </NuxtLink>
+      <NuxtLink
+        to="/admin/rag-phase0"
+        class="rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-200 hover:bg-amber-500/20"
+      >
+        Open RAG Phase 0
+      </NuxtLink>
+      <NuxtLink
+        to="/admin/rag-sources"
+        class="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-100 hover:bg-emerald-500/20"
+      >
+        Open RAG Sources
+      </NuxtLink>
     </div>
 
     <div class="rounded-lg border border-slate-800 bg-slate-900/70 p-4 text-sm text-slate-300">
