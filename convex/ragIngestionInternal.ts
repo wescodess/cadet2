@@ -14,6 +14,13 @@ type SourceRunStats = {
   unchanged: number
   failed: number
   skipped: number
+  transcriptAttempted: number
+  transcriptSucceeded: number
+  transcriptSucceededInnerTubeAndroid: number
+  transcriptSucceededApi: number
+  transcriptSucceededCaptionsXml: number
+  transcriptSucceededWithTimestamps: number
+  transcriptDescriptionFallback: number
 }
 
 type BatchSummary = {
@@ -24,6 +31,13 @@ type BatchSummary = {
   itemsChanged: number
   itemsUnchanged: number
   itemsFailed: number
+  transcriptAttempted: number
+  transcriptSucceeded: number
+  transcriptSucceededInnerTubeAndroid: number
+  transcriptSucceededApi: number
+  transcriptSucceededCaptionsXml: number
+  transcriptSucceededWithTimestamps: number
+  transcriptDescriptionFallback: number
 }
 
 type SourceRunError = {
@@ -66,6 +80,13 @@ function zeroStats(): SourceRunStats {
     unchanged: 0,
     failed: 0,
     skipped: 0,
+    transcriptAttempted: 0,
+    transcriptSucceeded: 0,
+    transcriptSucceededInnerTubeAndroid: 0,
+    transcriptSucceededApi: 0,
+    transcriptSucceededCaptionsXml: 0,
+    transcriptSucceededWithTimestamps: 0,
+    transcriptDescriptionFallback: 0,
   }
 }
 
@@ -78,6 +99,13 @@ function zeroSummary(): BatchSummary {
     itemsChanged: 0,
     itemsUnchanged: 0,
     itemsFailed: 0,
+    transcriptAttempted: 0,
+    transcriptSucceeded: 0,
+    transcriptSucceededInnerTubeAndroid: 0,
+    transcriptSucceededApi: 0,
+    transcriptSucceededCaptionsXml: 0,
+    transcriptSucceededWithTimestamps: 0,
+    transcriptDescriptionFallback: 0,
   }
 }
 
@@ -224,6 +252,13 @@ function aggregateBatchSummary(sourceRuns: Array<{ status: string, stats: Source
     summary.itemsChanged += run.stats.changed
     summary.itemsUnchanged += run.stats.unchanged
     summary.itemsFailed += run.stats.failed
+    summary.transcriptAttempted += run.stats.transcriptAttempted
+    summary.transcriptSucceeded += run.stats.transcriptSucceeded
+    summary.transcriptSucceededInnerTubeAndroid += run.stats.transcriptSucceededInnerTubeAndroid
+    summary.transcriptSucceededApi += run.stats.transcriptSucceededApi
+    summary.transcriptSucceededCaptionsXml += run.stats.transcriptSucceededCaptionsXml
+    summary.transcriptSucceededWithTimestamps += run.stats.transcriptSucceededWithTimestamps
+    summary.transcriptDescriptionFallback += run.stats.transcriptDescriptionFallback
   }
 
   return summary
@@ -511,6 +546,13 @@ const sourceRunStatsValidator = v.object({
   unchanged: v.number(),
   failed: v.number(),
   skipped: v.number(),
+  transcriptAttempted: v.number(),
+  transcriptSucceeded: v.number(),
+  transcriptSucceededInnerTubeAndroid: v.number(),
+  transcriptSucceededApi: v.number(),
+  transcriptSucceededCaptionsXml: v.number(),
+  transcriptSucceededWithTimestamps: v.number(),
+  transcriptDescriptionFallback: v.number(),
 })
 
 const sourceRunErrorValidator = v.object({

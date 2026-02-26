@@ -47,6 +47,13 @@ type IngestionBatchSummary = {
   itemsChanged: number
   itemsUnchanged: number
   itemsFailed: number
+  transcriptAttempted: number
+  transcriptSucceeded: number
+  transcriptSucceededInnerTubeAndroid: number
+  transcriptSucceededApi: number
+  transcriptSucceededCaptionsXml: number
+  transcriptSucceededWithTimestamps: number
+  transcriptDescriptionFallback: number
 }
 
 type ListBatchesResult = {
@@ -89,6 +96,13 @@ type BatchDetailResult = {
       unchanged: number
       failed: number
       skipped: number
+      transcriptAttempted: number
+      transcriptSucceeded: number
+      transcriptSucceededInnerTubeAndroid: number
+      transcriptSucceededApi: number
+      transcriptSucceededCaptionsXml: number
+      transcriptSucceededWithTimestamps: number
+      transcriptDescriptionFallback: number
     }
     errors: Array<{
       code: string
@@ -162,6 +176,16 @@ function formatTimestamp(value?: number) {
   }
 
   return new Date(value).toLocaleString()
+}
+
+function formatPercent(numerator?: number, denominator?: number) {
+  const num = Number(numerator ?? 0)
+  const den = Number(denominator ?? 0)
+  if (!Number.isFinite(num) || !Number.isFinite(den) || den <= 0) {
+    return '—'
+  }
+
+  return `${Math.round((num / den) * 100)}%`
 }
 
 async function checkPhase0Access() {
@@ -810,6 +834,15 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
                 · failed: <code>{{ batch.summary.itemsFailed }}</code>
               </p>
               <p class="text-xs text-slate-500">
+                transcripts: <code>{{ batch.summary.transcriptSucceeded ?? 0 }}</code>/<code>{{ batch.summary.transcriptAttempted ?? 0 }}</code>
+                (<code>{{ formatPercent(batch.summary.transcriptSucceeded, batch.summary.transcriptAttempted) }}</code>)
+                · innertube: <code>{{ batch.summary.transcriptSucceededInnerTubeAndroid ?? 0 }}</code>
+                · api: <code>{{ batch.summary.transcriptSucceededApi ?? 0 }}</code>
+                · captions: <code>{{ batch.summary.transcriptSucceededCaptionsXml ?? 0 }}</code>
+                · timestamped: <code>{{ batch.summary.transcriptSucceededWithTimestamps ?? 0 }}</code>
+                · desc fallback: <code>{{ batch.summary.transcriptDescriptionFallback ?? 0 }}</code>
+              </p>
+              <p class="text-xs text-slate-500">
                 idempotency: <code>{{ batch.idempotencyKey }}</code>
               </p>
             </div>
@@ -871,6 +904,18 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
                 </p>
                 <p class="text-xs text-slate-500">
                   stats: discovered <code>{{ run.stats.discovered }}</code> · fetched <code>{{ run.stats.fetched }}</code> · new <code>{{ run.stats.new }}</code> · changed <code>{{ run.stats.changed }}</code> · unchanged <code>{{ run.stats.unchanged }}</code> · failed <code>{{ run.stats.failed }}</code>
+                </p>
+                <p
+                  v-if="run.source?.type === 'youtube_channel' || (run.stats.transcriptAttempted ?? 0) > 0 || (run.stats.transcriptDescriptionFallback ?? 0) > 0"
+                  class="text-xs text-slate-500"
+                >
+                  transcripts <code>{{ run.stats.transcriptSucceeded ?? 0 }}</code>/<code>{{ run.stats.transcriptAttempted ?? 0 }}</code>
+                  (<code>{{ formatPercent(run.stats.transcriptSucceeded, run.stats.transcriptAttempted) }}</code>)
+                  · innertube <code>{{ run.stats.transcriptSucceededInnerTubeAndroid ?? 0 }}</code>
+                  · api <code>{{ run.stats.transcriptSucceededApi ?? 0 }}</code>
+                  · captions <code>{{ run.stats.transcriptSucceededCaptionsXml ?? 0 }}</code>
+                  · timestamped <code>{{ run.stats.transcriptSucceededWithTimestamps ?? 0 }}</code>
+                  · desc fallback <code>{{ run.stats.transcriptDescriptionFallback ?? 0 }}</code>
                 </p>
                 <p v-if="run.lastError" class="text-xs text-rose-300">
                   last error: {{ run.lastError }}
