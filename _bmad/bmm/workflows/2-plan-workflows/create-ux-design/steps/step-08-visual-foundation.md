@@ -1,4 +1,4 @@
-# Step 8: Visual Foundation
+# Step 8: Design Tokens & System
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -8,7 +8,7 @@
 - 🔄 CRITICAL: When loading next step with 'C', ensure the entire file is read and understood before proceeding
 - ✅ ALWAYS treat this as collaborative discovery between UX facilitator and stakeholder
 - 📋 YOU ARE A UX FACILITATOR, not a content generator
-- 💬 FOCUS on establishing visual design foundation (colors, typography, spacing)
+- 💬 FOCUS on establishing the app-wide design tokens and system artifacts (colors, typography, spacing, motion, and output files)
 - 🎯 COLLABORATIVE discovery, not assumption-based design
 - ✅ YOU MUST ALWAYS SPEAK OUTPUT In your Agent communication style with the config `{communication_language}`
 
@@ -38,17 +38,17 @@ This step will generate content and present choices:
 ## CONTEXT BOUNDARIES:
 
 - Current document and frontmatter from previous steps are available
-- Design system choice from step 6 provides component foundation
+- Design system choice from step 6 provides component foundation and the active Stitch workspace
 - Emotional response goals from step 4 inform visual decisions
-- Focus on colors, typography, spacing, and layout foundation
+- Focus on colors, typography, spacing, layout, motion, and persisted design-system artifacts
 
 ## YOUR TASK:
 
-Establish the visual design foundation including color themes, typography, and spacing systems.
+Establish the concrete design-token system, semantic rules, and exported design artifacts that the rest of the BMAD workflow must reuse.
 
 ## VISUAL FOUNDATION SEQUENCE:
 
-### 1. Brand Guidelines Assessment
+### 1. Brand Guidelines And Token Inputs
 
 Check for existing brand requirements:
 "Do you have existing brand guidelines or a specific color palette I should follow? (y/n)
@@ -56,14 +56,18 @@ Check for existing brand requirements:
 If yes, I'll extract and document your brand colors and create semantic color mappings.
 If no, I'll generate theme options based on your project's personality and emotional goals from our earlier discussion."
 
-### 2. Generate Color Theme Options (If no brand guidelines)
+### 2. Define Token Families
 
-Create visual exploration opportunities:
-"If no existing brand guidelines, I'll create a color theme visualizer to help you explore options.
+Define the token families that will become the source of truth:
 
-🎨 I can generate comprehensive HTML color theme visualizers with multiple theme options, complete UI examples, and the ability to see how colors work in real interface contexts.
+- Color
+- Typography
+- Spacing
+- Radius
+- Shadow / elevation
+- Motion / timing
 
-This will help you make an informed decision about the visual direction for {{project_name}}."
+These are app-wide tokens, not one-off styling notes.
 
 ### 3. Define Typography System
 
@@ -82,7 +86,7 @@ Establish the typographic foundation:
 - Define line heights and spacing relationships
 - Consider readability and accessibility"
 
-### 4. Establish Spacing and Layout Foundation
+### 4. Establish Spacing, Layout, And Motion Foundation
 
 Define the structural foundation:
 "**Spacing and Layout Foundation:**
@@ -98,32 +102,21 @@ Define the structural foundation:
 - [Layout principle 2 based on user needs]
 - [Layout principle 3 based on platform requirements]"
 
-### 5. Create Visual Foundation Strategy
+### 5. Generate Persisted Design-System Artifacts
 
-Synthesize all visual decisions:
-"**Visual Foundation Strategy:**
+This step must explicitly define the artifacts that will be produced and reused:
+"**Design-System Outputs:**"
 
-**Color System:**
+- `DESIGN.md` as the semantic source of truth
+- `design-tokens.json` as the machine-readable token export
+- `design-tokens.css` as the implementation-facing CSS variable export
+- Optional exported style guide / token registry references tied to the active Stitch workspace
 
-- [Color strategy based on brand guidelines or generated themes]
-- Semantic color mapping (primary, secondary, success, warning, error, etc.)
-- Accessibility compliance (contrast ratios)
+Use the `stitch-design-md` skill to keep `DESIGN.md` aligned with the current Stitch project, and use Stitch token/export capabilities to keep the implementation-facing artifacts aligned with the approved design foundation.
 
-**Typography System:**
+This foundation will ensure consistency across all later UX and story-level work."
 
-- [Typography strategy based on content needs and tone]
-- Type scale and hierarchy
-- Font pairing rationale
-
-**Spacing & Layout:**
-
-- [Spacing strategy based on content density and platform]
-- Grid system approach
-- Component spacing relationships
-
-This foundation will ensure consistency across all our design decisions."
-
-### 6. Generate Visual Foundation Content
+### 6. Generate Design Token Content
 
 Prepare the content to append to the document:
 
@@ -132,7 +125,19 @@ Prepare the content to append to the document:
 When saving to document, append these Level 2 and Level 3 sections:
 
 ```markdown
-## Visual Design Foundation
+## Design Tokens & Design System
+
+### Stitch Design System Source of Truth
+
+[How DESIGN.md will describe the design system]
+
+### Token Families
+
+[Color, typography, spacing, radius, shadow, and motion tokens]
+
+### Token Export Artifacts
+
+[Paths and usage for DESIGN.md, design-tokens.json, design-tokens.css, and any related exports]
 
 ### Color System
 
@@ -154,7 +159,7 @@ When saving to document, append these Level 2 and Level 3 sections:
 ### 7. Present Content and Menu
 
 Show the generated visual foundation content and present choices:
-"I've established the visual design foundation for {{project_name}}. This provides the building blocks for consistent, beautiful design.
+"I've established the design-token system for {{project_name}}. This provides the reusable source of truth for consistent design, approved variants, and frontend implementation.
 
 **Here's what I'll add to the document:**
 
@@ -186,7 +191,7 @@ Show the generated visual foundation content and present choices:
 #### If 'C' (Continue):
 
 - Append the final content to `{planning_artifacts}/ux-design-specification.md`
-- Update frontmatter: append step to end of stepsCompleted array
+- Update frontmatter: append step to end of stepsCompleted array, set `lastStep: 8`, and update `designSystemArtifacts` with the token output references
 - Load `{project-root}/_bmad/bmm/workflows/2-plan-workflows/create-ux-design/steps/step-09-design-directions.md`
 
 ## APPEND TO DOCUMENT:
@@ -196,16 +201,20 @@ When user selects 'C', append the content directly to the document using the str
 ## SUCCESS METRICS:
 
 ✅ Brand guidelines assessed and incorporated if available
+✅ Concrete token families defined
+✅ DESIGN.md and token export artifacts explicitly planned
 ✅ Color system established with accessibility consideration
 ✅ Typography system defined with appropriate hierarchy
-✅ Spacing and layout foundation created
-✅ Visual foundation strategy documented
+✅ Spacing, layout, and motion foundations created
+✅ Design-system artifact strategy documented
 ✅ A/P/C menu presented and handled correctly
 ✅ Content properly appended to document when C selected
 
 ## FAILURE MODES:
 
 ❌ Not checking for existing brand guidelines first
+❌ Not defining reusable token families
+❌ Not documenting DESIGN.md or token export artifacts
 ❌ Color palette not aligned with emotional goals
 ❌ Typography not suitable for content type or readability needs
 ❌ Spacing system not appropriate for content density

@@ -5,7 +5,7 @@ description: 'Plan UX patterns and design specifications. Use when the user says
 
 # Create UX Design Workflow
 
-**Goal:** Create comprehensive UX design specifications through collaborative visual exploration and informed decision-making where you act as a UX facilitator working with a product stakeholder.
+**Goal:** Create comprehensive, Stitch-first UX design specifications through collaborative visual exploration and informed decision-making where you act as a UX facilitator working with a product stakeholder. This workflow owns the app-wide design system, design tokens, and approved app- or feature-level variant directions that downstream story workflows must reuse.
 
 ---
 
@@ -35,6 +35,9 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
 - `installed_path` = `{project-root}/_bmad/bmm/workflows/2-plan-workflows/create-ux-design`
 - `template_path` = `{installed_path}/ux-design-template.md`
 - `default_output_file` = `{planning_artifacts}/ux-design-specification.md`
+- `design_system_output_file` = `{planning_artifacts}/DESIGN.md`
+- `design_tokens_json` = `{planning_artifacts}/design-tokens.json`
+- `design_tokens_css` = `{planning_artifacts}/design-tokens.css`
 
 ## EXECUTION
 

@@ -23,6 +23,10 @@ epics_file: "{planning_artifacts}/epics.md" # Enhanced epics+stories with BDD an
 prd_file: "{planning_artifacts}/prd.md" # Fallback for requirements (if not in epics file)
 architecture_file: "{planning_artifacts}/architecture.md" # Fallback for constraints (if not in epics file)
 ux_file: "{planning_artifacts}/*ux*.md" # Fallback for UX requirements (if not in epics file)
+design_spec_file: "{planning_artifacts}/ux-design-specification.md" # Preferred app-level UX foundation
+design_system_file: "{planning_artifacts}/DESIGN.md" # Preferred semantic design-system source
+design_tokens_json: "{planning_artifacts}/design-tokens.json" # Preferred machine-readable tokens
+design_tokens_css: "{planning_artifacts}/design-tokens.css" # Preferred implementation-facing CSS tokens
 story_title: "" # Will be elicited if not derivable
 project_context: "**/project-context.md"
 default_output_file: "{implementation_artifacts}/{{story_key}}.md"

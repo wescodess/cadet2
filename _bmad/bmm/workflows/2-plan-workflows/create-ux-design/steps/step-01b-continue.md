@@ -39,6 +39,11 @@ Review the frontmatter to understand:
 - `stepsCompleted`: Which steps are already done
 - `lastStep`: The most recently completed step number
 - `inputDocuments`: What context was already loaded
+- `uxScopeMode`: Whether this run is app-foundation or feature-scope
+- `productContextMode`: Whether the product context is greenfield or brownfield
+- `stitchProjectId` / `stitchWorkspaceBound`: Which Stitch workspace has already been selected
+- `designSystemArtifacts`: What token and design-system files have already been created
+- `selectedVariantId` / `selectedVariantLabel`: The current approved direction, if one has already been chosen
 - All other frontmatter variables
 
 ### 2. Load All Input Documents
@@ -59,6 +64,10 @@ Welcome the user back and provide context:
 - Steps completed: {stepsCompleted}
 - Last worked on: Step {lastStep}
 - Context documents available: {len(inputDocuments)} files
+- UX scope mode: {uxScopeMode or "Not selected yet"}
+- Product context mode: {productContextMode or "Not selected yet"}
+- Stitch workspace: {stitchProjectId or "Not selected yet"}
+- Approved variant: {selectedVariantLabel or "Not selected yet"}
 - Current UX design specification is ready with all completed sections
 
 **Document Status:**
@@ -91,6 +100,7 @@ After presenting current progress, ask:
 ✅ Current workflow state accurately analyzed and presented
 ✅ User confirms understanding of progress
 ✅ Correct next step identified and prepared for loading
+✅ Stitch workspace, token, and variant state preserved across continuation
 
 ## FAILURE MODES:
 
@@ -98,6 +108,7 @@ After presenting current progress, ask:
 ❌ Modifying content from already completed steps
 ❌ Loading wrong next step based on `lastStep` value
 ❌ Proceeding without user confirmation of current state
+❌ Losing or ignoring Stitch workspace, token artifact, or approved variant metadata
 
 ❌ **CRITICAL**: Reading only partial step file - leads to incomplete understanding and poor decisions
 ❌ **CRITICAL**: Proceeding with 'C' without fully reading and understanding the next step file

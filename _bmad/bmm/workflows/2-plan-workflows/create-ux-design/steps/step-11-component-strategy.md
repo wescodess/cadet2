@@ -40,11 +40,12 @@ This step will generate content and present choices:
 - Current document and frontmatter from previous steps are available
 - Design system choice from step 6 determines available components
 - User journeys from step 10 identify component needs
-- Focus on defining custom components and implementation strategy
+- The approved design direction and design-token exports are available
+- Focus on defining custom components and implementation strategy that can be reused by story creation and implementation workflows
 
 ## YOUR TASK:
 
-Define component library strategy and design custom components not covered by the design system.
+Define component library strategy, including which components are extracted from the Stitch foundation and which must be custom.
 
 ## COMPONENT STRATEGY SEQUENCE:
 
@@ -53,8 +54,8 @@ Define component library strategy and design custom components not covered by th
 Review what components are available vs. needed:
 "Based on our chosen design system [design system from step 6], let's identify what components are already available and what we need to create custom.
 
-**Available from Design System:**
-[List of components available in chosen design system]
+**Available from Design System / Stitch Inventory:**
+[List of components available in the chosen system and any components extracted from the Stitch foundation]
 
 **Components Needed for {{project_name}}:**
 Looking at our user journeys and design direction, we need:
@@ -84,7 +85,7 @@ For each custom component needed, design thoroughly:
 
 Let's walk through each custom component systematically."
 
-### 3. Document Component Specifications
+### 3. Document Component Specifications And Extraction Strategy
 
 Create detailed specifications for each component:
 
@@ -108,7 +109,7 @@ Create detailed specifications for each component:
 Establish overall component library approach:
 "**Component Strategy:**
 
-**Foundation Components:** (from design system)
+**Foundation Components:** (from design system / extracted Stitch components)
 
 - [Foundation component 1]
 - [Foundation component 2]
@@ -123,7 +124,8 @@ Establish overall component library approach:
 - Build custom components using design system tokens
 - Ensure consistency with established patterns
 - Follow accessibility best practices
-- Create reusable patterns for common use cases"
+- Create reusable patterns for common use cases
+- Record which components can be fetched or referenced directly from approved Stitch artifacts"
 
 ### 5. Plan Implementation Roadmap
 
@@ -161,6 +163,10 @@ When saving to document, append these Level 2 and Level 3 sections:
 ### Design System Components
 
 [Analysis of available design system components based on conversation]
+
+### Stitch Component Inventory
+
+[Components or patterns extracted from the active Stitch foundation]
 
 ### Custom Components
 
@@ -220,6 +226,7 @@ When user selects 'C', append the content directly to the document using the str
 ## SUCCESS METRICS:
 
 ✅ Design system coverage properly analyzed
+✅ Stitch component inventory identified where relevant
 ✅ All custom components thoroughly specified
 ✅ Component strategy clearly defined
 ✅ Implementation roadmap prioritized by user need
@@ -230,6 +237,7 @@ When user selects 'C', append the content directly to the document using the str
 ## FAILURE MODES:
 
 ❌ Not analyzing design system coverage properly
+❌ Not tying component decisions back to the active Stitch foundation
 ❌ Custom components not thoroughly specified
 ❌ Missing accessibility considerations
 ❌ Component strategy not aligned with user journeys

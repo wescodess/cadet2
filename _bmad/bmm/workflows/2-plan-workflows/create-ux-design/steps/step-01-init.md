@@ -16,7 +16,7 @@
 
 - 🎯 Show your analysis before taking any action
 - 💾 Initialize document and update frontmatter
-- 📖 Set up frontmatter `stepsCompleted: [1]` before loading next step
+- 📖 Set up frontmatter `stepsCompleted: [1]` and `lastStep: 1` before loading next step
 - 🚫 FORBIDDEN to load next step until setup is complete
 
 ## CONTEXT BOUNDARIES:
@@ -81,7 +81,18 @@ Try to discover the following:
 #### B. Create Initial Document
 
 Copy the template from `{installed_path}/ux-design-template.md` to `{planning_artifacts}/ux-design-specification.md`
-Initialize frontmatter in the template.
+Initialize frontmatter in the template, including:
+
+- `stepsCompleted`
+- `lastStep`
+- `inputDocuments`
+- `uxScopeMode`
+- `productContextMode`
+- `stitchProjectId`
+- `stitchWorkspaceBound`
+- `designSystemArtifacts`
+- `selectedVariantId`
+- `selectedVariantLabel`
 
 #### C. Complete Initialization and Report
 
@@ -90,7 +101,7 @@ Complete setup and report to user:
 **Document Setup:**
 
 - Created: `{planning_artifacts}/ux-design-specification.md` from template
-- Initialized frontmatter with workflow state
+- Initialized frontmatter with workflow state plus Stitch workspace, token artifact, and selected variant placeholders
 
 **Input Documents Discovered:**
 Report what was found:
@@ -120,6 +131,7 @@ Remember: Do NOT proceed to step-02 until output file has been updated and user 
 ✅ Fresh workflow initialized with template and frontmatter
 ✅ Input documents discovered and loaded using sharded-first logic
 ✅ All discovered files tracked in frontmatter `inputDocuments`
+✅ Stitch-first frontmatter fields initialized for later steps
 ✅ User confirmed document setup and can proceed
 
 ## FAILURE MODES:
@@ -129,6 +141,7 @@ Remember: Do NOT proceed to step-02 until output file has been updated and user 
 ❌ Creating document without proper template
 ❌ Not checking sharded folders first before whole files
 ❌ Not reporting what documents were found to user
+❌ Not initializing the Stitch-specific frontmatter fields that later steps depend on
 
 ❌ **CRITICAL**: Reading only partial step file - leads to incomplete understanding and poor decisions
 ❌ **CRITICAL**: Proceeding with 'C' without fully reading and understanding the next step file

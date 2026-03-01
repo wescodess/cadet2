@@ -11,6 +11,7 @@
     other instruction.</critical>
   <critical>Do NOT schedule a "next session" or request review pauses unless a HALT condition applies. Only Step 6 decides completion.</critical>
   <critical>User skill level ({user_skill_level}) affects conversation style ONLY, not code updates.</critical>
+  <critical>For frontend-impacting stories, the approved Stitch design package embedded in Dev Notes is the authoritative UI source of truth. Do NOT invent or regenerate visual directions inside dev-story.</critical>
 
   <step n="1" goal="Find next ready story and load it" tag="sprint-status">
     <check if="{{story_path}} is provided">
@@ -134,7 +135,7 @@
     <action if="incomplete task or subtask requirements ambiguous">ASK user to clarify or HALT</action>
   </step>
 
-  <step n="2" goal="Load project context and story information">
+  <step n="2" goal="Load project context, story information, and approved design package">
     <critical>Load all available context to inform implementation</critical>
 
     <action>Load {project_context} for coding standards and project-wide patterns (if exists)</action>
@@ -142,8 +143,37 @@
     <action>Load comprehensive context from story file's Dev Notes section</action>
     <action>Extract developer guidance from Dev Notes: architecture requirements, previous learnings, technical specifications</action>
     <action>Use enhanced story context to inform implementation decisions and approaches</action>
+    <action>Determine whether this is a frontend-impacting story by checking the Dev Notes sections for UI/UX Context, Affected Frontend Surfaces, Approved Stitch Design Package, or Approved Variant Decision</action>
+
+    <check if="story is frontend-impacting">
+      <action>Parse the following Dev Notes sections:
+        - Approved Stitch Design Package
+        - Approved Variant Decision
+        - Design Tokens / System Constraints
+        - Stitch Retrieval Instructions
+        - Referenced UX Artifacts
+      </action>
+      <action>Validate that the approved design package includes the required IDs and references:
+        - Stitch project ID
+        - Approved screen IDs for each relevant surface
+        - Surface-to-screen mapping
+        - Selected variant labels
+      </action>
+      <action if="required design references are missing">HALT: "This frontend story is missing a complete approved Stitch design package. Re-run or complete create-story before implementation."</action>
+      <action>Fetch the approved screens/components and supporting metadata using the approved Stitch references via `get_project`, `list_screens`, `get_screen`, `fetch_screen_image`, `fetch_screen_code`, and `extract_components`</action>
+      <action>Record retrieved assets in Dev Agent Record → Stitch Retrieval Log</action>
+      <action>Record how each approved surface maps to implementation tasks in Dev Agent Record → UI Implementation Mapping</action>
+      <action>Use the approved package, fetched screen code, and token constraints as the authoritative UI source of truth</action>
+      <action>If deeper token inspection is required, use `generate_design_tokens` against the approved screen context</action>
+      <action>If the project stack matches, use the appropriate implementation-facing Stitch skills (`stitch-vue-components`, `stitch-shadcn-vue`) to translate the approved artifacts into code</action>
+    </check>
+
+    <check if="story is NOT frontend-impacting">
+      <action>Continue with the standard implementation flow without design-package retrieval</action>
+    </check>
+
     <output>✅ **Context Loaded**
-      Story and project context available for implementation
+      Story, project context, and any approved design package are available for implementation
     </output>
   </step>
 
@@ -239,6 +269,7 @@
     <!-- REFACTOR PHASE -->
     <action>Improve code structure while keeping tests green</action>
     <action>Ensure code follows architecture patterns and coding standards from Dev Notes</action>
+    <action if="story is frontend-impacting">Implement visible UI strictly against the Approved Stitch Design Package and approved token constraints. If the visual direction needs to change, HALT and route back to create-story instead of regenerating variants here.</action>
 
     <action>Document technical approach and decisions in Dev Agent Record → Implementation Plan</action>
 

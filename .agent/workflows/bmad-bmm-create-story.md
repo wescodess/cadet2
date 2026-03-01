@@ -1,6 +1,6 @@
 ---
 name: 'create-story'
-description: 'Creates a dedicated story file with all the context the agent will need to implement it later. Use when the user says "create the next story" or "create story [story identifier]"'
+description: 'Creates a dedicated story file with all the context the agent will need to implement it later, including mandatory frontend variant approval and an approved Stitch design package when UI work is involved. Use when the user says "create the next story" or "create story [story identifier]"'
 ---
 
 IT IS CRITICAL THAT YOU FOLLOW THESE STEPS - while staying in character as the current agent persona you may have loaded:

@@ -1,4 +1,4 @@
-# Step 6: Design System Choice
+# Step 6: Stitch Workspace & Design System Foundation
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -8,14 +8,14 @@
 - 🔄 CRITICAL: When loading next step with 'C', ensure the entire file is read and understood before proceeding
 - ✅ ALWAYS treat this as collaborative discovery between UX facilitator and stakeholder
 - 📋 YOU ARE A UX FACILITATOR, not a content generator
-- 💬 FOCUS on choosing appropriate design system approach
+- 💬 FOCUS on establishing the Stitch workspace and app-wide design system foundation
 - 🎯 COLLABORATIVE decision-making, not recommendation-only
 - ✅ YOU MUST ALWAYS SPEAK OUTPUT In your Agent communication style with the config `{communication_language}`
 
 ## EXECUTION PROTOCOLS:
 
 - 🎯 Show your analysis before taking any action
-- ⚠️ Present A/P/C menu after generating design system decision content
+- ⚠️ Present A/P/C menu after generating Stitch workspace and design system foundation content
 - 💾 ONLY save when user chooses C (Continue)
 - 📖 Update output file frontmatter, adding this step to the end of the list of stepsCompleted.
 - 🚫 FORBIDDEN to load next step until C is selected
@@ -40,102 +40,54 @@ This step will generate content and present choices:
 - Current document and frontmatter from previous steps are available
 - Platform requirements from step 3 inform design system choice
 - Inspiration patterns from step 5 guide design system selection
-- Focus on choosing foundation for consistent design
+- Focus on choosing a reusable Stitch-first foundation for consistent design
 
 ## YOUR TASK:
 
-Choose appropriate design system approach based on project requirements and constraints.
+Establish the Stitch workspace, choose the reusable design system foundation, and document how later steps must generate tokens and variants.
 
 ## DESIGN SYSTEM CHOICE SEQUENCE:
 
-### 1. Present Design System Options
+### 1. Resolve The Stitch Workspace
 
-Educate about design system approaches:
-"For {{project_name}}, we need to choose a design system foundation. Think of design systems like LEGO blocks for UI - they provide proven components and patterns, ensuring consistency and speeding development.
+Before discussing components, establish or reuse the Stitch workspace:
+"For {{project_name}}, we need a single Stitch workspace that becomes the source of truth for design generation.
 
-**Design System Approaches:**
+- First check whether a workspace project is already bound.
+- If one exists, reuse it and record the current project ID.
+- If not, create a new project, bind it, and record the project ID.
+- If this is brownfield and screens already exist, review them before choosing the foundation.
 
-**1. Custom Design System**
+This project ID must be saved to frontmatter as `stitchProjectId`, and `stitchWorkspaceBound` should reflect whether the workspace is now connected."
 
-- Complete visual uniqueness
-- Full control over every component
-- Higher initial investment
-- Perfect for established brands with unique needs
+### 2. Choose The Design System Foundation
 
-**2. Established System (Material Design, Ant Design, etc.)**
+Choose the reusable design system strategy within that workspace:
+"For {{project_name}}, we still need to decide whether our foundation is:
 
-- Fast development with proven patterns
-- Great defaults and accessibility built-in
-- Less visual differentiation
-- Ideal for startups or internal tools
+- Primarily custom
+- Based on an established system
+- Based on a themeable system
 
-**3. Themeable System (MUI, Chakra UI, Tailwind UI)**
+But this decision now exists inside our Stitch workflow, because later steps must generate tokens, style guides, and approved variants from the same source."
 
-- Customizable with strong foundation
-- Brand flexibility with proven components
-- Moderate learning curve
-- Good balance of speed and uniqueness
+### 3. Define The Required Stitch Capabilities
 
-Which direction feels right for your project?"
+Document that the UX workflow must use the available Stitch capabilities as they become relevant:
 
-### 2. Analyze Project Requirements
+- Workspace/project resolution: `get_workspace_project`, `list_projects`, `create_project`, `get_project`, `set_workspace_project`
+- Existing screen review: `list_screens`, `get_screen`, `fetch_screen_image`, `fetch_screen_code`
+- Design-context extraction: `extract_design_context`, `extract_components`, `apply_design_context`
+- Token generation and export: `generate_design_tokens`, `export_design_system`, `generate_style_guide`
+- Variant generation and comparison: `generate_screen_from_text`, `generate_variants`, `batch_generate_screens`, `compare_designs`
+- Accessibility and responsive validation: `analyze_accessibility`, `generate_responsive_variant`
 
-Guide decision based on project context:
-"**Let's consider your specific needs:**
+The goal here is not to fire tools immediately without reason, but to commit to a Stitch-first process where the same workspace and design system drive the rest of the workflow.
 
-**Based on our previous conversations:**
-
-- Platform: [platform from step 3]
-- Timeline: [inferred from user conversation]
-- Team Size: [inferred from user conversation]
-- Brand Requirements: [inferred from user conversation]
-- Technical Constraints: [inferred from user conversation]
-
-**Decision Factors:**
-
-- Need for speed vs. need for uniqueness
-- Brand guidelines or existing visual identity
-- Team's design expertise
-- Long-term maintenance considerations
-- Integration requirements with existing systems"
-
-### 3. Explore Specific Design System Options
-
-Dive deeper into relevant options:
-"**Recommended Options Based on Your Needs:**
-
-**For [Your Platform Type]:**
-
-- [Option 1] - [Key benefit] - [Best for scenario]
-- [Option 2] - [Key benefit] - [Best for scenario]
-- [Option 3] - [Key benefit] - [Best for scenario]
-
-**Considerations:**
-
-- Component library size and quality
-- Documentation and community support
-- Customization capabilities
-- Accessibility compliance
-- Performance characteristics
-- Learning curve for your team"
-
-### 4. Facilitate Decision Process
-
-Help user make informed choice:
-"**Decision Framework:**
-
-1. What's most important: Speed, uniqueness, or balance?
-2. How much design expertise does your team have?
-3. Are there existing brand guidelines to follow?
-4. What's your timeline and budget?
-5. Long-term maintenance needs?
-
-Let's evaluate options based on your answers to these questions."
-
-### 5. Finalize Design System Choice
+### 4. Finalize The Foundation Decision
 
 Confirm and document the decision:
-"Based on our analysis, I recommend [Design System Choice] for {{project_name}}.
+"Based on our analysis, the recommended foundation for {{project_name}} is [Design System Choice], running through Stitch project [Project ID].
 
 **Rationale:**
 
@@ -145,13 +97,11 @@ Confirm and document the decision:
 
 **Next Steps:**
 
-- We'll customize this system to match your brand and needs
-- Define component strategy for custom components needed
-- Establish design tokens and patterns
+- Use this workspace as the design source of truth
+- Generate app-wide design tokens in the next visual system step
+- Reuse this foundation when we generate and approve variants"
 
-Does this design system choice feel right to you?"
-
-### 6. Generate Design System Content
+### 5. Generate Design System Content
 
 Prepare the content to append to the document:
 
@@ -160,6 +110,16 @@ Prepare the content to append to the document:
 When saving to document, append these Level 2 and Level 3 sections:
 
 ```markdown
+## Stitch Workspace
+
+### Project Binding
+
+[How the Stitch workspace was resolved or created]
+
+### Workspace Reuse Strategy
+
+[How existing screens or brownfield assets will be reused]
+
 ## Design System Foundation
 
 ### 1.1 Design System Choice
@@ -179,10 +139,10 @@ When saving to document, append these Level 2 and Level 3 sections:
 [Customization strategy based on project needs]
 ```
 
-### 7. Present Content and Menu
+### 6. Present Content and Menu
 
 Show the generated design system content and present choices:
-"I've documented our design system choice for {{project_name}}. This foundation will ensure consistency and speed up development.
+"I've documented the Stitch workspace and design system foundation for {{project_name}}. This foundation will ensure consistency and speed up later token generation and approved variant work.
 
 **Here's what I'll add to the document:**
 
@@ -193,7 +153,7 @@ Show the generated design system content and present choices:
 [P] Party Mode - Bring technical perspectives on design systems
 [C] Continue - Save this to the document and move to defining experience
 
-### 8. Handle Menu Selection
+### 7. Handle Menu Selection
 
 #### If 'A' (Advanced Elicitation):
 
@@ -214,7 +174,7 @@ Show the generated design system content and present choices:
 #### If 'C' (Continue):
 
 - Append the final content to `{planning_artifacts}/ux-design-specification.md`
-- Update frontmatter: append step to end of stepsCompleted array
+- Update frontmatter: append step to end of stepsCompleted array, set `lastStep: 6`, and persist `stitchProjectId` / `stitchWorkspaceBound`
 - Load `{project-root}/_bmad/bmm/workflows/2-plan-workflows/create-ux-design/steps/step-07-defining-experience.md`
 
 ## APPEND TO DOCUMENT:
@@ -223,21 +183,22 @@ When user selects 'C', append the content directly to the document using the str
 
 ## SUCCESS METRICS:
 
+✅ Stitch workspace resolved or created and documented
 ✅ Design system options clearly presented and explained
-✅ Decision framework applied to project requirements
 ✅ Specific design system chosen with clear rationale
-✅ Implementation approach planned
-✅ Customization strategy defined
+✅ Workspace reuse strategy defined for brownfield or existing screens
+✅ Downstream token and variant generation expectations documented
 ✅ A/P/C menu presented and handled correctly
 ✅ Content properly appended to document when C selected
 
 ## FAILURE MODES:
 
+❌ Not resolving the Stitch workspace before moving on
 ❌ Not explaining design system concepts clearly
 ❌ Rushing to recommendation without understanding requirements
 ❌ Not considering technical constraints or team capabilities
 ❌ Choosing design system without clear rationale
-❌ Not planning implementation approach
+❌ Not documenting how the workspace and foundation will be reused in later steps
 ❌ Not presenting A/P/C menu after content generation
 ❌ Appending content without user selecting 'C'
 

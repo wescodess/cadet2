@@ -44,7 +44,7 @@ This step will generate content and present choices:
 
 ## YOUR TASK:
 
-Understand the project context, target users, and what makes this product special from a UX perspective.
+Understand the project context, target users, and what makes this product special from a UX perspective, then classify the UX planning scope so later Stitch steps know whether to generate an app shell or a feature-only surface.
 
 ## PROJECT DISCOVERY SEQUENCE:
 
@@ -109,7 +109,22 @@ Surface the key UX challenges to address:
 
 Does this capture the key UX considerations we need to address?"
 
-### 5. Generate Project Understanding Content
+### 5. Classify Planning Scope
+
+Before finalizing this step, explicitly classify the workflow:
+"I need to lock two execution modes before we move into Stitch-first design work:
+
+- **UX Scope Mode:** Is this an **app-foundation** engagement (whole app / shared shell / reusable design system) or a **feature-scope** engagement (one feature or contained surface)?
+- **Product Context Mode:** Is this **greenfield** (no existing UI foundation) or **brownfield** (there is an existing UI, product, or screen language to reuse)?
+
+These decisions control whether we generate full-app shell variants later, or only feature-level variants."
+
+Update frontmatter with:
+
+- `uxScopeMode`
+- `productContextMode`
+
+### 6. Generate Project Understanding Content
 
 Prepare the content to append to the document:
 
@@ -128,6 +143,14 @@ When saving to document, append these Level 2 and Level 3 sections:
 
 [Target user descriptions based on conversation]
 
+### UX Planning Scope
+
+[State whether this is app-foundation or feature-scope, and why]
+
+### Product Context Mode
+
+[State whether this is greenfield or brownfield, and why]
+
 ### Key Design Challenges
 
 [Key UX challenges identified based on conversation]
@@ -137,7 +160,7 @@ When saving to document, append these Level 2 and Level 3 sections:
 [Design opportunities identified based on conversation]
 ```
 
-### 6. Present Content and Menu
+### 7. Present Content and Menu
 
 Show the generated project understanding content and present choices:
 "I've documented our understanding of {{project_name}} from a UX perspective. This will guide all our design decisions moving forward.
@@ -149,12 +172,12 @@ Show the generated project understanding content and present choices:
 **What would you like to do?**
 [C] Continue - Save this to the document and move to core experience definition"
 
-### 7. Handle Menu Selection
+### 8. Handle Menu Selection
 
 #### If 'C' (Continue):
 
 - Append the final content to `{planning_artifacts}/ux-design-specification.md`
-- Update frontmatter: `stepsCompleted: [1, 2]`
+- Update frontmatter: `stepsCompleted: [1, 2]`, `lastStep: 2`, plus the selected `uxScopeMode` and `productContextMode`
 - Load `{project-root}/_bmad/bmm/workflows/2-plan-workflows/create-ux-design/steps/step-03-core-experience.md`
 
 ## APPEND TO DOCUMENT:
@@ -166,6 +189,8 @@ When user selects 'C', append the content directly to the document. Only after t
 ✅ All available context documents reviewed and synthesized
 ✅ Project vision clearly articulated
 ✅ Target users well understood
+✅ UX scope mode classified as app-foundation or feature-scope
+✅ Product context mode classified as greenfield or brownfield
 ✅ Key UX challenges identified
 ✅ Design opportunities surfaced
 ✅ A/P/C menu presented and handled correctly
@@ -175,6 +200,8 @@ When user selects 'C', append the content directly to the document. Only after t
 
 ❌ Not reviewing loaded context documents thoroughly
 ❌ Making assumptions about users without asking
+❌ Not classifying app-foundation vs feature-scope before moving into Stitch generation
+❌ Not classifying greenfield vs brownfield before moving into foundation reuse decisions
 ❌ Missing key UX challenges that will impact design
 ❌ Not identifying design opportunities
 ❌ Generating generic content without real project insight

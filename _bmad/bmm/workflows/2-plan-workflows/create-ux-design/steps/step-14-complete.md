@@ -46,17 +46,17 @@ Complete the UX design workflow, update status files, and suggest next steps for
 Inform user that the UX design is complete:
 "🎉 **UX Design Complete, {{user_name}}!**
 
-I've successfully collaborated with you to create a comprehensive UX design specification for {{project_name}}.
+I've successfully collaborated with you to create a comprehensive, Stitch-first UX design specification for {{project_name}}.
 
 **What we've accomplished:**
 
 - ✅ Project understanding and user insights
 - ✅ Core experience and emotional response definition
 - ✅ UX pattern analysis and inspiration
-- ✅ Design system choice and implementation strategy
+- ✅ Stitch workspace resolution and design system choice
 - ✅ Core interaction definition and experience mechanics
-- ✅ Visual design foundation (colors, typography, spacing)
-- ✅ Design direction mockups and visual explorations
+- ✅ Design token system (colors, typography, spacing, motion, and exports)
+- ✅ Approved variant directions and visual explorations
 - ✅ User journey flows and interaction design
 - ✅ Component strategy and custom component specifications
 - ✅ UX consistency patterns for common interactions
@@ -66,10 +66,12 @@ I've successfully collaborated with you to create a comprehensive UX design spec
 
 **Supporting Visual Assets:**
 
-- Color themes visualizer: `{planning_artifacts}/ux-color-themes.html`
-- Design directions mockups: `{planning_artifacts}/ux-design-directions.html`
+- Semantic design system source: `{planning_artifacts}/DESIGN.md`
+- Machine-readable tokens: `{planning_artifacts}/design-tokens.json`
+- CSS variable tokens: `{planning_artifacts}/design-tokens.css`
+- Approved direction artifacts: `{planning_artifacts}/ux-design-directions.html` (if generated)
 
-This specification is now ready to guide visual design, implementation, and development."
+This specification is now ready to guide visual design, story generation, and downstream implementation."
 
 ### 2. Workflow Status Update
 
@@ -98,6 +100,7 @@ Congratulate the user on the completion you both completed together of the UX.
 ✅ Clear next step guidance provided to user
 ✅ Document quality validation completed
 ✅ User acknowledges completion and understands next options
+✅ Stitch project, token artifacts, and approved direction are captured for downstream workflows
 
 ## FAILURE MODES:
 
@@ -106,6 +109,7 @@ Congratulate the user on the completion you both completed together of the UX.
 ❌ Not confirming document completeness with user
 ❌ Workflow not properly marked as complete in status tracking
 ❌ User unclear about what happens next
+❌ Not surfacing the Stitch artifacts that later story workflows must reuse
 
 ❌ **CRITICAL**: Reading only partial step file - leads to incomplete understanding and poor decisions
 ❌ **CRITICAL**: Proceeding with 'C' without fully reading and understanding the next step file
@@ -119,9 +123,10 @@ Congratulate the user on the completion you both completed together of the UX.
 - [ ] Core experience and emotional response definition
 - [ ] UX pattern analysis and inspiration
 - [ ] Design system choice and strategy
+- [ ] Stitch workspace binding and reuse strategy
 - [ ] Core interaction mechanics definition
-- [ ] Visual design foundation (colors, typography, spacing)
-- [ ] Design direction decisions and mockups
+- [ ] Design token system and exported artifacts
+- [ ] Approved design direction decisions and variants
 - [ ] User journey flows and interaction design
 - [ ] Component strategy and specifications
 - [ ] UX consistency patterns documentation
@@ -139,10 +144,10 @@ Congratulate the user on the completion you both completed together of the UX.
 
 **Immediate Options:**
 
-1. **Wireframe Generation** - Create low-fidelity layouts based on UX spec
-2. **Interactive Prototype** - Build clickable prototypes for testing
-3. **Solution Architecture** - Technical design with UX context
-4. **Figma Visual Design** - High-fidelity UI implementation
+1. **Story Creation** - Create frontend stories that reuse the approved design foundation and story-level variant approval gate
+2. **Wireframe Generation** - Create low-fidelity layouts based on the approved direction
+3. **Interactive Prototype** - Build clickable prototypes for testing
+4. **Solution Architecture** - Technical design with UX context
 5. **Epic Creation** - Break down UX requirements for development
 
 **Recommended Sequence:**
@@ -167,5 +172,7 @@ This UX design workflow is now complete. The specification serves as the foundat
 **Core Deliverables:**
 
 - ✅ UX Design Specification: `{planning_artifacts}/ux-design-specification.md`
-- ✅ Color Themes Visualizer: `{planning_artifacts}/ux-color-themes.html`
-- ✅ Design Directions: `{planning_artifacts}/ux-design-directions.html`
+- ✅ Semantic Design System: `{planning_artifacts}/DESIGN.md`
+- ✅ Design Tokens: `{planning_artifacts}/design-tokens.json`
+- ✅ CSS Tokens: `{planning_artifacts}/design-tokens.css`
+- ✅ Approved Design Directions: `{planning_artifacts}/ux-design-directions.html` (if generated)
