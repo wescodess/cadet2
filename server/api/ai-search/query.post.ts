@@ -7,6 +7,7 @@ type QueryRequestBody = {
   maxNumResults?: unknown
   scoreThreshold?: unknown
   filters?: unknown
+  includeMetaFiles?: unknown
   reranking?: unknown
   model?: unknown
   systemPrompt?: unknown
@@ -19,6 +20,30 @@ function toOptionalBoolean(value: unknown) {
 
 function toOptionalNumber(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined
+}
+
+function mergeWithContentFilter(
+  filters: Record<string, unknown> | undefined,
+  includeMetaFiles: boolean,
+) {
+  if (includeMetaFiles) {
+    return filters
+  }
+
+  const contentFilesFilter = {
+    type: 'eq',
+    key: 'filename',
+    value: 'latest.md',
+  } satisfies Record<string, string>
+
+  if (!filters) {
+    return contentFilesFilter
+  }
+
+  return {
+    type: 'and',
+    filters: [contentFilesFilter, filters],
+  } satisfies Record<string, unknown>
 }
 
 export default defineEventHandler(async (event) => {
@@ -58,6 +83,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const mode = body.mode === 'ai-search' ? 'ai-search' : 'search'
+  const includeMetaFiles = toOptionalBoolean(body.includeMetaFiles) ?? false
   const maxNumResults = toOptionalNumber(body.maxNumResults)
   const scoreThreshold = toOptionalNumber(body.scoreThreshold)
 
@@ -86,7 +112,10 @@ export default defineEventHandler(async (event) => {
     rewriteQuery: toOptionalBoolean(body.rewriteQuery),
     maxNumResults,
     scoreThreshold,
-    filters: body.filters && typeof body.filters === 'object' ? body.filters as Record<string, unknown> : undefined,
+    filters: mergeWithContentFilter(
+      body.filters && typeof body.filters === 'object' ? body.filters as Record<string, unknown> : undefined,
+      includeMetaFiles,
+    ),
     reranking: body.reranking && typeof body.reranking === 'object' ? body.reranking as Record<string, unknown> : undefined,
     model: typeof body.model === 'string' ? body.model : undefined,
     systemPrompt: typeof body.systemPrompt === 'string' ? body.systemPrompt : undefined,

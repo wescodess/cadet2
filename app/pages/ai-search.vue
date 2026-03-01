@@ -6,6 +6,7 @@ const query = ref('What information is available in this knowledge base?')
 const rewriteQuery = ref(true)
 const maxNumResults = ref(5)
 const scoreThreshold = ref<number | null>(null)
+const contentFilesOnly = ref(true)
 const pending = ref(false)
 const errorMessage = ref('')
 const responseBody = ref<unknown>(null)
@@ -31,6 +32,7 @@ async function runQuery() {
         rewriteQuery: rewriteQuery.value,
         maxNumResults: maxNumResults.value,
         scoreThreshold: scoreThreshold.value ?? undefined,
+        includeMetaFiles: !contentFilesOnly.value,
       },
     })
   }
@@ -109,6 +111,11 @@ async function runQuery() {
           </label>
 
           <label class="inline-flex items-center gap-2 text-sm text-slate-300">
+            <input v-model="contentFilesOnly" type="checkbox" class="size-4 rounded border-slate-600 bg-slate-900">
+            Content files only (`latest.md`)
+          </label>
+
+          <label class="inline-flex items-center gap-2 text-sm text-slate-300">
             <span>Score threshold</span>
             <input
               :value="scoreThreshold ?? ''"
@@ -142,6 +149,10 @@ async function runQuery() {
           Endpoint: <code>/api/ai-search/query</code>
         </p>
       </div>
+
+      <p v-if="contentFilesOnly" class="mb-3 text-xs text-slate-500">
+        Content-only mode excludes `meta.json` objects, which tend to pollute retrieval quality.
+      </p>
 
       <p v-if="errorMessage" class="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
         {{ errorMessage }}

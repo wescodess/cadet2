@@ -474,22 +474,14 @@ function buildR2Keys(input: {
   }
 }
 
-function buildMarkdownDocument(page: CrawlPage, metadata: Record<string, unknown>) {
+function buildMarkdownDocument(page: CrawlPage) {
   return [
     `# ${page.title}`,
     '',
     `Source URL: ${page.canonicalUrl}`,
     `Fetched At: ${new Date(page.fetchedAtMs).toISOString()}`,
     '',
-    '## Content',
-    '',
     page.contentText,
-    '',
-    '## Metadata',
-    '',
-    '```json',
-    JSON.stringify(metadata, null, 2),
-    '```',
     '',
   ].join('\n')
 }
@@ -1045,7 +1037,6 @@ function buildYoutubeMarkdownDocument(input: {
   contentSource: 'transcript' | 'description'
   transcriptSections?: YoutubeTranscriptSection[]
   descriptionText?: string
-  metadata: Record<string, unknown>
 }) {
   const transcriptBody = (input.transcriptSections ?? [])
     .map(section => `[${formatTimestamp(section.startSec)} - ${formatTimestamp(section.endSec)}] ${section.text}`)
@@ -1071,12 +1062,6 @@ function buildYoutubeMarkdownDocument(input: {
     `## ${contentHeading}`,
     '',
     contentBody,
-    '',
-    '## Metadata',
-    '',
-    '```json',
-    JSON.stringify(input.metadata, null, 2),
-    '```',
     '',
   ].join('\n')
 }
@@ -2408,7 +2393,6 @@ async function processYoutubeSourceRun(
         contentSource,
         transcriptSections,
         descriptionText: descriptionTextForContent,
-        metadata,
       })
       const metaJson = JSON.stringify({
         ...metadata,
@@ -2648,7 +2632,7 @@ async function processWebsiteSourceRun(
     }
 
     if (isNew || isChanged) {
-      const markdown = buildMarkdownDocument(outcome.page, metadata)
+      const markdown = buildMarkdownDocument(outcome.page)
       const metaJson = JSON.stringify({
         ...metadata,
         raw_hash: rawHash,
