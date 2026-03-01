@@ -1,0 +1,158 @@
+{
+  "workflow_version": "1.2.0",
+  "timestamps": {
+    "started": "2026-03-01T18:46:04Z",
+    "last_updated": "2026-03-01T18:46:04Z",
+    "completed": "2026-03-01T18:46:04Z"
+  },
+  "mode": "initial_scan",
+  "scan_level": "deep",
+  "project_root": "/Users/wesleyukadike/Desktop/cadet2",
+  "project_knowledge": "/Users/wesleyukadike/Desktop/cadet2/docs",
+  "completed_steps": [
+    {
+      "step": "step_1",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Classified as monolith with 1 part"
+    },
+    {
+      "step": "step_2",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Found 11 pre-existing documentation files and recorded no extra user context"
+    },
+    {
+      "step": "step_3",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Tech stack documented as Nuxt 4 + Vue 3 + TypeScript"
+    },
+    {
+      "step": "step_4",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Conditional analysis complete, 6 analysis files written"
+    },
+    {
+      "step": "step_5",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Source tree documented"
+    },
+    {
+      "step": "step_6",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Dev and deployment guidance written"
+    },
+    {
+      "step": "step_8",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Architecture document written for single-part project"
+    },
+    {
+      "step": "step_9",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Supporting documentation set written"
+    },
+    {
+      "step": "step_10",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Master index generated"
+    },
+    {
+      "step": "step_11",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Validation and review complete"
+    },
+    {
+      "step": "step_12",
+      "status": "completed",
+      "timestamp": "2026-03-01T18:46:04Z",
+      "summary": "Workflow complete"
+    }
+  ],
+  "current_step": "completed",
+  "findings": {
+    "project_classification": {
+      "repository_type": "monolith",
+      "parts_count": 1,
+      "primary_tech": "Nuxt 4 + Vue 3 + TypeScript",
+      "summary": "monolith, 1 part, Nuxt 4 + Vue 3 + TypeScript"
+    },
+    "existing_docs": {
+      "count": 11,
+      "summary": "RAG planning drafts plus minimal root readme"
+    },
+    "technology_stack": {
+      "summary": "Nuxt 4, Vue 3, TypeScript, Tailwind CSS 4, Better Auth, Convex, NuxtHub PostgreSQL"
+    },
+    "scan_level_summary": {
+      "summary": "Deep scan completed across app, server, convex, and docs critical folders"
+    }
+  },
+  "outputs_generated": [
+    "project-scan-report.json",
+    "project-structure.md",
+    "project-parts-metadata.md",
+    "existing-documentation-inventory.md",
+    "user-provided-context.md",
+    "technology-stack.md",
+    "architecture-patterns.md",
+    "api-contracts.md",
+    "data-models.md",
+    "state-management-patterns.md",
+    "component-inventory.md",
+    "comprehensive-analysis.md",
+    "source-tree-analysis.md",
+    "critical-folders-summary.md",
+    "development-instructions.md",
+    "deployment-configuration.md",
+    "contribution-guidelines.md",
+    "architecture.md",
+    "project-overview.md",
+    "development-guide.md",
+    "deployment-guide.md",
+    "contribution-guide.md",
+    "supporting-documentation.md",
+    "index.md"
+  ],
+  "resume_instructions": "Workflow completed. Start a fresh scan for a full refresh, or use deep-dive mode for a targeted area.",
+  "project_types": [
+    {
+      "part_id": "app",
+      "project_type_id": "web",
+      "display_name": "Web Application"
+    }
+  ],
+  "batches_completed": [
+    {
+      "path": "app/",
+      "files_scanned": 6,
+      "summary": "Reviewed primary route screens, plugin auth bridge, and UI structure"
+    },
+    {
+      "path": "server/",
+      "files_scanned": 10,
+      "summary": "Reviewed public, admin, and internal API routes plus provider and auth utilities"
+    },
+    {
+      "path": "convex/",
+      "files_scanned": 5,
+      "summary": "Reviewed schema, source mutations, and ingestion orchestration scaffolding"
+    },
+    {
+      "path": "docs/",
+      "files_scanned": 7,
+      "summary": "Reviewed existing RAG planning drafts and docs overview for contextual alignment"
+    }
+  ],
+  "verification_summary": "Manual validation against the document-project checklist, link consistency review, and source-to-doc cross-checks from sampled app/server/convex files",
+  "open_risks": "No formal CI, deployment manifests, or automated test suite are present; some RAG pipeline phases remain scaffold-level by design",
+  "next_checks": "Run pnpm build, verify runtime env values for admin/RAG features, and refresh these docs when infrastructure or ingestion adapters become concrete"
+}
