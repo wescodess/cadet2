@@ -8,7 +8,7 @@ type DemoTask = {
   identitySubject: string
 }
 
-const { user, loggedIn, waitForSession, signOut } = useUserSession()
+const { user, loggedIn, ready, waitForSession, signOut } = useUserSession()
 const convex = useConvex()
 
 let tasks = ref<DemoTask[] | null>(null)
@@ -49,11 +49,27 @@ async function fetchConvexToken({ forceRefreshToken }: { forceRefreshToken: bool
   }
 }
 
+watch(
+  [ready, loggedIn],
+  ([isReady, isLoggedIn]) => {
+    if (!import.meta.client || !isReady || isLoggedIn) {
+      return
+    }
+
+    stopTaskSubscription?.()
+    stopTaskSubscription = null
+    tasks.value = null
+    error.value = null
+    pending.value = false
+    void navigateTo('/auth')
+  },
+  { immediate: true },
+)
+
 if (import.meta.client) {
   await waitForSession()
   if (!loggedIn.value || !user.value?.id) {
     pending.value = false
-    void navigateTo('/auth')
   }
   else {
     const userId = user.value.id
@@ -97,22 +113,18 @@ onScopeDispose(() => {
 })
 
 async function logout() {
-  await signOut({
-    onSuccess: async () => {
-      await navigateTo('/auth')
-    },
-  })
+  await signOut()
 }
 </script>
 
 <template>
-  <main class="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-6 py-16">
+  <main data-testid="tasks-page" class="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-6 py-16">
     <header class="flex flex-wrap items-start justify-between gap-3">
       <div class="space-y-1">
         <NuxtLink to="/" class="text-xs text-slate-400 hover:text-slate-200">
           ← Home
         </NuxtLink>
-        <h1 class="text-2xl font-semibold text-white">
+        <h1 data-testid="tasks-heading" class="text-2xl font-semibold text-white">
           Protected Convex Query
         </h1>
         <p class="text-sm text-slate-400">
@@ -122,6 +134,7 @@ async function logout() {
 
       <button
         type="button"
+        data-testid="tasks-sign-out"
         class="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm hover:bg-slate-800"
         @click="logout"
       >
@@ -129,18 +142,18 @@ async function logout() {
       </button>
     </header>
 
-    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 text-sm">
+    <section data-testid="tasks-session-summary" class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 text-sm">
       <p class="text-slate-300">
         <span class="text-slate-400">User ID:</span>
-        <code class="ml-1">{{ user?.id ?? 'not loaded' }}</code>
+        <code data-testid="tasks-user-id" class="ml-1">{{ user?.id ?? 'not loaded' }}</code>
       </p>
       <p class="mt-1 text-slate-300">
         <span class="text-slate-400">Email:</span>
-        <code class="ml-1">{{ user?.email ?? 'not loaded' }}</code>
+        <code data-testid="tasks-user-email" class="ml-1">{{ user?.email ?? 'not loaded' }}</code>
       </p>
     </section>
 
-    <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+    <section data-testid="tasks-list-panel" class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
       <div class="mb-3 flex items-center justify-between">
         <h2 class="text-sm font-medium text-slate-200">
           Demo Tasks (from Convex)
@@ -158,11 +171,15 @@ async function logout() {
         Loading tasks…
       </p>
 
-      <p v-else-if="error" class="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+      <p
+        v-else-if="error"
+        data-testid="tasks-error-state"
+        class="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+      >
         {{ error.message }}
       </p>
 
-      <ul v-else-if="tasks?.length" class="space-y-2">
+      <ul v-else-if="tasks?.length" data-testid="tasks-list" class="space-y-2">
         <li
           v-for="task in tasks"
           :key="task.id"
@@ -180,7 +197,7 @@ async function logout() {
         </li>
       </ul>
 
-      <p v-else class="text-sm text-slate-400">
+      <p v-else data-testid="tasks-empty-state" class="text-sm text-slate-400">
         No tasks yet.
       </p>
     </section>

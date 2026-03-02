@@ -1,0 +1,224 @@
+{
+  "meta": {
+    "projectName": "cadet2",
+    "projectId": "6257021077077987630",
+    "approvedDirection": "Comparison Workspace (Desktop + Mobile Pairing)",
+    "sourceScreens": {
+      "desktop": "3a4bf4f2083e46d89b219ab72563bf1a",
+      "mobile": "2d7501846dd44d8a8bc52b9742494a71",
+      "tablet": "dc826e99abc34ba29c8a985158de51e9"
+    },
+    "generatedFrom": "Approved UX specification and locked Stitch direction"
+  },
+  "color": {
+    "background": {
+      "app": {
+        "light": "#f7f8fa",
+        "dark": "#14191e"
+      },
+      "surface": {
+        "light": "#ffffff",
+        "dark": "#1b232c"
+      },
+      "subtle": {
+        "light": "#edf1f4",
+        "dark": "#25313d"
+      }
+    },
+    "text": {
+      "primary": {
+        "light": "#18232d",
+        "dark": "#f7f8fa"
+      },
+      "secondary": {
+        "light": "#66737f",
+        "dark": "#a9b5bf"
+      },
+      "inverse": {
+        "light": "#ffffff",
+        "dark": "#14191e"
+      }
+    },
+    "border": {
+      "default": {
+        "light": "#d9dfe5",
+        "dark": "#2c3742"
+      },
+      "strong": {
+        "light": "#b8c2cb",
+        "dark": "#44515d"
+      }
+    },
+    "interactive": {
+      "primary": {
+        "base": "#234c76",
+        "hover": "#1f4469",
+        "active": "#183654",
+        "foreground": "#ffffff"
+      },
+      "secondary": {
+        "light": "#edf1f4",
+        "dark": "#25313d",
+        "foregroundLight": "#18232d",
+        "foregroundDark": "#f7f8fa"
+      },
+      "accent": {
+        "base": "#4d7a72",
+        "foreground": "#ffffff"
+      }
+    },
+    "status": {
+      "success": {
+        "base": "#4d7a72",
+        "softLight": "#e7f0ee",
+        "softDark": "#1f332f",
+        "foreground": "#ffffff"
+      },
+      "warning": {
+        "base": "#c89b52",
+        "softLight": "#faf1df",
+        "softDark": "#3c3020",
+        "foreground": "#18232d"
+      },
+      "destructive": {
+        "base": "#bf5f52",
+        "softLight": "#fae8e5",
+        "softDark": "#3a2421",
+        "foreground": "#ffffff"
+      },
+      "info": {
+        "base": "#234c76",
+        "softLight": "#e7eef6",
+        "softDark": "#1d2b39",
+        "foreground": "#ffffff"
+      }
+    },
+    "domain": {
+      "trust": {
+        "base": "#234c76",
+        "softLight": "#e7eef6",
+        "softDark": "#1d2b39"
+      },
+      "confidenceHigh": {
+        "base": "#4d7a72"
+      },
+      "confidenceMedium": {
+        "base": "#c89b52"
+      },
+      "confidenceLow": {
+        "base": "#bf5f52"
+      }
+    },
+    "focus": {
+      "ring": {
+        "light": "#234c76",
+        "dark": "#7ea6d1"
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "display": "\"Public Sans\", sans-serif",
+      "body": "\"Public Sans\", sans-serif",
+      "mono": "\"SFMono-Regular\", \"SF Mono\", Menlo, monospace"
+    },
+    "fontSize": {
+      "display": "2rem",
+      "h1": "1.5rem",
+      "h2": "1.25rem",
+      "h3": "1rem",
+      "body": "1rem",
+      "bodySecondary": "0.9375rem",
+      "caption": "0.75rem",
+      "dataLabel": "0.6875rem"
+    },
+    "lineHeight": {
+      "display": 1.2,
+      "heading": 1.3,
+      "body": 1.55,
+      "compact": 1.4
+    },
+    "fontWeight": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "letterSpacing": {
+      "tight": "-0.02em",
+      "normal": "0em",
+      "wideCaps": "0.06em"
+    }
+  },
+  "spacing": {
+    "base": "8px",
+    "scale": {
+      "0": "0",
+      "1": "4px",
+      "2": "8px",
+      "3": "12px",
+      "4": "16px",
+      "5": "20px",
+      "6": "24px",
+      "8": "32px",
+      "10": "40px",
+      "12": "48px",
+      "16": "64px"
+    },
+    "layout": {
+      "contentMaxWidth": "1280px",
+      "desktopGutter": "32px",
+      "tabletGutter": "24px",
+      "mobileGutter": "16px"
+    }
+  },
+  "radius": {
+    "sm": "8px",
+    "md": "12px",
+    "lg": "14px",
+    "xl": "24px",
+    "pill": "9999px"
+  },
+  "shadow": {
+    "none": "none",
+    "sm": "0 1px 2px rgba(24, 35, 45, 0.06)",
+    "md": "0 6px 18px rgba(24, 35, 45, 0.08)",
+    "lg": "0 12px 28px rgba(24, 35, 45, 0.10)"
+  },
+  "motion": {
+    "duration": {
+      "fast": "120ms",
+      "base": "180ms",
+      "slow": "260ms"
+    },
+    "easing": {
+      "standard": "cubic-bezier(0.2, 0, 0, 1)",
+      "emphasized": "cubic-bezier(0.2, 0.8, 0.2, 1)"
+    }
+  },
+  "components": {
+    "button": {
+      "height": {
+        "sm": "36px",
+        "md": "40px",
+        "lg": "48px"
+      },
+      "radius": "{radius.md}"
+    },
+    "card": {
+      "radius": "{radius.lg}",
+      "padding": {
+        "sm": "{spacing.scale.4}",
+        "md": "{spacing.scale.6}",
+        "lg": "{spacing.scale.8}"
+      }
+    },
+    "input": {
+      "height": "44px",
+      "radius": "{radius.md}"
+    },
+    "touchTarget": {
+      "minimum": "44px"
+    }
+  }
+}
