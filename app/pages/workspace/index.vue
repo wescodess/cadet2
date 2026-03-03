@@ -32,15 +32,12 @@ const { firstName } = useDisplayName()
 
       <!-- CTA Button -->
       <div class="flex justify-center">
-        <Button
-          as-child
-          size="lg"
-          class="min-h-[44px] rounded-lg bg-[var(--trust)] px-8 py-3.5 font-bold text-white shadow-md hover:bg-[var(--trust)]/90"
+        <NuxtLink
+          to="/workspace/intake"
+          class="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-[var(--trust)] px-8 py-3.5 font-bold text-white shadow-md transition-colors hover:bg-[var(--trust)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
         >
-          <NuxtLink to="/workspace/intake">
-            Start Guided Intake
-          </NuxtLink>
-        </Button>
+          Start Guided Intake
+        </NuxtLink>
       </div>
 
       <!-- Trust Badges -->
@@ -61,4 +58,3 @@ const { firstName } = useDisplayName()
     </div>
   </section>
 </template>
-
