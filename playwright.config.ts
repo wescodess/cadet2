@@ -1,9 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const baseURL = process.env.BASE_URL || 'http://127.0.0.1:3000'
+const baseURL = process.env.BASE_URL || 'http://localhost:3000'
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: './tests',
   outputDir: 'test-results/artifacts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -29,15 +29,23 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testMatch: ['e2e/**/*.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      name: 'api',
+      testMatch: ['api/**/*.spec.ts'],
+      use: {
+        baseURL,
       },
     },
   ],
   webServer: process.env.CI
     ? undefined
     : {
-        command: 'pnpm dev --host 127.0.0.1 --port 3000',
+        command: 'pnpm dev --host localhost --port 3000',
         url: baseURL,
         reuseExistingServer: true,
         timeout: 120_000,

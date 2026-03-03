@@ -8,7 +8,7 @@ const { firstName } = useDisplayName()
 <template>
   <section
     data-testid="workspace-dashboard"
-    class="flex flex-col items-center"
+    class="flex flex-col items-center w-full flex-1 justify-center"
   >
     <!-- Welcome Card -->
     <div class="w-full rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-sm sm:p-12">
