@@ -11,7 +11,7 @@ const authTestUser = {
 test.describe('Tasks route authentication', () => {
   test('guest is redirected to auth when opening the protected tasks route', async ({ page, appBaseUrl }) => {
     await test.step('When a guest opens the protected route directly', async () => {
-      await page.goto(`${appBaseUrl}/tasks`)
+      await page.goto(`${appBaseUrl}/tasks`, { waitUntil: 'domcontentloaded' })
     })
 
     await test.step('Then the app redirects to the auth page', async () => {
@@ -28,7 +28,7 @@ test.describe('Tasks route authentication', () => {
 
     test('authenticated user can open the protected tasks route and sign out', async ({ page, appBaseUrl }) => {
       await test.step('When the authenticated user opens the protected route', async () => {
-        await page.goto(`${appBaseUrl}/tasks`)
+        await page.goto(`${appBaseUrl}/tasks`, { waitUntil: 'domcontentloaded' })
       })
 
       await test.step('Then the protected content renders with the session details', async () => {

@@ -40,6 +40,12 @@ type IntakeDraftResponse = {
   values: Record<string, Record<string, unknown>>
 }
 
+type IntakeDraftPayload = {
+  currentSection: IntakeSection
+  sectionProgress: SectionProgress
+  fieldValues: SectionFieldValues
+}
+
 type SaveFeedback = {
   tone: 'info' | 'success' | 'error'
   message: string
@@ -281,15 +287,31 @@ function validateCurrentSection() {
   return false
 }
 
-function toDraftPayload() {
+function createDraftPayload(options?: {
+  currentSection?: IntakeSection
+  sectionProgress?: Partial<SectionProgress>
+}): IntakeDraftPayload {
   return {
-    currentSection: currentSection.value,
-    sectionProgress,
-    fieldValues,
+    currentSection: options?.currentSection || currentSection.value,
+    sectionProgress: {
+      personal: sectionProgress.personal,
+      education: sectionProgress.education,
+      work: sectionProgress.work,
+      immigration: sectionProgress.immigration,
+      goals: sectionProgress.goals,
+      ...(options?.sectionProgress || {}),
+    },
+    fieldValues: {
+      personal: { ...fieldValues.personal },
+      education: { ...fieldValues.education },
+      work: { ...fieldValues.work },
+      immigration: { ...fieldValues.immigration },
+      goals: { ...fieldValues.goals },
+    },
   }
 }
 
-async function saveDraft() {
+async function saveDraft(payload: IntakeDraftPayload = createDraftPayload()) {
   isSaving.value = true
   saveFeedback.value = {
     tone: 'info',
@@ -299,7 +321,7 @@ async function saveDraft() {
   try {
     const response = await $fetch<IntakeDraftResponse>('/api/intake/draft', {
       method: 'POST',
-      body: toDraftPayload(),
+      body: payload,
     })
 
     saveFeedback.value = {
@@ -308,12 +330,16 @@ async function saveDraft() {
         ? `Draft saved at ${new Date(response.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`
         : 'Draft saved successfully.',
     }
+
+    return true
   }
   catch {
     saveFeedback.value = {
       tone: 'error',
       message: 'We could not save your draft. Please try again.',
     }
+
+    return false
   }
   finally {
     isSaving.value = false
@@ -338,14 +364,25 @@ async function moveToNextSection() {
     return
   }
 
+  const sourceSection = currentSection.value
   const currentIndex = currentSectionIndex.value
-  sectionProgress[currentSection.value] = true
+  const targetSection = currentIndex < sectionIds.length - 1
+    ? sectionIds[currentIndex + 1]!
+    : sourceSection
+  const saved = await saveDraft(createDraftPayload({
+    currentSection: targetSection,
+    sectionProgress: {
+      [sourceSection]: true,
+    },
+  }))
 
-  if (currentIndex < sectionIds.length - 1) {
-    currentSection.value = sectionIds[currentIndex + 1]!
+  if (!saved) {
+    return
   }
 
-  await saveDraft()
+  sectionProgress[sourceSection] = true
+  currentSection.value = targetSection
+  clearValidationForSection(currentSection.value)
 }
 
 async function hydrateDraft() {
@@ -369,6 +406,7 @@ async function hydrateDraft() {
 onMounted(async () => {
   await hydrateDraft()
 })
+
 </script>
 
 <template>
@@ -463,7 +501,7 @@ onMounted(async () => {
             type="button"
             data-testid="intake-save"
             :disabled="isHydrating || isSaving"
-            @click="saveDraft"
+            @click="saveDraft()"
             class="inline-flex min-h-[44px] items-center justify-center rounded-md border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
           >
             <LoaderCircle v-if="isSaving" class="mr-2 size-4 animate-spin" />

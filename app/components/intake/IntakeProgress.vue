@@ -44,7 +44,13 @@ function getStepStatus(sectionId: string, index: number) {
       <CardDescription class="text-slate-600">
         Step {{ currentIndex + 1 }} of {{ sections.length }}
       </CardDescription>
-      <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+      <div 
+        class="h-2 w-full overflow-hidden rounded-full bg-slate-200"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        :aria-valuenow="completionPercent"
+      >
         <div
           class="h-full rounded-full bg-[var(--trust)] transition-[width] duration-300"
           :style="{ width: `${completionPercent}%` }"
@@ -58,6 +64,7 @@ function getStepStatus(sectionId: string, index: number) {
           v-for="(section, index) in sections"
           :key="section.id"
           class="flex items-center gap-2 rounded-lg border p-2 text-sm"
+          :aria-current="getStepStatus(section.id, index) === 'current' ? 'step' : undefined"
           :class="[
             getStepStatus(section.id, index) === 'current'
               ? 'border-[var(--trust)] bg-[var(--trust-soft)] text-[var(--trust)]'

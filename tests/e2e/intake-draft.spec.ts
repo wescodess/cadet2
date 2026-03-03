@@ -2,7 +2,6 @@ import { test, expect } from '../support/fixtures'
 import {
   createIntakeDraftPayload,
   createIntakeRouteProbe,
-  createResumeDraftFixture,
 } from '../support/fixtures/factories/intake-draft-factory'
 import {
   INTAKE_ATDD_SECTIONS,
@@ -57,7 +56,7 @@ test.describe('Guided intake draft save and resume', () => {
   test('guest is redirected to auth when opening intake route', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
-    await page.goto(probe.intakePath)
+    await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
 
     await expect(page).toHaveURL(/\/auth$/)
   })
@@ -66,7 +65,7 @@ test.describe('Guided intake draft save and resume', () => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
     await ensureAuthenticatedPage(page, appBaseUrl)
-    await page.goto(probe.intakePath)
+    await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
 
     await expect(page).toHaveURL(/\/workspace\/intake$/)
     await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.progress)).toBeVisible()
@@ -78,71 +77,79 @@ test.describe('Guided intake draft save and resume', () => {
   test('save action persists draft and shows immediate confirmation', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
     const payload = createIntakeDraftPayload()
-    let sawPostRequest = false
-
-    await page.route('**/api/intake/draft**', async (route) => {
-      if (route.request().method() === 'POST') {
-        sawPostRequest = true
-      }
-
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: route.request().method() === 'POST' ? 'saved' : 'ok',
-          savedAt: new Date().toISOString(),
-          currentSection: 'personal',
-          values: payload.fieldValues,
-        }),
-      })
-    })
 
     await ensureAuthenticatedPage(page, appBaseUrl)
-    await page.goto(probe.intakePath)
+    await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
     await waitForIntakeHydration(page)
     await page.getByLabel('First name').fill(String(payload.fieldValues.personal?.firstName || 'Ada'))
+
+    // Expect the API call to complete successfully after clicking save
+    const saveResponsePromise = page.waitForResponse(response =>
+      response.url().includes('/api/intake/draft') && response.request().method() === 'POST'
+    )
     await page.getByTestId(INTAKE_ATDD_TEST_IDS.saveButton).click()
-    await expect.poll(() => sawPostRequest).toBe(true)
+    const saveResponse = await saveResponsePromise
+    const saveResponseBody = await saveResponse.text()
+
+    expect(saveResponse.status(), saveResponseBody).toBe(200)
+
     await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.saveFeedback)).toBeVisible()
+    await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.saveFeedback)).toContainText(/Draft saved/)
   })
 
   test('returning user resumes at saved section with previous values', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
-    const resumeFixture = createResumeDraftFixture({ currentSection: 'work' })
 
-    await page.route('**/api/intake/draft**', async (route) => {
-      if (route.request().method() !== 'GET') {
-        await route.continue()
-        return
-      }
+    // Use the API to actually set up real state
+    await ensureAuthenticatedPage(page, appBaseUrl)
 
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: 'ok',
-          savedAt: resumeFixture.savedAt,
-          currentSection: resumeFixture.draft.currentSection,
-          values: resumeFixture.draft.fieldValues,
-        }),
-      })
+    // We can interact with the app via the UI to avoid manual cookie parsing
+    await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
+    await waitForIntakeHydration(page)
+
+    // Set up the state using page.evaluate to call the endpoint natively from the context!
+    // Or we can just use page.request since the auth cookies are attached to the page Context
+    const setupResponse = await page.request.post(`${appBaseUrl}/api/intake/draft`, {
+      data: {
+        currentSection: 'work',
+        sectionProgress: {
+          personal: true,
+          education: true,
+          work: false,
+          immigration: false,
+          goals: false,
+        },
+        fieldValues: {
+          personal: {
+            firstName: 'Ada Resume Test',
+            lastName: 'Okafor',
+            email: 'ada.resume@example.com',
+          },
+        },
+      },
     })
 
-    await ensureAuthenticatedPage(page, appBaseUrl)
-    await page.goto(probe.intakePath)
+    // Verify our test setup succeeded
+    expect(setupResponse.ok()).toBeTruthy()
+
+    // Now reload the app to let it hydrate from the newly saved state
+    await page.reload({ waitUntil: 'networkidle' })
     await waitForIntakeHydration(page)
 
     await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.sectionHeading)).toContainText(/work/i)
-    await expect(page.getByLabel('First name')).toHaveValue(
-      String(resumeFixture.draft.fieldValues.personal?.firstName || ''),
-    )
+
+    // Go back to personal section to check values
+    await page.getByTestId(INTAKE_ATDD_TEST_IDS.previousButton).click()
+    await page.getByTestId(INTAKE_ATDD_TEST_IDS.previousButton).click()
+    await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.sectionHeading)).toContainText(/personal/i)
+    await expect(page.getByLabel('First name')).toHaveValue('Ada Resume Test')
   })
 
   test('invalid required fields show inline accessible guidance', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
     await ensureAuthenticatedPage(page, appBaseUrl)
-    await page.goto(probe.intakePath)
+    await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
     await waitForIntakeHydration(page)
     await page.getByTestId(INTAKE_ATDD_TEST_IDS.nextButton).click()
 
@@ -155,23 +162,8 @@ test.describe('Guided intake draft save and resume', () => {
   test('keyboard navigation works across section controls', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
-    await page.route('**/api/intake/draft**', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: 'saved',
-          savedAt: new Date().toISOString(),
-          currentSection: 'personal',
-          values: {
-            personal: {},
-          },
-        }),
-      })
-    })
-
     await ensureAuthenticatedPage(page, appBaseUrl)
-    await page.goto(probe.intakePath)
+    await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
     await waitForIntakeHydration(page)
 
     const previousButton = page.getByTestId(INTAKE_ATDD_TEST_IDS.previousButton)

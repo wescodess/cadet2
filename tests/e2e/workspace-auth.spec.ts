@@ -15,7 +15,7 @@ const authTestUser = {
 
 test.describe('Workspace route authentication', () => {
   test('guest is redirected to auth when opening the protected workspace route', async ({ page, appBaseUrl }) => {
-    await page.goto(`${appBaseUrl}/workspace`)
+    await page.goto(`${appBaseUrl}/workspace`, { waitUntil: 'domcontentloaded' })
 
     await expect(page).toHaveURL(/\/auth$/)
     await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible()
@@ -28,14 +28,15 @@ test.describe('Workspace route authentication', () => {
     })
 
     test('authenticated user can open the workspace shell', async ({ page, appBaseUrl }) => {
-      await page.goto(`${appBaseUrl}/workspace`)
+      await page.goto(`${appBaseUrl}/workspace`, { waitUntil: 'domcontentloaded' })
 
       await expect(page).toHaveURL(/\/workspace$/)
       await expect(page.getByTestId('workspace-shell')).toBeVisible()
       await expect(page.getByTestId('workspace-dashboard')).toBeVisible()
       await expect(page.getByTestId('workspace-nav')).toBeVisible()
       await expect(page.getByRole('link', { name: 'Start Guided Intake' })).toBeVisible()
-      await expect(page.getByText('Workspace user')).toBeVisible()
+      await expect(page.getByRole('heading', { name: /Welcome to Cadet2, .* Let's build your pathway plan\./ })).toBeVisible()
+      await expect(page.getByText('Standard Member')).toBeVisible()
     })
   })
 
@@ -45,19 +46,24 @@ test.describe('Workspace route authentication', () => {
       authOptions: authTestUser,
     })
 
-    test('standard authenticated users are redirected away from admin routes', async ({ page, appBaseUrl }) => {
-      await page.goto(`${appBaseUrl}/admin/rag-phase0`)
+    test(
+      'standard authenticated users are redirected away from admin routes',
+      { annotation: [{ type: 'skipNetworkMonitoring', description: 'Expected 403 from /api/admin/access for non-admin users.' }] },
+      async ({ page, appBaseUrl }) => {
+        await page.goto(`${appBaseUrl}/admin/rag-phase0`, { waitUntil: 'domcontentloaded' })
 
-      await expect(page).not.toHaveURL(/\/admin\/rag-phase0$/)
-      await expect(page.getByRole('heading', { name: 'Phase 0 Readiness Check' })).toHaveCount(0)
+        await expect(page).not.toHaveURL(/\/admin\/rag-phase0$/)
+        await expect(page.getByRole('heading', { name: 'Phase 0 Readiness Check' })).toHaveCount(0)
 
-      if (/\/workspace$/.test(page.url())) {
-        await expect(page.getByTestId('workspace-shell')).toBeVisible()
-      }
-      else {
-        await expect(page).toHaveURL(/\/auth/)
-        await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible()
-      }
-    })
+        if (/\/workspace$/.test(page.url())) {
+          await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+          await expect(page.getByRole('navigation', { name: 'Workspace navigation' }).first()).toBeVisible()
+        }
+        else {
+          await expect(page).toHaveURL(/\/auth/)
+          await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible()
+        }
+      },
+    )
   })
 })

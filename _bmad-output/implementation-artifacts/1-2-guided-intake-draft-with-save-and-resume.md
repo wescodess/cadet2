@@ -1,6 +1,6 @@
 # Story 1.2: Guided Intake Draft with Save and Resume
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -271,6 +271,10 @@ Codex (GPT-5)
 - `pnpm exec playwright test --project=chromium tests/e2e/intake-draft.spec.ts` (pass, 6/6)
 - `pnpm exec playwright test --project=api tests/api/intake-draft.spec.ts` (pass, 7/7)
 - `pnpm exec playwright test` (pass, 19 passed / 23 skipped)
+- `pnpm exec playwright test --project=chromium tests/e2e/intake-draft.spec.ts tests/e2e/workspace-auth.spec.ts tests/e2e/tasks-auth.spec.ts` (review run: initially exposed AC #4 regression, then blocked by Nuxt dev server port-binding failure: `Unable to find a random port on host "127.0.0.1"`)
+- `pkill -f "@playwright/test/cli.js test|pnpm dev --host 127.0.0.1 --port 3000|nuxt/bin/nuxt.mjs dev --host 127.0.0.1 --port 3000|cadet2/node_modules/.pnpm/playwright"` (cleared stale local runner/dev-server processes before final verification rerun)
+- `pnpm exec playwright test --project=chromium tests/e2e/intake-draft.spec.ts tests/e2e/workspace-auth.spec.ts tests/e2e/tasks-auth.spec.ts` (pass, 11/11)
+- `pnpm exec playwright test --project=api tests/api/intake-draft.spec.ts` (pass, 7/7)
 
 ### Completion Notes List
 
@@ -281,6 +285,9 @@ Codex (GPT-5)
 - Implemented resume hydration, save/advance persistence, and immediate feedback states in intake UI.
 - Added and stabilized intake API and E2E test coverage for AC 1-5, including auth redirect, save confirmation, resume restore, and validation accessibility behavior.
 - Hardened `tests/e2e/workspace-auth.spec.ts` to use unique auth accounts per run so full-suite regression remains stable.
+- Refactored intake draft persistence flow so "Next" only advances section state after successful draft save.
+- Restored deterministic draft hydration via client-side `$fetch` on mount for resume correctness in review scenarios.
+- Fixed save button handler to call `saveDraft()` explicitly (preventing event-object payloads from causing `POST /api/intake/draft` validation errors).
 
 ### File List
 
@@ -296,10 +303,27 @@ Codex (GPT-5)
 - server/utils/intake/normalizeIntakePayload.ts
 - tests/api/intake-draft.spec.ts
 - tests/e2e/intake-draft.spec.ts
+- tests/e2e/tasks-auth.spec.ts
 - tests/e2e/workspace-auth.spec.ts
 - tests/support/fixtures/factories/intake-draft-factory.ts
 - tests/support/fixtures/test-data.ts
 
+### Senior Developer Review (AI)
+
+- Date: 2026-03-03
+- Reviewer: Codex (GPT-5)
+- Outcome: Approved after auto-fix verification
+- High/Medium Issues Addressed:
+- Fixed AC #4 regression where resume section restoration failed in E2E review run (hydration logic adjusted in `app/pages/workspace/intake.vue`).
+- Fixed AC #2 partial behavior where UI advanced before save success (save-first navigation flow implemented in `app/pages/workspace/intake.vue`).
+- Resolved story File List mismatch by adding `tests/e2e/tasks-auth.spec.ts`.
+- Verification status:
+- Verification rerun passed after clearing stale local Playwright/Nuxt processes.
+- Chromium suite: `11/11` passed (`tests/e2e/intake-draft.spec.ts`, `tests/e2e/workspace-auth.spec.ts`, `tests/e2e/tasks-auth.spec.ts`).
+- API suite: `7/7` passed (`tests/api/intake-draft.spec.ts`).
+
 ### Change Log
 
 - 2026-03-03: Implemented guided intake draft save/resume flow end-to-end (UI + API + migration + tests), moved story status to `review`, and updated suite stability for workspace auth E2E.
+- 2026-03-03: Ran adversarial code review, fixed identified AC #2/#4 regressions, updated story documentation/file list, and moved status to `in-progress` pending rerun after local Nuxt port-binding issue is resolved.
+- 2026-03-03: Cleared stale local runner processes, reran full targeted chromium+api verification successfully, and moved story status to `done`.

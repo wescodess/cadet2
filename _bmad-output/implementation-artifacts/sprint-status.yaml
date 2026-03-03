@@ -42,7 +42,7 @@ story_location: /Users/wesleyukadike/Desktop/cadet2/_bmad-output/implementation-
 development_status:
   epic-1: in-progress
   1-1-secure-user-workspace-access: done
-  1-2-guided-intake-draft-with-save-and-resume: review
+  1-2-guided-intake-draft-with-save-and-resume: done
   1-3-capture-constraints-and-free-form-context: backlog
   1-4-submit-intake-and-track-recommendation-run-records: backlog
   epic-1-retrospective: optional
