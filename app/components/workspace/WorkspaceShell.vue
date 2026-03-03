@@ -79,14 +79,14 @@ async function handleSignOut() {
 <template>
   <div
     data-testid="workspace-shell"
-    class="flex h-screen overflow-hidden bg-[#f7f8fa] text-[#18232d]"
+    class="flex h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]"
   >
     <!-- Desktop Sidebar Navigation Rail -->
     <aside
-      class="hidden w-64 flex-col justify-between bg-[var(--trust)] py-6 text-white lg:flex"
+      class="hidden w-64 flex-col justify-between bg-[var(--trust)] py-4 text-white lg:flex"
       aria-label="Workspace sidebar"
     >
-      <div class="flex flex-col gap-8">
+      <div class="flex flex-col gap-6">
         <!-- Branding -->
         <div class="flex items-center gap-3 px-6">
           <div class="flex size-10 items-center justify-center rounded-lg bg-white/20">
@@ -104,7 +104,7 @@ async function handleSignOut() {
           <!-- Dashboard -->
           <NuxtLink
             :to="dashboardItem.to"
-            class="flex min-h-[44px] items-center gap-3 px-6 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            class="flex min-h-[44px] items-center gap-3 px-6 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
             :class="[
               isActive(dashboardItem)
                 ? 'border-l-4 border-white bg-white/10 text-white'
@@ -120,7 +120,7 @@ async function handleSignOut() {
           <div class="px-4 py-2">
             <NuxtLink
               to="/workspace/intake"
-              class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-[var(--trust)] transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+              class="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-[var(--trust)] transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
             >
               <ClipboardList class="size-4 shrink-0" />
               <span>Start Intake</span>
@@ -134,7 +134,7 @@ async function handleSignOut() {
               :key="item.label"
               type="button"
               disabled
-              class="flex min-h-[44px] w-full items-center gap-3 border-l-4 border-transparent px-6 py-3 text-left text-sm font-medium text-white/40"
+              class="flex min-h-[44px] w-full items-center gap-3 border-l-4 border-transparent px-6 py-2 text-left text-sm font-medium text-white/40"
               aria-disabled="true"
             >
               <component :is="item.icon" class="size-5 shrink-0" />
@@ -145,7 +145,7 @@ async function handleSignOut() {
       </div>
 
       <!-- User Profile -->
-      <div class="border-t border-white/10 px-6 pt-6">
+      <div class="border-t border-white/10 px-6 pt-4">
         <div class="flex items-center gap-3">
           <div class="flex size-10 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/20">
             <span class="text-sm font-semibold text-white">{{ initials }}</span>
@@ -158,7 +158,7 @@ async function handleSignOut() {
         <Button
           variant="secondary"
           data-testid="workspace-sign-out"
-          class="mt-4 min-h-[44px] w-full items-center gap-2 rounded-lg border-0 bg-white/12 text-white hover:bg-white/18 hover:text-white"
+          class="mt-3 min-h-[44px] w-full items-center gap-2 rounded-lg border-0 bg-white/12 text-white hover:bg-white/18 hover:text-white"
           @click="handleSignOut"
         >
           <LogOut class="size-4" />
@@ -289,7 +289,7 @@ async function handleSignOut() {
             <NuxtLink
               v-if="!item.disabled"
               :to="item.to"
-              class="flex flex-1 flex-col items-center gap-1 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--trust)]"
+              class="flex min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-center gap-1 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--trust)]"
               :class="isActive(item) ? 'text-[var(--trust)]' : 'text-slate-400 hover:text-[var(--trust)]'"
               :aria-current="isActive(item) ? 'page' : undefined"
             >
@@ -297,13 +297,16 @@ async function handleSignOut() {
               <span>{{ item.label }}</span>
             </NuxtLink>
 
-            <div
+            <button
               v-else
-              class="flex flex-1 flex-col items-center gap-1 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 opacity-60"
+              type="button"
+              disabled
+              aria-disabled="true"
+              class="flex min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-center gap-1 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 opacity-60"
             >
               <component :is="item.icon" class="size-6 shrink-0" />
               <span>{{ item.label }}</span>
-            </div>
+            </button>
           </template>
         </div>
       </nav>
