@@ -1,6 +1,6 @@
 ---
 name: bmad-bmm-create-story
-description: Creates a dedicated story file with all the context the agent will need to implement it later, including mandatory frontend variant approval and an approved Stitch design package when UI work is involved. Use when the user says "create the next story" or "create story [story identifier]"
+description: "Creates a dedicated story file with all context needed for implementation, including mandatory Stitch-first frontend packaging when UI work is involved: generate 3 different concept directions per impacted surface, generate desktop+mobile versions for each direction, require explicit user selection of one approved mobile+desktop pair, and embed the approved package for dev-story handoff. Use when the user says \"create the next story\" or \"create story [story identifier]\""
 ---
 
 IT IS CRITICAL THAT YOU FOLLOW THESE STEPS - while staying in character as the current agent persona you may have loaded:

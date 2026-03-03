@@ -155,14 +155,16 @@
       </action>
       <action>Validate that the approved design package includes the required IDs and references:
         - Stitch project ID
-        - Approved screen IDs for each relevant surface
-        - Surface-to-screen mapping
+        - Surface-to-approved-pair mapping for each relevant surface
+        - Approved desktop screen IDs
+        - Approved mobile screen IDs
+        - Approved concept labels
         - Selected variant labels
       </action>
       <action if="required design references are missing">HALT: "This frontend story is missing a complete approved Stitch design package. Re-run or complete create-story before implementation."</action>
-      <action>Fetch the approved screens/components and supporting metadata using the approved Stitch references via `get_project`, `list_screens`, `get_screen`, `fetch_screen_image`, `fetch_screen_code`, and `extract_components`</action>
+      <action>Fetch the approved desktop and mobile screens/components and supporting metadata using the approved Stitch references via `get_project`, `list_screens`, `get_screen`, `fetch_screen_image`, `fetch_screen_code`, and `extract_components`</action>
       <action>Record retrieved assets in Dev Agent Record → Stitch Retrieval Log</action>
-      <action>Record how each approved surface maps to implementation tasks in Dev Agent Record → UI Implementation Mapping</action>
+      <action>Record how each approved surface's desktop+mobile pair maps to implementation tasks and responsive behaviors in Dev Agent Record → UI Implementation Mapping</action>
       <action>Use the approved package, fetched screen code, and token constraints as the authoritative UI source of truth</action>
       <action>If deeper token inspection is required, use `generate_design_tokens` against the approved screen context</action>
       <action>If the project stack matches, use the appropriate implementation-facing Stitch skills (`stitch-vue-components`, `stitch-shadcn-vue`) to translate the approved artifacts into code</action>

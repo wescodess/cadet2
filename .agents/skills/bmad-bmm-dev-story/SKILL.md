@@ -1,6 +1,6 @@
 ---
 name: bmad-bmm-dev-story
-description: Execute story implementation following a context filled story spec file, consuming the approved Stitch design package already embedded in the story when frontend work is involved. Use when the user says "dev this story [story file]" or "implement the next story in the sprint plan"
+description: Execute story implementation following a context-filled story spec file, consuming the approved Stitch design package already embedded in the story when frontend work is involved, including the user-approved desktop+mobile pair per surface and the retrieval/translation workflow for accurate UI implementation. Use when the user says "dev this story [story file]" or "implement the next story in the sprint plan"
 ---
 
 IT IS CRITICAL THAT YOU FOLLOW THESE STEPS - while staying in character as the current agent persona you may have loaded:

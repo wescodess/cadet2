@@ -36,16 +36,26 @@ so that {{benefit}}.
 
 - List each page, route, layout region, or reusable component affected by this story
 
+### Concept Options (3 Paired Directions Per Surface)
+
+- For each affected surface, list exactly 3 concept directions
+- For each concept direction, record both desktop and mobile screen IDs
+- Keep each concept aligned to the existing app theme and token constraints
+
 ### Approved Stitch Design Package
 
 - Stitch project ID:
-- Surface-to-screen mapping:
-- Approved screen IDs:
+- Surface-to-concept-options mapping (3 paired directions per surface):
+- Surface-to-approved-pair mapping:
+- Approved desktop screen IDs:
+- Approved mobile screen IDs:
 - Approved component IDs:
+- Approved concept labels:
 - Selected variant labels:
 - Prompt summary:
 - Design context source:
 - Token artifact references:
+- Pair approval rationale:
 - Supporting screenshot/code references:
 
 ### Approved Variant Decision
@@ -60,7 +70,8 @@ so that {{benefit}}.
 
 ### Stitch Retrieval Instructions
 
-- Which approved artifacts the dev agent must fetch first
+- Which approved desktop+mobile pair artifacts the dev agent must fetch first
+- How each approved pair maps to implementation tasks and responsive behavior
 - Which Stitch tools or skills are expected for implementation handoff
 
 ### Referenced UX Artifacts

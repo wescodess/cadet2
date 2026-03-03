@@ -175,6 +175,8 @@
 
     <check if="{{frontend_impacting}} == true">
       <critical>Frontend-impacting stories require a dedicated UI approval checkpoint before the story can become ready-for-dev</critical>
+      <critical>For each impacted frontend surface, you MUST produce exactly 3 clearly different concept directions that stay within the existing theme/design system context.</critical>
+      <critical>Each concept direction MUST be a paired design set: one desktop screen and one mobile screen. Do not allow unpaired approval.</critical>
       <action>Resolve the preferred design foundation from:
         - {design_spec_file}
         - {design_system_file}
@@ -190,20 +192,28 @@
         - Reuse existing screens/components with `list_screens`, `get_screen`, `fetch_screen_image`, and `fetch_screen_code`
         - Use the `stitch-enhance-prompt` skill to structure the prompt
         - Apply the established design context with `extract_design_context`, `extract_components`, and `apply_design_context`
-        - Generate at least 3 variants with `generate_screen_from_text`, `generate_variants`, or `batch_generate_screens`
-        - Compare variants with `compare_designs`, review accessibility with `analyze_accessibility`, and capture responsive considerations with `generate_responsive_variant`
+        - Generate exactly 3 concept directions (A/B/C or equivalent labels) with `generate_screen_from_text`, `generate_variants`, or `batch_generate_screens`
+        - For each concept direction, create and record a desktop+mobile pair:
+          - Use `generate_responsive_variant` where appropriate to produce the counterpart device version
+          - If responsive conversion quality is insufficient, generate a direct second screen with `apply_design_context` or `generate_screen_from_text`
+          - Record concept label, desktop screen ID, mobile screen ID, and prompt summary for each pair
+        - Compare concept directions with `compare_designs` and run `analyze_accessibility` on both desktop and mobile screens
         - Refresh shared system artifacts with `generate_design_tokens` or `export_design_system` when the story changes shared UI primitives
       </action>
-      <ask>Present the generated variants and require explicit user selection, approval, or an iteration request before continuing</ask>
+      <ask>Present all 3 concept pairs per frontend surface and require explicit user selection of one desktop+mobile pair per surface (or an iteration request) before continuing</ask>
       <action>Persist the approved design package for every approved surface, including:
         - Stitch project ID
-        - Surface-to-screen mapping
-        - Approved screen IDs
+        - Surface-to-concept-options mapping (3 paired directions per surface)
+        - Surface-to-approved-pair mapping
+        - Approved desktop screen IDs
+        - Approved mobile screen IDs
         - Approved component IDs when applicable
+        - Approved concept labels
         - Selected variant labels
         - Prompt summary
         - Design context source
         - Token artifact references
+        - Pair approval rationale
         - Supporting screenshot/code references for later retrieval
       </action>
       <action>Store the approved design package as {{approved_stitch_design_package}}</action>
@@ -245,6 +255,7 @@
       <action>Populate the Dev Notes sections for:
         - UI/UX Context
         - Affected Frontend Surfaces
+        - Concept Options (3 Paired Directions Per Surface)
         - Approved Stitch Design Package
         - Approved Variant Decision
         - Design Tokens / System Constraints
@@ -253,8 +264,10 @@
       </action>
       <action>Write {{approved_stitch_design_package}} into "Approved Stitch Design Package"</action>
       <action>Write {{approved_variant_decision}} into "Approved Variant Decision"</action>
+      <action>Write the three concept directions per surface, each with desktop+mobile IDs, into "Concept Options (3 Paired Directions Per Surface)"</action>
+      <action>Ensure the approved design package records exactly one selected desktop+mobile pair for every impacted frontend surface</action>
       <action>Populate "Design Tokens / System Constraints" using the approved shared token artifacts and any story-specific constraints</action>
-      <action>Populate "Stitch Retrieval Instructions" so dev-story knows which approved artifacts to fetch first and which implementation-facing Stitch skills are relevant, including `stitch-vue-components` and `stitch-shadcn-vue` when the project stack matches</action>
+      <action>Populate "Stitch Retrieval Instructions" so dev-story knows which approved desktop+mobile artifacts to fetch first and which implementation-facing Stitch skills are relevant, including `stitch-vue-components` and `stitch-shadcn-vue` when the project stack matches</action>
       <action>Populate Dev Agent Record scaffolding so the dev agent can update:
         - Implementation Plan
         - Stitch Retrieval Log
@@ -267,6 +280,12 @@
 
     <check if="{{frontend_impacting}} == true AND {{approved_stitch_design_package}} is empty">
       <action>HALT: "Frontend-impacting stories cannot be marked ready-for-dev without an approved Stitch design package."</action>
+    </check>
+    <check if="{{frontend_impacting}} == true AND approved package is missing selected desktop/mobile pair IDs for each impacted surface">
+      <action>HALT: "Frontend-impacting stories cannot be marked ready-for-dev until each impacted surface has one explicitly approved desktop+mobile pair."</action>
+    </check>
+    <check if="{{frontend_impacting}} == true AND approved package does not document 3 concept directions per impacted surface">
+      <action>HALT: "Frontend-impacting stories must document three concept directions per surface before approval can be finalized."</action>
     </check>
 
     <action>Set story Status to: "ready-for-dev"</action>

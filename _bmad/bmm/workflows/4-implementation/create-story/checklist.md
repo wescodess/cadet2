@@ -127,6 +127,14 @@ You will systematically re-do the entire story creation process, but with a crit
   - Performance improvements or deprecations
   - Best practices for current versions
 
+#### **2.6 Frontend Pairing Package Analysis (if frontend-impacting)**
+
+- Confirm each impacted frontend surface has exactly 3 concept directions documented
+- Confirm each concept direction includes a desktop+mobile screen pair with recorded IDs
+- Confirm concepts align with the existing design foundation (UX spec, DESIGN.md, tokens, or brownfield UI context)
+- Confirm user selected exactly one desktop+mobile pair per surface before story finalization
+- Confirm the story includes implementation-facing retrieval instructions for the approved pair(s), including relevant Stitch skills
+
 ### **Step 3: Disaster Prevention Gap Analysis**
 
 **🚨 CRITICAL: Identify every mistake the original LLM missed that could cause DISASTERS!**
