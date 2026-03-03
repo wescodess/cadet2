@@ -1,12 +1,12 @@
 import { anyApi } from 'convex/server'
-import { requireRagAdminSession } from '../../../../utils/rag-admin'
+import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
 
 type SourceStatus = 'pending_approval' | 'approved' | 'rejected' | 'paused'
 type SourceType = 'website' | 'youtube_channel'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireRagAdminSession(event)
+  const { session } = await requireAdminSession(event)
 
   const query = getQuery(event) as {
     showOnlyMine?: string

@@ -1,5 +1,5 @@
 import { anyApi } from 'convex/server'
-import { requireRagAdminSession } from '../../../../utils/rag-admin'
+import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
 import { executePreparedBatchPhase3 } from '../../../../utils/rag-ingestion-phase3'
 import { maybeRunAiSearchSyncForBatch } from '../../../../utils/cloudflare-ai-search-sync'
@@ -31,7 +31,7 @@ function buildManualIdempotencyKey(now: Date) {
 }
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireRagAdminSession(event)
+  const { session } = await requireAdminSession(event)
   const body = await readBody<ManualIngestionRunBody>(event)
 
   if (body?.mode !== undefined && body.mode !== 'manual') {

@@ -1,11 +1,11 @@
 import { anyApi } from 'convex/server'
-import { requireRagAdminSession } from '../../../../../utils/rag-admin'
+import { requireAdminSession } from '../../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClient } from '../../../../../utils/convex-admin-client'
 
 type BatchStatus = 'queued' | 'running' | 'ingesting' | 'sync_pending' | 'syncing' | 'completed' | 'failed'
 
 export default defineEventHandler(async (event) => {
-  await requireRagAdminSession(event)
+  await requireAdminSession(event)
   const query = getQuery(event) as {
     limit?: string
     status?: string

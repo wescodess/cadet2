@@ -1,9 +1,11 @@
 import { anyApi } from 'convex/server'
-import { requireRagAdminSession } from '../../../../utils/rag-admin'
+import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireRagAdminSession(event)
+  const { session, authorizationSource } = await requireAdminSession(event, {
+    allowBootstrapFromAllowlist: true,
+  })
   const convex = await createConvexAdminClient()
 
   const result = await convex.mutation(
@@ -18,6 +20,7 @@ export default defineEventHandler(async (event) => {
   return {
     ok: true,
     synced: true,
+    authorizationSource,
     result,
   }
 })

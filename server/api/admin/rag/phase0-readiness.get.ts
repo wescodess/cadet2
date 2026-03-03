@@ -1,8 +1,10 @@
 import { getRagPhase0Readiness } from '../../../utils/rag-foundation'
-import { requireRagAdminSession } from '../../../utils/rag-admin'
+import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 
 export default defineEventHandler(async (event) => {
-  const { session, adminMatch } = await requireRagAdminSession(event)
+  const { session, authorizationSource } = await requireAdminSession(event, {
+    allowBootstrapFromAllowlist: true,
+  })
   const readiness = getRagPhase0Readiness(event)
 
   return {
@@ -11,7 +13,7 @@ export default defineEventHandler(async (event) => {
     viewer: {
       userId: session.user.id,
       email: session.user.email,
-      matchedBy: adminMatch.matchedBy,
+      authorizationSource,
     },
     readiness,
     docs: [

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "../../../_bmad-output/planning-artifacts/design-tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -116,5 +117,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
   }
 }

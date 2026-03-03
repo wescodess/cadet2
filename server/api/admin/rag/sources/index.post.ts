@@ -1,9 +1,9 @@
 import { anyApi } from 'convex/server'
-import { requireRagAdminSession } from '../../../../utils/rag-admin'
+import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireRagAdminSession(event)
+  const { session } = await requireAdminSession(event)
   const body = await readBody<Record<string, unknown>>(event)
   const convex = await createConvexAdminClientActingAs(event, {
     id: session.user.id,

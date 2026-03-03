@@ -20,7 +20,7 @@ const { signIn, signUp, loggedIn, waitForSession, fetchSession } = useUserSessio
 if (import.meta.client) {
   await waitForSession()
   if (loggedIn.value) {
-    await navigateTo('/tasks')
+    await navigateTo('/workspace')
   }
 }
 
@@ -51,7 +51,7 @@ async function submit() {
     }
 
     await fetchSession({ force: true })
-    await navigateTo('/tasks')
+    await navigateTo('/workspace')
   }
   catch (error) {
     formError.value = error instanceof Error ? error.message : 'Unexpected error.'

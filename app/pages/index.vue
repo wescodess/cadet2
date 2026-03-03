@@ -8,18 +8,18 @@ const { loggedIn, ready } = useUserSession()
     class="mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-6 px-6 py-16"
   >
     <div class="space-y-2">
-      <p class="text-xs uppercase tracking-[0.2em] text-emerald-300">
-        Nuxt + Better Auth + Convex
+      <p class="text-xs uppercase tracking-[0.2em] text-[var(--warning)]">
+        Cadet secure workspace
       </p>
       <h1
         data-testid="home-hero"
-        class="text-3xl font-semibold text-white"
+        class="text-3xl font-semibold text-slate-950"
       >
-        Minimal Auth + Protected Query Demo
+        Protected planning starts in your workspace.
       </h1>
-      <p class="text-sm text-slate-300">
-        Sign up or sign in, then open the protected page to fetch data with
-        <code>useConvexQuery</code>.
+      <p class="text-sm text-slate-600">
+        Sign in to enter the secure workspace shell. The legacy tasks demo still exists, but it is no longer the
+        primary post-login destination.
       </p>
     </div>
 
@@ -27,35 +27,42 @@ const { loggedIn, ready } = useUserSession()
       <NuxtLink
         to="/auth"
         data-testid="home-open-auth-link"
-        class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm hover:bg-slate-800"
+        class="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-100"
       >
         Open Auth Page
       </NuxtLink>
       <NuxtLink
-        to="/tasks"
-        data-testid="home-open-tasks-link"
-        class="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200 hover:bg-emerald-500/20"
+        to="/workspace"
+        data-testid="home-open-workspace-link"
+        class="rounded-md border border-slate-200 bg-[var(--trust-soft)] px-4 py-2 text-sm text-[var(--trust)] hover:bg-slate-100"
       >
-        Open Protected Tasks
+        Open Workspace
+      </NuxtLink>
+      <NuxtLink
+        to="/tasks"
+        data-testid="home-open-legacy-tasks-link"
+        class="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-100"
+      >
+        Open Legacy Tasks
       </NuxtLink>
       <NuxtLink
         to="/ai-search"
         data-testid="home-open-ai-search-link"
-        class="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-200 hover:bg-cyan-500/20"
+        class="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-700 hover:bg-cyan-500/20"
       >
         Open AI Search Playground
       </NuxtLink>
       <NuxtLink
         to="/admin/rag-phase0"
         data-testid="home-open-rag-phase0-link"
-        class="rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-200 hover:bg-amber-500/20"
+        class="rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-700 hover:bg-amber-500/20"
       >
         Open RAG Phase 0
       </NuxtLink>
       <NuxtLink
         to="/admin/rag-sources"
         data-testid="home-open-rag-sources-link"
-        class="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-100 hover:bg-emerald-500/20"
+        class="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-500/20"
       >
         Open RAG Sources
       </NuxtLink>
@@ -63,10 +70,10 @@ const { loggedIn, ready } = useUserSession()
 
     <div
       data-testid="home-auth-status"
-      class="rounded-lg border border-slate-800 bg-slate-900/70 p-4 text-sm text-slate-300"
+      class="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-900"
     >
-      <p><span class="text-slate-400">Auth ready:</span> {{ ready ? 'yes' : 'no' }}</p>
-      <p><span class="text-slate-400">Logged in:</span> {{ loggedIn ? 'yes' : 'no' }}</p>
+      <p><span class="text-slate-500">Auth ready:</span> {{ ready ? 'yes' : 'no' }}</p>
+      <p><span class="text-slate-500">Logged in:</span> {{ loggedIn ? 'yes' : 'no' }}</p>
     </div>
   </main>
 </template>

@@ -1,5 +1,5 @@
 import { anyApi } from 'convex/server'
-import { requireRagAdminSession } from '../../../../../utils/rag-admin'
+import { requireAdminSession } from '../../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClient } from '../../../../../utils/convex-admin-client'
 
 type ApproveBody = {
@@ -9,7 +9,7 @@ type ApproveBody = {
 }
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireRagAdminSession(event)
+  const { session } = await requireAdminSession(event)
   const sourceId = getRouterParam(event, 'sourceId')
 
   if (!sourceId) {

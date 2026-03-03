@@ -13,6 +13,10 @@ type AdminStatusResult = {
   bootstrapAvailable: boolean
 }
 
+definePageMeta({
+  middleware: ['auth', 'admin'],
+})
+
 type ListSourcesResult = {
   currentUserIsAdmin: boolean
   items: Array<{

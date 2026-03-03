@@ -5,7 +5,7 @@ type Phase0Response = {
   viewer: {
     userId: string
     email: string
-    matchedBy: 'userId' | 'email'
+    authorizationSource: 'rag_admins' | 'allowlist'
   }
   readiness: {
     overallReady: boolean
@@ -18,6 +18,10 @@ type Phase0Response = {
     }>
   }
 }
+
+definePageMeta({
+  middleware: ['auth', 'admin'],
+})
 
 const { loggedIn, waitForSession } = useUserSession()
 const pending = ref(false)
@@ -114,7 +118,7 @@ const sectionEntries = computed(() => {
             {{ result.readiness.overallReady ? 'Ready for Phase 1' : 'Phase 0 Incomplete' }}
           </span>
           <p class="text-sm text-slate-300">
-            Admin: <code>{{ result.viewer.email }}</code> (matched by {{ result.viewer.matchedBy }})
+            Admin: <code>{{ result.viewer.email }}</code> (authorized via {{ result.viewer.authorizationSource }})
           </p>
         </div>
       </section>

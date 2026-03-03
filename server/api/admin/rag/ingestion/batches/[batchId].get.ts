@@ -1,9 +1,9 @@
 import { anyApi } from 'convex/server'
-import { requireRagAdminSession } from '../../../../../utils/rag-admin'
+import { requireAdminSession } from '../../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClient } from '../../../../../utils/convex-admin-client'
 
 export default defineEventHandler(async (event) => {
-  await requireRagAdminSession(event)
+  await requireAdminSession(event)
   const batchId = getRouterParam(event, 'batchId')
 
   if (!batchId) {
