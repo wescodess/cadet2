@@ -159,12 +159,44 @@ test.describe('Guided intake draft save and resume', () => {
     await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.firstNameError)).toBeFocused()
   })
 
+  test('advancing to education shows education fields instead of personal fields', async ({ page, appBaseUrl }) => {
+    const probe = createIntakeRouteProbe(appBaseUrl)
+
+    await ensureAuthenticatedPage(page, appBaseUrl)
+    await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
+    await waitForIntakeHydration(page)
+
+    await page.getByLabel('First name').fill('Ada')
+    await page.getByLabel('Last name').fill('Okafor')
+    await page.getByLabel('Email address').fill('ada.transition@example.com')
+    await page.getByLabel('Date of birth').fill('1995-06-15')
+    await page.getByLabel('Country of citizenship').fill('Nigeria')
+    await page.getByLabel('Marital status').selectOption('single')
+    await page.getByLabel('Number of dependants').fill('0')
+
+    await page.getByTestId(INTAKE_ATDD_TEST_IDS.nextButton).click()
+
+    await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.sectionHeading)).toContainText(/education/i)
+    await expect(page.getByLabel('Highest completed level')).toBeVisible()
+    await expect(page.getByLabel('First name')).toBeHidden()
+  })
+
   test('keyboard navigation works across section controls', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
     await ensureAuthenticatedPage(page, appBaseUrl)
     await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
     await waitForIntakeHydration(page)
+
+    await page.getByLabel('First name').fill('Ada')
+    await page.getByLabel('Last name').fill('Okafor')
+    await page.getByLabel('Email address').fill('ada.keyboard@example.com')
+    await page.getByLabel('Date of birth').fill('1995-06-15')
+    await page.getByLabel('Country of citizenship').fill('Nigeria')
+    await page.getByLabel('Marital status').selectOption('single')
+    await page.getByLabel('Number of dependants').fill('0')
+    await page.getByTestId(INTAKE_ATDD_TEST_IDS.nextButton).click()
+    await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.sectionHeading)).toContainText(/education/i)
 
     const previousButton = page.getByTestId(INTAKE_ATDD_TEST_IDS.previousButton)
     const nextButton = page.getByTestId(INTAKE_ATDD_TEST_IDS.nextButton)
@@ -174,11 +206,12 @@ test.describe('Guided intake draft save and resume', () => {
     await expect(previousButton).toBeFocused()
 
     await page.keyboard.press('Tab')
-    await expect(nextButton).toBeFocused()
-
-    await page.keyboard.press('Tab')
     await expect(saveButton).toBeFocused()
 
+    await page.keyboard.press('Tab')
+    await expect(nextButton).toBeFocused()
+
+    await saveButton.focus()
     await page.keyboard.press('Enter')
     await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.saveFeedback)).toBeVisible()
   })

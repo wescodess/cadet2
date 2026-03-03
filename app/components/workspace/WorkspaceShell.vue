@@ -168,7 +168,7 @@ async function handleSignOut() {
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex min-h-screen min-w-0 flex-1 flex-col">
+    <div class="flex h-screen min-w-0 flex-1 flex-col overflow-y-auto">
       <!-- Header -->
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
         <div class="flex min-w-0 items-center gap-3">
@@ -270,7 +270,7 @@ async function handleSignOut() {
       </header>
 
       <!-- Content Area -->
-      <main class="flex flex-1 flex-col items-center justify-center px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-8 lg:pt-8">
+      <main class="flex flex-1 flex-col items-center px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-8 lg:pt-8">
         <div class="w-full max-w-3xl">
           <slot />
         </div>

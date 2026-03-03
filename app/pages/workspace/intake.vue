@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { AlertTriangle, CheckCircle2, LoaderCircle, Save } from 'lucide-vue-next'
+import { AlertTriangle, CheckCircle2, LoaderCircle } from 'lucide-vue-next'
 import { z } from 'zod'
 
 import IntakeProgress from '~/components/intake/IntakeProgress.vue'
 import IntakeSectionFields from '~/components/intake/IntakeSectionFields.vue'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card'
 
 definePageMeta({
   middleware: ['auth'],
@@ -12,14 +11,21 @@ definePageMeta({
 
 type IntakeSection = 'personal' | 'education' | 'work' | 'immigration' | 'goals'
 
+type IntakeFieldOption = {
+  label: string
+  value: string
+}
+
 type IntakeField = {
   key: string
   label: string
   placeholder: string
   helper: string
-  type?: 'text' | 'email'
+  type?: 'text' | 'email' | 'date' | 'number' | 'tel' | 'textarea' | 'select'
   required?: boolean
   testIdError?: string
+  width?: 'full' | 'half'
+  options?: IntakeFieldOption[]
 }
 
 type IntakeSectionDefinition = {
@@ -31,7 +37,7 @@ type IntakeSectionDefinition = {
 }
 
 type SectionProgress = Record<IntakeSection, boolean>
-type SectionFieldValues = Record<IntakeSection, Record<string, string>>
+type SectionFieldValues = Record<IntakeSection, Record<string, string | number>>
 
 type IntakeDraftResponse = {
   status: string
@@ -51,12 +57,74 @@ type SaveFeedback = {
   message: string
 }
 
+const yesNoOptions: IntakeFieldOption[] = [
+  { label: 'Yes', value: 'yes' },
+  { label: 'No', value: 'no' },
+]
+
+const maritalStatusOptions: IntakeFieldOption[] = [
+  { label: 'Single', value: 'single' },
+  { label: 'Married', value: 'married' },
+  { label: 'Common-law', value: 'common-law' },
+  { label: 'Divorced', value: 'divorced' },
+  { label: 'Widowed', value: 'widowed' },
+]
+
+const educationLevelOptions: IntakeFieldOption[] = [
+  { label: 'High school', value: 'high-school' },
+  { label: 'Diploma or certificate', value: 'diploma' },
+  { label: 'Bachelors degree', value: 'bachelors' },
+  { label: 'Masters degree', value: 'masters' },
+  { label: 'Doctorate (PhD)', value: 'phd' },
+]
+
+const ecaStatusOptions: IntakeFieldOption[] = [
+  { label: 'Completed', value: 'completed' },
+  { label: 'In progress', value: 'in-progress' },
+  { label: 'Not started', value: 'not-started' },
+  { label: 'Not required', value: 'not-required' },
+]
+
+const nocTeerOptions: IntakeFieldOption[] = [
+  { label: 'TEER 0', value: '0' },
+  { label: 'TEER 1', value: '1' },
+  { label: 'TEER 2', value: '2' },
+  { label: 'TEER 3', value: '3' },
+  { label: 'TEER 4', value: '4' },
+  { label: 'TEER 5', value: '5' },
+]
+
+const statusInCanadaOptions: IntakeFieldOption[] = [
+  { label: 'Outside Canada', value: 'outside-canada' },
+  { label: 'Visitor status', value: 'visitor' },
+  { label: 'Study permit', value: 'study-permit' },
+  { label: 'Work permit', value: 'work-permit' },
+  { label: 'Post-graduation work permit', value: 'pgwp' },
+  { label: 'Permanent resident', value: 'permanent-resident' },
+  { label: 'Other', value: 'other' },
+]
+
+const primaryGoalOptions: IntakeFieldOption[] = [
+  { label: 'Permanent residency', value: 'permanent-residency' },
+  { label: 'Work permit strategy', value: 'work-permit' },
+  { label: 'Study then transition', value: 'study-to-pr' },
+  { label: 'Family sponsorship path', value: 'family-sponsorship' },
+  { label: 'Business or entrepreneur route', value: 'business' },
+]
+
+const priorityPreferenceOptions: IntakeFieldOption[] = [
+  { label: 'Fastest timeline', value: 'fastest-timeline' },
+  { label: 'Highest approval odds', value: 'highest-odds' },
+  { label: 'Lowest overall cost', value: 'lowest-cost' },
+  { label: 'Long-term flexibility', value: 'long-term-flexibility' },
+]
+
 const sections: IntakeSectionDefinition[] = [
   {
     id: 'personal',
     label: 'Personal',
     heading: 'Personal profile',
-    description: 'Share core identity details so recommendations can match your legal profile correctly.',
+    description: 'Capture identity and household context to ground pathway scoring and family-linked options.',
     fields: [
       {
         key: 'firstName',
@@ -65,6 +133,7 @@ const sections: IntakeSectionDefinition[] = [
         helper: 'We use this to personalize your plan and document checklists.',
         required: true,
         testIdError: 'intake-error-first-name',
+        width: 'half',
       },
       {
         key: 'lastName',
@@ -72,6 +141,7 @@ const sections: IntakeSectionDefinition[] = [
         placeholder: 'Okafor',
         helper: 'This helps keep your saved profile aligned with your formal records.',
         required: true,
+        width: 'half',
       },
       {
         key: 'email',
@@ -80,6 +150,43 @@ const sections: IntakeSectionDefinition[] = [
         placeholder: 'ada@example.com',
         helper: 'We use this to send secure updates when your pathway insights are ready.',
         required: true,
+        width: 'full',
+      },
+      {
+        key: 'dateOfBirth',
+        label: 'Date of birth',
+        type: 'date',
+        placeholder: 'YYYY-MM-DD',
+        helper: 'Age affects many pathway cutoffs and ranking assumptions.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'countryOfCitizenship',
+        label: 'Country of citizenship',
+        placeholder: 'India',
+        helper: 'Citizenship can change eligibility requirements and document routes.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'maritalStatus',
+        label: 'Marital status',
+        type: 'select',
+        placeholder: 'Select marital status',
+        helper: 'Family status affects points, dependants, and certain pathway options.',
+        required: true,
+        width: 'half',
+        options: maritalStatusOptions,
+      },
+      {
+        key: 'dependantsCount',
+        label: 'Number of dependants',
+        type: 'number',
+        placeholder: '0',
+        helper: 'Dependants can influence settlement funds, processing, and pathway fit.',
+        required: true,
+        width: 'half',
       },
     ],
   },
@@ -87,14 +194,53 @@ const sections: IntakeSectionDefinition[] = [
     id: 'education',
     label: 'Education',
     heading: 'Education history',
-    description: 'Education details shape score assumptions and pathway eligibility confidence.',
+    description: 'Education signals credential strength and whether additional assessment steps are needed.',
     fields: [
       {
         key: 'highestLevel',
         label: 'Highest completed level',
-        placeholder: 'Bachelors',
+        type: 'select',
+        placeholder: 'Select highest completed level',
         helper: 'This helps estimate credential impact in recommendation scoring.',
         required: true,
+        width: 'full',
+        options: educationLevelOptions,
+      },
+      {
+        key: 'fieldOfStudy',
+        label: 'Field of study',
+        placeholder: 'Computer Science',
+        helper: 'Study domain can affect pathway competitiveness and occupational fit.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'countryOfEducation',
+        label: 'Country of highest education',
+        placeholder: 'Canada',
+        helper: 'Where credentials were earned affects recognition and equivalency assumptions.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'hasCanadianEducation',
+        label: 'Do you have Canadian education?',
+        type: 'select',
+        placeholder: 'Select an option',
+        helper: 'Canadian study experience can materially increase eligibility in several streams.',
+        required: true,
+        width: 'half',
+        options: yesNoOptions,
+      },
+      {
+        key: 'credentialEcaStatus',
+        label: 'Credential assessment (ECA) status',
+        type: 'select',
+        placeholder: 'Select assessment status',
+        helper: 'ECA readiness changes what pathways are immediately viable.',
+        required: true,
+        width: 'half',
+        options: ecaStatusOptions,
       },
     ],
   },
@@ -102,7 +248,7 @@ const sections: IntakeSectionDefinition[] = [
     id: 'work',
     label: 'Work',
     heading: 'Work experience',
-    description: 'Work context narrows pathways and expected competitiveness.',
+    description: 'Employment profile defines skilled eligibility, urgency routes, and near-term options.',
     fields: [
       {
         key: 'currentRole',
@@ -110,6 +256,62 @@ const sections: IntakeSectionDefinition[] = [
         placeholder: 'Software Engineer',
         helper: 'Your role helps identify comparable pathways and likely evidence needs.',
         required: true,
+        width: 'full',
+      },
+      {
+        key: 'nocTeerCategory',
+        label: 'NOC TEER category',
+        type: 'select',
+        placeholder: 'Select TEER category',
+        helper: 'TEER level is a primary filter in many Canadian immigration streams.',
+        required: true,
+        width: 'half',
+        options: nocTeerOptions,
+      },
+      {
+        key: 'yearsSkilledExperience',
+        label: 'Years of skilled work experience',
+        type: 'number',
+        placeholder: '3',
+        helper: 'Skilled experience length directly affects ranking and pathway viability.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'canadianWorkExperienceYears',
+        label: 'Years of Canadian work experience',
+        type: 'number',
+        placeholder: '0',
+        helper: 'Canadian work history can significantly improve points and pathway access.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'hasValidJobOffer',
+        label: 'Do you have a valid job offer in Canada?',
+        type: 'select',
+        placeholder: 'Select an option',
+        helper: 'A valid job offer may unlock direct or faster routes.',
+        required: true,
+        width: 'half',
+        options: yesNoOptions,
+      },
+      {
+        key: 'jobOfferProvince',
+        label: 'Job offer province (if applicable)',
+        placeholder: 'Ontario',
+        helper: 'Province matters when evaluating provincial nominee options.',
+        width: 'half',
+      },
+      {
+        key: 'selfEmployedExperience',
+        label: 'Do you have self-employed experience?',
+        type: 'select',
+        placeholder: 'Select an option',
+        helper: 'Self-employment history may affect evidence requirements and stream fit.',
+        required: true,
+        width: 'half',
+        options: yesNoOptions,
       },
     ],
   },
@@ -117,7 +319,7 @@ const sections: IntakeSectionDefinition[] = [
     id: 'immigration',
     label: 'Immigration',
     heading: 'Immigration context',
-    description: 'Immigration intent and status help prioritize realistic path options.',
+    description: 'Immigration status, language profile, and constraints determine immediate pathway realism.',
     fields: [
       {
         key: 'currentCountry',
@@ -125,6 +327,87 @@ const sections: IntakeSectionDefinition[] = [
         placeholder: 'Nigeria',
         helper: 'Country context affects available pathways and processing assumptions.',
         required: true,
+        width: 'full',
+      },
+      {
+        key: 'currentStatusInCanada',
+        label: 'Current status in Canada',
+        type: 'select',
+        placeholder: 'Select your status',
+        helper: 'Current status strongly influences urgent options and legal timelines.',
+        required: true,
+        width: 'half',
+        options: statusInCanadaOptions,
+      },
+      {
+        key: 'statusExpiryDate',
+        label: 'Status expiry date (if applicable)',
+        type: 'date',
+        placeholder: 'YYYY-MM-DD',
+        helper: 'Expiry deadlines help prioritize pathways that need immediate action.',
+        width: 'half',
+      },
+      {
+        key: 'intendedProvince',
+        label: 'Intended province or territory',
+        placeholder: 'Ontario',
+        helper: 'Province preference affects program availability and recommendation ordering.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'openToRelocation',
+        label: 'Open to relocation across provinces?',
+        type: 'select',
+        placeholder: 'Select an option',
+        helper: 'Relocation flexibility increases the set of plausible pathways.',
+        required: true,
+        width: 'half',
+        options: yesNoOptions,
+      },
+      {
+        key: 'englishClb',
+        label: 'English CLB score',
+        type: 'number',
+        placeholder: '7',
+        helper: 'Language level is a major scoring driver for economic pathways.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'frenchClb',
+        label: 'French CLB score (optional)',
+        type: 'number',
+        placeholder: '0',
+        helper: 'French proficiency can improve competitiveness in many streams.',
+        width: 'half',
+      },
+      {
+        key: 'availableSettlementFundsCad',
+        label: 'Available settlement funds (CAD)',
+        type: 'number',
+        placeholder: '15000',
+        helper: 'Funds influence eligibility and readiness for specific pathways.',
+        required: true,
+        width: 'full',
+      },
+      {
+        key: 'previousRefusal',
+        label: 'Any previous visa or immigration refusal?',
+        type: 'select',
+        placeholder: 'Select an option',
+        helper: 'Past refusals can change risk profile and document strategy.',
+        required: true,
+        width: 'half',
+        options: yesNoOptions,
+      },
+      {
+        key: 'urgencyDeadline',
+        label: 'Urgent deadline (if any)',
+        type: 'date',
+        placeholder: 'YYYY-MM-DD',
+        helper: 'Use this when a permit, status, or personal timeline is time-sensitive.',
+        width: 'half',
       },
     ],
   },
@@ -132,14 +415,73 @@ const sections: IntakeSectionDefinition[] = [
     id: 'goals',
     label: 'Goals',
     heading: 'Planning goals',
-    description: 'Your goals steer recommendation ranking and action priorities.',
+    description: 'Your priorities, timing, and constraints determine which pathways should be ranked first.',
     fields: [
       {
         key: 'primaryGoal',
         label: 'Primary immigration goal',
-        placeholder: 'Permanent residency',
+        type: 'select',
+        placeholder: 'Select your primary goal',
         helper: 'Clear goals improve recommendation quality and timeline guidance.',
         required: true,
+        width: 'full',
+        options: primaryGoalOptions,
+      },
+      {
+        key: 'targetTimelineMonths',
+        label: 'Target timeline (months)',
+        type: 'number',
+        placeholder: '12',
+        helper: 'Timeline pressure changes tradeoffs between stronger and faster routes.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'budgetCad',
+        label: 'Estimated process budget (CAD)',
+        type: 'number',
+        placeholder: '10000',
+        helper: 'Budget constraints affect which options are realistically executable.',
+        required: true,
+        width: 'half',
+      },
+      {
+        key: 'priorityPreference',
+        label: 'Top decision priority',
+        type: 'select',
+        placeholder: 'Select top priority',
+        helper: 'This helps rank pathways by what matters most to you.',
+        required: true,
+        width: 'full',
+        options: priorityPreferenceOptions,
+      },
+      {
+        key: 'willingToStudyOrRetrain',
+        label: 'Willing to study or retrain if needed?',
+        type: 'select',
+        placeholder: 'Select an option',
+        helper: 'Training flexibility can unlock stronger long-term pathways.',
+        required: true,
+        width: 'half',
+        options: yesNoOptions,
+      },
+      {
+        key: 'hasFamilyInCanada',
+        label: 'Do you have close family in Canada?',
+        type: 'select',
+        placeholder: 'Select an option',
+        helper: 'Family presence can increase pathway opportunities or points.',
+        required: true,
+        width: 'half',
+        options: yesNoOptions,
+      },
+      {
+        key: 'additionalContext',
+        label: 'Additional context',
+        type: 'textarea',
+        placeholder: 'Share any constraints or context that could affect recommendation quality.',
+        helper: 'Use this for unique details not captured above.',
+        width: 'full',
       },
     ],
   },
@@ -152,18 +494,47 @@ const fieldValues = reactive<SectionFieldValues>({
     firstName: '',
     lastName: '',
     email: '',
+    dateOfBirth: '',
+    countryOfCitizenship: '',
+    maritalStatus: '',
+    dependantsCount: '',
   },
   education: {
     highestLevel: '',
+    fieldOfStudy: '',
+    countryOfEducation: '',
+    hasCanadianEducation: '',
+    credentialEcaStatus: '',
   },
   work: {
     currentRole: '',
+    nocTeerCategory: '',
+    yearsSkilledExperience: '',
+    canadianWorkExperienceYears: '',
+    hasValidJobOffer: '',
+    jobOfferProvince: '',
+    selfEmployedExperience: '',
   },
   immigration: {
     currentCountry: '',
+    currentStatusInCanada: '',
+    statusExpiryDate: '',
+    intendedProvince: '',
+    openToRelocation: '',
+    englishClb: '',
+    frenchClb: '',
+    availableSettlementFundsCad: '',
+    previousRefusal: '',
+    urgencyDeadline: '',
   },
   goals: {
     primaryGoal: '',
+    targetTimelineMonths: '',
+    budgetCad: '',
+    priorityPreference: '',
+    willingToStudyOrRetrain: '',
+    hasFamilyInCanada: '',
+    additionalContext: '',
   },
 })
 
@@ -183,25 +554,109 @@ const sectionErrors = reactive<Record<IntakeSection, Record<string, string>>>({
   goals: {},
 })
 
-const sectionValidationSchemas: Record<IntakeSection, z.ZodObject<Record<string, z.ZodString>>> = {
+const requiredText = (message: string) => z.string().trim().min(1, message)
+
+const requiredEmail = (message: string) => requiredText(message).email('Enter a valid email address.')
+
+const requiredDate = (message: string) => requiredText(message)
+  .refine(value => !Number.isNaN(Date.parse(value)), 'Enter a valid date.')
+
+const optionalDate = () => z.string().trim()
+  .refine(value => value === '' || !Number.isNaN(Date.parse(value)), 'Enter a valid date.')
+
+function coerceNumberInput(value: unknown) {
+  if (value === '' || value === null || value === undefined) {
+    return undefined
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      return undefined
+    }
+
+    const parsed = Number(trimmed)
+    return Number.isNaN(parsed) ? value : parsed
+  }
+
+  return value
+}
+
+const requiredNumber = (message: string, minValue = 0) => z.preprocess(
+  coerceNumberInput,
+  z.number({
+    required_error: message,
+    invalid_type_error: 'Enter a valid number.',
+  }).min(minValue, `Enter a number greater than or equal to ${minValue}.`),
+)
+
+const requiredWholeNumber = (message: string, minValue = 0) => z.preprocess(
+  coerceNumberInput,
+  z.number({
+    required_error: message,
+    invalid_type_error: 'Enter a valid whole number.',
+  })
+    .int('Enter a valid whole number.')
+    .min(minValue, `Enter a number greater than or equal to ${minValue}.`),
+)
+
+const optionalWholeNumber = () => z.preprocess(
+  coerceNumberInput,
+  z.number({
+    invalid_type_error: 'Enter a valid whole number.',
+  }).int('Enter a valid whole number.').optional(),
+)
+
+const sectionValidationSchemas = {
   personal: z.object({
-    firstName: z.string().trim().min(1, 'Enter your first name to continue.'),
-    lastName: z.string().trim().min(1, 'Enter your last name to continue.'),
-    email: z.string().trim().min(1, 'Enter your email to continue.'),
+    firstName: requiredText('Enter your first name to continue.'),
+    lastName: requiredText('Enter your last name to continue.'),
+    email: requiredEmail('Enter your email to continue.'),
+    dateOfBirth: requiredDate('Enter your date of birth to continue.'),
+    countryOfCitizenship: requiredText('Enter your country of citizenship to continue.'),
+    maritalStatus: requiredText('Select your marital status to continue.'),
+    dependantsCount: requiredWholeNumber('Enter the number of dependants to continue.', 0),
   }),
   education: z.object({
-    highestLevel: z.string().trim().min(1, 'Enter your highest completed education level.'),
+    highestLevel: requiredText('Select your highest completed education level.'),
+    fieldOfStudy: requiredText('Enter your field of study to continue.'),
+    countryOfEducation: requiredText('Enter your country of education to continue.'),
+    hasCanadianEducation: requiredText('Select whether you have Canadian education.'),
+    credentialEcaStatus: requiredText('Select your credential assessment status.'),
   }),
   work: z.object({
-    currentRole: z.string().trim().min(1, 'Enter your current role or occupation.'),
+    currentRole: requiredText('Enter your current role or occupation.'),
+    nocTeerCategory: requiredText('Select your NOC TEER category.'),
+    yearsSkilledExperience: requiredNumber('Enter your years of skilled work experience.', 0),
+    canadianWorkExperienceYears: requiredNumber('Enter your years of Canadian work experience.', 0),
+    hasValidJobOffer: requiredText('Select whether you have a valid Canadian job offer.'),
+    jobOfferProvince: z.string().trim(),
+    selfEmployedExperience: requiredText('Select whether you have self-employed experience.'),
   }),
   immigration: z.object({
-    currentCountry: z.string().trim().min(1, 'Enter your current country of residence.'),
+    currentCountry: requiredText('Enter your current country of residence.'),
+    currentStatusInCanada: requiredText('Select your current status in Canada.'),
+    statusExpiryDate: optionalDate(),
+    intendedProvince: requiredText('Enter your intended province or territory.'),
+    openToRelocation: requiredText('Select whether you are open to relocation.'),
+    englishClb: requiredWholeNumber('Enter your English CLB score.', 0)
+      .refine(value => Number(value) <= 12, 'English CLB score must be between 0 and 12.'),
+    frenchClb: optionalWholeNumber()
+      .refine(value => value === '' || Number(value) <= 12, 'French CLB score must be between 0 and 12.'),
+    availableSettlementFundsCad: requiredNumber('Enter your available settlement funds in CAD.', 0),
+    previousRefusal: requiredText('Select whether you have a previous refusal.'),
+    urgencyDeadline: optionalDate(),
   }),
   goals: z.object({
-    primaryGoal: z.string().trim().min(1, 'Enter your primary immigration goal.'),
+    primaryGoal: requiredText('Select your primary immigration goal.'),
+    targetTimelineMonths: requiredWholeNumber('Enter your target timeline in months.', 1),
+    budgetCad: requiredNumber('Enter your estimated process budget in CAD.', 0),
+    priorityPreference: requiredText('Select your top decision priority.'),
+    willingToStudyOrRetrain: requiredText('Select whether you are willing to study or retrain.'),
+    hasFamilyInCanada: requiredText('Select whether you have close family in Canada.'),
+    additionalContext: z.string().trim(),
   }),
-}
+} satisfies Record<IntakeSection, z.ZodTypeAny>
 
 const currentSection = ref<IntakeSection>('personal')
 const validationSummary = ref<string[]>([])
@@ -410,40 +865,36 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="space-y-6" data-testid="intake-page">
-    <header class="space-y-2">
-      <h1 class="text-2xl font-bold text-slate-900">
-        Guided Intake
-      </h1>
-      <p class="text-sm text-slate-600">
-        Complete each section at your pace. Your progress saves to your workspace as you go.
+  <div data-testid="intake-page" class="flex h-full w-full flex-col pb-[60px] lg:pb-0">
+    <div class="mb-6 md:mb-10">
+      <IntakeProgress
+        :sections="sections.map(section => ({ id: section.id, label: section.label }))"
+        :current-section="currentSection"
+        :section-progress="sectionProgress"
+      />
+    </div>
+
+    <!-- Active Section Heading -->
+    <div class="mb-6 md:mb-8">
+      <h2
+        data-testid="intake-section-heading"
+        class="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl"
+      >
+        {{ activeSection.heading }}
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-slate-500 md:text-base">
+        {{ activeSection.description }}
       </p>
-    </header>
+    </div>
 
-    <IntakeProgress
-      :sections="sections.map(section => ({ id: section.id, label: section.label }))"
-      :current-section="currentSection"
-      :section-progress="sectionProgress"
-    />
-
-    <Card class="border-slate-200 bg-white">
-      <CardHeader>
-        <CardTitle
-          data-testid="intake-section-heading"
-          class="text-xl font-semibold text-slate-900"
-        >
-          {{ activeSection.heading }}
-        </CardTitle>
-        <CardDescription class="text-slate-600">
-          {{ activeSection.description }}
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-4">
+    <!-- Form Container -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:p-10">
+      <div class="space-y-6 md:space-y-8">
         <div
           v-if="validationSummary.length > 0"
           data-testid="intake-validation-summary"
           role="alert"
-          class="rounded-lg border border-amber-200 bg-amber-50 p-3"
+          class="rounded-lg border border-amber-200 bg-amber-50 p-4"
         >
           <div class="mb-2 flex items-start gap-2 text-amber-900">
             <AlertTriangle class="mt-0.5 size-4" />
@@ -467,78 +918,103 @@ onMounted(async () => {
 
         <div
           v-for="section in sections"
-          v-show="section.id === currentSection"
-          :key="section.id"
+          :key="`fields-${section.id}`"
         >
           <IntakeSectionFields
+            v-if="section.id === currentSection"
             v-model="fieldValues[section.id]"
             :fields="section.fields"
             :errors="sectionErrors[section.id]"
           />
         </div>
-      </CardContent>
-      <CardFooter class="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <button
-            type="button"
-            data-testid="intake-previous"
-            :disabled="isHydrating"
-            @click="moveToPreviousSection"
-            class="inline-flex min-h-[44px] items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
-          >
-            Previous
-          </button>
+
+        <!-- Desktop Footer Actions -->
+        <div class="hidden items-center justify-between border-t border-slate-100 pt-8 lg:flex">
+          <div class="flex items-center gap-4">
+            <button
+              v-if="currentSectionIndex > 0"
+              type="button"
+              data-testid="intake-previous"
+              :disabled="isHydrating"
+              @click="moveToPreviousSection"
+              class="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 px-6 font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              data-testid="intake-save"
+              :disabled="isHydrating || isSaving"
+              @click="saveDraft()"
+              class="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 px-6 font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+            >
+              <LoaderCircle v-if="isSaving" class="mr-2 size-4 animate-spin" />
+              Save Draft
+            </button>
+            <div
+              v-if="saveFeedback"
+              data-testid="intake-save-feedback"
+              class="flex items-center gap-1.5 rounded-full px-3 py-1"
+              :class="[
+                saveFeedback.tone === 'success' ? 'bg-emerald-50 text-emerald-600' :
+                saveFeedback.tone === 'error' ? 'bg-red-50 text-red-600' :
+                'bg-slate-50 text-slate-600'
+              ]"
+              role="status"
+              aria-live="polite"
+            >
+              <CheckCircle2 v-if="saveFeedback.tone === 'success'" class="size-3.5" />
+              <AlertTriangle v-else-if="saveFeedback.tone === 'error'" class="size-3.5" />
+              <LoaderCircle v-else class="size-3.5 animate-spin" />
+              <span class="text-[10px] font-bold uppercase tracking-wider">{{ saveFeedback.message }}</span>
+            </div>
+          </div>
           <button
             type="button"
             data-testid="intake-next"
             :disabled="isHydrating"
             @click="moveToNextSection"
-            class="inline-flex min-h-[44px] items-center justify-center rounded-md bg-[var(--trust)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--trust)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+            class="inline-flex h-11 items-center gap-2 rounded-lg bg-[var(--trust)] px-8 font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
           >
-            Next
-          </button>
-          <button
-            type="button"
-            data-testid="intake-save"
-            :disabled="isHydrating || isSaving"
-            @click="saveDraft()"
-            class="inline-flex min-h-[44px] items-center justify-center rounded-md border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
-          >
-            <LoaderCircle v-if="isSaving" class="mr-2 size-4 animate-spin" />
-            <Save v-else class="mr-2 size-4" />
-            Save Draft
+            Next Section
           </button>
         </div>
+      </div>
+    </div>
 
-        <p
-          v-if="saveFeedback"
-          data-testid="intake-save-feedback"
-          class="inline-flex items-center gap-2 text-sm"
-          :class="[
-            saveFeedback.tone === 'error'
-              ? 'text-red-700'
-              : saveFeedback.tone === 'success'
-                ? 'text-emerald-700'
-                : 'text-slate-600',
-          ]"
-          role="status"
-          aria-live="polite"
+    <!-- Mobile Header Actions (Sticky Bottom) -->
+    <!-- Matches WorkspaceShell's mobile nav layout padding by rendering right above standard 60px nav area or sitting on top of it -->
+    <div class="fixed inset-x-0 bottom-[60px] z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur-sm lg:hidden">
+      <div class="mx-auto flex max-w-lg items-center justify-between gap-3">
+        <button
+          v-if="currentSectionIndex > 0"
+          type="button"
+          data-testid="intake-previous-mobile"
+          :disabled="isHydrating"
+          @click="moveToPreviousSection"
+          class="flex-1 rounded-lg py-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50"
         >
-          <CheckCircle2
-            v-if="saveFeedback.tone === 'success'"
-            class="size-4"
-          />
-          <AlertTriangle
-            v-else-if="saveFeedback.tone === 'error'"
-            class="size-4"
-          />
-          <LoaderCircle
-            v-else
-            class="size-4 animate-spin"
-          />
-          {{ saveFeedback.message }}
-        </p>
-      </CardFooter>
-    </Card>
-  </section>
+          Back
+        </button>
+        <button
+          type="button"
+          data-testid="intake-save-mobile"
+          :disabled="isHydrating || isSaving"
+          @click="saveDraft()"
+          class="flex-1 rounded-lg border border-slate-200 py-3 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50"
+        >
+          {{ isSaving ? 'Saving...' : 'Save Draft' }}
+        </button>
+        <button
+          type="button"
+          data-testid="intake-next-mobile"
+          :disabled="isHydrating"
+          @click="moveToNextSection"
+          class="flex flex-[1.5] items-center justify-center gap-1.5 rounded-lg bg-[var(--trust)] py-3 text-sm font-semibold text-white shadow-md shadow-[var(--trust)]/20 transition-all hover:brightness-110"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
 </template>

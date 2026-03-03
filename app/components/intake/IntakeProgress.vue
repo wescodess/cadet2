@@ -11,13 +11,6 @@ const props = defineProps<{
 }>()
 
 const currentIndex = computed(() => props.sections.findIndex(section => section.id === props.currentSection))
-const completionPercent = computed(() => {
-  if (props.sections.length === 0) {
-    return 0
-  }
-
-  return Math.round(((currentIndex.value + 1) / props.sections.length) * 100)
-})
 
 function getStepStatus(sectionId: string, index: number) {
   if (sectionId === props.currentSection) {
@@ -33,61 +26,64 @@ function getStepStatus(sectionId: string, index: number) {
 </script>
 
 <template>
-  <Card
-    data-testid="intake-progress"
-    class="border-slate-200 bg-white"
-  >
-    <CardHeader class="space-y-3 pb-3">
-      <CardTitle class="text-base font-semibold text-slate-900">
-        Guided Intake Progress
-      </CardTitle>
-      <CardDescription class="text-slate-600">
-        Step {{ currentIndex + 1 }} of {{ sections.length }}
-      </CardDescription>
-      <div 
-        class="h-2 w-full overflow-hidden rounded-full bg-slate-200"
-        role="progressbar"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        :aria-valuenow="completionPercent"
-      >
-        <div
-          class="h-full rounded-full bg-[var(--trust)] transition-[width] duration-300"
-          :style="{ width: `${completionPercent}%` }"
-          aria-hidden="true"
-        />
-      </div>
-    </CardHeader>
-    <CardContent>
-      <ol class="grid gap-2 sm:grid-cols-2">
-        <li
-          v-for="(section, index) in sections"
-          :key="section.id"
-          class="flex items-center gap-2 rounded-lg border p-2 text-sm"
-          :aria-current="getStepStatus(section.id, index) === 'current' ? 'step' : undefined"
-          :class="[
-            getStepStatus(section.id, index) === 'current'
-              ? 'border-[var(--trust)] bg-[var(--trust-soft)] text-[var(--trust)]'
-              : getStepStatus(section.id, index) === 'complete'
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                : 'border-slate-200 text-slate-500',
-          ]"
-        >
-          <span
-            class="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+  <div data-testid="intake-progress">
+    <!-- Desktop Stepper -->
+    <div class="hidden md:flex items-center justify-between">
+      <template v-for="(section, index) in sections" :key="`desktop-${section.id}`">
+        <div class="group flex items-center gap-2">
+          <div
+            class="flex size-8 items-center justify-center rounded-full text-xs font-bold transition-colors"
             :class="[
-              getStepStatus(section.id, index) === 'current'
-                ? 'bg-[var(--trust)] text-white'
-                : getStepStatus(section.id, index) === 'complete'
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-slate-200 text-slate-600',
+              getStepStatus(section.id, index) === 'current' ? 'bg-[var(--trust)] text-white' :
+              getStepStatus(section.id, index) === 'complete' ? 'border-2 border-[var(--trust)] bg-white text-[var(--trust)]' :
+              'border-2 border-slate-200 bg-white text-slate-400'
             ]"
           >
             {{ index + 1 }}
+          </div>
+          <span
+            class="text-sm transition-colors"
+            :class="[
+              getStepStatus(section.id, index) === 'current' ? 'font-bold text-[var(--trust)]' :
+              getStepStatus(section.id, index) === 'complete' ? 'font-bold text-slate-900' :
+              'font-medium text-slate-400 group-hover:text-slate-600'
+            ]"
+          >
+            {{ section.label }}
           </span>
-          <span class="font-medium">{{ section.label }}</span>
-        </li>
-      </ol>
-    </CardContent>
-  </Card>
+        </div>
+        <div
+          v-if="index < sections.length - 1"
+          class="mx-4 h-px flex-1 transition-colors"
+          :class="getStepStatus(section.id, index) === 'complete' ? 'bg-[var(--trust)]' : 'bg-slate-200'"
+        ></div>
+      </template>
+    </div>
+
+    <!-- Mobile Segmented Bar -->
+    <div class="md:hidden">
+      <div class="flex items-center justify-between space-x-1">
+        <div v-for="(section, index) in sections" :key="`mobile-${section.id}`" class="flex flex-1 flex-col items-center">
+          <div
+            class="mb-2 h-1 w-full rounded-full transition-colors"
+            :class="[
+              getStepStatus(section.id, index) === 'current' ? 'bg-[var(--trust)]' :
+              getStepStatus(section.id, index) === 'complete' ? 'bg-[var(--trust)] opacity-50' :
+              'bg-slate-200'
+            ]"
+          ></div>
+          <span
+            class="text-[10px] sm:text-xs transition-colors"
+            :class="[
+              getStepStatus(section.id, index) === 'current' ? 'font-semibold text-[var(--trust)]' :
+              getStepStatus(section.id, index) === 'complete' ? 'font-medium text-slate-700' :
+              'font-medium text-slate-400'
+            ]"
+          >
+            {{ section.label }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
