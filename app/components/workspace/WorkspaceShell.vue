@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
 import {
-  Bell,
   ClipboardList,
   Compass,
   History,
@@ -11,6 +10,7 @@ import {
   Settings,
   Sparkles,
 } from 'lucide-vue-next'
+import { useDisplayName } from '~/composables/useDisplayName'
 
 type NavItem = {
   label: string
@@ -21,8 +21,9 @@ type NavItem = {
 }
 
 const route = useRoute()
-const { user, signOut } = useUserSession()
+const { signOut } = useUserSession()
 const sheetOpen = ref(false)
+const { displayName, initials } = useDisplayName()
 
 const navItems: NavItem[] = [
   {
@@ -48,34 +49,15 @@ const navItems: NavItem[] = [
     icon: History,
     disabled: true,
   },
+  {
+    label: 'Settings',
+    to: '/workspace/settings',
+    icon: Settings,
+    disabled: true,
+  },
 ]
 
 const dashboardItem = navItems[0]!
-
-const displayName = computed(() => {
-  const candidate = user.value?.name?.trim()
-
-  if (candidate) {
-    return candidate
-  }
-
-  return user.value?.email?.trim() || 'Workspace user'
-})
-
-const firstName = computed(() => {
-  return displayName.value.split(/\s+/)[0] || 'there'
-})
-
-const initials = computed(() => {
-  const source = displayName.value
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(part => part.charAt(0).toUpperCase())
-    .join('')
-
-  return source || 'WU'
-})
 
 function isActive(item: NavItem) {
   if (item.to === '/workspace') {
@@ -158,15 +140,6 @@ async function handleSignOut() {
               <component :is="item.icon" class="size-5 shrink-0" />
               <span>{{ item.label }}</span>
             </button>
-
-            <!-- Settings -->
-            <NuxtLink
-              to="/workspace/settings"
-              class="flex min-h-[44px] items-center gap-3 border-l-4 border-transparent px-6 py-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-            >
-              <Settings class="size-5 shrink-0" />
-              <span>Settings</span>
-            </NuxtLink>
           </div>
         </nav>
       </div>
@@ -287,10 +260,6 @@ async function handleSignOut() {
 
         <!-- Header right side -->
         <div class="flex items-center gap-4">
-          <button class="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100">
-            <Bell class="size-5" />
-          </button>
-          <div class="mx-2 hidden h-6 w-px bg-slate-200 sm:block" />
           <div class="hidden items-center gap-2 sm:flex">
             <span class="text-xs font-medium uppercase tracking-wider text-slate-500">
               Session Active
@@ -321,7 +290,7 @@ async function handleSignOut() {
               v-if="!item.disabled"
               :to="item.to"
               class="flex flex-1 flex-col items-center gap-1 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--trust)]"
-              :class="isActive(item) ? 'text-[#234c76]' : 'text-slate-400 hover:text-[#234c76]'"
+              :class="isActive(item) ? 'text-[var(--trust)]' : 'text-slate-400 hover:text-[var(--trust)]'"
               :aria-current="isActive(item) ? 'page' : undefined"
             >
               <component :is="item.icon" class="size-6 shrink-0" />

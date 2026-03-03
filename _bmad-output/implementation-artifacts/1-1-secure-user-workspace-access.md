@@ -1,6 +1,6 @@
 # Story 1.1: Secure User Workspace Access
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -212,7 +212,7 @@ Codex (GPT-5)
 
 ### File List
 
-- app/assets/css/tailwind.css
+- app/composables/useDisplayName.ts
 - app/components/workspace/WorkspaceShell.vue
 - app/middleware/admin.ts
 - app/middleware/auth.ts
@@ -246,3 +246,14 @@ Codex (GPT-5)
 - Implemented protected workspace routing, shell UI, and session-derived workspace API boundary.
 - Redirected the core auth flow into the new workspace entrypoint while retaining the legacy tasks page.
 - Hardened admin page and API access checks, then added passing Playwright coverage for the protected workspace and admin rejection path.
+- **[Code Review Fix]** Replaced hardcoded `#234c76` hex values with `var(--trust)` design token in WorkspaceShell.vue and workspace/index.vue (H1).
+- **[Code Review Fix]** Removed non-functional notification Bell button from workspace header — AC #4 violation (H2).
+- **[Code Review Fix]** Converted Settings nav link to a disabled button matching Recommendations/History pattern — AC #4 violation (H3).
+- **[Code Review Fix]** Extracted `app/composables/useDisplayName.ts` shared composable to deduplicate firstName/displayName/initials logic (M1).
+- **[Code Review Fix]** Removed dead "Explore Documentation" ghost button with no target (M2).
+- **[Code Review Fix]** Removed dead `<a href="#">` help text link with no target (M3).
+
+### Review Follow-ups (AI)
+
+- [ ] [AI-Review][HIGH] H4: Add unit tests for `requireUserSession.ts` and `requireAdminSession.ts` (requires installing vitest or equivalent unit test framework)
+- [ ] [AI-Review][LOW] L1: Make WorkspaceShell header `<h1>` title dynamic (prop or route-based) instead of hardcoded "Dashboard"

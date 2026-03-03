@@ -37,7 +37,21 @@ export default defineNuxtConfig({
   },
 
   hub: {
-    db: 'postgresql',
+    db: {
+      dialect: 'postgresql',
+      connection: {
+        // Keep using local PGlite in dev, but isolate from a corrupted prior store.
+        // Override with NUXT_HUB_DB_DATA_DIR when needed.
+        dataDir: process.env.NUXT_HUB_DB_DATA_DIR || '.data/db/pglite-main',
+      },
+      // Avoid opening PGlite during both Nitro build and dev runtime startup.
+      // In practice this can abort the local WASM engine before auth/session queries run.
+      applyMigrationsDuringBuild: Boolean(
+        process.env.DATABASE_URL
+        || process.env.POSTGRES_URL
+        || process.env.POSTGRESQL_URL,
+      ),
+    },
   },
 
   convex: {

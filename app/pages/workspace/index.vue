@@ -1,15 +1,8 @@
 <script setup lang="ts">
 import { Compass, Shield, Zap, BadgeCheck } from 'lucide-vue-next'
+import { useDisplayName } from '~/composables/useDisplayName'
 
-const { user } = useUserSession()
-
-const firstName = computed(() => {
-  const name = user.value?.name?.trim()
-  if (name) {
-    return name.split(/\s+/)[0]
-  }
-  return user.value?.email?.split('@')[0] || 'there'
-})
+const { firstName } = useDisplayName()
 </script>
 
 <template>
@@ -37,23 +30,16 @@ const firstName = computed(() => {
         immigration strategy for your journey to Canada.
       </p>
 
-      <!-- CTA Buttons -->
-      <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+      <!-- CTA Button -->
+      <div class="flex justify-center">
         <Button
           as-child
           size="lg"
-          class="min-h-[44px] rounded-lg bg-[#234c76] px-8 py-3.5 font-bold text-white shadow-md hover:bg-[#1f4469]"
+          class="min-h-[44px] rounded-lg bg-[var(--trust)] px-8 py-3.5 font-bold text-white shadow-md hover:bg-[var(--trust)]/90"
         >
           <NuxtLink to="/workspace/intake">
             Start Guided Intake
           </NuxtLink>
-        </Button>
-        <Button
-          variant="ghost"
-          size="lg"
-          class="min-h-[44px] px-6 py-3 font-medium text-slate-600 hover:text-[#234c76]"
-        >
-          Explore Documentation
         </Button>
       </div>
 
@@ -73,13 +59,6 @@ const firstName = computed(() => {
         </div>
       </div>
     </div>
-
-    <!-- Help Text -->
-    <p class="mt-8 text-sm text-slate-400">
-      Need help getting started?
-      <a href="#" class="font-medium text-[#234c76] hover:underline">
-        View our getting started guide
-      </a>
-    </p>
   </section>
 </template>
+
