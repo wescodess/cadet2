@@ -107,7 +107,7 @@ jobs:
           done
 
           curl --silent --fail "$CI_BASE_URL" > /dev/null
-          pnpm test:e2e -- --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+          pnpm exec playwright test --project=chromium --project=api --shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
       - name: Upload Playwright artifacts
         if: always()

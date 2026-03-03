@@ -1,10 +1,15 @@
 import { test, expect } from '../support/fixtures'
 import { getBaseUrl, getTestEnvironment } from '../support/helpers/env'
 
+function uniqueAuthEmail() {
+  const seed = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+  return `playwright-${getTestEnvironment()}-workspace-${seed}@example.com`
+}
+
 const authTestUser = {
   environment: getTestEnvironment(),
   baseUrl: getBaseUrl(),
-  userIdentifier: `playwright-${getTestEnvironment()}-workspace@example.com`,
+  userIdentifier: uniqueAuthEmail(),
   userPassword: 'PlaywrightPass123!',
 }
 

@@ -23,6 +23,8 @@ Copy `.env.example` to `.env` and set the test-specific values:
 
 ```bash
 pnpm test:e2e
+pnpm test:api
+pnpm test:all
 pnpm test:e2e:headed
 pnpm test:e2e:ui
 ```
@@ -33,6 +35,7 @@ By default, local runs reuse an existing `pnpm dev` server or start one automati
 
 - `playwright.config.ts`: central test runner configuration, artifacts, reporters, and local web server bootstrap
 - `tests/e2e/`: browser-facing specs
+- `tests/api/`: API-focused specs running under the Playwright `api` project
 - `tests/support/fixtures/`: merged fixture entrypoint plus local project fixtures
 - `tests/support/helpers/`: environment, auth-provider, and network helper utilities
 - `tests/support/fixtures/factories/`: faker-backed factories with tracked cleanup
