@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import { anyApi } from 'convex/server'
+import { sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { requireWorkspaceUserSession } from '../../../utils/auth/requireUserSession'
@@ -17,6 +18,7 @@ const recommendationSeedPayloadSchema = z.object({
   status: z.enum(canonicalRecommendationStatuses).default('queued'),
   statusMessage: z.string().trim().min(1).optional(),
   resetExisting: z.boolean().optional(),
+  submittedPayload: z.unknown().optional(),
 }).strict()
 
 type SeededRunRecord = {
@@ -48,20 +50,74 @@ export default defineEventHandler(async (event) => {
   }
 
   const convex = await createConvexAdminClient()
+  const runId = parsed.data.runId || `run_seed_${randomUUID().replace(/-/g, '')}`
+  const profileSnapshotId = parsed.data.profileSnapshotId || `snapshot_seed_${randomUUID().replace(/-/g, '')}`
 
   if (parsed.data.resetExisting) {
     await convex.mutation(
       (anyApi as any).recommendationRuns.resetRunsForUser,
       { userId },
     )
+
+    await db.execute(sql`
+      DELETE FROM "recommendation_profiles"
+      WHERE "userId" = ${userId};
+    `)
   }
+
+  const defaultSeedPayload = {
+    currentSection: 'goals',
+    sectionProgress: {
+      personal: true,
+      education: true,
+      work: true,
+      immigration: true,
+      goals: true,
+    },
+    fieldValues: {
+      personal: {},
+      education: {},
+      work: {
+        yearsSkilledExperience: 3,
+        hasValidJobOffer: 'yes',
+      },
+      immigration: {
+        openToRelocation: 'yes',
+        englishClb: 9,
+        availableSettlementFundsCad: 30000,
+      },
+      goals: {
+        targetTimelineMonths: 12,
+        budgetCad: 32000,
+        willingToStudyOrRetrain: 'yes',
+      },
+    },
+  }
+
+  const seedPayload = JSON.stringify(parsed.data.submittedPayload ?? defaultSeedPayload)
+
+  await db.execute(sql`
+    INSERT INTO "recommendation_profiles" (
+      "snapshotId",
+      "userId",
+      "submittedPayload",
+      "createdAt"
+    )
+    VALUES (
+      ${profileSnapshotId},
+      ${userId},
+      ${seedPayload}::jsonb,
+      now()
+    )
+    ON CONFLICT ("snapshotId") DO NOTHING;
+  `)
 
   const seededRun = await convex.mutation(
     (anyApi as any).recommendationRuns.seedRunForUser,
     {
       userId,
-      runId: parsed.data.runId || `run_seed_${randomUUID().replace(/-/g, '')}`,
-      profileSnapshotId: parsed.data.profileSnapshotId || `snapshot_seed_${randomUUID().replace(/-/g, '')}`,
+      runId,
+      profileSnapshotId,
       status: parsed.data.status,
       statusMessage: parsed.data.statusMessage,
     },

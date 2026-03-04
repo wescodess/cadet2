@@ -9,6 +9,7 @@ import {
   recommendationStartPayloadSchema,
 } from '../../../../utils/recommendations/lifecycle'
 import { assertRecommendationTestModeEnabled } from '../../../../utils/recommendations/testMode'
+import { evaluatePathwayEligibilityForRun } from '../../../../utils/recommendations/evaluatePathwayEligibility'
 
 type RecommendationLifecycleRecord = {
   runId: string
@@ -37,6 +38,13 @@ function toLifecycleError(error: unknown) {
     return createError({
       statusCode: 404,
       statusMessage: 'Recommendation run not found',
+    })
+  }
+
+  if (haystack.includes('PROFILE_SNAPSHOT_NOT_FOUND')) {
+    return createError({
+      statusCode: 404,
+      statusMessage: 'Recommendation profile snapshot not found',
     })
   }
 
@@ -111,6 +119,43 @@ export default defineEventHandler(async (event) => {
       statusCode: 500,
       statusMessage: 'Recommendation run status contract is invalid',
     })
+  }
+
+  if (run.status === 'queued' || run.status === 'evaluating') {
+    try {
+      await evaluatePathwayEligibilityForRun({
+        convex,
+        runId: run.runId,
+        userId,
+        mode: requestedMode,
+      })
+    }
+    catch (error) {
+      // Keep lifecycle state safe when pathway evaluation fails after start transition.
+      try {
+        await convex.mutation(
+          (anyApi as any).recommendationRuns.setTerminalStatusForUser,
+          {
+            runId: run.runId,
+            userId,
+            status: 'failed',
+            statusMessage: 'Recommendation evaluation failed and requires retry.',
+          },
+        )
+      }
+      catch {
+      }
+
+      const mappedError = toLifecycleError(error)
+      if (mappedError.statusCode === 500) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: 'Unable to evaluate supported pathways for this run',
+        })
+      }
+
+      throw mappedError
+    }
   }
 
   return normalizeStatusResponse({
