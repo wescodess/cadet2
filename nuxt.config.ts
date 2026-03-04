@@ -37,6 +37,7 @@ export default defineNuxtConfig({
   },
 
   hub: {
+    dir: process.env.NUXT_HUB_DIR || '.data',
     db: {
       dialect: 'postgresql',
       connection: {

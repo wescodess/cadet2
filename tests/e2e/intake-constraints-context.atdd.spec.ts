@@ -1,4 +1,4 @@
-import type { APIResponse, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { test, expect } from '../support/fixtures'
 import {
@@ -14,38 +14,29 @@ import {
 import { getTestEnvironment } from '../support/helpers/env'
 
 type DraftValues = Record<string, Record<string, unknown>>
+type AuthCredentials = {
+  email: string
+  password: string
+}
 
 function uniqueAuthEmail() {
   const seed = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
   return `playwright-${getTestEnvironment()}-intake-constraints-e2e-${seed}@example.com`
 }
 
-async function describeAuthFailure(response: APIResponse) {
-  const text = (await response.text()).trim().replace(/\s+/g, ' ')
-  return text ? `HTTP ${response.status()}: ${text.slice(0, 240)}` : `HTTP ${response.status()}`
-}
-
-async function ensureAuthenticatedPage(page: Page, appBaseUrl: string) {
-  const email = uniqueAuthEmail()
-  const password = 'PlaywrightPass123!'
-
-  const signInResponse = await page.request.post(`${appBaseUrl}/api/auth/sign-in/email`, {
-    data: {
-      email,
-      password,
-      rememberMe: true,
-    },
-    failOnStatusCode: false,
-  })
-
-  if (signInResponse.ok()) {
-    return
+async function ensureAuthenticatedPage(
+  page: Page,
+  appBaseUrl: string,
+): Promise<AuthCredentials> {
+  const credentials = {
+    email: uniqueAuthEmail(),
+    password: 'PlaywrightPass123!',
   }
 
   const signUpResponse = await page.request.post(`${appBaseUrl}/api/auth/sign-up/email`, {
     data: {
-      email,
-      password,
+      email: credentials.email,
+      password: credentials.password,
       name: 'Intake Constraints E2E Test User',
       rememberMe: true,
     },
@@ -53,15 +44,52 @@ async function ensureAuthenticatedPage(page: Page, appBaseUrl: string) {
   })
 
   if (!signUpResponse.ok()) {
-    const [signInFailure, signUpFailure] = await Promise.all([
-      describeAuthFailure(signInResponse),
-      describeAuthFailure(signUpResponse),
-    ])
-
-    throw new Error(
-      `Could not establish authenticated browser session for constraints/context tests. sign-in: ${signInFailure}; sign-up: ${signUpFailure}`,
-    )
+    const text = (await signUpResponse.text()).trim().replace(/\s+/g, ' ')
+    const signUpFailure = text
+      ? `HTTP ${signUpResponse.status()}: ${text.slice(0, 240)}`
+      : `HTTP ${signUpResponse.status()}`
+    throw new Error(`Could not establish authenticated browser session for constraints/context tests. sign-up: ${signUpFailure}`)
   }
+
+  const storageState = await page.request.storageState()
+  if (storageState.cookies.length === 0) {
+    throw new Error('Sign-up succeeded but no auth cookies were returned in storage state for constraints/context tests.')
+  }
+
+  await page.context().addCookies(storageState.cookies)
+
+  // In local environments, session propagation can lag right after sign-up.
+  // Validate access to protected intake route, then retry once with sign-in if needed.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await page.goto(`${appBaseUrl}/workspace/intake`, { waitUntil: 'domcontentloaded' })
+    if (/\/workspace\/intake(?:\?.*)?$/.test(page.url())) {
+      return credentials
+    }
+
+    const signInResponse = await page.request.post(`${appBaseUrl}/api/auth/sign-in/email`, {
+      data: {
+        email: credentials.email,
+        password: credentials.password,
+        rememberMe: true,
+      },
+      failOnStatusCode: false,
+    })
+
+    if (!signInResponse.ok()) {
+      const signInText = (await signInResponse.text()).trim().replace(/\s+/g, ' ')
+      const signInFailure = signInText
+        ? `HTTP ${signInResponse.status()}: ${signInText.slice(0, 240)}`
+        : `HTTP ${signInResponse.status()}`
+      throw new Error(`Sign-in retry failed while establishing constraints/context auth session: ${signInFailure}`)
+    }
+
+    const refreshedStorageState = await page.request.storageState()
+    if (refreshedStorageState.cookies.length > 0) {
+      await page.context().addCookies(refreshedStorageState.cookies)
+    }
+  }
+
+  return credentials
 }
 
 async function seedGoalsDraft(page: Page, appBaseUrl: string, payload = createGoalsDraftPayload()) {
@@ -73,7 +101,22 @@ async function seedGoalsDraft(page: Page, appBaseUrl: string, payload = createGo
   expect(response.status()).toBe(200)
 }
 
+async function waitForIntakeHydration(page: Page) {
+  await expect(page).toHaveURL(/\/workspace\/intake(?:\?.*)?$/, { timeout: 20_000 })
+  await expect(page.getByText('Restoring your saved draft...')).toBeHidden({ timeout: 20_000 })
+  const authHeading = page.getByRole('heading', { name: /create account|sign in/i })
+  const authHeadingVisible = (await authHeading.count()) > 0 && await authHeading.first().isVisible().catch(() => false)
+  if (authHeadingVisible) {
+    const cookies = await page.context().cookies()
+    const cookieSummary = cookies.map(cookie => `${cookie.name}@${cookie.domain}`).join(', ')
+    throw new Error(`Auth view rendered while waiting for intake hydration at URL ${page.url()}. Cookies: ${cookieSummary}`)
+  }
+  await expect(page.getByTestId(INTAKE_CONSTRAINTS_ATDD_TEST_IDS.sectionHeading)).toBeVisible({ timeout: 20_000 })
+}
+
 test.describe('Story 1.3 Constraints and Context E2E ATDD', () => {
+  test.describe.configure({ mode: 'serial' })
+
   test('[P0][AC3] guest is redirected to auth when opening intake route', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
@@ -89,11 +132,14 @@ test.describe('Story 1.3 Constraints and Context E2E ATDD', () => {
     test('[P0][AC1][AC4] goals stage shows structured constraints and helper text', async ({ page, appBaseUrl }) => {
       const probe = createIntakeRouteProbe(appBaseUrl)
       await ensureAuthenticatedPage(page, appBaseUrl)
+      await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
+      await waitForIntakeHydration(page)
       await seedGoalsDraft(page, appBaseUrl)
 
       // Given an authenticated user re-entering intake on the goals stage
       // When the page hydrates saved goals context
-      await page.goto(probe.intakePath)
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await waitForIntakeHydration(page)
 
       // Then structured constraints and narrative context controls are visible with guidance
       await expect(page.getByTestId(INTAKE_CONSTRAINTS_ATDD_TEST_IDS.sectionHeading)).toContainText(/planning goals/i)
@@ -113,10 +159,13 @@ test.describe('Story 1.3 Constraints and Context E2E ATDD', () => {
       const probe = createIntakeRouteProbe(appBaseUrl)
       const goalsUpdate = createGoalsUpdateFixture().updated
       await ensureAuthenticatedPage(page, appBaseUrl)
+      await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
+      await waitForIntakeHydration(page)
       await seedGoalsDraft(page, appBaseUrl)
 
       // Given goals constraints can be updated in-place
-      await page.goto(probe.intakePath)
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await waitForIntakeHydration(page)
       await page.getByLabel(INTAKE_CONSTRAINTS_ATDD_FIELD_LABELS.targetTimelineMonths).fill(
         String(goalsUpdate.targetTimelineMonths),
       )
@@ -157,10 +206,13 @@ test.describe('Story 1.3 Constraints and Context E2E ATDD', () => {
       const probe = createIntakeRouteProbe(appBaseUrl)
       const goalsUpdate = createGoalsUpdateFixture().updated
       await ensureAuthenticatedPage(page, appBaseUrl)
+      await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
+      await waitForIntakeHydration(page)
       await seedGoalsDraft(page, appBaseUrl)
 
       // Given goals values were edited and saved
-      await page.goto(probe.intakePath)
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await waitForIntakeHydration(page)
       await page.getByLabel(INTAKE_CONSTRAINTS_ATDD_FIELD_LABELS.targetTimelineMonths).fill(
         String(goalsUpdate.targetTimelineMonths),
       )
@@ -181,6 +233,7 @@ test.describe('Story 1.3 Constraints and Context E2E ATDD', () => {
 
       // When the user revisits the intake page
       await page.reload()
+      await waitForIntakeHydration(page)
 
       // Then the updated constraints/context hydrate without restarting previous sections
       await expect(page.getByTestId(INTAKE_CONSTRAINTS_ATDD_TEST_IDS.sectionHeading)).toContainText(/planning goals/i)
@@ -205,10 +258,13 @@ test.describe('Story 1.3 Constraints and Context E2E ATDD', () => {
       const probe = createIntakeRouteProbe(appBaseUrl)
       await page.setViewportSize({ width: 390, height: 844 })
       await ensureAuthenticatedPage(page, appBaseUrl)
+      await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
+      await waitForIntakeHydration(page)
       await seedGoalsDraft(page, appBaseUrl)
 
       // Given a mobile viewport with keyboard-only interaction
-      await page.goto(probe.intakePath)
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await waitForIntakeHydration(page)
 
       // Then required mobile controls are visible and large enough for touch accessibility
       const previousButton = page.getByTestId(INTAKE_CONSTRAINTS_ATDD_TEST_IDS.previousMobileButton)

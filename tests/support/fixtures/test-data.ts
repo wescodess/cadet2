@@ -74,3 +74,23 @@ export const INTAKE_CONSTRAINTS_ATDD_TEST_IDS = {
   nextMobileButton: 'intake-next-mobile',
   previousMobileButton: 'intake-previous-mobile',
 } as const
+
+export const INTAKE_SUBMIT_ATDD_TEST_IDS = {
+  submitButton: 'intake-submit',
+  submitFeedback: 'intake-submit-feedback',
+  runList: 'workspace-run-list',
+  runItem: 'workspace-run-item',
+} as const
+
+export const INTAKE_SUBMIT_ATDD_CONFIRMATION_SNIPPETS = [
+  'submitted for recommendation processing',
+  'next state',
+] as const
+
+export const RECOMMENDATION_RUN_ATDD_REQUIRED_KEYS = [
+  'runId',
+  'profileSnapshotId',
+  'status',
+  'createdAt',
+  'updatedAt',
+] as const

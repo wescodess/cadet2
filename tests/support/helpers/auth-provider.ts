@@ -102,9 +102,9 @@ const authProvider: AuthProvider = {
     const userPassword = options.userPassword || defaultPassword
     const authBaseUrl = resolveAuthBaseUrl(options)
 
-    if (!userIdentifier || !userPassword) {
+    if (!userIdentifier) {
       throw new Error(
-        'Set TEST_USER_EMAIL and TEST_USER_PASSWORD (or pass authOptions.userIdentifier/userPassword) before enabling authSession fixtures.',
+        'Set TEST_USER_EMAIL (or pass authOptions.userIdentifier) before enabling authSession fixtures.',
       )
     }
 
@@ -114,8 +114,14 @@ const authProvider: AuthProvider = {
     const cachedStorageState = await readStoredStorageState(storageStatePath)
     const cachedToken = cachedStorageState ? authProvider.extractToken(cachedStorageState) : null
 
-    if (cachedStorageState && cachedToken)
-      return cachedStorageState
+    if (!userPassword) {
+      if (cachedStorageState && cachedToken)
+        return cachedStorageState
+
+      throw new Error(
+        'Set TEST_USER_PASSWORD (or pass authOptions.userPassword) before enabling authSession fixtures.',
+      )
+    }
 
     const signInResponse = await request.post(new URL('/api/auth/sign-in/email', authBaseUrl).toString(), {
       data: {

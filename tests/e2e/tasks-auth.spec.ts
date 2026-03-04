@@ -32,7 +32,17 @@ test.describe('Tasks route authentication', () => {
       authOptions: authTestUser,
     })
 
-    test('authenticated user can open the protected tasks route and sign out', async ({ page, appBaseUrl }) => {
+    test(
+      'authenticated user can open the protected tasks route and sign out',
+      {
+        annotation: [
+          {
+            type: 'skipNetworkMonitoring',
+            description: 'Expected 401 responses from demo Convex token prewarm endpoints in tasks route.',
+          },
+        ],
+      },
+      async ({ page, appBaseUrl }) => {
       await test.step('When the authenticated user opens the protected route', async () => {
         await page.goto(`${appBaseUrl}/tasks`, { waitUntil: 'domcontentloaded' })
       })
@@ -50,6 +60,7 @@ test.describe('Tasks route authentication', () => {
         await page.getByTestId('tasks-sign-out').click()
         await expectAuthPageLoaded(page)
       })
-    })
+      },
+    )
   })
 })
