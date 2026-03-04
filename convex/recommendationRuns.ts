@@ -11,6 +11,26 @@ const canonicalStatusValidator = v.union(
 
 type RecommendationLifecycleStatus = 'queued' | 'evaluating' | 'completed' | 'degraded' | 'failed'
 type RecommendationProcessingMode = 'standard' | 'recoverable-delay' | 'mock-completed' | 'mock-degraded' | 'mock-failed'
+type DirectPathwayOutcome = {
+  pathwayId: string
+  status: 'direct'
+}
+type BlockedPathwayOutcome = {
+  pathwayId: string
+  status: 'blocked'
+  unmetConditions: string[]
+}
+
+const directPathwayOutcomeValidator = v.object({
+  pathwayId: v.string(),
+  status: v.literal('direct'),
+})
+
+const blockedPathwayOutcomeValidator = v.object({
+  pathwayId: v.string(),
+  status: v.literal('blocked'),
+  unmetConditions: v.array(v.string()),
+})
 
 const inProgressStatuses = new Set<RecommendationLifecycleStatus>(['queued', 'evaluating'])
 
@@ -66,6 +86,43 @@ function resolveStatusMessage(mode: RecommendationProcessingMode, status: Recomm
   }
 
   return buildDefaultStatusMessage(status)
+}
+
+function normalizeDirectOutcomes(outcomes: DirectPathwayOutcome[]) {
+  return Array.from(new Set(outcomes.map(outcome => outcome.pathwayId)))
+    .sort((left, right) => left.localeCompare(right))
+    .map(pathwayId => ({
+      pathwayId,
+      status: 'direct' as const,
+    }))
+}
+
+function normalizeBlockedOutcomes(outcomes: BlockedPathwayOutcome[]) {
+  const byPathwayId = new Map<string, Set<string>>()
+
+  for (const outcome of outcomes) {
+    const existing = byPathwayId.get(outcome.pathwayId) || new Set<string>()
+    for (const unmetCondition of outcome.unmetConditions) {
+      const normalizedCondition = unmetCondition.trim()
+      if (normalizedCondition) {
+        existing.add(normalizedCondition)
+      }
+    }
+
+    if (existing.size === 0) {
+      existing.add('unspecified-requirement')
+    }
+
+    byPathwayId.set(outcome.pathwayId, existing)
+  }
+
+  return Array.from(byPathwayId.entries())
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([pathwayId, unmetConditions]) => ({
+      pathwayId,
+      status: 'blocked' as const,
+      unmetConditions: Array.from(unmetConditions).sort(),
+    }))
 }
 
 export const createQueuedRun = mutation({
@@ -147,6 +204,76 @@ export const readStatusForUser = query({
       processingHeartbeatAt: row.processingHeartbeatAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+    }
+  },
+})
+
+export const readPathwayEvaluationForUser = query({
+  args: {
+    runId: v.string(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const row = await ctx.db
+      .query('recommendation_runs')
+      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .first()
+
+    if (!row || row.userId !== args.userId) {
+      return null
+    }
+
+    const direct = row.pathwayEvaluation?.direct || []
+    const blocked = row.pathwayEvaluation?.blocked || []
+
+    return {
+      runId: row.runId,
+      profileSnapshotId: row.profileSnapshotId,
+      direct: normalizeDirectOutcomes(direct),
+      blocked: normalizeBlockedOutcomes(blocked),
+      evaluatedAt: row.pathwayEvaluation?.evaluatedAt ?? null,
+    }
+  },
+})
+
+export const writePathwayEvaluationForUser = mutation({
+  args: {
+    runId: v.string(),
+    userId: v.string(),
+    profileSnapshotId: v.string(),
+    direct: v.array(directPathwayOutcomeValidator),
+    blocked: v.array(blockedPathwayOutcomeValidator),
+  },
+  handler: async (ctx, args) => {
+    const row = await ctx.db
+      .query('recommendation_runs')
+      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .first()
+
+    if (!row || row.userId !== args.userId || row.profileSnapshotId !== args.profileSnapshotId) {
+      throw new Error('RUN_NOT_FOUND')
+    }
+
+    const normalizedDirect = normalizeDirectOutcomes(args.direct)
+    const normalizedBlocked = normalizeBlockedOutcomes(args.blocked)
+    const now = Date.now()
+
+    await ctx.db.patch(row._id, {
+      pathwayEvaluation: {
+        evaluatedAt: now,
+        evaluatorVersion: 'mvp-pathway-catalog-v1',
+        direct: normalizedDirect,
+        blocked: normalizedBlocked,
+      },
+      updatedAt: now,
+    })
+
+    return {
+      runId: row.runId,
+      profileSnapshotId: row.profileSnapshotId,
+      direct: normalizedDirect,
+      blocked: normalizedBlocked,
+      evaluatedAt: now,
     }
   },
 })

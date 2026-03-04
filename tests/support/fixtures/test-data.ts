@@ -128,3 +128,19 @@ export const RECOMMENDATION_LIFECYCLE_IN_PROGRESS_COPY_SNIPPETS = [
   'active',
   'resumable',
 ] as const
+
+export const RECOMMENDATION_PATHWAY_STATUSES = [
+  'direct',
+  'blocked',
+] as const
+
+export const RECOMMENDATION_PATHWAY_SUPPORTED_IDS = [
+  'mvp-skilled-worker',
+  'mvp-provincial-nominee',
+  'mvp-study-to-work',
+] as const
+
+export const RECOMMENDATION_PATHWAY_UNSUPPORTED_IDS = [
+  'mvp-investor-stream',
+  'mvp-humanitarian-stream',
+] as const

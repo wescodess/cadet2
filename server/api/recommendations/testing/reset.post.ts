@@ -1,4 +1,5 @@
 import { anyApi } from 'convex/server'
+import { sql } from 'drizzle-orm'
 
 import { requireWorkspaceUserSession } from '../../../utils/auth/requireUserSession'
 import { createConvexAdminClient } from '../../../utils/convex-admin-client'
@@ -14,6 +15,11 @@ export default defineEventHandler(async (event) => {
     (anyApi as any).recommendationRuns.resetRunsForUser,
     { userId },
   ) as { deletedCount: number }
+
+  await db.execute(sql`
+    DELETE FROM "recommendation_profiles"
+    WHERE "userId" = ${userId};
+  `)
 
   return {
     deletedCount: result.deletedCount,

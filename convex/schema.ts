@@ -1,6 +1,17 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
+const pathwayDirectOutcomeValidator = v.object({
+  pathwayId: v.string(),
+  status: v.literal('direct'),
+})
+
+const pathwayBlockedOutcomeValidator = v.object({
+  pathwayId: v.string(),
+  status: v.literal('blocked'),
+  unmetConditions: v.array(v.string()),
+})
+
 export default defineSchema({
   recommendation_runs: defineTable({
     runId: v.string(),
@@ -17,6 +28,12 @@ export default defineSchema({
     resumable: v.optional(v.boolean()),
     processingStartedAt: v.optional(v.number()),
     processingHeartbeatAt: v.optional(v.number()),
+    pathwayEvaluation: v.optional(v.object({
+      evaluatedAt: v.number(),
+      evaluatorVersion: v.string(),
+      direct: v.array(pathwayDirectOutcomeValidator),
+      blocked: v.array(pathwayBlockedOutcomeValidator),
+    })),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
