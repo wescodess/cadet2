@@ -1,6 +1,6 @@
 export type TestEnvironment = 'local' | 'staging' | 'production'
 
-const DEFAULT_BASE_URL = 'http://localhost:3000'
+const DEFAULT_BASE_URL = 'http://127.0.0.1:3100'
 
 export function getTestEnvironment(): TestEnvironment {
   const value = process.env.TEST_ENV

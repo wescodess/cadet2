@@ -8,6 +8,17 @@ export type IntakeDraftPayload = {
   fieldValues: Record<string, Record<string, unknown>>
 }
 
+export type GoalsConstraintsValues = {
+  primaryGoal: string
+  targetTimelineMonths: number
+  budgetCad: number
+  priorityPreference: string
+  locationPreference: string
+  willingToStudyOrRetrain: 'yes' | 'no'
+  hasFamilyInCanada: 'yes' | 'no'
+  additionalContext: string
+}
+
 type IntakeRouteProbe = {
   intakePath: string
   draftApiPath: string
@@ -76,5 +87,60 @@ export function createResumeDraftFixture(overrides: Partial<IntakeDraftPayload> 
   return {
     savedAt: new Date().toISOString(),
     draft,
+  }
+}
+
+export function createGoalsConstraintsValues(overrides: Partial<GoalsConstraintsValues> = {}): GoalsConstraintsValues {
+  return {
+    primaryGoal: 'permanent-residency',
+    targetTimelineMonths: 12,
+    budgetCad: 18000,
+    priorityPreference: 'lowest-cost',
+    locationPreference: 'targeted-provinces',
+    willingToStudyOrRetrain: 'yes',
+    hasFamilyInCanada: 'no',
+    additionalContext: 'I can relocate outside Ontario if processing is faster.',
+    ...overrides,
+  }
+}
+
+export function createGoalsDraftPayload(overrides: Partial<IntakeDraftPayload> = {}): IntakeDraftPayload {
+  const goalsValues = createGoalsConstraintsValues()
+
+  return createIntakeDraftPayload({
+    currentSection: 'goals',
+    sectionProgress: {
+      personal: true,
+      education: true,
+      work: true,
+      immigration: true,
+      goals: false,
+      ...(overrides.sectionProgress || {}),
+    },
+    fieldValues: {
+      ...createIntakeDraftPayload().fieldValues,
+      goals: goalsValues,
+      ...(overrides.fieldValues || {}),
+    },
+    ...overrides,
+  })
+}
+
+export function createGoalsUpdateFixture() {
+  return {
+    initial: createGoalsConstraintsValues({
+      targetTimelineMonths: 10,
+      budgetCad: 14000,
+      priorityPreference: 'highest-odds',
+      locationPreference: 'major-city-focus',
+      additionalContext: 'My status expires in 6 months and I prefer low up-front costs.',
+    }),
+    updated: createGoalsConstraintsValues({
+      targetTimelineMonths: 6,
+      budgetCad: 22000,
+      priorityPreference: 'fastest-timeline',
+      locationPreference: 'any-province',
+      additionalContext: 'I can study in Manitoba if it shortens processing time.',
+    }),
   }
 }

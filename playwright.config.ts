@@ -1,6 +1,12 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const baseURL = process.env.BASE_URL || 'http://localhost:3000'
+const baseURL = process.env.BASE_URL || 'http://127.0.0.1:3100'
+const isCI = !!process.env.CI
+const parsedBaseUrl = new URL(baseURL)
+const devHost = parsedBaseUrl.hostname
+const devPort = parsedBaseUrl.port || (parsedBaseUrl.protocol === 'https:' ? '443' : '80')
+const playwrightDbDataDir = process.env.NUXT_HUB_DB_DATA_DIR || '.data/db/pglite-playwright'
+const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_SERVER === 'true'
 
 export default defineConfig({
   testDir: './tests',
@@ -42,12 +48,12 @@ export default defineConfig({
       },
     },
   ],
-  webServer: process.env.CI
+  webServer: isCI
     ? undefined
     : {
-        command: 'pnpm dev --host localhost --port 3000',
+        command: `NUXT_HUB_DB_DATA_DIR=${playwrightDbDataDir} pnpm dev --host ${devHost} --port ${devPort}`,
         url: baseURL,
-        reuseExistingServer: true,
+        reuseExistingServer,
         timeout: 120_000,
       },
 })
