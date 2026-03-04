@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import {
+  getRecommendationStatusLabel,
+  getRecommendationStatusTone,
+} from '~/lib/recommendation-lifecycle'
+
 type RecommendationRunListItem = {
   runId: string
   profileSnapshotId: string
@@ -15,22 +20,6 @@ const props = withDefaults(defineProps<{
   isLoading: false,
   errorMessage: null,
 })
-
-const statusLabelMap: Record<string, string> = {
-  queued: 'Queued',
-  evaluating: 'Evaluating',
-  completed: 'Completed',
-  degraded: 'Degraded',
-  failed: 'Failed',
-}
-
-const statusToneMap: Record<string, string> = {
-  queued: 'bg-amber-50 text-amber-700 border-amber-200',
-  evaluating: 'bg-sky-50 text-sky-700 border-sky-200',
-  completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  degraded: 'bg-orange-50 text-orange-700 border-orange-200',
-  failed: 'bg-rose-50 text-rose-700 border-rose-200',
-}
 
 function formatTimestamp(value: string) {
   const parsed = new Date(value)
@@ -103,9 +92,9 @@ function shortRunId(runId: string) {
           </div>
           <span
             class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold"
-            :class="statusToneMap[run.status] || 'bg-slate-100 text-slate-600 border-slate-200'"
+            :class="getRecommendationStatusTone(run.status)"
           >
-            {{ statusLabelMap[run.status] || run.status }}
+            {{ getRecommendationStatusLabel(run.status) }}
           </span>
         </div>
       </li>

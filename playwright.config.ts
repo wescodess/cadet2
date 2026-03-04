@@ -44,7 +44,7 @@ export default defineConfig({
     },
     {
       name: 'api',
-      testMatch: ['api/**/*.spec.ts'],
+      testMatch: ['api/**/*.spec.ts', 'integration/**/*.spec.ts'],
       use: {
         baseURL,
       },

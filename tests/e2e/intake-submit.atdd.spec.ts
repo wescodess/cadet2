@@ -115,6 +115,59 @@ async function waitForRunListLoad(page: Page) {
   await expect(page.getByText('Loading your recommendation runs...')).toBeHidden({ timeout: 20_000 })
 }
 
+function buildLifecycleStatusMessage(status: RecommendationRunRecord['status']) {
+  switch (status) {
+    case 'queued':
+      return 'Recommendation processing is active and resumable while internal services catch up.'
+    case 'evaluating':
+      return 'Recommendation processing is actively evaluating your profile.'
+    case 'completed':
+      return 'Recommendation evaluation completed.'
+    case 'degraded':
+      return 'Recommendation evaluation completed with degraded quality.'
+    case 'failed':
+      return 'Recommendation evaluation failed and requires retry.'
+  }
+}
+
+async function mockRecommendationStatusByRunId(
+  page: Page,
+  getRuns: () => RecommendationRunRecord[],
+) {
+  await page.route('**/api/recommendations/runs/*/status**', async (route) => {
+    const url = new URL(route.request().url())
+    const segments = url.pathname.split('/').filter(Boolean)
+    const runId = segments.length >= 4 ? decodeURIComponent(segments[3] || '') : ''
+    const runs = getRuns()
+    const fallbackRun = runs[0]
+    const run = runs.find(candidate => candidate.runId === runId) || fallbackRun
+
+    if (!run) {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ statusMessage: 'Recommendation run not found' }),
+      })
+      return
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        runId: run.runId,
+        profileSnapshotId: run.profileSnapshotId,
+        status: run.status,
+        statusMessage: buildLifecycleStatusMessage(run.status),
+        resumable: run.status === 'queued' || run.status === 'evaluating',
+        processingHeartbeatAt: run.updatedAt,
+        createdAt: run.createdAt,
+        updatedAt: run.updatedAt,
+      }),
+    })
+  })
+}
+
 test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATDD (RED)', () => {
   test.describe.configure({ mode: 'serial' })
 
@@ -175,6 +228,7 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
           body: JSON.stringify(runHistory),
         })
       })
+      await mockRecommendationStatusByRunId(page, () => runHistory)
 
       // Given a completed intake with a successful submit API response
       await page.goto(routeProbe.intakePath)
@@ -246,6 +300,7 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
           body: JSON.stringify(runListFixture),
         })
       })
+      await mockRecommendationStatusByRunId(page, () => runListFixture)
 
       // When the user opens workspace home
       await page.goto(routeProbe.workspacePath)
@@ -288,6 +343,7 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
           body: JSON.stringify(runHistory),
         })
       })
+      await mockRecommendationStatusByRunId(page, () => runHistory)
 
       // Given a completed draft is submitted twice
       await page.goto(routeProbe.intakePath)
