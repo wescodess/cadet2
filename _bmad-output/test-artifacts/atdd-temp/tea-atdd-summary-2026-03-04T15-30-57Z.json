@@ -1,0 +1,39 @@
+{
+  "tdd_phase": "RED",
+  "total_tests": 11,
+  "api_tests": 6,
+  "e2e_tests": 5,
+  "all_tests_skipped": true,
+  "expected_to_fail": true,
+  "fixtures_created": 6,
+  "fixture_needs": [
+    "authenticatedWorkspaceApiSession",
+    "queuedRecommendationRunSeed",
+    "recommendationProviderMockControl",
+    "authenticatedWorkspaceBrowserSession",
+    "workspaceRecommendationRunListMock",
+    "workspaceRecommendationStatusEndpointMock"
+  ],
+  "acceptance_criteria_covered": [
+    "AC1 lifecycle start updates existing recommendation run linkage and status",
+    "AC2 canonical lifecycle contract exposed provider-agnostically",
+    "AC4 recoverable delay remains in-progress and resumable",
+    "AC5 deterministic run seed and provider-mock seams required for lifecycle verification",
+    "AC2 lifecycle state is readable from workspace without provider internals",
+    "AC3 workspace status banner exposes stable recommendation-status-banner test hook",
+    "AC4 recoverable delay copy remains active and resumable"
+  ],
+  "knowledge_fragments_used": [
+    "data-factories",
+    "api-testing-patterns",
+    "test-quality",
+    "test-healing-patterns",
+    "test-levels-framework",
+    "test-priorities-matrix",
+    "selector-resilience",
+    "timing-debugging",
+    "network-first"
+  ],
+  "subagent_execution": "SEQUENTIAL (API -> E2E)",
+  "performance_gain": "baseline (no parallel speedup)"
+}

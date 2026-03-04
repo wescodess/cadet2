@@ -94,3 +94,37 @@ export const RECOMMENDATION_RUN_ATDD_REQUIRED_KEYS = [
   'createdAt',
   'updatedAt',
 ] as const
+
+export const RECOMMENDATION_LIFECYCLE_ATDD_TEST_IDS = {
+  statusBanner: 'recommendation-status-banner',
+  runList: 'workspace-run-list',
+  runItem: 'workspace-run-item',
+} as const
+
+export const RECOMMENDATION_LIFECYCLE_CANONICAL_STATUSES = [
+  'queued',
+  'evaluating',
+  'completed',
+  'degraded',
+  'failed',
+] as const
+
+export const RECOMMENDATION_LIFECYCLE_IN_PROGRESS_STATUSES = [
+  'queued',
+  'evaluating',
+] as const
+
+export const RECOMMENDATION_LIFECYCLE_FORBIDDEN_PROVIDER_FIELDS = [
+  'provider',
+  'providerPayload',
+  'providerResponse',
+  'modelOutput',
+  'adapterTrace',
+  'rawProviderResponse',
+] as const
+
+export const RECOMMENDATION_LIFECYCLE_IN_PROGRESS_COPY_SNIPPETS = [
+  'processing',
+  'active',
+  'resumable',
+] as const

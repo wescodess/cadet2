@@ -13,6 +13,10 @@ export default defineSchema({
       v.literal('degraded'),
       v.literal('failed'),
     ),
+    statusMessage: v.optional(v.string()),
+    resumable: v.optional(v.boolean()),
+    processingStartedAt: v.optional(v.number()),
+    processingHeartbeatAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

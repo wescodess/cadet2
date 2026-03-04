@@ -47,8 +47,8 @@ development_status:
   1-4-submit-intake-and-track-recommendation-run-records: done
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-start-recommendation-processing-from-a-submitted-profile: backlog
+  epic-2: in-progress
+  2-1-start-recommendation-processing-from-a-submitted-profile: done
   2-2-evaluate-direct-and-blocked-pathways-in-the-mvp-pathway-set: backlog
   2-3-generate-and-rank-limited-composed-pathway-recommendations: backlog
   2-4-safely-qualify-weak-results-and-support-recommendation-refresh: backlog

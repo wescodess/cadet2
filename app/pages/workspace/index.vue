@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Compass, Shield, Zap, BadgeCheck } from 'lucide-vue-next'
 import { useDisplayName } from '~/composables/useDisplayName'
+import {
+  getDefaultStatusMessage,
+  isCanonicalRecommendationStatus,
+  isInProgressStatus,
+} from '~/lib/recommendation-lifecycle'
+import RecommendationStatusBanner from '~/components/workspace/RecommendationStatusBanner.vue'
 import RecommendationRunList from '~/components/workspace/RecommendationRunList.vue'
 
 type RecommendationRunListItem = {
@@ -11,10 +17,68 @@ type RecommendationRunListItem = {
   updatedAt: string
 }
 
+type RecommendationRunStatusRecord = {
+  runId: string
+  profileSnapshotId: string
+  status: string
+  statusMessage: string
+  resumable: boolean
+  processingHeartbeatAt: string
+  createdAt: string
+  updatedAt: string
+}
+
 const { firstName } = useDisplayName()
 const recommendationRuns = ref<RecommendationRunListItem[]>([])
 const isLoadingRuns = ref(true)
 const runListErrorMessage = ref<string | null>(null)
+const activeRunStatus = ref<RecommendationRunStatusRecord | null>(null)
+const isLoadingRunStatus = ref(false)
+const runStatusErrorMessage = ref<string | null>(null)
+
+function fallbackStatusFromRun(run: RecommendationRunListItem): RecommendationRunStatusRecord {
+  const canonicalStatus = isCanonicalRecommendationStatus(run.status)
+    ? run.status
+    : 'queued'
+
+  return {
+    runId: run.runId,
+    profileSnapshotId: run.profileSnapshotId,
+    status: run.status,
+    statusMessage: canonicalStatus
+      ? getDefaultStatusMessage(canonicalStatus)
+      : 'Recommendation processing status is available in your run timeline.',
+    resumable: canonicalStatus ? isInProgressStatus(canonicalStatus) : false,
+    processingHeartbeatAt: run.updatedAt,
+    createdAt: run.createdAt,
+    updatedAt: run.updatedAt,
+  }
+}
+
+async function loadActiveRunStatus() {
+  const latestRun = recommendationRuns.value[0]
+  runStatusErrorMessage.value = null
+
+  if (!latestRun) {
+    activeRunStatus.value = null
+    return
+  }
+
+  isLoadingRunStatus.value = true
+
+  try {
+    activeRunStatus.value = await $fetch<RecommendationRunStatusRecord>(
+      `/api/recommendations/runs/${encodeURIComponent(latestRun.runId)}/status`,
+    )
+  }
+  catch {
+    activeRunStatus.value = fallbackStatusFromRun(latestRun)
+    runStatusErrorMessage.value = null
+  }
+  finally {
+    isLoadingRunStatus.value = false
+  }
+}
 
 async function loadRecommendationRuns() {
   isLoadingRuns.value = true
@@ -22,10 +86,13 @@ async function loadRecommendationRuns() {
 
   try {
     recommendationRuns.value = await $fetch<RecommendationRunListItem[]>('/api/workspace/recommendation-runs')
+    await loadActiveRunStatus()
   }
   catch {
     recommendationRuns.value = []
     runListErrorMessage.value = 'We could not load your recommendation run continuity right now.'
+    activeRunStatus.value = null
+    runStatusErrorMessage.value = null
   }
   finally {
     isLoadingRuns.value = false
@@ -93,6 +160,12 @@ onMounted(async () => {
       :runs="recommendationRuns"
       :is-loading="isLoadingRuns"
       :error-message="runListErrorMessage"
+    />
+
+    <RecommendationStatusBanner
+      :status-record="activeRunStatus"
+      :is-loading="isLoadingRunStatus"
+      :error-message="runStatusErrorMessage"
     />
   </section>
 </template>
