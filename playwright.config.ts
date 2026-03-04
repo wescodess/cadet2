@@ -5,7 +5,9 @@ const isCI = !!process.env.CI
 const parsedBaseUrl = new URL(baseURL)
 const devHost = parsedBaseUrl.hostname
 const devPort = parsedBaseUrl.port || (parsedBaseUrl.protocol === 'https:' ? '443' : '80')
-const playwrightDbDataDir = process.env.NUXT_HUB_DB_DATA_DIR || '.data/db/pglite-playwright'
+const playwrightRunId = process.env.PLAYWRIGHT_RUN_ID || `pw-${process.pid}-${Date.now()}`
+const playwrightHubDir = process.env.NUXT_HUB_DIR || `.data/${playwrightRunId}`
+const playwrightDbDataDir = process.env.NUXT_HUB_DB_DATA_DIR || `${playwrightHubDir}/db/pglite`
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_SERVER === 'true'
 
 export default defineConfig({
@@ -51,7 +53,7 @@ export default defineConfig({
   webServer: isCI
     ? undefined
     : {
-        command: `NUXT_HUB_DB_DATA_DIR=${playwrightDbDataDir} pnpm dev --host ${devHost} --port ${devPort}`,
+        command: `BASE_URL=${baseURL} NUXT_PUBLIC_SITE_URL=${baseURL} CONVEX_SITE_URL=${baseURL} NUXT_HUB_DIR=${playwrightHubDir} NUXT_HUB_DB_DATA_DIR=${playwrightDbDataDir} pnpm dev --host ${devHost} --port ${devPort}`,
         url: baseURL,
         reuseExistingServer,
         timeout: 120_000,

@@ -113,7 +113,11 @@ onScopeDispose(() => {
 })
 
 async function logout() {
-  await signOut()
+  await signOut({
+    onSuccess: async () => {
+      window.location.assign('/auth')
+    },
+  })
 }
 </script>
 

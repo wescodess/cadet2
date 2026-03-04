@@ -44,7 +44,7 @@ development_status:
   1-1-secure-user-workspace-access: done
   1-2-guided-intake-draft-with-save-and-resume: done
   1-3-capture-constraints-and-free-form-context: done
-  1-4-submit-intake-and-track-recommendation-run-records: backlog
+  1-4-submit-intake-and-track-recommendation-run-records: done
   epic-1-retrospective: optional
 
   epic-2: backlog

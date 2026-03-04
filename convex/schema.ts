@@ -2,6 +2,24 @@ import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
 export default defineSchema({
+  recommendation_runs: defineTable({
+    runId: v.string(),
+    userId: v.string(),
+    profileSnapshotId: v.string(),
+    status: v.union(
+      v.literal('queued'),
+      v.literal('evaluating'),
+      v.literal('completed'),
+      v.literal('degraded'),
+      v.literal('failed'),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_runId', ['runId'])
+    .index('by_userId', ['userId'])
+    .index('by_userId_createdAt', ['userId', 'createdAt']),
+
   rag_admins: defineTable({
     userId: v.string(),
     email: v.optional(v.string()),

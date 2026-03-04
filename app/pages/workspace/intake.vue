@@ -57,6 +57,14 @@ type SaveFeedback = {
   message: string
 }
 
+type IntakeSubmitResponse = {
+  runId: string
+  profileSnapshotId: string
+  status: string
+  createdAt: string
+  updatedAt: string
+}
+
 const yesNoOptions: IntakeFieldOption[] = [
   { label: 'Yes', value: 'yes' },
   { label: 'No', value: 'no' },
@@ -660,7 +668,7 @@ const sectionValidationSchemas = {
     englishClb: requiredWholeNumber('Enter your English CLB score.', 0)
       .refine(value => Number(value) <= 12, 'English CLB score must be between 0 and 12.'),
     frenchClb: optionalWholeNumber()
-      .refine(value => value === '' || Number(value) <= 12, 'French CLB score must be between 0 and 12.'),
+      .refine(value => value === undefined || Number(value) <= 12, 'French CLB score must be between 0 and 12.'),
     availableSettlementFundsCad: requiredNumber('Enter your available settlement funds in CAD.', 0),
     previousRefusal: requiredText('Select whether you have a previous refusal.'),
     urgencyDeadline: optionalDate(),
@@ -680,7 +688,9 @@ const sectionValidationSchemas = {
 const currentSection = ref<IntakeSection>('personal')
 const validationSummary = ref<string[]>([])
 const saveFeedback = ref<SaveFeedback | null>(null)
+const submitFeedback = ref<SaveFeedback | null>(null)
 const isSaving = ref(false)
+const isSubmitting = ref(false)
 const isHydrating = ref(true)
 
 const currentSectionIndex = computed(() => sectionIds.findIndex(sectionId => sectionId === currentSection.value))
@@ -688,6 +698,14 @@ const activeSection = computed(() => sections[currentSectionIndex.value] || sect
 const goalsSectionFields = sections.find(section => section.id === 'goals')?.fields || []
 const structuredGoalsFields = goalsSectionFields.filter(field => field.key !== 'additionalContext')
 const narrativeGoalsFields = goalsSectionFields.filter(field => field.key === 'additionalContext')
+const isSubmitStage = computed(() => currentSection.value === 'goals')
+
+const hasCompletedPrerequisiteSections = computed(() =>
+  sectionProgress.personal
+  && sectionProgress.education
+  && sectionProgress.work
+  && sectionProgress.immigration,
+)
 
 function isIntakeSection(value: string): value is IntakeSection {
   return sectionIds.includes(value as IntakeSection)
@@ -823,6 +841,23 @@ async function saveDraft(payload: IntakeDraftPayload = createDraftPayload()) {
   }
 }
 
+function resolveErrorMessage(error: unknown, fallback: string) {
+  if (!error || typeof error !== 'object') {
+    return fallback
+  }
+
+  const errorLike = error as {
+    data?: { statusMessage?: string }
+    statusMessage?: string
+    message?: string
+  }
+
+  return errorLike.data?.statusMessage
+    || errorLike.statusMessage
+    || errorLike.message
+    || fallback
+}
+
 function moveToPreviousSection() {
   const currentIndex = currentSectionIndex.value
 
@@ -860,6 +895,72 @@ async function moveToNextSection() {
   sectionProgress[sourceSection] = true
   currentSection.value = targetSection
   clearValidationForSection(currentSection.value)
+}
+
+async function submitIntake() {
+  if (isSubmitting.value || isHydrating.value) {
+    return
+  }
+
+  if (!hasCompletedPrerequisiteSections.value) {
+    submitFeedback.value = {
+      tone: 'error',
+      message: 'Complete all intake sections before submitting for recommendation processing.',
+    }
+    return
+  }
+
+  const valid = validateCurrentSection()
+
+  if (!valid) {
+    submitFeedback.value = {
+      tone: 'error',
+      message: 'Resolve the required fields above before submitting.',
+    }
+    return
+  }
+
+  const saved = await saveDraft(createDraftPayload({
+    currentSection: 'goals',
+    sectionProgress: {
+      goals: true,
+    },
+  }))
+
+  if (!saved) {
+    submitFeedback.value = {
+      tone: 'error',
+      message: 'Save failed. Please retry before submitting.',
+    }
+    return
+  }
+
+  sectionProgress.goals = true
+  isSubmitting.value = true
+  submitFeedback.value = {
+    tone: 'info',
+    message: 'Submitting your profile for recommendation processing...',
+  }
+
+  try {
+    const response = await $fetch<IntakeSubmitResponse>('/api/intake/submit', {
+      method: 'POST',
+    })
+
+    submitFeedback.value = {
+      tone: 'success',
+      message: `Your profile was submitted for recommendation processing. Next state: run ${response.runId} is ${response.status} in your workspace.`,
+    }
+  }
+  catch (error) {
+    submitFeedback.value = {
+      tone: 'error',
+      message: resolveErrorMessage(error, 'We could not submit your intake. Please try again.'),
+    }
+  }
+  finally {
+    isSubmitting.value = false
+  }
 }
 
 async function hydrateDraft() {
@@ -982,6 +1083,21 @@ onMounted(async () => {
           </div>
         </div>
 
+        <div
+          v-if="submitFeedback"
+          data-testid="intake-submit-feedback"
+          class="rounded-lg border px-4 py-3 text-sm"
+          :class="[
+            submitFeedback.tone === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
+            submitFeedback.tone === 'error' ? 'border-red-200 bg-red-50 text-red-700' :
+            'border-slate-200 bg-slate-50 text-slate-700'
+          ]"
+          role="status"
+          aria-live="polite"
+        >
+          {{ submitFeedback.message }}
+        </div>
+
         <!-- Desktop Footer Actions -->
         <div class="hidden items-center justify-between border-t border-slate-100 pt-8 lg:flex">
           <div class="flex items-center gap-4">
@@ -1023,15 +1139,28 @@ onMounted(async () => {
               <span class="text-[10px] font-bold uppercase tracking-wider">{{ saveFeedback.message }}</span>
             </div>
           </div>
-          <button
-            type="button"
-            data-testid="intake-next"
-            :disabled="isHydrating"
-            @click="moveToNextSection"
-            class="inline-flex h-11 items-center gap-2 rounded-lg bg-[var(--trust)] px-8 font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
-          >
-            Next Section
-          </button>
+          <div class="flex items-center gap-3">
+            <button
+              v-if="isSubmitStage"
+              type="button"
+              data-testid="intake-submit"
+              :disabled="isHydrating || isSaving || isSubmitting"
+              @click="submitIntake"
+              class="inline-flex h-11 items-center gap-2 rounded-lg bg-[var(--trust)] px-8 font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <LoaderCircle v-if="isSubmitting" class="size-4 animate-spin" />
+              {{ isSubmitting ? 'Submitting...' : 'Submit Intake' }}
+            </button>
+            <button
+              type="button"
+              data-testid="intake-next"
+              :disabled="isHydrating"
+              @click="moveToNextSection"
+              class="inline-flex h-11 items-center gap-2 rounded-lg bg-[var(--trust)] px-8 font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+            >
+              Next Section
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1067,6 +1196,17 @@ onMounted(async () => {
           class="flex flex-[1.5] items-center justify-center gap-1.5 rounded-lg bg-[var(--trust)] py-3 text-sm font-semibold text-white shadow-md shadow-[var(--trust)]/20 transition-all hover:brightness-110"
         >
           Next
+        </button>
+        <button
+          v-if="isSubmitStage"
+          type="button"
+          data-testid="intake-submit-mobile"
+          :disabled="isHydrating || isSaving || isSubmitting"
+          @click="submitIntake"
+          class="flex flex-[1.5] items-center justify-center gap-1.5 rounded-lg bg-[var(--trust)] py-3 text-sm font-semibold text-white shadow-md shadow-[var(--trust)]/20 transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:brightness-100 disabled:opacity-60"
+        >
+          <LoaderCircle v-if="isSubmitting" class="size-4 animate-spin" />
+          {{ isSubmitting ? 'Submitting...' : 'Submit' }}
         </button>
       </div>
     </div>

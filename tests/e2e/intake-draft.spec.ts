@@ -27,27 +27,37 @@ async function ensureAuthenticatedPage(page: import('@playwright/test').Page, ap
     failOnStatusCode: false,
   })
 
-  if (signInResponse.ok()) {
-    return
+  let storageState = await page.request.storageState()
+
+  if (!signInResponse.ok() || storageState.cookies.length === 0) {
+    const signUpResponse = await page.request.post(`${appBaseUrl}/api/auth/sign-up/email`, {
+      data: {
+        email,
+        password,
+        name: 'Intake E2E Test User',
+        rememberMe: true,
+      },
+      failOnStatusCode: false,
+    })
+
+    if (!signUpResponse.ok()) {
+      throw new Error('Could not establish authenticated browser session for intake e2e tests')
+    }
+
+    storageState = await page.request.storageState()
   }
 
-  const signUpResponse = await page.request.post(`${appBaseUrl}/api/auth/sign-up/email`, {
-    data: {
-      email,
-      password,
-      name: 'Intake E2E Test User',
-      rememberMe: true,
-    },
-    failOnStatusCode: false,
-  })
-
-  if (!signUpResponse.ok()) {
-    throw new Error('Could not establish authenticated browser session for intake e2e tests')
+  if (storageState.cookies.length > 0) {
+    await page.context().addCookies(storageState.cookies)
   }
+
+  await page.goto(`${appBaseUrl}/workspace`, { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/workspace(?:\/.*)?$/, { timeout: 20_000 })
 }
 
 async function waitForIntakeHydration(page: import('@playwright/test').Page) {
-  await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.saveButton)).toBeEnabled()
+  await expect(page.getByText('Restoring your saved draft...')).toBeHidden({ timeout: 20_000 })
+  await expect(page.getByTestId(INTAKE_ATDD_TEST_IDS.saveButton)).toBeEnabled({ timeout: 20_000 })
 }
 
 test.describe('Guided intake draft save and resume', () => {

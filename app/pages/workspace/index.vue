@@ -1,14 +1,46 @@
 <script setup lang="ts">
 import { Compass, Shield, Zap, BadgeCheck } from 'lucide-vue-next'
 import { useDisplayName } from '~/composables/useDisplayName'
+import RecommendationRunList from '~/components/workspace/RecommendationRunList.vue'
+
+type RecommendationRunListItem = {
+  runId: string
+  profileSnapshotId: string
+  status: string
+  createdAt: string
+  updatedAt: string
+}
 
 const { firstName } = useDisplayName()
+const recommendationRuns = ref<RecommendationRunListItem[]>([])
+const isLoadingRuns = ref(true)
+const runListErrorMessage = ref<string | null>(null)
+
+async function loadRecommendationRuns() {
+  isLoadingRuns.value = true
+  runListErrorMessage.value = null
+
+  try {
+    recommendationRuns.value = await $fetch<RecommendationRunListItem[]>('/api/workspace/recommendation-runs')
+  }
+  catch {
+    recommendationRuns.value = []
+    runListErrorMessage.value = 'We could not load your recommendation run continuity right now.'
+  }
+  finally {
+    isLoadingRuns.value = false
+  }
+}
+
+onMounted(async () => {
+  await loadRecommendationRuns()
+})
 </script>
 
 <template>
   <section
     data-testid="workspace-dashboard"
-    class="flex flex-col items-center w-full flex-1 justify-center"
+    class="flex w-full flex-1 flex-col items-center gap-6 py-6 md:py-10"
   >
     <!-- Welcome Card -->
     <div class="w-full rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-sm sm:p-12">
@@ -56,5 +88,11 @@ const { firstName } = useDisplayName()
         </div>
       </div>
     </div>
+
+    <RecommendationRunList
+      :runs="recommendationRuns"
+      :is-loading="isLoadingRuns"
+      :error-message="runListErrorMessage"
+    />
   </section>
 </template>
