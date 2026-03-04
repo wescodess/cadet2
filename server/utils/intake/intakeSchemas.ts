@@ -8,6 +8,110 @@ export const intakeSectionSchema = z.enum(intakeSections)
 
 const sectionValueSchema = z.record(z.string(), z.unknown())
 
+export const primaryGoalValues = [
+  'permanent-residency',
+  'work-permit',
+  'study-to-pr',
+  'family-sponsorship',
+  'business',
+] as const
+
+export const priorityPreferenceValues = [
+  'fastest-timeline',
+  'highest-odds',
+  'lowest-cost',
+  'long-term-flexibility',
+] as const
+
+export const locationPreferenceValues = [
+  'any-province',
+  'targeted-provinces',
+  'major-city-focus',
+  'smaller-community-focus',
+] as const
+
+function trimString(value: unknown): unknown {
+  if (typeof value === 'string') {
+    return value.trim()
+  }
+
+  return value
+}
+
+function parseNumberOrEmpty(value: unknown): unknown {
+  if (value === null || value === undefined) {
+    return ''
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      return ''
+    }
+
+    const parsed = Number(trimmed)
+    return Number.isNaN(parsed) ? value : parsed
+  }
+
+  return value
+}
+
+const primaryGoalOrEmptySchema = z.preprocess(
+  trimString,
+  z.union([z.literal(''), z.enum(primaryGoalValues)]),
+)
+
+const priorityPreferenceOrEmptySchema = z.preprocess(
+  trimString,
+  z.union([z.literal(''), z.enum(priorityPreferenceValues)]),
+)
+
+const locationPreferenceOrEmptySchema = z.preprocess(
+  trimString,
+  z.union([z.literal(''), z.enum(locationPreferenceValues)]),
+)
+
+const timelineMonthsOrEmptySchema = z.preprocess(
+  parseNumberOrEmpty,
+  z.union([z.literal(''), z.number().int().min(1).max(120)]),
+)
+
+const budgetCadOrEmptySchema = z.preprocess(
+  parseNumberOrEmpty,
+  z.union([z.literal(''), z.number().min(0).max(100000000)]),
+)
+
+const yesNoOrEmptySchema = z.union([z.literal(''), z.enum(['yes', 'no'])])
+
+const additionalContextOrEmptySchema = z.preprocess(
+  trimString,
+  z.union([z.literal(''), z.string().max(4000)]),
+)
+
+export const goalsFieldValuesSchema = z.object({
+  primaryGoal: primaryGoalOrEmptySchema.optional(),
+  targetTimelineMonths: timelineMonthsOrEmptySchema.optional(),
+  budgetCad: budgetCadOrEmptySchema.optional(),
+  priorityPreference: priorityPreferenceOrEmptySchema.optional(),
+  locationPreference: locationPreferenceOrEmptySchema.optional(),
+  willingToStudyOrRetrain: yesNoOrEmptySchema.optional(),
+  hasFamilyInCanada: yesNoOrEmptySchema.optional(),
+  additionalContext: additionalContextOrEmptySchema.optional(),
+}).strict()
+
+export type GoalsFieldValues = z.infer<typeof goalsFieldValuesSchema>
+
+export const emptyGoalsFieldValues: GoalsFieldValues = {
+  primaryGoal: '',
+  targetTimelineMonths: '',
+  budgetCad: '',
+  priorityPreference: '',
+  locationPreference: '',
+  willingToStudyOrRetrain: '',
+  hasFamilyInCanada: '',
+  additionalContext: '',
+}
+
 export const sectionProgressSchema = z.object({
   personal: z.boolean(),
   education: z.boolean(),
@@ -21,7 +125,7 @@ export const sectionFieldValuesSchema = z.object({
   education: sectionValueSchema.optional(),
   work: sectionValueSchema.optional(),
   immigration: sectionValueSchema.optional(),
-  goals: sectionValueSchema.optional(),
+  goals: goalsFieldValuesSchema.optional(),
 }).strict()
 
 export const intakeDraftInputSchema = z.object({
@@ -51,5 +155,5 @@ export const emptyFieldValues: Record<IntakeSection, Record<string, unknown>> = 
   education: {},
   work: {},
   immigration: {},
-  goals: {},
+  goals: { ...emptyGoalsFieldValues },
 }

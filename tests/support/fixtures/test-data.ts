@@ -48,3 +48,29 @@ export const INTAKE_ATDD_REQUIRED_STORAGE_KEYS = [
   'sectionProgress',
   'fieldValues',
 ] as const
+
+export const INTAKE_CONSTRAINTS_ATDD_FIELD_LABELS = {
+  targetTimelineMonths: 'Target timeline (months)',
+  budgetCad: 'Estimated process budget (CAD)',
+  priorityPreference: 'Top decision priority',
+  locationPreference: 'Location preference',
+  willingToStudyOrRetrain: 'Willing to study or retrain if needed?',
+  additionalContext: 'Additional context',
+} as const
+
+export const INTAKE_CONSTRAINTS_ATDD_HELPER_TEXT_SNIPPETS = [
+  'Timeline pressure changes tradeoffs',
+  'Budget constraints affect which options',
+  'Location preference helps prioritize province-specific',
+  'Training flexibility can unlock stronger long-term pathways',
+  'Use this for unique details not captured above',
+] as const
+
+export const INTAKE_CONSTRAINTS_ATDD_TEST_IDS = {
+  sectionHeading: 'intake-section-heading',
+  saveButton: 'intake-save',
+  saveFeedback: 'intake-save-feedback',
+  saveMobileButton: 'intake-save-mobile',
+  nextMobileButton: 'intake-next-mobile',
+  previousMobileButton: 'intake-previous-mobile',
+} as const

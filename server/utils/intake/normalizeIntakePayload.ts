@@ -1,6 +1,9 @@
 import {
   defaultSectionProgress,
+  emptyGoalsFieldValues,
   emptyFieldValues,
+  goalsFieldValuesSchema,
+  type GoalsFieldValues,
   intakeSectionSchema,
   intakeSections,
   type IntakeDraftInput,
@@ -41,16 +44,59 @@ function normalizeSectionProgress(input: Record<string, unknown>): Record<Intake
   return normalized
 }
 
+function parseGoalsField<Key extends keyof GoalsFieldValues>(
+  key: Key,
+  input: Record<string, unknown>,
+): GoalsFieldValues[Key] {
+  const schema = goalsFieldValuesSchema.shape[key]
+  const parsed = schema.safeParse(input[key])
+
+  if (parsed.success && parsed.data !== undefined) {
+    return parsed.data as GoalsFieldValues[Key]
+  }
+
+  return emptyGoalsFieldValues[key]
+}
+
+function normalizeGoalsFieldValues(input: unknown): GoalsFieldValues {
+  const parsedGoals = goalsFieldValuesSchema.safeParse(input)
+
+  if (parsedGoals.success) {
+    return {
+      ...emptyGoalsFieldValues,
+      ...parsedGoals.data,
+    }
+  }
+
+  const goalsInput = toRecord(input)
+
+  return {
+    primaryGoal: parseGoalsField('primaryGoal', goalsInput),
+    targetTimelineMonths: parseGoalsField('targetTimelineMonths', goalsInput),
+    budgetCad: parseGoalsField('budgetCad', goalsInput),
+    priorityPreference: parseGoalsField('priorityPreference', goalsInput),
+    locationPreference: parseGoalsField('locationPreference', goalsInput),
+    willingToStudyOrRetrain: parseGoalsField('willingToStudyOrRetrain', goalsInput),
+    hasFamilyInCanada: parseGoalsField('hasFamilyInCanada', goalsInput),
+    additionalContext: parseGoalsField('additionalContext', goalsInput),
+  }
+}
+
 function normalizeFieldValues(input: Record<string, unknown>): Record<IntakeSection, Record<string, unknown>> {
   const normalized: Record<IntakeSection, Record<string, unknown>> = {
     personal: {},
     education: {},
     work: {},
     immigration: {},
-    goals: {},
+    goals: { ...emptyGoalsFieldValues },
   }
 
   for (const section of intakeSections) {
+    if (section === 'goals') {
+      normalized.goals = normalizeGoalsFieldValues(input[section])
+      continue
+    }
+
     normalized[section] = toRecord(input[section])
   }
 

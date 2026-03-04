@@ -119,6 +119,13 @@ const priorityPreferenceOptions: IntakeFieldOption[] = [
   { label: 'Long-term flexibility', value: 'long-term-flexibility' },
 ]
 
+const locationPreferenceOptions: IntakeFieldOption[] = [
+  { label: 'Open to any province', value: 'any-province' },
+  { label: 'Prefer one or two provinces', value: 'targeted-provinces' },
+  { label: 'Major city focus', value: 'major-city-focus' },
+  { label: 'Smaller community focus', value: 'smaller-community-focus' },
+]
+
 const sections: IntakeSectionDefinition[] = [
   {
     id: 'personal',
@@ -456,6 +463,16 @@ const sections: IntakeSectionDefinition[] = [
         options: priorityPreferenceOptions,
       },
       {
+        key: 'locationPreference',
+        label: 'Location preference',
+        type: 'select',
+        placeholder: 'Select your location preference',
+        helper: 'Location preference helps prioritize province-specific and relocation-fit pathways.',
+        required: true,
+        width: 'full',
+        options: locationPreferenceOptions,
+      },
+      {
         key: 'willingToStudyOrRetrain',
         label: 'Willing to study or retrain if needed?',
         type: 'select',
@@ -532,6 +549,7 @@ const fieldValues = reactive<SectionFieldValues>({
     targetTimelineMonths: '',
     budgetCad: '',
     priorityPreference: '',
+    locationPreference: '',
     willingToStudyOrRetrain: '',
     hasFamilyInCanada: '',
     additionalContext: '',
@@ -652,6 +670,7 @@ const sectionValidationSchemas = {
     targetTimelineMonths: requiredWholeNumber('Enter your target timeline in months.', 1),
     budgetCad: requiredNumber('Enter your estimated process budget in CAD.', 0),
     priorityPreference: requiredText('Select your top decision priority.'),
+    locationPreference: requiredText('Select your location preference.'),
     willingToStudyOrRetrain: requiredText('Select whether you are willing to study or retrain.'),
     hasFamilyInCanada: requiredText('Select whether you have close family in Canada.'),
     additionalContext: z.string().trim(),
@@ -666,6 +685,9 @@ const isHydrating = ref(true)
 
 const currentSectionIndex = computed(() => sectionIds.findIndex(sectionId => sectionId === currentSection.value))
 const activeSection = computed(() => sections[currentSectionIndex.value] || sections[0]!)
+const goalsSectionFields = sections.find(section => section.id === 'goals')?.fields || []
+const structuredGoalsFields = goalsSectionFields.filter(field => field.key !== 'additionalContext')
+const narrativeGoalsFields = goalsSectionFields.filter(field => field.key === 'additionalContext')
 
 function isIntakeSection(value: string): value is IntakeSection {
   return sectionIds.includes(value as IntakeSection)
@@ -921,11 +943,43 @@ onMounted(async () => {
           :key="`fields-${section.id}`"
         >
           <IntakeSectionFields
-            v-if="section.id === currentSection"
+            v-if="section.id === currentSection && section.id !== 'goals'"
             v-model="fieldValues[section.id]"
             :fields="section.fields"
             :errors="sectionErrors[section.id]"
           />
+          <div
+            v-else-if="section.id === currentSection && section.id === 'goals'"
+            class="space-y-8"
+          >
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-700">
+                Structured Planning Constraints
+              </p>
+              <p class="mt-1 text-xs text-slate-500">
+                Set concrete timing, cost, priority, location, and flexibility constraints for recommendation ranking.
+              </p>
+            </div>
+            <IntakeSectionFields
+              v-model="fieldValues[section.id]"
+              :fields="structuredGoalsFields"
+              :errors="sectionErrors[section.id]"
+            />
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-700">
+                Optional Narrative Context
+              </p>
+              <p class="mt-1 text-xs text-slate-500">
+                Share nuance that does not fit cleanly into structured controls.
+              </p>
+            </div>
+            <IntakeSectionFields
+              v-model="fieldValues[section.id]"
+              :fields="narrativeGoalsFields"
+              :errors="sectionErrors[section.id]"
+            />
+          </div>
         </div>
 
         <!-- Desktop Footer Actions -->

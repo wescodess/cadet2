@@ -8,6 +8,13 @@ const authTestUser = {
   userPassword: 'PlaywrightPass123!',
 }
 
+async function expectAuthPageLoaded(page: import('@playwright/test').Page) {
+  await expect(page).toHaveURL(/\/auth(?:\?.*)?$/)
+  await expect(page.getByRole('heading', { name: /Create account|Sign in/i })).toBeVisible()
+  await expect(page.getByLabel('Email')).toBeVisible()
+  await expect(page.getByLabel('Password')).toBeVisible()
+}
+
 test.describe('Tasks route authentication', () => {
   test('guest is redirected to auth when opening the protected tasks route', async ({ page, appBaseUrl }) => {
     await test.step('When a guest opens the protected route directly', async () => {
@@ -15,8 +22,7 @@ test.describe('Tasks route authentication', () => {
     })
 
     await test.step('Then the app redirects to the auth page', async () => {
-      await expect(page).toHaveURL(/\/auth$/)
-      await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible()
+      await expectAuthPageLoaded(page)
     })
   })
 
@@ -42,8 +48,7 @@ test.describe('Tasks route authentication', () => {
 
       await test.step('And signing out returns the user to auth', async () => {
         await page.getByTestId('tasks-sign-out').click()
-        await expect(page).toHaveURL(/\/auth$/)
-        await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible()
+        await expectAuthPageLoaded(page)
       })
     })
   })

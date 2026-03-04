@@ -29,7 +29,11 @@ pnpm test:e2e:headed
 pnpm test:e2e:ui
 ```
 
-By default, local runs reuse an existing `pnpm dev` server or start one automatically through `playwright.config.ts`.
+By default, local runs start an isolated Nuxt server for tests at `http://127.0.0.1:3100` (unless `BASE_URL` overrides it) through `playwright.config.ts`.
+
+The Playwright web server also uses an isolated PGlite data directory (`.data/db/pglite-playwright`) by default to avoid local auth/session interference with your main dev DB.
+
+Set `PLAYWRIGHT_REUSE_SERVER=true` if you explicitly want Playwright to reuse an already-running server at `BASE_URL`.
 
 ## Architecture Overview
 
