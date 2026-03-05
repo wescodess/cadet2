@@ -12,6 +12,37 @@ const pathwayBlockedOutcomeValidator = v.object({
   unmetConditions: v.array(v.string()),
 })
 
+const recommendationTierValidator = v.union(
+  v.literal('strong-fit'),
+  v.literal('conditional-fit'),
+  v.literal('lower-confidence'),
+)
+
+const rankedDirectRecommendationValidator = v.object({
+  pathwayId: v.string(),
+  type: v.literal('direct'),
+  rank: v.number(),
+  tier: recommendationTierValidator,
+  score: v.number(),
+})
+
+const rankedBlockedRecommendationValidator = v.object({
+  pathwayId: v.string(),
+  type: v.literal('blocked'),
+  rank: v.number(),
+  tier: recommendationTierValidator,
+  score: v.number(),
+})
+
+const rankedComposedRecommendationValidator = v.object({
+  pathwayId: v.string(),
+  type: v.literal('composed'),
+  rank: v.number(),
+  tier: recommendationTierValidator,
+  score: v.number(),
+  composedSteps: v.array(v.string()),
+})
+
 export default defineSchema({
   recommendation_runs: defineTable({
     runId: v.string(),
@@ -33,6 +64,14 @@ export default defineSchema({
       evaluatorVersion: v.string(),
       direct: v.array(pathwayDirectOutcomeValidator),
       blocked: v.array(pathwayBlockedOutcomeValidator),
+    })),
+    recommendationResults: v.optional(v.object({
+      rankedAt: v.number(),
+      rankerVersion: v.string(),
+      noComposedReason: v.optional(v.string()),
+      direct: v.array(rankedDirectRecommendationValidator),
+      blocked: v.array(rankedBlockedRecommendationValidator),
+      composed: v.array(rankedComposedRecommendationValidator),
     })),
     createdAt: v.number(),
     updatedAt: v.number(),

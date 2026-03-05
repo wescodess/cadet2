@@ -115,6 +115,30 @@ async function waitForRunListLoad(page: Page) {
   await expect(page.getByText('Loading your recommendation runs...')).toBeHidden({ timeout: 20_000 })
 }
 
+async function mockRecommendationStart(page: Page) {
+  await page.route('**/api/recommendations/runs/*/start**', async (route) => {
+    const url = new URL(route.request().url())
+    const segments = url.pathname.split('/').filter(Boolean)
+    const runId = segments.length >= 4 ? decodeURIComponent(segments[3] || '') : ''
+    const nowIso = new Date().toISOString()
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        runId: runId || 'run_mock_start',
+        profileSnapshotId: 'snapshot_mock_start',
+        status: 'queued',
+        statusMessage: 'Recommendation processing is active and resumable while internal services catch up.',
+        resumable: true,
+        processingHeartbeatAt: nowIso,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      }),
+    })
+  })
+}
+
 function buildLifecycleStatusMessage(status: RecommendationRunRecord['status']) {
   switch (status) {
     case 'queued':
@@ -183,6 +207,10 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
   })
 
   test.describe('authenticated standard user', () => {
+    test.beforeEach(async ({ page }) => {
+      await mockRecommendationStart(page)
+    })
+
     test('[P0][AC1][AC5] completed intake shows a dedicated submit action with stable hooks', async ({ page, appBaseUrl }) => {
       await ensureAuthenticatedPage(page, appBaseUrl)
       const routeProbe = await mockCompletedIntakeDraft(page, appBaseUrl)

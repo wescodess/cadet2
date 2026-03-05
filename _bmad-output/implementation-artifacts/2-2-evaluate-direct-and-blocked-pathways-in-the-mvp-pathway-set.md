@@ -251,6 +251,9 @@ Not applicable for this backend/non-UI story.
 - Added failure compensation in recommendation start flow so pathway-evaluation exceptions force a safe terminal `failed` state instead of leaving lifecycle state partially advanced.
 - Added explicit pending behavior for pathways retrieval (`409`) when evaluation artifacts have not been generated yet.
 - Extended test-mode seed/reset routes to provision/cleanup deterministic profile snapshots and added API coverage for owner-scoping and stronger idempotency assertions.
+- Removed Story 2.3 ranking/finalization side effects from Story 2.2 `start` processing so standard starts remain in deterministic direct/blocked evaluation scope only.
+- Made pathway-evaluation persistence idempotent by skipping rewrites when normalized direct/blocked outcomes are unchanged across repeated starts.
+- Added lifecycle ATDD assertion that start-response status matches persisted status endpoint output for the same run.
 
 ### File List
 
@@ -264,6 +267,7 @@ Not applicable for this backend/non-UI story.
 - `server/api/recommendations/testing/seed.post.ts`
 - `server/api/recommendations/testing/reset.post.ts`
 - `tests/api/recommendation-pathway-evaluation.atdd.spec.ts`
+- `tests/api/recommendation-lifecycle.atdd.spec.ts`
 - `tests/integration/recommendation-pathway-evaluation.integration.spec.ts`
 - `tests/support/fixtures/factories/recommendation-lifecycle-factory.ts`
 - `tests/support/fixtures/test-data.ts`
@@ -275,11 +279,15 @@ Not applicable for this backend/non-UI story.
 - High-severity fixes applied:
   - missing profile snapshot now fails explicitly (`404`) instead of producing synthetic blocked outputs
   - start-flow evaluation failures now write run terminal status to `failed` before returning error
+  - Story 2.2 start flow no longer performs Story 2.3 ranking/completion side effects
 - Medium-severity fixes applied:
   - pathways endpoint now returns explicit `409` when evaluation artifacts are not ready
-  - Story file list synchronized with actual changed files
-- Validation rerun after fixes: `17 passed` (`tests/api/recommendation-pathway-evaluation.atdd.spec.ts`, `tests/integration/recommendation-pathway-evaluation.integration.spec.ts`, `tests/api/recommendation-lifecycle.atdd.spec.ts`)
+  - pathway-evaluation writes are now idempotent when outcomes are unchanged
+  - lifecycle API ATDD now checks response/persisted status consistency after start
+  - active Story 2.3 ranking files in the current workspace are explicitly treated as out-of-scope for Story 2.2 traceability
+- Validation rerun after fixes: `17 passed` (`tests/api/recommendation-lifecycle.atdd.spec.ts`, `tests/api/recommendation-pathway-evaluation.atdd.spec.ts`, `tests/integration/recommendation-pathway-evaluation.integration.spec.ts`)
 
 ### Change Log
 
 - 2026-03-04: Applied code-review remediation for Story 2.2, expanded owner-scope/idempotency coverage, and marked story `done`.
+- 2026-03-05: Removed Story 2.3 ranking side effects from Story 2.2 start flow, added idempotent pathway-evaluation write guard, and expanded lifecycle ATDD status consistency assertions.

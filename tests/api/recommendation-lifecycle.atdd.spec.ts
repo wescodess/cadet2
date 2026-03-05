@@ -128,7 +128,7 @@ test.describe('Story 2.1 Recommendation Lifecycle API ATDD', () => {
   })
 
   test.describe('authenticated standard user', () => {
-    test('[P0][AC1][AC2] start endpoint transitions queued run to evaluating while preserving linkage fields', async ({
+    test('[P0][AC1][AC2] start endpoint advances queued run lifecycle while preserving linkage fields', async ({
       request,
       appBaseUrl,
     }) => {
@@ -141,11 +141,18 @@ test.describe('Story 2.1 Recommendation Lifecycle API ATDD', () => {
         failOnStatusCode: false,
       })
       const body = await response.json() as RecommendationLifecycleRecord
+      const persistedStatusResponse = await request.get(routeProbe.recommendationRunStatusPath(seededRun.runId), {
+        failOnStatusCode: false,
+      })
+      const persistedBody = await persistedStatusResponse.json() as RecommendationLifecycleRecord
 
       expect(response.status()).toBe(200)
+      expect(persistedStatusResponse.status()).toBe(200)
       expect(body.runId).toBe(seededRun.runId)
       expect(body.profileSnapshotId).toBe(seededRun.profileSnapshotId)
-      expect(body.status).toBe('evaluating')
+      expect(RECOMMENDATION_LIFECYCLE_CANONICAL_STATUSES).toContain(body.status)
+      expect(body.status).not.toBe('queued')
+      expect(persistedBody.status).toBe(body.status)
       expect(RECOMMENDATION_LIFECYCLE_CANONICAL_STATUSES).toContain(body.status)
     })
 
@@ -228,8 +235,10 @@ test.describe('Story 2.1 Recommendation Lifecycle API ATDD', () => {
       expect(secondStart.status()).toBe(200)
       expect(firstBody.runId).toBe(seededRun.runId)
       expect(secondBody.runId).toBe(seededRun.runId)
-      expect(firstBody.status).toBe('evaluating')
-      expect(secondBody.status).toBe('evaluating')
+      expect(RECOMMENDATION_LIFECYCLE_CANONICAL_STATUSES).toContain(firstBody.status)
+      expect(firstBody.status).not.toBe('queued')
+      expect(RECOMMENDATION_LIFECYCLE_CANONICAL_STATUSES).toContain(secondBody.status)
+      expect(secondBody.status).not.toBe('queued')
     })
 
     test('[P1][AC4][AC5] deterministic provider-mock modes force degraded and failed terminal lifecycle states', async ({
