@@ -60,6 +60,10 @@ export function toIsoString(value: unknown): string {
 export type RecommendationStatusResponse = {
   runId: string
   profileSnapshotId: string
+  refreshedFromRunId?: string
+  previousProfileSnapshotId?: string
+  refreshRootRunId?: string
+  refreshSequence?: number
   status: RecommendationLifecycleStatus
   statusMessage: string
   resumable: boolean
@@ -72,6 +76,12 @@ export function normalizeStatusResponse(input: RecommendationStatusResponse) {
   return {
     runId: input.runId,
     profileSnapshotId: input.profileSnapshotId,
+    refreshedFromRunId: input.refreshedFromRunId,
+    previousProfileSnapshotId: input.previousProfileSnapshotId,
+    refreshRootRunId: input.refreshRootRunId,
+    refreshSequence: typeof input.refreshSequence === 'number'
+      ? input.refreshSequence
+      : undefined,
     status: input.status,
     statusMessage: input.statusMessage || getDefaultStatusMessage(input.status),
     resumable: typeof input.resumable === 'boolean'

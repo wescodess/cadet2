@@ -156,3 +156,22 @@ export const RECOMMENDATION_TIER_VALUES = [
   'conditional-fit',
   'lower-confidence',
 ] as const
+
+export const RECOMMENDATION_QUALIFICATION_LEVELS = [
+  'supported',
+  'low-confidence',
+  'withheld',
+] as const
+
+export const RECOMMENDATION_CONFIDENCE_LEVELS = [
+  'high',
+  'medium',
+  'low',
+  'withheld',
+] as const
+
+export const RECOMMENDATION_FRESHNESS_LEVELS = [
+  'fresh',
+  'stale',
+  'unknown',
+] as const

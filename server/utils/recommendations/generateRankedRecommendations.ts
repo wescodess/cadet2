@@ -9,10 +9,13 @@ import type {
 } from '../pathways/evaluateDirectAndBlockedPathways'
 import {
   rankRecommendationCandidates,
-  type RankedBlockedRecommendation,
-  type RankedComposedRecommendation,
-  type RankedDirectRecommendation,
 } from './rankRecommendationCandidates'
+import {
+  qualifyWeakRecommendationResults,
+  type QualifiedBlockedRecommendation,
+  type QualifiedComposedRecommendation,
+  type QualifiedDirectRecommendation,
+} from './qualifyWeakRecommendationResults'
 
 type RecommendationPathwayEvaluationRecord = {
   runId: string
@@ -29,22 +32,27 @@ type RecommendationResultsReadRecord = {
   noComposedReason: string
   status: 'queued' | 'evaluating' | 'completed' | 'degraded' | 'failed'
   results: {
-    direct: RankedDirectRecommendation[]
-    blocked: RankedBlockedRecommendation[]
-    composed: RankedComposedRecommendation[]
+    direct: QualifiedDirectRecommendation[]
+    blocked: QualifiedBlockedRecommendation[]
+    composed: QualifiedComposedRecommendation[]
   }
 } | null
 
-type RecommendationResultsWriteRecord = {
+type RecommendationResultsPersistedRecord = {
   runId: string
   profileSnapshotId: string
   rankedAt: number
   noComposedReason: string
   results: {
-    direct: RankedDirectRecommendation[]
-    blocked: RankedBlockedRecommendation[]
-    composed: RankedComposedRecommendation[]
+    direct: QualifiedDirectRecommendation[]
+    blocked: QualifiedBlockedRecommendation[]
+    composed: QualifiedComposedRecommendation[]
   }
+}
+
+type RecommendationResultsWriteRecord = RecommendationResultsPersistedRecord & {
+  terminalStatus: 'completed' | 'degraded' | 'failed'
+  terminalStatusMessage: string
 }
 
 type ConvexAdminClientLike = {
@@ -100,6 +108,16 @@ export async function generateRankedRecommendationsForRun(
       rankedAt: existingResults!.rankedAt || Date.now(),
       noComposedReason: existingResults!.noComposedReason || '',
       results: existingResults!.results,
+      terminalStatus: existingResults!.status === 'completed'
+        ? 'completed'
+        : existingResults!.status === 'degraded'
+          ? 'degraded'
+          : 'failed',
+      terminalStatusMessage: existingResults!.status === 'completed'
+        ? 'Recommendation evaluation completed.'
+        : existingResults!.status === 'degraded'
+          ? 'Recommendation evaluation completed with low-confidence outputs. Review caveats before acting.'
+          : 'Recommendation evaluation could not produce trustworthy recommendations. Please retry later or update your inputs before rerunning.',
     }
   }
 
@@ -127,16 +145,32 @@ export async function generateRankedRecommendationsForRun(
     composed: composed.composed,
   })
 
-  return await input.convex.mutation(
+  const qualified = qualifyWeakRecommendationResults({
+    direct: ranked.direct,
+    blocked: ranked.blocked,
+    composed: ranked.composed,
+    blockedOutcomes: pathwayEvaluation.blocked.map(outcome => ({
+      pathwayId: outcome.pathwayId,
+      unmetConditions: [...outcome.unmetConditions],
+    })),
+  })
+
+  const persisted = await input.convex.mutation(
     (anyApi as any).recommendationRuns.writeRankedRecommendationsForUser,
     {
       runId: input.runId,
       userId: input.userId,
       profileSnapshotId: pathwayEvaluation.profileSnapshotId,
-      direct: ranked.direct,
-      blocked: ranked.blocked,
-      composed: ranked.composed,
+      direct: qualified.direct,
+      blocked: qualified.blocked,
+      composed: qualified.composed,
       noComposedReason: composed.noComposedReason,
     },
-  ) as RecommendationResultsWriteRecord
+  ) as RecommendationResultsPersistedRecord
+
+  return {
+    ...persisted,
+    terminalStatus: qualified.terminalStatus,
+    terminalStatusMessage: qualified.terminalStatusMessage,
+  }
 }

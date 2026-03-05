@@ -51,7 +51,7 @@ development_status:
   2-1-start-recommendation-processing-from-a-submitted-profile: done
   2-2-evaluate-direct-and-blocked-pathways-in-the-mvp-pathway-set: done
   2-3-generate-and-rank-limited-composed-pathway-recommendations: done
-  2-4-safely-qualify-weak-results-and-support-recommendation-refresh: backlog
+  2-4-safely-qualify-weak-results-and-support-recommendation-refresh: done
   epic-2-retrospective: optional
 
   epic-3: backlog
