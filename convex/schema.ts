@@ -18,12 +18,35 @@ const recommendationTierValidator = v.union(
   v.literal('lower-confidence'),
 )
 
+const recommendationQualificationValidator = v.union(
+  v.literal('supported'),
+  v.literal('low-confidence'),
+  v.literal('withheld'),
+)
+
+const recommendationConfidenceValidator = v.union(
+  v.literal('high'),
+  v.literal('medium'),
+  v.literal('low'),
+  v.literal('withheld'),
+)
+
+const recommendationFreshnessValidator = v.union(
+  v.literal('fresh'),
+  v.literal('stale'),
+  v.literal('unknown'),
+)
+
 const rankedDirectRecommendationValidator = v.object({
   pathwayId: v.string(),
   type: v.literal('direct'),
   rank: v.number(),
   tier: recommendationTierValidator,
   score: v.number(),
+  qualification: v.optional(recommendationQualificationValidator),
+  confidence: v.optional(recommendationConfidenceValidator),
+  freshness: v.optional(recommendationFreshnessValidator),
+  caveat: v.optional(v.string()),
 })
 
 const rankedBlockedRecommendationValidator = v.object({
@@ -32,6 +55,10 @@ const rankedBlockedRecommendationValidator = v.object({
   rank: v.number(),
   tier: recommendationTierValidator,
   score: v.number(),
+  qualification: v.optional(recommendationQualificationValidator),
+  confidence: v.optional(recommendationConfidenceValidator),
+  freshness: v.optional(recommendationFreshnessValidator),
+  caveat: v.optional(v.string()),
 })
 
 const rankedComposedRecommendationValidator = v.object({
@@ -41,6 +68,10 @@ const rankedComposedRecommendationValidator = v.object({
   tier: recommendationTierValidator,
   score: v.number(),
   composedSteps: v.array(v.string()),
+  qualification: v.optional(recommendationQualificationValidator),
+  confidence: v.optional(recommendationConfidenceValidator),
+  freshness: v.optional(recommendationFreshnessValidator),
+  caveat: v.optional(v.string()),
 })
 
 export default defineSchema({
@@ -48,6 +79,10 @@ export default defineSchema({
     runId: v.string(),
     userId: v.string(),
     profileSnapshotId: v.string(),
+    refreshedFromRunId: v.optional(v.string()),
+    previousProfileSnapshotId: v.optional(v.string()),
+    refreshRootRunId: v.optional(v.string()),
+    refreshSequence: v.optional(v.number()),
     status: v.union(
       v.literal('queued'),
       v.literal('evaluating'),

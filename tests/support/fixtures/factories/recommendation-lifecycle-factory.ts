@@ -21,6 +21,7 @@ type RecommendationLifecycleRouteProbe = {
   recommendationRunStatusPath: (runId: string) => string
   recommendationRunPathwaysPath: (runId: string) => string
   recommendationRunResultsPath: (runId: string) => string
+  recommendationRunRefreshPath: (runId: string) => string
   authPath: string
 }
 
@@ -41,6 +42,7 @@ export function createRecommendationLifecycleRouteProbe(baseUrl: string): Recomm
     recommendationRunStatusPath: runId => `${normalizedBaseUrl}/api/recommendations/runs/${encodeURIComponent(runId)}/status`,
     recommendationRunPathwaysPath: runId => `${normalizedBaseUrl}/api/recommendations/runs/${encodeURIComponent(runId)}/pathways`,
     recommendationRunResultsPath: runId => `${normalizedBaseUrl}/api/recommendations/runs/${encodeURIComponent(runId)}/results`,
+    recommendationRunRefreshPath: runId => `${normalizedBaseUrl}/api/recommendations/runs/${encodeURIComponent(runId)}/refresh`,
     authPath: `${normalizedBaseUrl}/auth`,
   }
 }

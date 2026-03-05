@@ -6,6 +6,9 @@ import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
 import { MVP_PATHWAY_IDS } from '../../../../utils/pathways/mvpPathwayCatalog'
 
 type RecommendationResultTier = 'strong-fit' | 'conditional-fit' | 'lower-confidence'
+type RecommendationQualification = 'supported' | 'low-confidence' | 'withheld'
+type RecommendationConfidence = 'high' | 'medium' | 'low' | 'withheld'
+type RecommendationFreshness = 'fresh' | 'stale' | 'unknown'
 
 type RankedDirectRecommendation = {
   pathwayId: string
@@ -13,6 +16,10 @@ type RankedDirectRecommendation = {
   rank: number
   tier: RecommendationResultTier
   score: number
+  qualification: RecommendationQualification
+  confidence: RecommendationConfidence
+  freshness: RecommendationFreshness
+  caveat: string
 }
 
 type RankedBlockedRecommendation = {
@@ -21,6 +28,10 @@ type RankedBlockedRecommendation = {
   rank: number
   tier: RecommendationResultTier
   score: number
+  qualification: RecommendationQualification
+  confidence: RecommendationConfidence
+  freshness: RecommendationFreshness
+  caveat: string
 }
 
 type RankedComposedRecommendation = {
@@ -30,6 +41,10 @@ type RankedComposedRecommendation = {
   tier: RecommendationResultTier
   score: number
   composedSteps: string[]
+  qualification: RecommendationQualification
+  confidence: RecommendationConfidence
+  freshness: RecommendationFreshness
+  caveat: string
 }
 
 type RecommendationResultsRecord = {
@@ -79,6 +94,20 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!record.rankedAt) {
+    if (record.status === 'failed') {
+      return {
+        runId: record.runId,
+        profileSnapshotId: record.profileSnapshotId,
+        status: record.status,
+        results: {
+          direct: [],
+          blocked: [],
+          composed: [],
+        },
+        noComposedReason: 'Recommendation evaluation is temporarily unavailable. Please retry later or update your inputs before rerunning.',
+      }
+    }
+
     throw createError({
       statusCode: 409,
       statusMessage: 'Recommendation ranking not ready',
@@ -98,6 +127,10 @@ export default defineEventHandler(async (event) => {
           rank: candidate.rank,
           tier: candidate.tier,
           score: candidate.score,
+          qualification: candidate.qualification,
+          confidence: candidate.confidence,
+          freshness: candidate.freshness,
+          caveat: candidate.caveat,
         })),
       blocked: sortByRank(record.results.blocked)
         .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
@@ -107,6 +140,10 @@ export default defineEventHandler(async (event) => {
           rank: candidate.rank,
           tier: candidate.tier,
           score: candidate.score,
+          qualification: candidate.qualification,
+          confidence: candidate.confidence,
+          freshness: candidate.freshness,
+          caveat: candidate.caveat,
         })),
       composed: sortByRank(record.results.composed)
         .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
@@ -117,6 +154,10 @@ export default defineEventHandler(async (event) => {
           tier: candidate.tier,
           score: candidate.score,
           composedSteps: candidate.composedSteps,
+          qualification: candidate.qualification,
+          confidence: candidate.confidence,
+          freshness: candidate.freshness,
+          caveat: candidate.caveat,
         })),
     },
     noComposedReason: record.noComposedReason,

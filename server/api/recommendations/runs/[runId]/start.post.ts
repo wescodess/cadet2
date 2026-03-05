@@ -15,6 +15,10 @@ import { generateRankedRecommendationsForRun } from '../../../../utils/recommend
 type RecommendationLifecycleRecord = {
   runId: string
   profileSnapshotId: string
+  refreshedFromRunId?: string
+  previousProfileSnapshotId?: string
+  refreshRootRunId?: string
+  refreshSequence?: number
   status: string
   statusMessage?: string
   resumable?: boolean
@@ -133,6 +137,10 @@ export default defineEventHandler(async (event) => {
     return normalizeStatusResponse({
       runId: existingRun.runId,
       profileSnapshotId: existingRun.profileSnapshotId,
+      refreshedFromRunId: existingRun.refreshedFromRunId,
+      previousProfileSnapshotId: existingRun.previousProfileSnapshotId,
+      refreshRootRunId: existingRun.refreshRootRunId,
+      refreshSequence: existingRun.refreshSequence,
       status: existingRun.status,
       statusMessage: existingRun.statusMessage,
       resumable: existingRun.resumable,
@@ -182,7 +190,7 @@ export default defineEventHandler(async (event) => {
             runId: run.runId,
             userId,
             status: 'failed',
-            statusMessage: 'Recommendation evaluation failed and requires retry.',
+            statusMessage: 'Recommendation evaluation is temporarily unavailable. Please retry later or update your inputs before rerunning.',
           },
         )
       }
@@ -202,7 +210,7 @@ export default defineEventHandler(async (event) => {
 
     if (requestedMode === 'standard') {
       try {
-        await generateRankedRecommendationsForRun({
+        const ranking = await generateRankedRecommendationsForRun({
           convex,
           runId: run.runId,
           userId,
@@ -214,8 +222,8 @@ export default defineEventHandler(async (event) => {
           {
             runId: run.runId,
             userId,
-            status: 'completed',
-            statusMessage: 'Recommendation evaluation completed.',
+            status: ranking.terminalStatus,
+            statusMessage: ranking.terminalStatusMessage,
           },
         ) as RecommendationLifecycleRecord
       }
@@ -228,7 +236,7 @@ export default defineEventHandler(async (event) => {
               runId: run.runId,
               userId,
               status: 'failed',
-              statusMessage: 'Recommendation ranking failed and requires retry.',
+              statusMessage: 'Recommendation evaluation is temporarily unavailable. Please retry later or update your inputs before rerunning.',
             },
           )
         }
@@ -251,6 +259,10 @@ export default defineEventHandler(async (event) => {
   return normalizeStatusResponse({
     runId: run.runId,
     profileSnapshotId: run.profileSnapshotId,
+    refreshedFromRunId: run.refreshedFromRunId,
+    previousProfileSnapshotId: run.previousProfileSnapshotId,
+    refreshRootRunId: run.refreshRootRunId,
+    refreshSequence: run.refreshSequence,
     status: run.status,
     statusMessage: run.statusMessage,
     resumable: run.resumable,

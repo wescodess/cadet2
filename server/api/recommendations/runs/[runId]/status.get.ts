@@ -11,6 +11,10 @@ import {
 type RecommendationLifecycleRecord = {
   runId: string
   profileSnapshotId: string
+  refreshedFromRunId?: string
+  previousProfileSnapshotId?: string
+  refreshRootRunId?: string
+  refreshSequence?: number
   status: string
   statusMessage?: string
   resumable?: boolean
@@ -56,6 +60,10 @@ export default defineEventHandler(async (event) => {
   return normalizeStatusResponse({
     runId: run.runId,
     profileSnapshotId: run.profileSnapshotId,
+    refreshedFromRunId: run.refreshedFromRunId,
+    previousProfileSnapshotId: run.previousProfileSnapshotId,
+    refreshRootRunId: run.refreshRootRunId,
+    refreshSequence: run.refreshSequence,
     status: run.status,
     statusMessage: run.statusMessage,
     resumable: run.resumable,

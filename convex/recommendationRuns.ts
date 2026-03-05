@@ -21,12 +21,19 @@ type BlockedPathwayOutcome = {
   unmetConditions: string[]
 }
 type RecommendationTier = 'strong-fit' | 'conditional-fit' | 'lower-confidence'
+type RecommendationQualification = 'supported' | 'low-confidence' | 'withheld'
+type RecommendationConfidence = 'high' | 'medium' | 'low' | 'withheld'
+type RecommendationFreshness = 'fresh' | 'stale' | 'unknown'
 type RankedDirectRecommendation = {
   pathwayId: string
   type: 'direct'
   rank: number
   tier: RecommendationTier
   score: number
+  qualification?: RecommendationQualification
+  confidence?: RecommendationConfidence
+  freshness?: RecommendationFreshness
+  caveat?: string
 }
 type RankedBlockedRecommendation = {
   pathwayId: string
@@ -34,6 +41,10 @@ type RankedBlockedRecommendation = {
   rank: number
   tier: RecommendationTier
   score: number
+  qualification?: RecommendationQualification
+  confidence?: RecommendationConfidence
+  freshness?: RecommendationFreshness
+  caveat?: string
 }
 type RankedComposedRecommendation = {
   pathwayId: string
@@ -42,6 +53,10 @@ type RankedComposedRecommendation = {
   tier: RecommendationTier
   score: number
   composedSteps: string[]
+  qualification?: RecommendationQualification
+  confidence?: RecommendationConfidence
+  freshness?: RecommendationFreshness
+  caveat?: string
 }
 
 const directPathwayOutcomeValidator = v.object({
@@ -61,12 +76,35 @@ const recommendationTierValidator = v.union(
   v.literal('lower-confidence'),
 )
 
+const recommendationQualificationValidator = v.union(
+  v.literal('supported'),
+  v.literal('low-confidence'),
+  v.literal('withheld'),
+)
+
+const recommendationConfidenceValidator = v.union(
+  v.literal('high'),
+  v.literal('medium'),
+  v.literal('low'),
+  v.literal('withheld'),
+)
+
+const recommendationFreshnessValidator = v.union(
+  v.literal('fresh'),
+  v.literal('stale'),
+  v.literal('unknown'),
+)
+
 const rankedDirectRecommendationValidator = v.object({
   pathwayId: v.string(),
   type: v.literal('direct'),
   rank: v.number(),
   tier: recommendationTierValidator,
   score: v.number(),
+  qualification: v.optional(recommendationQualificationValidator),
+  confidence: v.optional(recommendationConfidenceValidator),
+  freshness: v.optional(recommendationFreshnessValidator),
+  caveat: v.optional(v.string()),
 })
 
 const rankedBlockedRecommendationValidator = v.object({
@@ -75,6 +113,10 @@ const rankedBlockedRecommendationValidator = v.object({
   rank: v.number(),
   tier: recommendationTierValidator,
   score: v.number(),
+  qualification: v.optional(recommendationQualificationValidator),
+  confidence: v.optional(recommendationConfidenceValidator),
+  freshness: v.optional(recommendationFreshnessValidator),
+  caveat: v.optional(v.string()),
 })
 
 const rankedComposedRecommendationValidator = v.object({
@@ -84,6 +126,10 @@ const rankedComposedRecommendationValidator = v.object({
   tier: recommendationTierValidator,
   score: v.number(),
   composedSteps: v.array(v.string()),
+  qualification: v.optional(recommendationQualificationValidator),
+  confidence: v.optional(recommendationConfidenceValidator),
+  freshness: v.optional(recommendationFreshnessValidator),
+  caveat: v.optional(v.string()),
 })
 
 const inProgressStatuses = new Set<RecommendationLifecycleStatus>(['queued', 'evaluating'])
@@ -247,6 +293,38 @@ function dedupeAndSortRankedCandidates<T extends {
   })
 }
 
+function normalizeQualification(value: unknown, fallback: RecommendationQualification): RecommendationQualification {
+  if (value === 'supported' || value === 'low-confidence' || value === 'withheld') {
+    return value
+  }
+
+  return fallback
+}
+
+function normalizeConfidence(value: unknown, fallback: RecommendationConfidence): RecommendationConfidence {
+  if (value === 'high' || value === 'medium' || value === 'low' || value === 'withheld') {
+    return value
+  }
+
+  return fallback
+}
+
+function normalizeFreshness(value: unknown, fallback: RecommendationFreshness): RecommendationFreshness {
+  if (value === 'fresh' || value === 'stale' || value === 'unknown') {
+    return value
+  }
+
+  return fallback
+}
+
+function normalizeCaveat(value: unknown, fallback: string): string {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim()
+  }
+
+  return fallback
+}
+
 function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommendation[]) {
   return dedupeAndSortRankedCandidates(candidates).map(candidate => ({
     pathwayId: candidate.pathwayId,
@@ -254,6 +332,10 @@ function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommenda
     rank: Math.max(1, Math.round(candidate.rank)),
     tier: candidate.tier,
     score: Math.max(1, Math.round(candidate.score)),
+    qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
+    confidence: normalizeConfidence(candidate.confidence, 'low'),
+    freshness: normalizeFreshness(candidate.freshness, 'unknown'),
+    caveat: normalizeCaveat(candidate.caveat, 'Qualification metadata is unavailable for this recommendation. Treat as low-confidence guidance and rerun for updated evidence.'),
   }))
 }
 
@@ -264,6 +346,10 @@ function normalizeRankedBlockedRecommendations(candidates: RankedBlockedRecommen
     rank: Math.max(1, Math.round(candidate.rank)),
     tier: candidate.tier,
     score: Math.max(1, Math.round(candidate.score)),
+    qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
+    confidence: normalizeConfidence(candidate.confidence, 'low'),
+    freshness: normalizeFreshness(candidate.freshness, 'unknown'),
+    caveat: normalizeCaveat(candidate.caveat, `${candidate.pathwayId} is conditionally usable and should be treated as low-confidence guidance until refreshed evidence is available.`),
   }))
 }
 
@@ -277,6 +363,10 @@ function normalizeRankedComposedRecommendations(candidates: RankedComposedRecomm
     composedSteps: Array.from(new Set(candidate.composedSteps
       .map(step => step.trim())
       .filter(step => step.length > 0))),
+    qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
+    confidence: normalizeConfidence(candidate.confidence, 'low'),
+    freshness: normalizeFreshness(candidate.freshness, 'unknown'),
+    caveat: normalizeCaveat(candidate.caveat, 'Composed pathway guidance is provisional and should be treated as low-confidence until refreshed evidence is available.'),
   }))
 }
 
@@ -285,6 +375,10 @@ export const createQueuedRun = mutation({
     runId: v.string(),
     userId: v.string(),
     profileSnapshotId: v.string(),
+    refreshedFromRunId: v.optional(v.string()),
+    previousProfileSnapshotId: v.optional(v.string()),
+    refreshRootRunId: v.optional(v.string()),
+    refreshSequence: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -293,6 +387,10 @@ export const createQueuedRun = mutation({
       runId: args.runId,
       userId: args.userId,
       profileSnapshotId: args.profileSnapshotId,
+      refreshedFromRunId: args.refreshedFromRunId,
+      previousProfileSnapshotId: args.previousProfileSnapshotId,
+      refreshRootRunId: args.refreshRootRunId,
+      refreshSequence: args.refreshSequence,
       status: 'queued',
       statusMessage: buildDefaultStatusMessage('queued'),
       resumable: true,
@@ -304,6 +402,10 @@ export const createQueuedRun = mutation({
     return {
       runId: args.runId,
       profileSnapshotId: args.profileSnapshotId,
+      refreshedFromRunId: args.refreshedFromRunId,
+      previousProfileSnapshotId: args.previousProfileSnapshotId,
+      refreshRootRunId: args.refreshRootRunId,
+      refreshSequence: args.refreshSequence,
       status: 'queued' as const,
       statusMessage: buildDefaultStatusMessage('queued'),
       resumable: true,
@@ -328,6 +430,10 @@ export const listForUser = query({
     return rows.map(row => ({
       runId: row.runId,
       profileSnapshotId: row.profileSnapshotId,
+      refreshedFromRunId: row.refreshedFromRunId,
+      previousProfileSnapshotId: row.previousProfileSnapshotId,
+      refreshRootRunId: row.refreshRootRunId,
+      refreshSequence: row.refreshSequence,
       status: row.status,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -353,6 +459,10 @@ export const readStatusForUser = query({
     return {
       runId: row.runId,
       profileSnapshotId: row.profileSnapshotId,
+      refreshedFromRunId: row.refreshedFromRunId,
+      previousProfileSnapshotId: row.previousProfileSnapshotId,
+      refreshRootRunId: row.refreshRootRunId,
+      refreshSequence: row.refreshSequence,
       status: row.status,
       statusMessage: row.statusMessage || buildDefaultStatusMessage(row.status),
       resumable: typeof row.resumable === 'boolean' ? row.resumable : inProgressStatuses.has(row.status),
@@ -577,6 +687,10 @@ export const startProcessingForUser = mutation({
     return {
       runId: row.runId,
       profileSnapshotId: row.profileSnapshotId,
+      refreshedFromRunId: row.refreshedFromRunId,
+      previousProfileSnapshotId: row.previousProfileSnapshotId,
+      refreshRootRunId: row.refreshRootRunId,
+      refreshSequence: row.refreshSequence,
       status: targetStatus,
       statusMessage,
       resumable,
@@ -622,6 +736,10 @@ export const setTerminalStatusForUser = mutation({
     return {
       runId: row.runId,
       profileSnapshotId: row.profileSnapshotId,
+      refreshedFromRunId: row.refreshedFromRunId,
+      previousProfileSnapshotId: row.previousProfileSnapshotId,
+      refreshRootRunId: row.refreshRootRunId,
+      refreshSequence: row.refreshSequence,
       status: args.status,
       statusMessage,
       resumable: false,
@@ -637,6 +755,10 @@ export const seedRunForUser = mutation({
     userId: v.string(),
     runId: v.string(),
     profileSnapshotId: v.string(),
+    refreshedFromRunId: v.optional(v.string()),
+    previousProfileSnapshotId: v.optional(v.string()),
+    refreshRootRunId: v.optional(v.string()),
+    refreshSequence: v.optional(v.number()),
     status: canonicalStatusValidator,
     statusMessage: v.optional(v.string()),
   },
@@ -647,6 +769,10 @@ export const seedRunForUser = mutation({
       userId: args.userId,
       runId: args.runId,
       profileSnapshotId: args.profileSnapshotId,
+      refreshedFromRunId: args.refreshedFromRunId,
+      previousProfileSnapshotId: args.previousProfileSnapshotId,
+      refreshRootRunId: args.refreshRootRunId,
+      refreshSequence: args.refreshSequence,
       status: args.status,
       statusMessage: args.statusMessage || buildDefaultStatusMessage(args.status),
       resumable: inProgressStatuses.has(args.status),
@@ -659,6 +785,10 @@ export const seedRunForUser = mutation({
     return {
       runId: args.runId,
       profileSnapshotId: args.profileSnapshotId,
+      refreshedFromRunId: args.refreshedFromRunId,
+      previousProfileSnapshotId: args.previousProfileSnapshotId,
+      refreshRootRunId: args.refreshRootRunId,
+      refreshSequence: args.refreshSequence,
       status: args.status,
       statusMessage: args.statusMessage || buildDefaultStatusMessage(args.status),
       resumable: inProgressStatuses.has(args.status),
@@ -701,6 +831,10 @@ export const listRunsForUserTesting = query({
     return rows.map(row => ({
       runId: row.runId,
       profileSnapshotId: row.profileSnapshotId,
+      refreshedFromRunId: row.refreshedFromRunId,
+      previousProfileSnapshotId: row.previousProfileSnapshotId,
+      refreshRootRunId: row.refreshRootRunId,
+      refreshSequence: row.refreshSequence,
       status: row.status,
       statusMessage: row.statusMessage,
       resumable: row.resumable,

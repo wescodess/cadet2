@@ -233,7 +233,7 @@ test.describe('Story 2.3 Recommendation Ranking API ATDD', () => {
       failOnStatusCode: false,
     })
     expect(statusResponse.status()).toBe(200)
-    expect((await statusResponse.json() as RecommendationLifecycleRecord).status).toBe('completed')
+    expect(['completed', 'degraded']).toContain((await statusResponse.json() as RecommendationLifecycleRecord).status)
 
     const { response, body } = await readResultsForRun(request, appBaseUrl, seededRun.runId)
     expect(response.status()).toBe(200)
@@ -268,7 +268,7 @@ test.describe('Story 2.3 Recommendation Ranking API ATDD', () => {
       failOnStatusCode: false,
     })
     expect(statusResponse.status()).toBe(200)
-    expect((await statusResponse.json() as RecommendationLifecycleRecord).status).toBe('completed')
+    expect(['completed', 'degraded']).toContain((await statusResponse.json() as RecommendationLifecycleRecord).status)
 
     const { response, body } = await readResultsForRun(request, appBaseUrl, seededRun.runId)
     expect(response.status()).toBe(200)
@@ -311,7 +311,7 @@ test.describe('Story 2.3 Recommendation Ranking API ATDD', () => {
       failOnStatusCode: false,
     })
     expect(statusResponse.status()).toBe(200)
-    expect((await statusResponse.json() as RecommendationLifecycleRecord).status).toBe('completed')
+    expect(['completed', 'degraded']).toContain((await statusResponse.json() as RecommendationLifecycleRecord).status)
 
     const { response, body } = await readResultsForRun(request, appBaseUrl, seededRun.runId)
     expect(response.status()).toBe(200)

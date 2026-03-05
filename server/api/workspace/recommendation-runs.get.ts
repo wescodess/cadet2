@@ -6,6 +6,10 @@ import { createConvexAdminClient } from '../../utils/convex-admin-client'
 type RecommendationRunRecord = {
   runId: string
   profileSnapshotId: string
+  refreshedFromRunId?: string
+  previousProfileSnapshotId?: string
+  refreshRootRunId?: string
+  refreshSequence?: number
   status: string
   createdAt: number | string | Date
   updatedAt: number | string | Date
@@ -47,6 +51,10 @@ export default defineEventHandler(async (event) => {
   return runs.map(run => ({
     runId: run.runId,
     profileSnapshotId: run.profileSnapshotId,
+    refreshedFromRunId: run.refreshedFromRunId,
+    previousProfileSnapshotId: run.previousProfileSnapshotId,
+    refreshRootRunId: run.refreshRootRunId,
+    refreshSequence: run.refreshSequence,
     status: run.status,
     createdAt: toIsoString(run.createdAt),
     updatedAt: toIsoString(run.updatedAt),
