@@ -144,3 +144,15 @@ export const RECOMMENDATION_PATHWAY_UNSUPPORTED_IDS = [
   'mvp-investor-stream',
   'mvp-humanitarian-stream',
 ] as const
+
+export const RECOMMENDATION_RESULT_TYPES = [
+  'direct',
+  'blocked',
+  'composed',
+] as const
+
+export const RECOMMENDATION_TIER_VALUES = [
+  'strong-fit',
+  'conditional-fit',
+  'lower-confidence',
+] as const

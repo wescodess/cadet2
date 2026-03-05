@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
       education: {},
       work: {
         yearsSkilledExperience: 3,
-        hasValidJobOffer: 'yes',
+        hasValidJobOffer: 'no',
       },
       immigration: {
         openToRelocation: 'yes',
@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
       },
       goals: {
         targetTimelineMonths: 12,
-        budgetCad: 32000,
+        budgetCad: 20000,
         willingToStudyOrRetrain: 'yes',
       },
     },

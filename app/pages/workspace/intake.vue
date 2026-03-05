@@ -858,6 +858,17 @@ function resolveErrorMessage(error: unknown, fallback: string) {
     || fallback
 }
 
+async function triggerRecommendationStart(runId: string) {
+  try {
+    await $fetch(`/api/recommendations/runs/${encodeURIComponent(runId)}/start`, {
+      method: 'POST',
+    })
+  }
+  catch {
+    // Keep intake submission successful even if start orchestration retries from workspace.
+  }
+}
+
 function moveToPreviousSection() {
   const currentIndex = currentSectionIndex.value
 
@@ -946,6 +957,8 @@ async function submitIntake() {
     const response = await $fetch<IntakeSubmitResponse>('/api/intake/submit', {
       method: 'POST',
     })
+
+    void triggerRecommendationStart(response.runId)
 
     submitFeedback.value = {
       tone: 'success',

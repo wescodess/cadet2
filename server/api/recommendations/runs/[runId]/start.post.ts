@@ -10,6 +10,7 @@ import {
 } from '../../../../utils/recommendations/lifecycle'
 import { assertRecommendationTestModeEnabled } from '../../../../utils/recommendations/testMode'
 import { evaluatePathwayEligibilityForRun } from '../../../../utils/recommendations/evaluatePathwayEligibility'
+import { generateRankedRecommendationsForRun } from '../../../../utils/recommendations/generateRankedRecommendations'
 
 type RecommendationLifecycleRecord = {
   runId: string
@@ -20,6 +21,10 @@ type RecommendationLifecycleRecord = {
   processingHeartbeatAt?: number | string
   createdAt: number | string | Date
   updatedAt: number | string | Date
+}
+
+function isTerminalRecommendationStatus(status: RecommendationLifecycleRecord['status']) {
+  return status === 'completed' || status === 'degraded' || status === 'failed'
 }
 
 function toLifecycleError(error: unknown) {
@@ -98,6 +103,44 @@ export default defineEventHandler(async (event) => {
   }
 
   const convex = await createConvexAdminClient()
+  const existingRun = await convex.query(
+    (anyApi as any).recommendationRuns.readStatusForUser,
+    {
+      runId,
+      userId,
+    },
+  ) as RecommendationLifecycleRecord | null
+
+  if (!existingRun) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Recommendation run not found',
+    })
+  }
+
+  if (!isCanonicalRecommendationStatus(existingRun.status)) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Recommendation run status contract is invalid',
+    })
+  }
+
+  // Preserve idempotent start behavior after completion/degradation/failure.
+  if (
+    isTerminalRecommendationStatus(existingRun.status)
+    && (requestedMode === 'standard' || requestedMode === 'recoverable-delay')
+  ) {
+    return normalizeStatusResponse({
+      runId: existingRun.runId,
+      profileSnapshotId: existingRun.profileSnapshotId,
+      status: existingRun.status,
+      statusMessage: existingRun.statusMessage,
+      resumable: existingRun.resumable,
+      processingHeartbeatAt: existingRun.processingHeartbeatAt,
+      createdAt: existingRun.createdAt,
+      updatedAt: existingRun.updatedAt,
+    })
+  }
 
   let run: RecommendationLifecycleRecord
   try {
@@ -155,6 +198,53 @@ export default defineEventHandler(async (event) => {
       }
 
       throw mappedError
+    }
+
+    if (requestedMode === 'standard') {
+      try {
+        await generateRankedRecommendationsForRun({
+          convex,
+          runId: run.runId,
+          userId,
+          profileSnapshotId: run.profileSnapshotId,
+        })
+
+        run = await convex.mutation(
+          (anyApi as any).recommendationRuns.setTerminalStatusForUser,
+          {
+            runId: run.runId,
+            userId,
+            status: 'completed',
+            statusMessage: 'Recommendation evaluation completed.',
+          },
+        ) as RecommendationLifecycleRecord
+      }
+      catch (error) {
+        // Keep lifecycle state safe when ranking fails after pathway evaluation succeeds.
+        try {
+          await convex.mutation(
+            (anyApi as any).recommendationRuns.setTerminalStatusForUser,
+            {
+              runId: run.runId,
+              userId,
+              status: 'failed',
+              statusMessage: 'Recommendation ranking failed and requires retry.',
+            },
+          )
+        }
+        catch {
+        }
+
+        const mappedError = toLifecycleError(error)
+        if (mappedError.statusCode === 500) {
+          throw createError({
+            statusCode: 500,
+            statusMessage: 'Unable to generate ranked recommendations for this run',
+          })
+        }
+
+        throw mappedError
+      }
     }
   }
 

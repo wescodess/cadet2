@@ -20,6 +20,29 @@ type BlockedPathwayOutcome = {
   status: 'blocked'
   unmetConditions: string[]
 }
+type RecommendationTier = 'strong-fit' | 'conditional-fit' | 'lower-confidence'
+type RankedDirectRecommendation = {
+  pathwayId: string
+  type: 'direct'
+  rank: number
+  tier: RecommendationTier
+  score: number
+}
+type RankedBlockedRecommendation = {
+  pathwayId: string
+  type: 'blocked'
+  rank: number
+  tier: RecommendationTier
+  score: number
+}
+type RankedComposedRecommendation = {
+  pathwayId: string
+  type: 'composed'
+  rank: number
+  tier: RecommendationTier
+  score: number
+  composedSteps: string[]
+}
 
 const directPathwayOutcomeValidator = v.object({
   pathwayId: v.string(),
@@ -30,6 +53,37 @@ const blockedPathwayOutcomeValidator = v.object({
   pathwayId: v.string(),
   status: v.literal('blocked'),
   unmetConditions: v.array(v.string()),
+})
+
+const recommendationTierValidator = v.union(
+  v.literal('strong-fit'),
+  v.literal('conditional-fit'),
+  v.literal('lower-confidence'),
+)
+
+const rankedDirectRecommendationValidator = v.object({
+  pathwayId: v.string(),
+  type: v.literal('direct'),
+  rank: v.number(),
+  tier: recommendationTierValidator,
+  score: v.number(),
+})
+
+const rankedBlockedRecommendationValidator = v.object({
+  pathwayId: v.string(),
+  type: v.literal('blocked'),
+  rank: v.number(),
+  tier: recommendationTierValidator,
+  score: v.number(),
+})
+
+const rankedComposedRecommendationValidator = v.object({
+  pathwayId: v.string(),
+  type: v.literal('composed'),
+  rank: v.number(),
+  tier: recommendationTierValidator,
+  score: v.number(),
+  composedSteps: v.array(v.string()),
 })
 
 const inProgressStatuses = new Set<RecommendationLifecycleStatus>(['queued', 'evaluating'])
@@ -123,6 +177,107 @@ function normalizeBlockedOutcomes(outcomes: BlockedPathwayOutcome[]) {
       status: 'blocked' as const,
       unmetConditions: Array.from(unmetConditions).sort(),
     }))
+}
+
+function directOutcomesEqual(left: DirectPathwayOutcome[], right: DirectPathwayOutcome[]) {
+  if (left.length !== right.length) {
+    return false
+  }
+
+  for (let index = 0; index < left.length; index += 1) {
+    if (left[index].pathwayId !== right[index].pathwayId) {
+      return false
+    }
+  }
+
+  return true
+}
+
+function blockedOutcomesEqual(left: BlockedPathwayOutcome[], right: BlockedPathwayOutcome[]) {
+  if (left.length !== right.length) {
+    return false
+  }
+
+  for (let index = 0; index < left.length; index += 1) {
+    const leftOutcome = left[index]
+    const rightOutcome = right[index]
+
+    if (leftOutcome.pathwayId !== rightOutcome.pathwayId) {
+      return false
+    }
+
+    if (leftOutcome.unmetConditions.length !== rightOutcome.unmetConditions.length) {
+      return false
+    }
+
+    for (let unmetIndex = 0; unmetIndex < leftOutcome.unmetConditions.length; unmetIndex += 1) {
+      if (leftOutcome.unmetConditions[unmetIndex] !== rightOutcome.unmetConditions[unmetIndex]) {
+        return false
+      }
+    }
+  }
+
+  return true
+}
+
+function dedupeAndSortRankedCandidates<T extends {
+  pathwayId: string
+  rank: number
+  score: number
+}>(candidates: T[]) {
+  const byPathway = new Map<string, T>()
+
+  for (const candidate of candidates) {
+    const current = byPathway.get(candidate.pathwayId)
+    if (!current || candidate.rank < current.rank || (candidate.rank === current.rank && candidate.score > current.score)) {
+      byPathway.set(candidate.pathwayId, candidate)
+    }
+  }
+
+  return Array.from(byPathway.values()).sort((left, right) => {
+    if (left.rank !== right.rank) {
+      return left.rank - right.rank
+    }
+
+    if (left.score !== right.score) {
+      return right.score - left.score
+    }
+
+    return left.pathwayId.localeCompare(right.pathwayId)
+  })
+}
+
+function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommendation[]) {
+  return dedupeAndSortRankedCandidates(candidates).map(candidate => ({
+    pathwayId: candidate.pathwayId,
+    type: 'direct' as const,
+    rank: Math.max(1, Math.round(candidate.rank)),
+    tier: candidate.tier,
+    score: Math.max(1, Math.round(candidate.score)),
+  }))
+}
+
+function normalizeRankedBlockedRecommendations(candidates: RankedBlockedRecommendation[]) {
+  return dedupeAndSortRankedCandidates(candidates).map(candidate => ({
+    pathwayId: candidate.pathwayId,
+    type: 'blocked' as const,
+    rank: Math.max(1, Math.round(candidate.rank)),
+    tier: candidate.tier,
+    score: Math.max(1, Math.round(candidate.score)),
+  }))
+}
+
+function normalizeRankedComposedRecommendations(candidates: RankedComposedRecommendation[]) {
+  return dedupeAndSortRankedCandidates(candidates).map(candidate => ({
+    pathwayId: candidate.pathwayId,
+    type: 'composed' as const,
+    rank: Math.max(1, Math.round(candidate.rank)),
+    tier: candidate.tier,
+    score: Math.max(1, Math.round(candidate.score)),
+    composedSteps: Array.from(new Set(candidate.composedSteps
+      .map(step => step.trim())
+      .filter(step => step.length > 0))),
+  }))
 }
 
 export const createQueuedRun = mutation({
@@ -256,6 +411,23 @@ export const writePathwayEvaluationForUser = mutation({
 
     const normalizedDirect = normalizeDirectOutcomes(args.direct)
     const normalizedBlocked = normalizeBlockedOutcomes(args.blocked)
+    const existingDirect = normalizeDirectOutcomes((row.pathwayEvaluation?.direct || []) as DirectPathwayOutcome[])
+    const existingBlocked = normalizeBlockedOutcomes((row.pathwayEvaluation?.blocked || []) as BlockedPathwayOutcome[])
+
+    if (
+      row.pathwayEvaluation
+      && directOutcomesEqual(existingDirect, normalizedDirect)
+      && blockedOutcomesEqual(existingBlocked, normalizedBlocked)
+    ) {
+      return {
+        runId: row.runId,
+        profileSnapshotId: row.profileSnapshotId,
+        direct: existingDirect,
+        blocked: existingBlocked,
+        evaluatedAt: row.pathwayEvaluation.evaluatedAt,
+      }
+    }
+
     const now = Date.now()
 
     await ctx.db.patch(row._id, {
@@ -274,6 +446,87 @@ export const writePathwayEvaluationForUser = mutation({
       direct: normalizedDirect,
       blocked: normalizedBlocked,
       evaluatedAt: now,
+    }
+  },
+})
+
+export const readRankedRecommendationsForUser = query({
+  args: {
+    runId: v.string(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const row = await ctx.db
+      .query('recommendation_runs')
+      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .first()
+
+    if (!row || row.userId !== args.userId) {
+      return null
+    }
+
+    return {
+      runId: row.runId,
+      profileSnapshotId: row.profileSnapshotId,
+      status: row.status,
+      rankedAt: row.recommendationResults?.rankedAt ?? null,
+      noComposedReason: row.recommendationResults?.noComposedReason ?? '',
+      results: {
+        direct: normalizeRankedDirectRecommendations(row.recommendationResults?.direct || []),
+        blocked: normalizeRankedBlockedRecommendations(row.recommendationResults?.blocked || []),
+        composed: normalizeRankedComposedRecommendations(row.recommendationResults?.composed || []),
+      },
+    }
+  },
+})
+
+export const writeRankedRecommendationsForUser = mutation({
+  args: {
+    runId: v.string(),
+    userId: v.string(),
+    profileSnapshotId: v.string(),
+    direct: v.array(rankedDirectRecommendationValidator),
+    blocked: v.array(rankedBlockedRecommendationValidator),
+    composed: v.array(rankedComposedRecommendationValidator),
+    noComposedReason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const row = await ctx.db
+      .query('recommendation_runs')
+      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .first()
+
+    if (!row || row.userId !== args.userId || row.profileSnapshotId !== args.profileSnapshotId) {
+      throw new Error('RUN_NOT_FOUND')
+    }
+
+    const normalizedDirect = normalizeRankedDirectRecommendations(args.direct)
+    const normalizedBlocked = normalizeRankedBlockedRecommendations(args.blocked)
+    const normalizedComposed = normalizeRankedComposedRecommendations(args.composed)
+    const now = Date.now()
+
+    await ctx.db.patch(row._id, {
+      recommendationResults: {
+        rankedAt: now,
+        rankerVersion: 'mvp-recommendation-ranking-v1',
+        noComposedReason: args.noComposedReason?.trim() || undefined,
+        direct: normalizedDirect,
+        blocked: normalizedBlocked,
+        composed: normalizedComposed,
+      },
+      updatedAt: now,
+    })
+
+    return {
+      runId: row.runId,
+      profileSnapshotId: row.profileSnapshotId,
+      rankedAt: now,
+      noComposedReason: args.noComposedReason?.trim() || '',
+      results: {
+        direct: normalizedDirect,
+        blocked: normalizedBlocked,
+        composed: normalizedComposed,
+      },
     }
   },
 })

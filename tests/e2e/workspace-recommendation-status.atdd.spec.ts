@@ -111,6 +111,42 @@ async function mockRecommendationLifecycleResponses(
     })
   })
 
+  await page.route('**/api/recommendations/runs/*/start**', async (route) => {
+    const url = new URL(route.request().url())
+    const segments = url.pathname.split('/').filter(Boolean)
+    const runId = segments.length >= 4 ? segments[3] : ''
+    const payload = (runId && statusByRunId[runId]) ? statusByRunId[runId] : runs[0]
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(payload || runs[0] || createRunWithStatus('queued', '0')),
+    })
+  })
+
+  await page.route('**/api/recommendations/runs/*/results**', async (route) => {
+    const url = new URL(route.request().url())
+    const segments = url.pathname.split('/').filter(Boolean)
+    const runId = segments.length >= 4 ? segments[3] : ''
+    const run = runs.find(candidate => candidate.runId === runId) || runs[0]
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        runId: run?.runId || 'run_story21_0',
+        profileSnapshotId: run?.profileSnapshotId || 'snapshot_story21_0',
+        status: run?.status || 'queued',
+        results: {
+          direct: [],
+          blocked: [],
+          composed: [],
+        },
+        noComposedReason: '',
+      }),
+    })
+  })
+
   return routeProbe
 }
 
