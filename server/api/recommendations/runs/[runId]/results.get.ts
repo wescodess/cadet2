@@ -9,6 +9,14 @@ type RecommendationResultTier = 'strong-fit' | 'conditional-fit' | 'lower-confid
 type RecommendationQualification = 'supported' | 'low-confidence' | 'withheld'
 type RecommendationConfidence = 'high' | 'medium' | 'low' | 'withheld'
 type RecommendationFreshness = 'fresh' | 'stale' | 'unknown'
+type RecommendationFitSignalState = 'strength' | 'watch' | 'gap'
+
+type RecommendationFitSignal = {
+  id: string
+  label: string
+  detail: string
+  state: RecommendationFitSignalState
+}
 
 type RankedDirectRecommendation = {
   pathwayId: string
@@ -16,6 +24,8 @@ type RankedDirectRecommendation = {
   rank: number
   tier: RecommendationResultTier
   score: number
+  rationale: string
+  fitSignals: RecommendationFitSignal[]
   qualification: RecommendationQualification
   confidence: RecommendationConfidence
   freshness: RecommendationFreshness
@@ -28,6 +38,8 @@ type RankedBlockedRecommendation = {
   rank: number
   tier: RecommendationResultTier
   score: number
+  rationale: string
+  fitSignals: RecommendationFitSignal[]
   qualification: RecommendationQualification
   confidence: RecommendationConfidence
   freshness: RecommendationFreshness
@@ -41,6 +53,8 @@ type RankedComposedRecommendation = {
   tier: RecommendationResultTier
   score: number
   composedSteps: string[]
+  rationale: string
+  fitSignals: RecommendationFitSignal[]
   qualification: RecommendationQualification
   confidence: RecommendationConfidence
   freshness: RecommendationFreshness
@@ -127,6 +141,8 @@ export default defineEventHandler(async (event) => {
           rank: candidate.rank,
           tier: candidate.tier,
           score: candidate.score,
+          rationale: candidate.rationale,
+          fitSignals: candidate.fitSignals,
           qualification: candidate.qualification,
           confidence: candidate.confidence,
           freshness: candidate.freshness,
@@ -140,6 +156,8 @@ export default defineEventHandler(async (event) => {
           rank: candidate.rank,
           tier: candidate.tier,
           score: candidate.score,
+          rationale: candidate.rationale,
+          fitSignals: candidate.fitSignals,
           qualification: candidate.qualification,
           confidence: candidate.confidence,
           freshness: candidate.freshness,
@@ -154,6 +172,8 @@ export default defineEventHandler(async (event) => {
           tier: candidate.tier,
           score: candidate.score,
           composedSteps: candidate.composedSteps,
+          rationale: candidate.rationale,
+          fitSignals: candidate.fitSignals,
           qualification: candidate.qualification,
           confidence: candidate.confidence,
           freshness: candidate.freshness,

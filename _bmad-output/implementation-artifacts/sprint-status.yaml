@@ -52,10 +52,10 @@ development_status:
   2-2-evaluate-direct-and-blocked-pathways-in-the-mvp-pathway-set: done
   2-3-generate-and-rank-limited-composed-pathway-recommendations: done
   2-4-safely-qualify-weak-results-and-support-recommendation-refresh: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
 
-  epic-3: backlog
-  3-1-show-recommendation-rationale-and-fit-signals: backlog
+  epic-3: in-progress
+  3-1-show-recommendation-rationale-and-fit-signals: done
   3-2-surface-blockers-tradeoffs-and-improvement-actions: backlog
   3-3-compare-immediate-and-longer-horizon-pathways: backlog
   3-4-display-citations-source-context-and-trust-boundaries: backlog

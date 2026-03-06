@@ -99,6 +99,7 @@ export const RECOMMENDATION_LIFECYCLE_ATDD_TEST_IDS = {
   statusBanner: 'recommendation-status-banner',
   runList: 'workspace-run-list',
   runItem: 'workspace-run-item',
+  tierBadge: 'recommendation-tier-badge',
 } as const
 
 export const RECOMMENDATION_LIFECYCLE_CANONICAL_STATUSES = [
@@ -174,4 +175,10 @@ export const RECOMMENDATION_FRESHNESS_LEVELS = [
   'fresh',
   'stale',
   'unknown',
+] as const
+
+export const RECOMMENDATION_FIT_SIGNAL_STATES = [
+  'strength',
+  'watch',
+  'gap',
 ] as const

@@ -6,6 +6,7 @@ import {
   type RecommendationLifecycleRecord,
 } from '../support/fixtures/factories/recommendation-lifecycle-factory'
 import {
+  RECOMMENDATION_FIT_SIGNAL_STATES,
   RECOMMENDATION_PATHWAY_SUPPORTED_IDS,
   RECOMMENDATION_RESULT_TYPES,
   RECOMMENDATION_TIER_VALUES,
@@ -21,6 +22,13 @@ type RankedRecommendation = {
   rank: number
   tier: RecommendationTier
   score: number
+  rationale: string
+  fitSignals: Array<{
+    id: string
+    label: string
+    detail: string
+    state: typeof RECOMMENDATION_FIT_SIGNAL_STATES[number]
+  }>
   composedSteps?: string[]
 }
 
@@ -148,6 +156,18 @@ function allRankedResults(body: RecommendationResultsResponse): RankedRecommenda
 
 function emittedPathwayIds(body: RecommendationResultsResponse): string[] {
   return allRankedResults(body).map(candidate => candidate.pathwayId)
+}
+
+function expectRationaleAndFitSignals(candidate: RankedRecommendation) {
+  expect(candidate.rationale.trim().length).toBeGreaterThan(0)
+  expect(candidate.fitSignals.length).toBeGreaterThan(0)
+
+  for (const signal of candidate.fitSignals) {
+    expect(signal.id.trim().length).toBeGreaterThan(0)
+    expect(signal.label.trim().length).toBeGreaterThan(0)
+    expect(signal.detail.trim().length).toBeGreaterThan(0)
+    expect(RECOMMENDATION_FIT_SIGNAL_STATES).toContain(signal.state)
+  }
 }
 
 function createNoComposedRoutePayload() {
@@ -279,6 +299,7 @@ test.describe('Story 2.3 Recommendation Ranking API ATDD', () => {
       expect(RECOMMENDATION_TIER_VALUES).toContain(candidate.tier)
       expect(RECOMMENDATION_RESULT_TYPES).toContain(candidate.type)
       expect(candidate.rank).toBeGreaterThan(0)
+      expectRationaleAndFitSignals(candidate)
     }
 
     const ranks = candidates.map(candidate => candidate.rank).sort((a, b) => a - b)
@@ -323,6 +344,44 @@ test.describe('Story 2.3 Recommendation Ranking API ATDD', () => {
     }
     expect(Object.prototype.hasOwnProperty.call(body, 'providerPayload')).toBe(false)
     expect(Object.prototype.hasOwnProperty.call(body, 'providerResponse')).toBe(false)
+  })
+
+  test('[P0][AC1][AC2] direct, blocked, and composed candidates expose normalized rationale and fit-signal contracts', async ({
+    request,
+    appBaseUrl,
+  }) => {
+    await ensureAuthenticatedRequest(request, appBaseUrl)
+    await resetRecommendationRuns(request, appBaseUrl)
+
+    const routeProbe = createRecommendationLifecycleRouteProbe(appBaseUrl)
+    const seededRun = await seedRecommendationRun(request, appBaseUrl, {
+      runId: uniqueId('run_story31_api_rationale_contract'),
+      profileSnapshotId: uniqueId('snapshot_story31_api_rationale_contract'),
+      status: 'queued',
+      resetExisting: true,
+    })
+
+    const startResponse = await request.post(routeProbe.recommendationRunStartPath(seededRun.runId), {
+      failOnStatusCode: false,
+    })
+    expect(startResponse.status()).toBe(200)
+
+    const { response, body } = await readResultsForRun(request, appBaseUrl, seededRun.runId)
+    expect(response.status()).toBe(200)
+    expect(Array.isArray(body.results.direct)).toBe(true)
+    expect(Array.isArray(body.results.blocked)).toBe(true)
+    expect(Array.isArray(body.results.composed)).toBe(true)
+    expect(allRankedResults(body).length).toBeGreaterThan(0)
+
+    for (const candidate of body.results.direct) {
+      expectRationaleAndFitSignals(candidate)
+    }
+    for (const candidate of body.results.blocked) {
+      expectRationaleAndFitSignals(candidate)
+    }
+    for (const candidate of body.results.composed) {
+      expectRationaleAndFitSignals(candidate)
+    }
   })
 
   test('[P1][AC4] no-composed-route scenarios keep direct/blocked outputs and emit an explicit no-composed signal', async ({

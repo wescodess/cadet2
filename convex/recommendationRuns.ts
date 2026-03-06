@@ -24,12 +24,21 @@ type RecommendationTier = 'strong-fit' | 'conditional-fit' | 'lower-confidence'
 type RecommendationQualification = 'supported' | 'low-confidence' | 'withheld'
 type RecommendationConfidence = 'high' | 'medium' | 'low' | 'withheld'
 type RecommendationFreshness = 'fresh' | 'stale' | 'unknown'
+type RecommendationFitSignalState = 'strength' | 'watch' | 'gap'
+type RecommendationFitSignal = {
+  id: string
+  label: string
+  detail: string
+  state: RecommendationFitSignalState
+}
 type RankedDirectRecommendation = {
   pathwayId: string
   type: 'direct'
   rank: number
   tier: RecommendationTier
   score: number
+  rationale?: string
+  fitSignals?: RecommendationFitSignal[]
   qualification?: RecommendationQualification
   confidence?: RecommendationConfidence
   freshness?: RecommendationFreshness
@@ -41,6 +50,8 @@ type RankedBlockedRecommendation = {
   rank: number
   tier: RecommendationTier
   score: number
+  rationale?: string
+  fitSignals?: RecommendationFitSignal[]
   qualification?: RecommendationQualification
   confidence?: RecommendationConfidence
   freshness?: RecommendationFreshness
@@ -53,6 +64,8 @@ type RankedComposedRecommendation = {
   tier: RecommendationTier
   score: number
   composedSteps: string[]
+  rationale?: string
+  fitSignals?: RecommendationFitSignal[]
   qualification?: RecommendationQualification
   confidence?: RecommendationConfidence
   freshness?: RecommendationFreshness
@@ -95,12 +108,27 @@ const recommendationFreshnessValidator = v.union(
   v.literal('unknown'),
 )
 
+const recommendationFitSignalStateValidator = v.union(
+  v.literal('strength'),
+  v.literal('watch'),
+  v.literal('gap'),
+)
+
+const recommendationFitSignalValidator = v.object({
+  id: v.string(),
+  label: v.string(),
+  detail: v.string(),
+  state: recommendationFitSignalStateValidator,
+})
+
 const rankedDirectRecommendationValidator = v.object({
   pathwayId: v.string(),
   type: v.literal('direct'),
   rank: v.number(),
   tier: recommendationTierValidator,
   score: v.number(),
+  rationale: v.optional(v.string()),
+  fitSignals: v.optional(v.array(recommendationFitSignalValidator)),
   qualification: v.optional(recommendationQualificationValidator),
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
@@ -113,6 +141,8 @@ const rankedBlockedRecommendationValidator = v.object({
   rank: v.number(),
   tier: recommendationTierValidator,
   score: v.number(),
+  rationale: v.optional(v.string()),
+  fitSignals: v.optional(v.array(recommendationFitSignalValidator)),
   qualification: v.optional(recommendationQualificationValidator),
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
@@ -126,6 +156,8 @@ const rankedComposedRecommendationValidator = v.object({
   tier: recommendationTierValidator,
   score: v.number(),
   composedSteps: v.array(v.string()),
+  rationale: v.optional(v.string()),
+  fitSignals: v.optional(v.array(recommendationFitSignalValidator)),
   qualification: v.optional(recommendationQualificationValidator),
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
@@ -325,6 +357,62 @@ function normalizeCaveat(value: unknown, fallback: string): string {
   return fallback
 }
 
+function normalizeRationale(value: unknown, fallback: string): string {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim()
+  }
+
+  return fallback
+}
+
+function normalizeFitSignalState(value: unknown): RecommendationFitSignalState {
+  if (value === 'strength' || value === 'watch' || value === 'gap') {
+    return value
+  }
+
+  return 'watch'
+}
+
+function normalizeFitSignals(value: unknown): RecommendationFitSignal[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
+    .map((entry, index) => {
+      const id = typeof entry.id === 'string' && entry.id.trim().length > 0
+        ? entry.id.trim()
+        : `signal-${index + 1}`
+      const label = typeof entry.label === 'string' && entry.label.trim().length > 0
+        ? entry.label.trim()
+        : 'Fit signal'
+      const detail = typeof entry.detail === 'string' && entry.detail.trim().length > 0
+        ? entry.detail.trim()
+        : 'Profile signal was not available.'
+
+      return {
+        id,
+        label,
+        detail,
+        state: normalizeFitSignalState(entry.state),
+      }
+    })
+}
+
+function withDefaultFitSignal(signals: RecommendationFitSignal[], detail: string): RecommendationFitSignal[] {
+  if (signals.length > 0) {
+    return signals
+  }
+
+  return [{
+    id: 'fit-overview',
+    label: 'Fit overview',
+    detail,
+    state: 'watch',
+  }]
+}
+
 function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommendation[]) {
   return dedupeAndSortRankedCandidates(candidates).map(candidate => ({
     pathwayId: candidate.pathwayId,
@@ -332,6 +420,11 @@ function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommenda
     rank: Math.max(1, Math.round(candidate.rank)),
     tier: candidate.tier,
     score: Math.max(1, Math.round(candidate.score)),
+    rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} appears based on current direct-fit pathway evaluation.`),
+    fitSignals: withDefaultFitSignal(
+      normalizeFitSignals(candidate.fitSignals),
+      'Direct-fit signal available from pathway scoring and qualification metadata.',
+    ),
     qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
     confidence: normalizeConfidence(candidate.confidence, 'low'),
     freshness: normalizeFreshness(candidate.freshness, 'unknown'),
@@ -346,6 +439,11 @@ function normalizeRankedBlockedRecommendations(candidates: RankedBlockedRecommen
     rank: Math.max(1, Math.round(candidate.rank)),
     tier: candidate.tier,
     score: Math.max(1, Math.round(candidate.score)),
+    rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} is conditionally shown because key pathway constraints are unresolved.`),
+    fitSignals: withDefaultFitSignal(
+      normalizeFitSignals(candidate.fitSignals),
+      'Conditional signal available because pathway requirements remain partially unmet.',
+    ),
     qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
     confidence: normalizeConfidence(candidate.confidence, 'low'),
     freshness: normalizeFreshness(candidate.freshness, 'unknown'),
@@ -363,6 +461,11 @@ function normalizeRankedComposedRecommendations(candidates: RankedComposedRecomm
     composedSteps: Array.from(new Set(candidate.composedSteps
       .map(step => step.trim())
       .filter(step => step.length > 0))),
+    rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} is presented as a staged route based on composed pathway evaluation.`),
+    fitSignals: withDefaultFitSignal(
+      normalizeFitSignals(candidate.fitSignals),
+      'Staged fit signal available because this pathway relies on a composed route.',
+    ),
     qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
     confidence: normalizeConfidence(candidate.confidence, 'low'),
     freshness: normalizeFreshness(candidate.freshness, 'unknown'),

@@ -6,45 +6,40 @@ stepsCompleted:
   - step-04c-aggregate
   - step-05-validate-and-complete
 lastStep: step-05-validate-and-complete
-lastSaved: '2026-03-05T09:00:23Z'
+lastSaved: '2026-03-06T02:45:58Z'
 workflowType: testarch-atdd
 inputDocuments:
   - _bmad/tea/config.yaml
   - _bmad/tea/testarch/tea-index.csv
   - _bmad-output/implementation-artifacts/2-4-safely-qualify-weak-results-and-support-recommendation-refresh.md
-  - _bmad-output/implementation-artifacts/sprint-status.yaml
   - playwright.config.ts
   - package.json
-  - server/api/recommendations/runs/[runId]/start.post.ts
-  - server/api/recommendations/runs/[runId]/results.get.ts
-  - server/api/recommendations/runs/[runId]/status.get.ts
-  - server/utils/recommendations/generateRankedRecommendations.ts
-  - server/utils/recommendations/lifecycle.ts
-  - convex/recommendationRuns.ts
-  - convex/schema.ts
-  - tests/support/fixtures/factories/recommendation-lifecycle-factory.ts
-  - tests/support/fixtures/test-data.ts
+  - tests/api/recommendation-qualification.atdd.spec.ts
+  - tests/api/recommendation-refresh.atdd.spec.ts
+  - tests/integration/recommendation-qualification.integration.spec.ts
+  - tests/integration/recommendation-refresh.integration.spec.ts
   - _bmad/tea/testarch/knowledge/data-factories.md
   - _bmad/tea/testarch/knowledge/component-tdd.md
   - _bmad/tea/testarch/knowledge/test-quality.md
   - _bmad/tea/testarch/knowledge/test-healing-patterns.md
+  - _bmad/tea/testarch/knowledge/selector-resilience.md
+  - _bmad/tea/testarch/knowledge/timing-debugging.md
   - _bmad/tea/testarch/knowledge/overview.md
   - _bmad/tea/testarch/knowledge/api-request.md
+  - _bmad/tea/testarch/knowledge/network-recorder.md
   - _bmad/tea/testarch/knowledge/auth-session.md
+  - _bmad/tea/testarch/knowledge/intercept-network-call.md
   - _bmad/tea/testarch/knowledge/recurse.md
-  - _bmad/tea/testarch/knowledge/test-levels-framework.md
-  - _bmad/tea/testarch/knowledge/test-priorities-matrix.md
-  - _bmad/tea/testarch/knowledge/ci-burn-in.md
-  - _bmad/tea/testarch/knowledge/pactjs-utils-overview.md
-  - _bmad/tea/testarch/knowledge/pactjs-utils-consumer-helpers.md
-  - _bmad/tea/testarch/knowledge/pactjs-utils-provider-verifier.md
-  - _bmad/tea/testarch/knowledge/pactjs-utils-request-filter.md
-  - _bmad/tea/testarch/knowledge/pact-mcp.md
+  - _bmad/tea/testarch/knowledge/log.md
+  - _bmad/tea/testarch/knowledge/file-utils.md
+  - _bmad/tea/testarch/knowledge/network-error-monitor.md
+  - _bmad/tea/testarch/knowledge/fixtures-composition.md
+  - _bmad/tea/testarch/knowledge/playwright-cli.md
 ---
 
 # ATDD Checklist - Epic 2, Story 2.4: Safely Qualify Weak Results and Support Recommendation Refresh
 
-**Date:** 2026-03-05
+**Date:** 2026-03-06
 **Author:** Wesleyukadike
 **Primary Test Level:** API and integration contracts for qualification/degradation and refresh lifecycle continuity
 
@@ -52,7 +47,7 @@ inputDocuments:
 
 ## Story Summary
 
-Story 2.4 introduces trust qualification for weak recommendation outputs and adds explicit refresh/re-run support after profile updates. The scope is backend-only and extends the Story 2.3 ranked-output pipeline with degraded/failed safeguards, qualification metadata, and run lineage continuity.
+Story 2.4 introduces trust qualification for weak recommendation outputs and explicit refresh/re-run behavior after profile updates. This run generated dedicated RED-phase test files without overwriting existing green implementation test files.
 
 **As a** immigration user  
 **I want** weak recommendation outputs to be qualified and my run to be refreshable after profile changes  
@@ -70,20 +65,19 @@ Story 2.4 introduces trust qualification for weak recommendation outputs and add
 
 ## Preflight & Context (Step 1)
 
-- **Detected stack for this story run:** `backend` (story-scoped backend/non-UI execution)
+- **Detected stack:** `frontend` (Nuxt + Playwright project), with backend API/integration coverage selected by story scope.
 - **Prerequisites check:** ✅ passed
-  - Story exists and is `ready-for-dev`
-  - Clear acceptance criteria present
-  - Playwright API/integration project configured in `playwright.config.ts`
-  - Deterministic recommendation seed/reset utilities available
-- **Knowledge fragments loaded:** core + backend + Playwright utils API profile + Pact utility fragments (see `inputDocuments`)
+  - Story file exists and has explicit acceptance criteria
+  - Playwright config and API project present
+  - Existing recommendation fixtures/helpers present in `tests/support/fixtures`
+- **Knowledge loading:** core + frontend resiliency + Playwright utils + CLI fragment set loaded from TEA knowledge index.
 
 ---
 
 ## Generation Mode (Step 2)
 
 - **Selected mode:** AI generation
-- **Why:** Story 2.4 has no new UI routes/components; acceptance criteria are API/lifecycle contract centric.
+- **Why:** Story 2.4 is backend/non-UI by story contract; no additional UI route or component implementation is required.
 
 ---
 
@@ -95,7 +89,7 @@ Story 2.4 introduces trust qualification for weak recommendation outputs and add
 | AC2 | Refresh endpoint behavior, run lineage, and distinguishability | API + Integration | P0 |
 | AC3 | Safe-failure terminal behavior and recovery messaging | API + Integration | P1 |
 
-Red-phase rule applied: all generated Story 2.4 tests use `test.skip(...)` and assert expected green-phase behavior.
+RED-phase rule applied: all generated Story 2.4 tests use `test.skip(...)` and assert expected green-phase behavior.
 
 ---
 
@@ -103,52 +97,31 @@ Red-phase rule applied: all generated Story 2.4 tests use `test.skip(...)` and a
 
 ### API Tests (6 tests)
 
-**File:** `tests/api/recommendation-qualification.atdd.spec.ts` (298 lines)
+**File:** `tests/api/recommendation-qualification.red.atdd.spec.ts` (329 lines)
 
-- ✅ **Test:** `[P0][AC1] weak-evidence runs are finalized as degraded and expose confidence/freshness/caveat metadata`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** degraded finalization + per-candidate qualification metadata contract
-- ✅ **Test:** `[P0][AC1] degraded or withheld recommendations are explicit and never silently dropped from results payloads`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** explicit low-confidence/withheld representation in results contract
-- ✅ **Test:** `[P1][AC3] no-trustworthy scenarios fail safely with retry guidance and never surface strong-fit recommendations`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** safe failure semantics and anti-misleading output guardrails
+- ✅ `[P0][AC1]` weak-evidence runs are finalized as degraded and expose confidence/freshness/caveat metadata
+- ✅ `[P0][AC1]` degraded or withheld recommendations are explicit and never silently dropped from results payloads
+- ✅ `[P1][AC3]` no-trustworthy scenarios fail safely with retry guidance and never surface strong-fit recommendations
 
-**File:** `tests/api/recommendation-refresh.atdd.spec.ts` (195 lines)
+**File:** `tests/api/recommendation-refresh.red.atdd.spec.ts` (198 lines)
 
-- ✅ **Test:** `[P0][AC2] refresh creates a new evaluation linked to the previous run`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** refresh creates a new run and preserves linkage metadata
-- ✅ **Test:** `[P0][AC2] refresh keeps previous run distinguishable while tracking latest profile linkage`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** prior run immutability + refreshed run distinguishability
-- ✅ **Test:** `[P1][AC2][AC3] refresh rejects unknown or non-owned run identifiers`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** owner scoping and safe rejection behavior
+- ✅ `[P0][AC2]` refresh creates a new evaluation linked to the previous run
+- ✅ `[P0][AC2]` refresh keeps previous run distinguishable while tracking latest profile linkage
+- ✅ `[P1][AC2][AC3]` refresh rejects unknown or non-owned run identifiers
 
-### Integration Tests (5 tests)
+### Integration Tests (6 tests)
 
-**File:** `tests/integration/recommendation-qualification.integration.spec.ts` (257 lines)
+**File:** `tests/integration/recommendation-qualification.red.integration.spec.ts` (342 lines)
 
-- ✅ **Test:** `[P0][AC1][AC3] degraded qualification state persists across start, status, and results contracts`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** end-to-end lifecycle continuity for degraded qualification output
-- ✅ **Test:** `[P1][AC3] safe-failure path keeps failed runs user-safe and avoids strong-fit exposure`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** failed-state messaging and safe output semantics through integration boundaries
+- ✅ `[P0][AC1][AC3]` degraded qualification state persists across start, status, and results contracts
+- ✅ `[P1][AC3]` safe-failure path keeps failed runs user-safe and avoids strong-fit exposure
+- ✅ `[P1][AC3]` dependency/retrieval failures set failed status and return terminal-safe empty results payload
 
-**File:** `tests/integration/recommendation-refresh.integration.spec.ts` (191 lines)
+**File:** `tests/integration/recommendation-refresh.red.integration.spec.ts` (195 lines)
 
-- ✅ **Test:** `[P0][AC2] refresh flow creates a new linked run while preserving source run history`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** refresh lineage + source history continuity
-- ✅ **Test:** `[P1][AC2] consecutive refreshes create a traceable chain of run lineage metadata`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** chained refresh metadata continuity
-- ✅ **Test:** `[P1][AC2][AC3] refresh remains owner-scoped and rejects unknown/non-owned runs`
-  - **Status:** RED-guarded (`test.skip`)
-  - **Verifies:** authorization and unknown-run safeguards
+- ✅ `[P0][AC2]` refresh flow creates a new linked run while preserving source run history
+- ✅ `[P1][AC2]` consecutive refreshes create a traceable chain of run lineage metadata
+- ✅ `[P1][AC2][AC3]` refresh remains owner-scoped and rejects unknown/non-owned runs
 
 ### E2E Tests (0 tests)
 
@@ -156,21 +129,14 @@ Red-phase rule applied: all generated Story 2.4 tests use `test.skip(...)` and a
 
 ---
 
-## Data Factories & Fixtures Updated
+## Data Factories & Fixtures
 
-### Recommendation Route Probe (Extended)
+No new fixture/factory file required for this RED run. Existing recommendation lifecycle helpers and constants were reused.
 
-**File:** `tests/support/fixtures/factories/recommendation-lifecycle-factory.ts`
+Fixture needs tracked for green phase:
 
-- Added `recommendationRunRefreshPath(runId)` helper for canonical refresh route generation.
-
-### Recommendation Qualification Constants
-
-**File:** `tests/support/fixtures/test-data.ts`
-
-- Added `RECOMMENDATION_QUALIFICATION_LEVELS` (`supported`, `low-confidence`, `withheld`)
-- Added `RECOMMENDATION_CONFIDENCE_LEVELS` (`high`, `medium`, `low`, `withheld`)
-- Added `RECOMMENDATION_FRESHNESS_LEVELS` (`fresh`, `stale`, `unknown`)
+- `recommendationRunRefreshPath` route probe continuity
+- qualification metadata constants (`confidence`, `freshness`, `qualification`)
 
 ---
 
@@ -188,9 +154,7 @@ Red-phase rule applied: all generated Story 2.4 tests use `test.skip(...)` and a
   "profileSnapshotId": "snapshot_story24_refresh_002",
   "status": "queued",
   "refreshedFromRunId": "run_story24_refresh_001",
-  "previousProfileSnapshotId": "snapshot_story24_refresh_001",
-  "createdAt": "2026-03-05T09:00:23.000Z",
-  "updatedAt": "2026-03-05T09:00:23.000Z"
+  "previousProfileSnapshotId": "snapshot_story24_refresh_001"
 }
 ```
 
@@ -227,32 +191,32 @@ None required for Story 2.4 (backend-only slice).
 ### Test Group: Qualification Metadata + Safe Finalization
 
 **Files:**
-- `tests/api/recommendation-qualification.atdd.spec.ts`
-- `tests/integration/recommendation-qualification.integration.spec.ts`
+
+- `tests/api/recommendation-qualification.red.atdd.spec.ts`
+- `tests/integration/recommendation-qualification.red.integration.spec.ts`
 
 **Tasks to make tests pass (green run):**
 
-- [ ] Add qualification layer (`server/utils/recommendations/qualifyWeakRecommendationResults.ts`) to classify supported vs low-confidence vs withheld
-- [ ] Extend Convex schema/run contracts with confidence/freshness/qualification/caveat candidate metadata
-- [ ] Apply degraded/failed finalization semantics in recommendation orchestration before terminal state commit
-- [ ] Ensure failed paths do not expose misleading strong-fit outputs
-- [ ] Remove `test.skip()` from qualification tests and validate to green
+- [ ] Implement qualification layer and metadata contract persistence
+- [ ] Enforce degraded/failed finalization semantics before terminal commit
+- [ ] Ensure failed paths never surface misleading `strong-fit` outcomes
+- [ ] Remove `test.skip()` from red files and run targeted API+integration tests
 
 **Estimated Effort:** 4.0 hours
 
 ### Test Group: Refresh/Re-run Lineage
 
 **Files:**
-- `tests/api/recommendation-refresh.atdd.spec.ts`
-- `tests/integration/recommendation-refresh.integration.spec.ts`
+
+- `tests/api/recommendation-refresh.red.atdd.spec.ts`
+- `tests/integration/recommendation-refresh.red.integration.spec.ts`
 
 **Tasks to make tests pass (green run):**
 
-- [ ] Add refresh route: `POST /api/recommendations/runs/:runId/refresh`
-- [ ] Enforce owner-scoped access guards for refresh operations
-- [ ] Persist refresh lineage metadata (`refreshedFromRunId`, previous snapshot linkage)
-- [ ] Preserve source-run immutability while creating distinguishable refreshed runs
-- [ ] Remove `test.skip()` from refresh tests and validate to green
+- [ ] Enforce owner-scoped refresh route behavior and latest profile linkage
+- [ ] Persist and verify refresh lineage continuity fields
+- [ ] Preserve source-run distinguishability and historical immutability
+- [ ] Remove `test.skip()` from red files and run targeted API+integration tests
 
 **Estimated Effort:** 3.0 hours
 
@@ -261,14 +225,15 @@ None required for Story 2.4 (backend-only slice).
 ## Running Tests
 
 ```bash
-# Validate Story 2.4 files are collected
-pnpm exec playwright test --project=api tests/api/recommendation-qualification.atdd.spec.ts tests/api/recommendation-refresh.atdd.spec.ts tests/integration/recommendation-qualification.integration.spec.ts tests/integration/recommendation-refresh.integration.spec.ts --list
+# Run all Story 2.4 red-phase test files
+pnpm exec playwright test --project=api \
+  tests/api/recommendation-qualification.red.atdd.spec.ts \
+  tests/api/recommendation-refresh.red.atdd.spec.ts \
+  tests/integration/recommendation-qualification.red.integration.spec.ts \
+  tests/integration/recommendation-refresh.red.integration.spec.ts
 
-# Story 2.4 API red-phase tests (all intentionally skipped)
-pnpm exec playwright test --project=api tests/api/recommendation-qualification.atdd.spec.ts tests/api/recommendation-refresh.atdd.spec.ts
-
-# Story 2.4 integration red-phase tests (all intentionally skipped)
-pnpm exec playwright test --project=api tests/integration/recommendation-qualification.integration.spec.ts tests/integration/recommendation-refresh.integration.spec.ts
+# Run specific red file
+pnpm exec playwright test --project=api tests/api/recommendation-qualification.red.atdd.spec.ts
 ```
 
 ---
@@ -277,22 +242,62 @@ pnpm exec playwright test --project=api tests/integration/recommendation-qualifi
 
 ### RED Phase (Complete) ✅
 
-- ✅ Story 2.4 API and integration tests authored with expected future qualification/refresh behavior
-- ✅ All tests intentionally red-guarded using `test.skip(...)`
-- ✅ Backend-only story scope preserved (no E2E generation)
-- ✅ ATDD temp artifacts generated:
-  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-api-tests-2026-03-05T09-00-23Z.json`
-  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-e2e-tests-2026-03-05T09-00-23Z.json`
-  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-summary-2026-03-05T09-00-23Z.json`
+- ✅ Failing tests generated as `test.skip(...)`
+- ✅ AC-to-test mapping documented
+- ✅ Refresh/qualification contracts captured
 
-### GREEN Phase (DEV Team - Next Steps)
+### GREEN Phase (DEV Next)
 
-1. Implement qualification metadata and safe finalization semantics in recommendation orchestration.
-2. Add refresh endpoint and run-lineage persistence behavior.
-3. Remove `test.skip()` incrementally and drive each scenario to green.
+1. Remove `test.skip(...)` one test at a time
+2. Implement minimum code to satisfy that test
+3. Run the specific file until green
+4. Repeat for remaining tests
 
 ### REFACTOR Phase
 
-- Consolidate qualification metadata types across server, Convex validators, and tests.
-- Keep refresh lineage contracts normalized and provider-agnostic at API boundaries.
-- Reuse deterministic seed/reset controls for stable regression coverage.
+1. Run the full Story 2.4 suite green
+2. Remove duplication and tighten shared helpers
+3. Keep tests deterministic and isolated
+
+---
+
+## Validation & Completion (Step 5)
+
+- ✅ Checklist validated against ATDD workflow criteria
+- ✅ Duplicate sections removed and output normalized
+- ✅ Temp artifacts stored in `_bmad-output/test-artifacts/atdd-temp/`
+- ✅ No CLI session artifacts left open for this run
+
+### Completion Summary
+
+- **Test files created:** 4 red-phase files
+- **Total red tests generated:** 12
+- **Checklist output path:** `_bmad-output/test-artifacts/atdd-checklist-2-4.md`
+- **Temp outputs:**
+  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-api-tests-2026-03-06T02-45-58Z.json`
+  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-e2e-tests-2026-03-06T02-45-58Z.json`
+  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-summary-2026-03-06T02-45-58Z.json`
+- **Risks/assumptions:** story marked done, so red-phase files were created with `.red.*` names to avoid clobbering existing green tests.
+- **Recommended next workflow:** `dev-story` (implement/validate against red files), then optional `test-review`.
+
+---
+
+## Knowledge Base References Applied
+
+- `data-factories.md`
+- `component-tdd.md`
+- `test-quality.md`
+- `test-healing-patterns.md`
+- `selector-resilience.md`
+- `timing-debugging.md`
+- `overview.md`
+- `api-request.md`
+- `network-recorder.md`
+- `auth-session.md`
+- `intercept-network-call.md`
+- `recurse.md`
+- `log.md`
+- `file-utils.md`
+- `network-error-monitor.md`
+- `fixtures-composition.md`
+- `playwright-cli.md`

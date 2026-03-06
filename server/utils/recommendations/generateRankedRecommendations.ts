@@ -1,4 +1,5 @@
 import { anyApi } from 'convex/server'
+import { sql } from 'drizzle-orm'
 
 import {
   generateComposedPathways,
@@ -7,6 +8,11 @@ import type {
   BlockedPathwayOutcome,
   DirectPathwayOutcome,
 } from '../pathways/evaluateDirectAndBlockedPathways'
+import { normalizeStoredIntakeDraft } from '../intake/normalizeIntakePayload'
+import {
+  buildRecommendationRationale,
+  toRecommendationProfileContext,
+} from './buildRecommendationRationale'
 import {
   rankRecommendationCandidates,
 } from './rankRecommendationCandidates'
@@ -55,6 +61,10 @@ type RecommendationResultsWriteRecord = RecommendationResultsPersistedRecord & {
   terminalStatusMessage: string
 }
 
+type ProfileSnapshotRow = {
+  submittedPayload: unknown
+}
+
 type ConvexAdminClientLike = {
   query: (funcRef: unknown, args: Record<string, unknown>) => Promise<unknown>
   mutation: (funcRef: unknown, args: Record<string, unknown>) => Promise<unknown>
@@ -88,6 +98,36 @@ function toComposedPathways(input: {
     direct: input.direct,
     blocked: input.blocked,
   })
+}
+
+async function loadRecommendationProfileContext(userId: string, profileSnapshotId: string) {
+  const result = await db.execute(sql`
+    SELECT "submittedPayload"
+    FROM "recommendation_profiles"
+    WHERE "snapshotId" = ${profileSnapshotId}
+      AND "userId" = ${userId}
+    LIMIT 1;
+  `)
+
+  const row = ((result as { rows?: ProfileSnapshotRow[] }).rows || [])[0]
+  if (!row) {
+    return null
+  }
+
+  const normalizedProfile = normalizeStoredIntakeDraft(row.submittedPayload as {
+    currentSection?: unknown
+    sectionProgress?: unknown
+    fieldValues?: unknown
+  })
+
+  return toRecommendationProfileContext(normalizedProfile)
+}
+
+function toBlockedOutcomeIndex(blockedOutcomes: RecommendationPathwayEvaluationRecord['blocked']) {
+  return blockedOutcomes.reduce((map, outcome) => {
+    map.set(outcome.pathwayId, [...outcome.unmetConditions])
+    return map
+  }, new Map<string, string[]>())
 }
 
 export async function generateRankedRecommendationsForRun(
@@ -155,15 +195,47 @@ export async function generateRankedRecommendationsForRun(
     })),
   })
 
+  const blockedOutcomeIndex = toBlockedOutcomeIndex(pathwayEvaluation.blocked)
+  const profileContext = await loadRecommendationProfileContext(input.userId, pathwayEvaluation.profileSnapshotId)
+  if (!profileContext) {
+    throw new Error('PROFILE_SNAPSHOT_NOT_FOUND')
+  }
+
+  const enriched = {
+    direct: qualified.direct.map(candidate => ({
+      ...candidate,
+      ...buildRecommendationRationale({
+        candidate,
+        profile: profileContext,
+      }),
+    })),
+    blocked: qualified.blocked.map(candidate => ({
+      ...candidate,
+      ...buildRecommendationRationale({
+        candidate,
+        profile: profileContext,
+        unmetConditions: blockedOutcomeIndex.get(candidate.pathwayId) || [],
+      }),
+    })),
+    composed: qualified.composed.map(candidate => ({
+      ...candidate,
+      ...buildRecommendationRationale({
+        candidate,
+        profile: profileContext,
+        unmetConditions: blockedOutcomeIndex.get(candidate.pathwayId) || [],
+      }),
+    })),
+  }
+
   const persisted = await input.convex.mutation(
     (anyApi as any).recommendationRuns.writeRankedRecommendationsForUser,
     {
       runId: input.runId,
       userId: input.userId,
       profileSnapshotId: pathwayEvaluation.profileSnapshotId,
-      direct: qualified.direct,
-      blocked: qualified.blocked,
-      composed: qualified.composed,
+      direct: enriched.direct,
+      blocked: enriched.blocked,
+      composed: enriched.composed,
       noComposedReason: composed.noComposedReason,
     },
   ) as RecommendationResultsPersistedRecord
