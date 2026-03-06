@@ -1,5 +1,6 @@
 import type { BlockedPathwayOutcome, DirectPathwayOutcome } from '../pathways/evaluateDirectAndBlockedPathways'
 import type { ComposedPathwayOutcome } from '../pathways/generateComposedPathways'
+import type { RecommendationFitSignal } from './buildRecommendationRationale'
 
 export const RECOMMENDATION_TIER_VALUES = ['strong-fit', 'conditional-fit', 'lower-confidence'] as const
 
@@ -11,6 +12,8 @@ export type RankedDirectRecommendation = {
   rank: number
   tier: RecommendationTier
   score: number
+  rationale: string
+  fitSignals: RecommendationFitSignal[]
 }
 
 export type RankedBlockedRecommendation = {
@@ -19,6 +22,8 @@ export type RankedBlockedRecommendation = {
   rank: number
   tier: RecommendationTier
   score: number
+  rationale: string
+  fitSignals: RecommendationFitSignal[]
 }
 
 export type RankedComposedRecommendation = {
@@ -28,6 +33,8 @@ export type RankedComposedRecommendation = {
   tier: RecommendationTier
   score: number
   composedSteps: string[]
+  rationale: string
+  fitSignals: RecommendationFitSignal[]
 }
 
 type RankedCandidate =
@@ -114,6 +121,8 @@ function toRankedCandidates(candidates: UnrankedCandidate[]): RankedCandidate[] 
         tier,
         score,
         composedSteps: [...(candidate.composedSteps || [])],
+        rationale: '',
+        fitSignals: [],
       }
     }
 
@@ -124,6 +133,8 @@ function toRankedCandidates(candidates: UnrankedCandidate[]): RankedCandidate[] 
         rank,
         tier,
         score,
+        rationale: '',
+        fitSignals: [],
       }
     }
 
@@ -133,6 +144,8 @@ function toRankedCandidates(candidates: UnrankedCandidate[]): RankedCandidate[] 
       rank,
       tier,
       score,
+      rationale: '',
+      fitSignals: [],
     }
   })
 }

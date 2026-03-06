@@ -1,11 +1,26 @@
 <script setup lang="ts">
+import RecommendationTierBadge from '~/components/workspace/RecommendationTierBadge.vue'
+
+type RecommendationFitSignal = {
+  id: string
+  label: string
+  detail: string
+  state: 'strength' | 'watch' | 'gap'
+}
+
 type RecommendationResultsCandidate = {
   pathwayId: string
   type: 'direct' | 'blocked' | 'composed'
   rank: number
   tier: 'strong-fit' | 'conditional-fit' | 'lower-confidence'
   score: number
+  rationale: string
+  fitSignals: RecommendationFitSignal[]
   composedSteps?: string[]
+  qualification: 'supported' | 'low-confidence' | 'withheld'
+  confidence: 'high' | 'medium' | 'low' | 'withheld'
+  freshness: 'fresh' | 'stale' | 'unknown'
+  caveat: string
 }
 
 type RecommendationResultsRecord = {
@@ -35,16 +50,68 @@ const props = withDefaults(defineProps<{
   message: null,
 })
 
-function normalizeTierLabel(tier: RecommendationResultsCandidate['tier']) {
-  if (tier === 'strong-fit') {
-    return 'Strong fit'
+function normalizePathwayLabel(pathwayId: string) {
+  if (pathwayId === 'mvp-skilled-worker') {
+    return 'Skilled Worker pathway'
   }
 
-  if (tier === 'conditional-fit') {
-    return 'Conditional fit'
+  if (pathwayId === 'mvp-provincial-nominee') {
+    return 'Provincial Nominee pathway'
   }
 
-  return 'Lower confidence'
+  if (pathwayId === 'mvp-study-to-work') {
+    return 'Study-to-Work pathway'
+  }
+
+  return pathwayId
+}
+
+function signalToneClasses(state: RecommendationFitSignal['state']) {
+  if (state === 'strength') {
+    return 'border-emerald-200 bg-emerald-50 text-emerald-800'
+  }
+
+  if (state === 'gap') {
+    return 'border-rose-200 bg-rose-50 text-rose-800'
+  }
+
+  return 'border-amber-200 bg-amber-50 text-amber-800'
+}
+
+function signalStateLabel(state: RecommendationFitSignal['state']) {
+  if (state === 'strength') {
+    return 'Strength'
+  }
+
+  if (state === 'gap') {
+    return 'Gap'
+  }
+
+  return 'Watch'
+}
+
+function candidateContainerClasses(candidate: RecommendationResultsCandidate) {
+  if (candidate.qualification === 'supported') {
+    return 'border-emerald-200 bg-emerald-50/60'
+  }
+
+  if (candidate.qualification === 'withheld') {
+    return 'border-rose-200 bg-rose-50/50'
+  }
+
+  return 'border-amber-200 bg-amber-50/60'
+}
+
+function candidateOutcomeSummary(candidate: RecommendationResultsCandidate) {
+  if (candidate.qualification === 'supported') {
+    return 'Supported recommendation'
+  }
+
+  if (candidate.qualification === 'withheld') {
+    return 'Withheld recommendation'
+  }
+
+  return 'Low-confidence recommendation'
 }
 
 const directResults = computed(() => props.resultsRecord?.results.direct || [])
@@ -69,7 +136,7 @@ const hasAnyResults = computed(() =>
         Recommendation results
       </h3>
       <p class="text-sm text-slate-500">
-        Ranked direct, blocked, and composed pathway recommendations for your latest run.
+        Review why each recommendation appears, what supports it, and where confidence is lower.
       </p>
     </div>
 
@@ -101,58 +168,173 @@ const hasAnyResults = computed(() =>
       No ranked recommendations are available for this run yet.
     </div>
 
-    <div v-else class="space-y-5">
-      <div v-if="directResults.length > 0" class="space-y-2">
+    <div v-else class="space-y-6">
+      <div v-if="directResults.length > 0" class="space-y-3">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Direct pathways
         </p>
-        <ul class="space-y-2">
+        <ul class="space-y-3">
           <li
             v-for="candidate in directResults"
             :key="`${candidate.type}:${candidate.pathwayId}`"
             data-testid="recommendation-result-item"
-            class="rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-sm"
+            class="rounded-lg border px-4 py-3 text-sm"
+            :class="candidateContainerClasses(candidate)"
           >
-            #{{ candidate.rank }} · {{ candidate.pathwayId }} · {{ normalizeTierLabel(candidate.tier) }} · score {{ candidate.score }}
+            <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div class="space-y-1">
+                <p class="font-semibold text-slate-900">
+                  #{{ candidate.rank }} · {{ normalizePathwayLabel(candidate.pathwayId) }}
+                </p>
+                <p class="text-xs font-medium text-slate-700">
+                  {{ candidateOutcomeSummary(candidate) }} · Confidence {{ candidate.confidence }} · Freshness {{ candidate.freshness }}
+                </p>
+              </div>
+              <RecommendationTierBadge
+                :tier="candidate.tier"
+                :qualification="candidate.qualification"
+                :confidence="candidate.confidence"
+              />
+            </div>
+
+            <p class="mt-2 text-sm text-slate-800">
+              {{ candidate.rationale }}
+            </p>
+
+            <ul class="mt-3 grid gap-2 md:grid-cols-2" aria-label="Recommendation fit signals">
+              <li
+                v-for="signal in candidate.fitSignals"
+                :key="`${candidate.pathwayId}:${signal.id}`"
+                class="rounded-md border px-2.5 py-2 text-xs"
+                :class="signalToneClasses(signal.state)"
+              >
+                <span class="font-semibold">{{ signalStateLabel(signal.state) }}:</span>
+                <span class="font-semibold"> {{ signal.label }}</span>
+                <span> · {{ signal.detail }}</span>
+              </li>
+            </ul>
+
+            <p
+              v-if="candidate.qualification !== 'supported'"
+              class="mt-3 rounded-md border border-amber-300 bg-white/80 px-2.5 py-2 text-xs text-slate-800"
+            >
+              Caution: {{ candidate.caveat }}
+            </p>
           </li>
         </ul>
       </div>
 
-      <div v-if="blockedResults.length > 0" class="space-y-2">
+      <div v-if="blockedResults.length > 0" class="space-y-3">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Blocked pathways
         </p>
-        <ul class="space-y-2">
+        <ul class="space-y-3">
           <li
             v-for="candidate in blockedResults"
             :key="`${candidate.type}:${candidate.pathwayId}`"
             data-testid="recommendation-result-item"
-            class="rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2 text-sm"
+            class="rounded-lg border px-4 py-3 text-sm"
+            :class="candidateContainerClasses(candidate)"
           >
-            #{{ candidate.rank }} · {{ candidate.pathwayId }} · {{ normalizeTierLabel(candidate.tier) }} · score {{ candidate.score }}
+            <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div class="space-y-1">
+                <p class="font-semibold text-slate-900">
+                  #{{ candidate.rank }} · {{ normalizePathwayLabel(candidate.pathwayId) }}
+                </p>
+                <p class="text-xs font-medium text-slate-700">
+                  {{ candidateOutcomeSummary(candidate) }} · Confidence {{ candidate.confidence }} · Freshness {{ candidate.freshness }}
+                </p>
+              </div>
+              <RecommendationTierBadge
+                :tier="candidate.tier"
+                :qualification="candidate.qualification"
+                :confidence="candidate.confidence"
+              />
+            </div>
+
+            <p class="mt-2 text-sm text-slate-800">
+              {{ candidate.rationale }}
+            </p>
+
+            <ul class="mt-3 grid gap-2 md:grid-cols-2" aria-label="Recommendation fit signals">
+              <li
+                v-for="signal in candidate.fitSignals"
+                :key="`${candidate.pathwayId}:${signal.id}`"
+                class="rounded-md border px-2.5 py-2 text-xs"
+                :class="signalToneClasses(signal.state)"
+              >
+                <span class="font-semibold">{{ signalStateLabel(signal.state) }}:</span>
+                <span class="font-semibold"> {{ signal.label }}</span>
+                <span> · {{ signal.detail }}</span>
+              </li>
+            </ul>
+
+            <p
+              class="mt-3 rounded-md border border-amber-300 bg-white/80 px-2.5 py-2 text-xs text-slate-800"
+            >
+              Caution: {{ candidate.caveat }}
+            </p>
           </li>
         </ul>
       </div>
 
-      <div v-if="composedResults.length > 0" class="space-y-2">
+      <div v-if="composedResults.length > 0" class="space-y-3">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Composed pathways
         </p>
-        <ul class="space-y-2">
+        <ul class="space-y-3">
           <li
             v-for="candidate in composedResults"
             :key="`${candidate.type}:${candidate.pathwayId}`"
             data-testid="recommendation-result-item"
-            class="rounded-lg border border-sky-200 bg-sky-50/70 px-3 py-2 text-sm"
+            class="rounded-lg border px-4 py-3 text-sm"
+            :class="candidateContainerClasses(candidate)"
           >
-            <p>
-              #{{ candidate.rank }} · {{ candidate.pathwayId }} · {{ normalizeTierLabel(candidate.tier) }} · score {{ candidate.score }}
+            <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div class="space-y-1">
+                <p class="font-semibold text-slate-900">
+                  #{{ candidate.rank }} · {{ normalizePathwayLabel(candidate.pathwayId) }}
+                </p>
+                <p class="text-xs font-medium text-slate-700">
+                  {{ candidateOutcomeSummary(candidate) }} · Confidence {{ candidate.confidence }} · Freshness {{ candidate.freshness }}
+                </p>
+              </div>
+              <RecommendationTierBadge
+                :tier="candidate.tier"
+                :qualification="candidate.qualification"
+                :confidence="candidate.confidence"
+              />
+            </div>
+
+            <p class="mt-2 text-sm text-slate-800">
+              {{ candidate.rationale }}
             </p>
+
+            <ul class="mt-3 grid gap-2 md:grid-cols-2" aria-label="Recommendation fit signals">
+              <li
+                v-for="signal in candidate.fitSignals"
+                :key="`${candidate.pathwayId}:${signal.id}`"
+                class="rounded-md border px-2.5 py-2 text-xs"
+                :class="signalToneClasses(signal.state)"
+              >
+                <span class="font-semibold">{{ signalStateLabel(signal.state) }}:</span>
+                <span class="font-semibold"> {{ signal.label }}</span>
+                <span> · {{ signal.detail }}</span>
+              </li>
+            </ul>
+
+            <p
+              v-if="candidate.qualification !== 'supported'"
+              class="mt-3 rounded-md border border-amber-300 bg-white/80 px-2.5 py-2 text-xs text-slate-800"
+            >
+              Caution: {{ candidate.caveat }}
+            </p>
+
             <p
               v-if="candidate.composedSteps && candidate.composedSteps.length > 0"
-              class="mt-1 text-xs text-slate-600"
+              class="mt-2 text-xs text-slate-700"
             >
-              Steps: {{ candidate.composedSteps.join(' → ') }}
+              Staged steps: {{ candidate.composedSteps.join(' -> ') }}
             </p>
           </li>
         </ul>
@@ -160,7 +342,7 @@ const hasAnyResults = computed(() =>
 
       <p
         v-if="props.resultsRecord?.noComposedReason && composedResults.length === 0"
-        class="text-xs text-slate-600"
+        class="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700"
       >
         {{ props.resultsRecord.noComposedReason }}
       </p>

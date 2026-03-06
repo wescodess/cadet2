@@ -14,6 +14,35 @@ import {
 } from '../support/fixtures/test-data'
 import { getTestEnvironment } from '../support/helpers/env'
 
+type MockRecommendationFitSignal = {
+  id: string
+  label: string
+  detail: string
+  state: 'strength' | 'watch' | 'gap'
+}
+
+type MockRecommendationCandidate = {
+  pathwayId: string
+  type: 'direct' | 'blocked' | 'composed'
+  rank: number
+  tier: 'strong-fit' | 'conditional-fit' | 'lower-confidence'
+  score: number
+  rationale: string
+  fitSignals: MockRecommendationFitSignal[]
+  qualification: 'supported' | 'low-confidence' | 'withheld'
+  confidence: 'high' | 'medium' | 'low' | 'withheld'
+  freshness: 'fresh' | 'stale' | 'unknown'
+  caveat: string
+  composedSteps?: string[]
+}
+
+type MockRecommendationResultsPayload = {
+  direct: MockRecommendationCandidate[]
+  blocked: MockRecommendationCandidate[]
+  composed: MockRecommendationCandidate[]
+  noComposedReason?: string
+}
+
 function uniqueAuthEmail() {
   const seed = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
   return `playwright-${getTestEnvironment()}-recommendation-lifecycle-e2e-${seed}@example.com`
@@ -84,6 +113,7 @@ async function mockRecommendationLifecycleResponses(
   appBaseUrl: string,
   runs: RecommendationLifecycleRecord[],
   statusByRunId: Partial<Record<string, RecommendationLifecycleRecord>>,
+  resultsByRunId: Partial<Record<string, MockRecommendationResultsPayload>> = {},
 ) {
   const routeProbe = createRecommendationLifecycleRouteProbe(appBaseUrl)
 
@@ -129,6 +159,7 @@ async function mockRecommendationLifecycleResponses(
     const segments = url.pathname.split('/').filter(Boolean)
     const runId = segments.length >= 4 ? segments[3] : ''
     const run = runs.find(candidate => candidate.runId === runId) || runs[0]
+    const mockedResults = (runId && resultsByRunId[runId]) || null
 
     await route.fulfill({
       status: 200,
@@ -137,12 +168,18 @@ async function mockRecommendationLifecycleResponses(
         runId: run?.runId || 'run_story21_0',
         profileSnapshotId: run?.profileSnapshotId || 'snapshot_story21_0',
         status: run?.status || 'queued',
-        results: {
-          direct: [],
-          blocked: [],
-          composed: [],
-        },
-        noComposedReason: '',
+        results: mockedResults
+          ? {
+              direct: mockedResults.direct,
+              blocked: mockedResults.blocked,
+              composed: mockedResults.composed,
+            }
+          : {
+              direct: [],
+              blocked: [],
+              composed: [],
+            },
+        noComposedReason: mockedResults?.noComposedReason || '',
       }),
     })
   })
@@ -160,6 +197,33 @@ function createRunWithStatus(status: RecommendationLifecycleStatus, suffix: stri
     createdAt: timestamp,
     updatedAt: timestamp,
   })
+}
+
+function createMockCandidate(
+  overrides: Partial<MockRecommendationCandidate> = {},
+): MockRecommendationCandidate {
+  return {
+    pathwayId: 'mvp-skilled-worker',
+    type: 'direct',
+    rank: 1,
+    tier: 'strong-fit',
+    score: 90,
+    rationale: 'Skilled Worker pathway appears because your profile aligns with key requirements.',
+    fitSignals: [
+      {
+        id: 'english-clb',
+        label: 'Language readiness',
+        detail: 'CLB 9 against CLB 8 benchmark',
+        state: 'strength',
+      },
+    ],
+    qualification: 'supported',
+    confidence: 'high',
+    freshness: 'fresh',
+    caveat: 'Direct-fit recommendation is supported by current profile and MVP pathway rules.',
+    composedSteps: [],
+    ...overrides,
+  }
 }
 
 test.describe('Story 2.1 Recommendation Status Banner E2E ATDD', () => {
@@ -259,6 +323,98 @@ test.describe('Story 2.1 Recommendation Status Banner E2E ATDD', () => {
       const banner = page.getByTestId(RECOMMENDATION_LIFECYCLE_ATDD_TEST_IDS.statusBanner)
       await expect(banner).toContainText(/completed|degraded|failed/i)
       await expect(banner).toContainText(/recommendation/i)
+    })
+
+    test('[P0][AC2][AC3] recommendation results show text-readable tier badges and rationale signals independent of color-only cues', async ({
+      page,
+      appBaseUrl,
+    }) => {
+      await ensureAuthenticatedPage(page, appBaseUrl)
+      const completedRun = createRunWithStatus('completed', '8')
+      const routeProbe = await mockRecommendationLifecycleResponses(
+        page,
+        appBaseUrl,
+        [completedRun],
+        {
+          [completedRun.runId]: createRecommendationStatusPayload(completedRun, {
+            status: 'completed',
+            statusMessage: 'Recommendation evaluation completed.',
+          }),
+        },
+        {
+          [completedRun.runId]: {
+            direct: [
+              createMockCandidate({
+                pathwayId: 'mvp-skilled-worker',
+                tier: 'strong-fit',
+                qualification: 'supported',
+                confidence: 'high',
+              }),
+            ],
+            blocked: [
+              createMockCandidate({
+                pathwayId: 'mvp-provincial-nominee',
+                type: 'blocked',
+                rank: 2,
+                tier: 'conditional-fit',
+                score: 58,
+                qualification: 'low-confidence',
+                confidence: 'medium',
+                freshness: 'stale',
+                rationale: 'Provincial Nominee pathway is conditional due to unresolved constraints.',
+                fitSignals: [
+                  {
+                    id: 'job-offer',
+                    label: 'Job offer requirement',
+                    detail: 'No valid job offer on file',
+                    state: 'gap',
+                  },
+                ],
+                caveat: 'A valid job offer and relocation flexibility are still required.',
+              }),
+            ],
+            composed: [
+              createMockCandidate({
+                pathwayId: 'mvp-study-to-work',
+                type: 'composed',
+                rank: 3,
+                tier: 'lower-confidence',
+                score: 52,
+                qualification: 'withheld',
+                confidence: 'withheld',
+                freshness: 'unknown',
+                rationale: 'Study-to-Work appears as a staged option but current evidence is insufficient.',
+                fitSignals: [
+                  {
+                    id: 'study-budget',
+                    label: 'Study budget',
+                    detail: 'Budget is below CAD 25,000 benchmark',
+                    state: 'gap',
+                  },
+                ],
+                caveat: 'This pathway is withheld until stronger budget and timeline evidence is provided.',
+                composedSteps: ['mvp-skilled-worker', 'build-study-budget'],
+              }),
+            ],
+            noComposedReason: '',
+          },
+        },
+      )
+
+      await page.goto(routeProbe.workspacePath)
+      await expect(page.getByText('Loading your recommendation runs...')).toBeHidden({ timeout: 20_000 })
+
+      const tierBadges = page.getByTestId(RECOMMENDATION_LIFECYCLE_ATDD_TEST_IDS.tierBadge)
+      await expect(tierBadges).toHaveCount(3)
+      await expect(tierBadges.nth(0)).toContainText(/strong fit/i)
+      await expect(tierBadges.nth(0)).toContainText(/high alignment/i)
+      await expect(tierBadges.nth(1)).toContainText(/conditional fit/i)
+      await expect(tierBadges.nth(2)).toContainText(/lower confidence/i)
+
+      const panel = page.getByTestId('recommendation-results-panel')
+      await expect(panel).toContainText(/because your profile aligns|conditional due to unresolved constraints/i)
+      await expect(panel).toContainText(/language readiness|job offer requirement|study budget/i)
+      await expect(panel).toContainText(/caution/i)
     })
 
     test('[P0][AC2][AC3] run list and status banner hooks remain stable for workspace automation', async ({ page, appBaseUrl }) => {

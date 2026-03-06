@@ -7,6 +7,7 @@ import {
 } from '../support/fixtures/factories/recommendation-lifecycle-factory'
 import {
   RECOMMENDATION_CONFIDENCE_LEVELS,
+  RECOMMENDATION_FIT_SIGNAL_STATES,
   RECOMMENDATION_FRESHNESS_LEVELS,
   RECOMMENDATION_QUALIFICATION_LEVELS,
 } from '../support/fixtures/test-data'
@@ -22,6 +23,13 @@ type QualifiedRecommendation = {
   rank: number
   tier: 'strong-fit' | 'conditional-fit' | 'lower-confidence'
   score: number
+  rationale: string
+  fitSignals: Array<{
+    id: string
+    label: string
+    detail: string
+    state: typeof RECOMMENDATION_FIT_SIGNAL_STATES[number]
+  }>
   confidence: RecommendationConfidence
   freshness: RecommendationFreshness
   qualification: RecommendationQualification
@@ -242,6 +250,16 @@ test.describe('Story 2.4 Recommendation Qualification Integration', () => {
       expect(RECOMMENDATION_CONFIDENCE_LEVELS).toContain(candidate.confidence)
       expect(RECOMMENDATION_FRESHNESS_LEVELS).toContain(candidate.freshness)
       expect(candidate.caveat.trim().length).toBeGreaterThan(0)
+      expect(candidate.rationale.trim().length).toBeGreaterThan(0)
+      expect(candidate.fitSignals.length).toBeGreaterThan(0)
+      for (const signal of candidate.fitSignals) {
+        expect(signal.label.trim().length).toBeGreaterThan(0)
+        expect(signal.detail.trim().length).toBeGreaterThan(0)
+        expect(RECOMMENDATION_FIT_SIGNAL_STATES).toContain(signal.state)
+      }
+      if (candidate.qualification !== 'supported') {
+        expect(candidate.tier).not.toBe('strong-fit')
+      }
     }
   })
 

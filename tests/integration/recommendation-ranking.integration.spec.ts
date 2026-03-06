@@ -6,6 +6,7 @@ import {
   type RecommendationLifecycleRecord,
 } from '../support/fixtures/factories/recommendation-lifecycle-factory'
 import {
+  RECOMMENDATION_FIT_SIGNAL_STATES,
   RECOMMENDATION_PATHWAY_SUPPORTED_IDS,
   RECOMMENDATION_RESULT_TYPES,
   RECOMMENDATION_TIER_VALUES,
@@ -21,6 +22,13 @@ type RankedRecommendation = {
   rank: number
   tier: RecommendationTier
   score: number
+  rationale: string
+  fitSignals: Array<{
+    id: string
+    label: string
+    detail: string
+    state: typeof RECOMMENDATION_FIT_SIGNAL_STATES[number]
+  }>
   composedSteps?: string[]
 }
 
@@ -187,6 +195,17 @@ function allRankedResults(body: RecommendationResultsResponse): RankedRecommenda
   return [...body.results.direct, ...body.results.blocked, ...body.results.composed]
 }
 
+function expectRationaleAndSignals(candidate: RankedRecommendation) {
+  expect(candidate.rationale.trim().length).toBeGreaterThan(0)
+  expect(candidate.fitSignals.length).toBeGreaterThan(0)
+  for (const signal of candidate.fitSignals) {
+    expect(signal.id.trim().length).toBeGreaterThan(0)
+    expect(signal.label.trim().length).toBeGreaterThan(0)
+    expect(signal.detail.trim().length).toBeGreaterThan(0)
+    expect(RECOMMENDATION_FIT_SIGNAL_STATES).toContain(signal.state)
+  }
+}
+
 test.describe('Story 2.3 Recommendation Ranking Integration', () => {
   test('[P0][AC1][AC2] composed recommendations remain distinct from direct and blocked pathways when staged routes exist', async ({
     request,
@@ -258,6 +277,7 @@ test.describe('Story 2.3 Recommendation Ranking Integration', () => {
       expect(RECOMMENDATION_TIER_VALUES).toContain(candidate.tier)
       expect(RECOMMENDATION_RESULT_TYPES).toContain(candidate.type)
       expect(RECOMMENDATION_PATHWAY_SUPPORTED_IDS).toContain(candidate.pathwayId)
+      expectRationaleAndSignals(candidate)
     }
 
     const ranks = candidates.map(candidate => candidate.rank).sort((a, b) => a - b)

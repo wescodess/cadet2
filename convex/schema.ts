@@ -37,12 +37,27 @@ const recommendationFreshnessValidator = v.union(
   v.literal('unknown'),
 )
 
+const recommendationFitSignalStateValidator = v.union(
+  v.literal('strength'),
+  v.literal('watch'),
+  v.literal('gap'),
+)
+
+const recommendationFitSignalValidator = v.object({
+  id: v.string(),
+  label: v.string(),
+  detail: v.string(),
+  state: recommendationFitSignalStateValidator,
+})
+
 const rankedDirectRecommendationValidator = v.object({
   pathwayId: v.string(),
   type: v.literal('direct'),
   rank: v.number(),
   tier: recommendationTierValidator,
   score: v.number(),
+  rationale: v.optional(v.string()),
+  fitSignals: v.optional(v.array(recommendationFitSignalValidator)),
   qualification: v.optional(recommendationQualificationValidator),
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
@@ -55,6 +70,8 @@ const rankedBlockedRecommendationValidator = v.object({
   rank: v.number(),
   tier: recommendationTierValidator,
   score: v.number(),
+  rationale: v.optional(v.string()),
+  fitSignals: v.optional(v.array(recommendationFitSignalValidator)),
   qualification: v.optional(recommendationQualificationValidator),
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
@@ -68,6 +85,8 @@ const rankedComposedRecommendationValidator = v.object({
   tier: recommendationTierValidator,
   score: v.number(),
   composedSteps: v.array(v.string()),
+  rationale: v.optional(v.string()),
+  fitSignals: v.optional(v.array(recommendationFitSignalValidator)),
   qualification: v.optional(recommendationQualificationValidator),
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),

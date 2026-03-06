@@ -36,6 +36,17 @@ type RecommendationResultsCandidate = {
   tier: 'strong-fit' | 'conditional-fit' | 'lower-confidence'
   score: number
   composedSteps?: string[]
+  rationale: string
+  fitSignals: Array<{
+    id: string
+    label: string
+    detail: string
+    state: 'strength' | 'watch' | 'gap'
+  }>
+  qualification: 'supported' | 'low-confidence' | 'withheld'
+  confidence: 'high' | 'medium' | 'low' | 'withheld'
+  freshness: 'fresh' | 'stale' | 'unknown'
+  caveat: string
 }
 
 type RecommendationResultsRecord = {
