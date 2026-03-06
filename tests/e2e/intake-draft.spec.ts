@@ -62,13 +62,14 @@ async function waitForIntakeHydration(page: import('@playwright/test').Page) {
 
 test.describe('Guided intake draft save and resume', () => {
   test.describe.configure({ mode: 'serial' })
+  test.use({ authSessionEnabled: false })
 
   test('guest is redirected to auth when opening intake route', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
     await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
 
-    await expect(page).toHaveURL(/\/auth$/)
+    await expect(page).toHaveURL(/\/auth(?:\/)?(?:\?.*)?$/)
   })
 
   test('guided intake sections and progress container are visible', async ({ page, appBaseUrl }) => {
