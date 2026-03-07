@@ -194,16 +194,17 @@ async function mockRecommendationStatusByRunId(
 
 test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATDD (RED)', () => {
   test.describe.configure({ mode: 'serial' })
+  test.use({ authSessionEnabled: false })
 
   test('[P0][AC1] guest is redirected to auth when opening intake submission route', async ({ page, appBaseUrl }) => {
     const routeProbe = createIntakeSubmitRouteProbe(appBaseUrl)
 
     // Given a guest user without workspace authentication
     // When the guest opens the intake route directly
-    await page.goto(routeProbe.intakePath)
+    await page.goto(routeProbe.intakePath, { waitUntil: 'domcontentloaded' })
 
     // Then access is redirected to authentication
-    await expect(page).toHaveURL(/\/auth(?:\?.*)?$/)
+    await expect(page).toHaveURL(/\/auth(?:\/)?(?:\?.*)?$/)
   })
 
   test.describe('authenticated standard user', () => {

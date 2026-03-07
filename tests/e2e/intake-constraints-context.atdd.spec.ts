@@ -116,16 +116,17 @@ async function waitForIntakeHydration(page: Page) {
 
 test.describe('Story 1.3 Constraints and Context E2E ATDD', () => {
   test.describe.configure({ mode: 'serial' })
+  test.use({ authSessionEnabled: false })
 
   test('[P0][AC3] guest is redirected to auth when opening intake route', async ({ page, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
     // Given a guest user without a workspace session
     // When opening the intake route directly
-    await page.goto(probe.intakePath)
+    await page.goto(probe.intakePath, { waitUntil: 'domcontentloaded' })
 
     // Then access is redirected to auth
-    await expect(page).toHaveURL(/\/auth(?:\?.*)?$/)
+    await expect(page).toHaveURL(/\/auth(?:\/)?(?:\?.*)?$/)
   })
 
   test.describe('authenticated standard user', () => {
