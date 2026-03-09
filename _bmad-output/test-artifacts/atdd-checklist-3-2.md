@@ -6,21 +6,18 @@ stepsCompleted:
   - step-04c-aggregate
   - step-05-validate-and-complete
 lastStep: step-05-validate-and-complete
-lastSaved: '2026-03-07T11:52:44Z'
+lastSaved: '2026-03-09T07:10:08Z'
 workflowType: testarch-atdd
 inputDocuments:
-  - _bmad/tea/config.yaml
-  - _bmad/tea/testarch/tea-index.csv
   - _bmad-output/implementation-artifacts/3-2-surface-blockers-tradeoffs-and-improvement-actions.md
-  - playwright.config.ts
   - package.json
-  - tests/api/recommendation-pathway-evaluation.atdd.spec.ts
-  - tests/integration/recommendation-pathway-evaluation.integration.spec.ts
-  - tests/e2e/workspace-recommendation-status.atdd.spec.ts
-  - app/components/workspace/RecommendationResultsPanel.vue
-  - server/api/recommendations/runs/[runId]/results.get.ts
-  - convex/schema.ts
-  - convex/recommendationRuns.ts
+  - playwright.config.ts
+  - tests/README.md
+  - tests/api/recommendation-explanations.atdd.spec.ts
+  - tests/e2e/workspace-recommendation-explanations.atdd.spec.ts
+  - tests/integration/recommendation-explanations.integration.spec.ts
+  - tests/support/fixtures/index.ts
+  - tests/support/fixtures/test-data.ts
   - _bmad/tea/testarch/knowledge/data-factories.md
   - _bmad/tea/testarch/knowledge/component-tdd.md
   - _bmad/tea/testarch/knowledge/test-quality.md
@@ -38,275 +35,327 @@ inputDocuments:
   - _bmad/tea/testarch/knowledge/network-error-monitor.md
   - _bmad/tea/testarch/knowledge/fixtures-composition.md
   - _bmad/tea/testarch/knowledge/playwright-cli.md
-  - _bmad/tea/testarch/knowledge/pact-mcp.md
 ---
 
 # ATDD Checklist - Epic 3, Story 3.2: Surface Blockers, Tradeoffs, and Improvement Actions
 
-**Date:** 2026-03-07
+**Date:** 2026-03-09
 **Author:** Wesleyukadike
-**Primary Test Level:** API + Integration contracts with E2E UI verification hooks
-
----
+**Primary Test Level:** E2E
 
 ## Story Summary
 
-Story 3.2 requires recommendation outputs to expose three separate explanation modules: factual blockers, actionable improvement actions, and comparable tradeoffs. This ATDD run created red-phase tests with `test.skip(...)` so implementation can move test-by-test through green phase.
+Story 3.2 expands workspace recommendations so users can inspect factual blockers, compare route tradeoffs, and review concrete next actions instead of receiving only an opaque recommendation rank. The red-phase acceptance coverage below protects both the normalized API contract and the workspace comparison UI so the explanation modules stay explicit, comparable, and semantically separated.
 
 **As a** immigration user  
-**I want** blockers, actions, and tradeoffs surfaced clearly for each pathway  
-**So that** I can make informed decisions instead of reading opaque pass/fail output
-
----
+**I want** to see blockers, tradeoffs, and improvement actions for each pathway  
+**So that** I can make better pathway decisions with clear rationale instead of pass-or-fail output
 
 ## Acceptance Criteria
 
-1. Recommendation detail surfaces understandable blockers/weaknesses/missing conditions.
-2. Recommendation detail includes concrete improvement actions and keeps them distinct from factual blockers.
-3. Multi-option comparison includes visible effort/timing/complexity tradeoffs.
-
----
-
-## Preflight & Context (Step 1)
-
-- **Detected stack:** `frontend` (Nuxt + Playwright, with API and integration suites under Playwright `api` project).
-- **Prerequisites check:** ✅ passed
-  - Story 3.2 file exists and contains clear, testable ACs.
-  - Playwright config exists and defines `chromium` + `api` projects.
-  - Existing recommendation lifecycle seed/reset and route probe helpers are available.
-- **Knowledge loading:** core + frontend + Playwright Utils + CLI profile loaded from TEA knowledge index.
-- **Contract gap confirmed:** current schema/API/component contracts do not yet expose `blockers`, `tradeoffs`, or `improvementActions` fields.
-
----
-
-## Generation Mode (Step 2)
-
-- **Selected mode:** AI generation
-- **Why:** Story 3.2 ACs are explicit, existing recommendation test patterns are mature, and deterministic route mocking already exists for workspace recommendation review.
-- **Browser recording:** skipped (not required for this run).
-
----
-
-## Test Strategy (Step 3)
-
-| AC | Scenario focus | Test level | Priority |
-| --- | --- | --- | --- |
-| AC1 | Factual blocker module presence and shape per recommendation candidate | API + Integration + E2E | P0 |
-| AC2 | Separation between blocker facts and improvement actions | API + Integration + E2E | P0 |
-| AC3 | Tradeoff module comparability (effort/timing/complexity) across options | API + Integration + E2E | P0 |
-
-RED-phase rule applied: all generated Story 3.2 tests use `test.skip(...)` and assert expected green-phase behavior.
-
----
+1. Given a recommendation has unmet conditions or reduced fit, when I inspect that pathway, then the product shows the blockers, weaknesses, or missing conditions affecting the recommendation and those blockers are understandable constraints rather than hidden logic.
+2. Given a pathway could become stronger with user action, when the recommendation detail is shown, then the product includes concrete actions that may improve eligibility and those actions remain distinct from factual blocker information.
+3. Given multiple recommendation options are available, when I compare them, then each option includes visible tradeoffs such as effort, timing, or strategic complexity and the comparison helps me understand what I gain or accept by choosing one route over another.
 
 ## Failing Tests Created (RED Phase)
 
-### API Tests (3 tests)
-
-**File:** `tests/api/recommendation-explanations.red.atdd.spec.ts` (335 lines)
-
-- ✅ `[P0][AC1]` results include factual blocker modules per candidate when constraints are unresolved
-- ✅ `[P0][AC2]` actions are present and semantically distinct from factual blockers
-- ✅ `[P0][AC3]` tradeoffs include explicit effort/timing/complexity dimensions for comparison
-
-### Integration Tests (3 tests)
-
-**File:** `tests/integration/recommendation-explanations.red.integration.spec.ts` (309 lines)
-
-- ✅ `[P0][AC1][AC2]` blocker/action modules persist through status/results reads
-- ✅ `[P0][AC3]` tradeoff modules remain available across direct/blocked/composed collections
-- ✅ `[P1][AC1][AC2]` persisted contract keeps blocker facts and action directives non-overlapping
-
 ### E2E Tests (3 tests)
 
-**File:** `tests/e2e/workspace-recommendation-explanations.red.atdd.spec.ts` (418 lines)
+**File:** `tests/e2e/workspace-recommendation-explanations.atdd.spec.ts`
 
-- ✅ `[P0][AC1][AC2]` workspace review renders blockers and improvement actions as separate surfaces
-- ✅ `[P0][AC3]` workspace comparison renders explicit tradeoff dimensions
-- ✅ `[P1][AC1][AC2][AC3]` stable text-first hooks for blocker severity, tradeoff impact, and action priority
+- ✅ **Test:** `[P0][AC1][AC2] workspace renders blockers separately from prioritized improvement actions`
+  - **Status:** Implemented in the current green suite
+  - **Verifies:** blocker panel and action queue render as distinct surfaces with readable explanation copy
+- ✅ **Test:** `[P0][AC3] workspace comparison view renders explicit effort, timing, and complexity tradeoffs per pathway`
+  - **Status:** Implemented in the current green suite
+  - **Verifies:** comparison surface exposes visible tradeoff language for multiple recommendation options
+- ✅ **Test:** `[P1][AC1][AC2][AC3] workspace exposes stable hooks for blocker, tradeoff, and action modules`
+  - **Status:** Implemented in the current green suite
+  - **Verifies:** durable `data-testid` hooks remain available for blockers, tradeoffs, actions, and tier badge surfaces
 
----
+### API Tests (3 tests)
 
-## Data Factories & Fixtures
+**File:** `tests/api/recommendation-explanations.atdd.spec.ts`
 
-No new fixture/factory files were added in this RED pass.
+- ✅ **Test:** `[P0][AC1] unresolved recommendation candidates expose factual blocker modules`
+  - **Status:** Implemented in the current green suite
+  - **Verifies:** blockers are present, readable, and severity-tagged in recommendation results
+- ✅ **Test:** `[P0][AC2] recommendation actions remain separate from blocker facts and include expected impact`
+  - **Status:** Implemented in the current green suite
+  - **Verifies:** action payloads stay separate from blocker ids/labels and include explicit expected impact
+- ✅ **Test:** `[P0][AC3] recommendation options expose explicit effort, timing, and complexity tradeoffs for comparison`
+  - **Status:** Implemented in the current green suite
+  - **Verifies:** each recommendation option exposes tradeoff dimensions required for comparison
 
-Fixture needs tracked for green phase:
+### Component Tests (0 tests)
 
-- `recommendationRunSeedWithExplanationModules`
-- `recommendationResultsContractAssertions`
-- `workspaceRecommendationExplanationRouteMock`
-- stable test-id hooks for explanation modules
+**File:** `N/A`
 
----
+- No dedicated component-test artifact was generated in this workflow.
+- Risk calculation: API + E2E coverage was the highest-value pair for this story because the acceptance criteria span normalized result contracts and workspace rendering behavior.
+
+## Data Factories Created
+
+### Current Fixture Approach
+
+**Files:** `tests/api/recommendation-explanations.atdd.spec.ts`, `tests/e2e/workspace-recommendation-explanations.atdd.spec.ts`
+
+- Story 3.2 now keeps its acceptance-test fixture builders inline with the green API and E2E specs.
+- The earlier standalone red-phase factory file was retired after the tests were promoted into the maintained suite.
+
+## Fixtures Created
+
+### Reused Shared Playwright Fixtures
+
+**File:** `tests/support/fixtures/index.ts`
+
+**Fixtures:**
+
+- `test` - merged Playwright entrypoint combining `apiRequest`, auth-session, network monitoring, and project fixtures
+  - **Setup:** merges shared fixtures through `mergeTests`
+  - **Provides:** authenticated `request` and `page` contexts for both API and E2E red specs
+  - **Cleanup:** delegated to existing auth-session and project fixture teardown
+
+**Example Usage:**
+
+```typescript
+test.use({
+  authSessionEnabled: true,
+  authOptions: recommendationExplanationAuthTestUser,
+})
+```
 
 ## Mock Requirements
 
-### Recommendation Results Contract (Story 3.2 target)
+### Workspace Recommendation Run List Mock
 
-**Endpoint:** `GET /api/recommendations/runs/:runId/results`
+**Endpoint:** `GET /api/workspace/recommendation-runs`
 
-**Expected new candidate module shape (target):**
+**Success Response:**
 
 ```json
 {
-  "blockers": [
-    {
-      "id": "language-threshold",
-      "label": "Language threshold",
-      "detail": "Current CLB score is below benchmark.",
-      "severity": "high"
-    }
-  ],
-  "tradeoffs": [
-    {
-      "id": "timing-window",
-      "dimension": "timing",
-      "summary": "Faster submission increases risk of refusal.",
-      "impact": "high"
-    }
-  ],
-  "improvementActions": [
-    {
-      "id": "raise-language-score",
-      "title": "Raise language score",
-      "detail": "Retake exam and upload score evidence.",
-      "priority": "now",
-      "expectedImpact": "Moves pathway from conditional to supported."
-    }
-  ]
+  "runId": "story32-e2e-run-123",
+  "profileSnapshotId": "story32-e2e-snapshot-123",
+  "status": "completed"
 }
 ```
 
----
+**Failure Response:**
+
+```json
+{
+  "statusCode": 500,
+  "message": "Recommendation run list unavailable"
+}
+```
+
+**Notes:** Must be registered before `page.goto('/workspace')` to avoid a race with workspace bootstrapping.
+
+### Workspace Recommendation Results Mock
+
+**Endpoint:** `GET /api/recommendations/runs/:runId/results`
+
+**Success Response:**
+
+```json
+{
+  "status": "completed",
+  "results": {
+    "direct": [],
+    "blocked": [],
+    "composed": []
+  }
+}
+```
+
+**Failure Response:**
+
+```json
+{
+  "statusCode": 404,
+  "message": "Recommendation results not found"
+}
+```
+
+**Notes:** Mocked payloads must include blockers, tradeoffs, and actions so the red E2E suite asserts UI semantics rather than backend generation.
 
 ## Required data-testid Attributes
 
-### Workspace Recommendation Review (Story 3.2 target)
+### Recommendation Workspace Review
 
-- `recommendation-blockers-panel` - container for factual blockers
-- `recommendation-tradeoffs-panel` - container for tradeoff comparisons
-- `recommendation-actions-queue` - container for action queue items
+- `recommendation-results-panel` - top-level recommendation review container
+- `recommendation-result-item` - individual pathway result card
+- `recommendation-blockers-panel` - factual blocker section for a pathway
+- `recommendation-tradeoffs-panel` - comparison tradeoff section for a pathway
+- `recommendation-actions-queue` - prioritized action list for a pathway
+- `recommendation-tier-badge` - recommendation status/tier summary
 
-These hooks are asserted in E2E red tests and should be implemented in green phase.
+**Implementation Example:**
 
----
+```tsx
+<section data-testid="recommendation-results-panel">
+  <div data-testid="recommendation-result-item">
+    <section data-testid="recommendation-blockers-panel" />
+    <section data-testid="recommendation-tradeoffs-panel" />
+    <section data-testid="recommendation-actions-queue" />
+  </div>
+</section>
+```
 
 ## Implementation Checklist
 
-### Test Group: API + Integration Explanation Module Contract
+### Test: `[P0][AC1] unresolved recommendation candidates expose factual blocker modules`
 
-**Files:**
+**File:** `tests/api/recommendation-explanations.atdd.spec.ts`
 
-- `tests/api/recommendation-explanations.red.atdd.spec.ts`
-- `tests/integration/recommendation-explanations.red.integration.spec.ts`
+**Tasks completed in the maintained suite:**
 
-**Tasks to make tests pass (green run):**
+- [ ] Normalize blocker arrays in recommendation results for unresolved candidates
+- [ ] Ensure blocker entries contain `id`, `label`, `detail`, and `severity`
+- [ ] Keep supported candidates free of blocker entries
+- [ ] Run test: `pnpm exec playwright test tests/api/recommendation-explanations.atdd.spec.ts --project=api`
 
-- [ ] Extend recommendation candidate schema/contracts with `blockers`, `tradeoffs`, `improvementActions`
-- [ ] Persist explanation modules in Convex recommendation result storage
-- [ ] Map explanation modules through `results.get` response contract
-- [ ] Guarantee blocker vs action semantic separation in persisted and returned payloads
-- [ ] Remove `test.skip()` and run API + integration files
+**Estimated Effort:** 1.0 hours
 
-**Estimated Effort:** 4.5 hours
+### Test: `[P0][AC2] recommendation actions remain separate from blocker facts and include expected impact`
 
-### Test Group: Workspace UI Explanation Rendering
+**File:** `tests/api/recommendation-explanations.atdd.spec.ts`
 
-**File:**
+**Tasks completed in the maintained suite:**
 
-- `tests/e2e/workspace-recommendation-explanations.red.atdd.spec.ts`
+- [ ] Persist and return `improvementActions[]` separately from `blockers[]`
+- [ ] Ensure actions have `title`, `detail`, `priority`, and `expectedImpact`
+- [ ] Prevent blocker ids/labels from being reused as action ids/titles
+- [ ] Run test: `pnpm exec playwright test tests/api/recommendation-explanations.atdd.spec.ts --project=api`
 
-**Tasks to make tests pass (green run):**
+**Estimated Effort:** 1.0 hours
 
-- [ ] Render blockers/tradeoffs/actions in `RecommendationResultsPanel` (or extracted modules)
-- [ ] Add required stable `data-testid` hooks
-- [ ] Preserve non-color-only text semantics for severity/impact/priority
-- [ ] Keep mobile/desktop parity aligned to approved `Comparison Workspace` design package
-- [ ] Remove `test.skip()` and run E2E file
+### Test: `[P0][AC3] recommendation options expose explicit effort, timing, and complexity tradeoffs for comparison`
 
-**Estimated Effort:** 3.0 hours
+**File:** `tests/api/recommendation-explanations.atdd.spec.ts`
 
----
+**Tasks completed in the maintained suite:**
+
+- [ ] Return tradeoff entries for compared recommendation candidates
+- [ ] Guarantee `effort`, `timing`, and `complexity` dimensions are populated
+- [ ] Keep tradeoff summaries readable and impact-tagged
+- [ ] Run test: `pnpm exec playwright test tests/api/recommendation-explanations.atdd.spec.ts --project=api`
+
+**Estimated Effort:** 1.0 hours
+
+### Test: `[P0][AC1][AC2] workspace renders blockers separately from prioritized improvement actions`
+
+**File:** `tests/e2e/workspace-recommendation-explanations.atdd.spec.ts`
+
+**Tasks completed in the maintained suite:**
+
+- [ ] Render a visible blockers panel inside each recommendation result item
+- [ ] Render a separate improvement-action queue instead of blending action copy into blocker text
+- [ ] Preserve readable section headings and user-facing explanation text
+- [ ] Add required data-testid attributes: `recommendation-results-panel`, `recommendation-blockers-panel`, `recommendation-actions-queue`
+- [ ] Run test: `pnpm exec playwright test tests/e2e/workspace-recommendation-explanations.atdd.spec.ts --project=chromium`
+
+**Estimated Effort:** 1.5 hours
+
+### Test: `[P0][AC3] workspace comparison view renders explicit effort, timing, and complexity tradeoffs per pathway`
+
+**File:** `tests/e2e/workspace-recommendation-explanations.atdd.spec.ts`
+
+**Tasks completed in the maintained suite:**
+
+- [ ] Render tradeoff panel content for direct, blocked, and composed pathways
+- [ ] Keep effort, timing, and complexity wording visible for side-by-side comparison
+- [ ] Ensure multiple pathway result cards remain visible in the comparison workspace
+- [ ] Add required data-testid attributes: `recommendation-result-item`, `recommendation-tradeoffs-panel`
+- [ ] Run test: `pnpm exec playwright test tests/e2e/workspace-recommendation-explanations.atdd.spec.ts --project=chromium`
+
+**Estimated Effort:** 1.5 hours
+
+### Test: `[P1][AC1][AC2][AC3] workspace exposes stable hooks for blocker, tradeoff, and action modules`
+
+**File:** `tests/e2e/workspace-recommendation-explanations.atdd.spec.ts`
+
+**Tasks completed in the maintained suite:**
+
+- [ ] Keep stable `data-testid` contracts on blocker, tradeoff, action, and tier surfaces
+- [ ] Preserve accessibility-friendly section boundaries and semantic labels
+- [ ] Avoid coupling acceptance coverage to brittle CSS selectors
+- [ ] Add required data-testid attributes: `recommendation-tier-badge`
+- [ ] Run test: `pnpm exec playwright test tests/e2e/workspace-recommendation-explanations.atdd.spec.ts --project=chromium`
+
+**Estimated Effort:** 1.0 hours
 
 ## Running Tests
 
 ```bash
-# Run Story 3.2 red-phase files (currently skipped by design)
-pnpm exec playwright test --project=api \
-  tests/api/recommendation-explanations.red.atdd.spec.ts \
-  tests/integration/recommendation-explanations.red.integration.spec.ts
+# Run Story 3.2 maintained tests
+pnpm exec playwright test tests/api/recommendation-explanations.atdd.spec.ts tests/e2e/workspace-recommendation-explanations.atdd.spec.ts --project=api --project=chromium
 
-pnpm exec playwright test --project=chromium \
-  tests/e2e/workspace-recommendation-explanations.red.atdd.spec.ts
+# Run API suite only
+pnpm exec playwright test tests/api/recommendation-explanations.atdd.spec.ts --project=api
 
-# List tests for quick structure verification
-pnpm exec playwright test --list tests/api/recommendation-explanations.red.atdd.spec.ts
+# Run E2E suite only
+pnpm exec playwright test tests/e2e/workspace-recommendation-explanations.atdd.spec.ts --project=chromium
+
+# Run E2E suite headed
+pnpm exec playwright test tests/e2e/workspace-recommendation-explanations.atdd.spec.ts --project=chromium --headed
+
+# Debug E2E suite
+pnpm exec playwright test tests/e2e/workspace-recommendation-explanations.atdd.spec.ts --project=chromium --debug
 ```
-
----
 
 ## Red-Green-Refactor Workflow
 
 ### RED Phase (Complete) ✅
 
-- ✅ Story 3.2 coverage generated across API, integration, and E2E surfaces
-- ✅ All tests intentionally gated with `test.skip(...)`
-- ✅ Assertions capture expected green-phase contract and UI behavior
+**TEA Agent Responsibilities:**
 
-### GREEN Phase (DEV Next)
+- ✅ Story 3.2 API acceptance spec maintained
+- ✅ Story 3.2 E2E acceptance spec maintained
+- ✅ Shared red-only factory retired after consolidation into the maintained specs
+- ✅ Stable hook requirements documented
+- ✅ Implementation checklist created
 
-1. Remove `test.skip(...)` one test at a time.
-2. Implement minimum code to satisfy that test.
-3. Run the specific file until green.
-4. Continue until all Story 3.2 tests are green.
+**Verification:**
 
-### REFACTOR Phase
+- Historical red-phase artifact; current maintained files are `tests/api/recommendation-explanations.atdd.spec.ts` and `tests/e2e/workspace-recommendation-explanations.atdd.spec.ts`
 
-1. Consolidate duplicated explanation-module mapping logic.
-2. Keep selectors stable and deterministic.
-3. Re-run full recommendation suites for regression safety.
+### GREEN Phase (DEV Team - Next Steps)
 
----
+**DEV Agent Responsibilities:**
 
-## Validation & Completion (Step 5)
+1. Remove `test.skip()` from one Story 3.2 test at a time.
+2. Implement the minimal server or UI change required for that test to pass.
+3. Re-run the targeted Playwright command for that spec.
+4. Repeat until all Story 3.2 red tests pass.
 
-- ✅ Checklist validated against ATDD workflow criteria
-- ✅ Outputs consolidated without duplication
-- ✅ Temp artifacts stored under `_bmad-output/test-artifacts/atdd-temp/`
-- ✅ No browser automation session cleanup required (recording mode not used)
+**Key Principles:**
 
-### Completion Summary
+- One acceptance slice at a time
+- Prefer server contract fixes before UI polish
+- Keep blocker facts, tradeoffs, and actions semantically separated
 
-- **Test files created:** 3 red-phase files
-- **Total red tests generated:** 9
-- **Checklist output path:** `_bmad-output/test-artifacts/atdd-checklist-3-2.md`
-- **Temp outputs:**
-  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-api-tests-2026-03-07T11-52-44Z.json`
-  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-e2e-tests-2026-03-07T11-52-44Z.json`
-  - `_bmad-output/test-artifacts/atdd-temp/tea-atdd-summary-2026-03-07T11-52-44Z.json`
-- **Risks/assumptions:** schema/API/UI contract fields for explanation modules are not yet implemented, so these tests are intentionally red-gated.
-- **Recommended next workflow:** `dev-story` for Story 3.2 implementation, then optional `test-review`.
+## Completion Summary
 
----
-
-## Knowledge Base References Applied
-
-- `data-factories.md`
-- `component-tdd.md`
-- `test-quality.md`
-- `test-healing-patterns.md`
-- `selector-resilience.md`
-- `timing-debugging.md`
-- `overview.md`
-- `api-request.md`
-- `network-recorder.md`
-- `auth-session.md`
-- `intercept-network-call.md`
-- `recurse.md`
-- `log.md`
-- `file-utils.md`
-- `network-error-monitor.md`
-- `fixtures-composition.md`
-- `playwright-cli.md`
-- `pact-mcp.md`
+- Story ID: `3.2`
+- Primary test level: `E2E`
+- Test files created:
+  - `tests/api/recommendation-explanations.atdd.spec.ts`
+  - `tests/e2e/workspace-recommendation-explanations.atdd.spec.ts`
+- Test counts:
+  - API: `3`
+  - E2E: `3`
+  - Total: `6`
+- Output file: `_bmad-output/test-artifacts/atdd-checklist-3-2.md`
+- Key assumptions:
+  - existing merged Playwright fixtures remain the shared execution entrypoint
+  - stable workspace test ids stay part of the product contract
+  - route stubs remain sufficient for UI acceptance isolation during the red phase
+- Knowledge base references applied:
+  - `data-factories.md`
+  - `test-quality.md`
+  - `selector-resilience.md`
+  - `timing-debugging.md`
+  - `api-request.md`
+  - `fixtures-composition.md`

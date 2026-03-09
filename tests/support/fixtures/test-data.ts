@@ -182,3 +182,40 @@ export const RECOMMENDATION_FIT_SIGNAL_STATES = [
   'watch',
   'gap',
 ] as const
+
+export const RECOMMENDATION_EXPLANATIONS_ATDD_TEST_IDS = {
+  panel: 'recommendation-results-panel',
+  resultItem: 'recommendation-result-item',
+  blockersPanel: 'recommendation-blockers-panel',
+  tradeoffsPanel: 'recommendation-tradeoffs-panel',
+  actionsQueue: 'recommendation-actions-queue',
+  tierBadge: 'recommendation-tier-badge',
+} as const
+
+export const RECOMMENDATION_EXPLANATIONS_REQUIRED_TRADEOFF_DIMENSIONS = [
+  'effort',
+  'timing',
+  'complexity',
+] as const
+
+export const RECOMMENDATION_EXPLANATIONS_SECTION_LABELS = {
+  blockers: 'Blockers',
+  tradeoffs: 'Tradeoffs',
+  actions: 'Improvement actions',
+} as const
+
+export const RECOMMENDATION_COMPARISON_ATDD_TEST_IDS = {
+  panel: 'recommendation-results-panel',
+  workspace: 'recommendation-comparison-workspace',
+  summaryBand: 'recommendation-summary-band',
+  group: 'recommendation-comparison-group',
+  pathwayTypeBadge: 'recommendation-pathway-type-badge',
+  fallback: 'recommendation-comparison-fallback',
+  routePlanner: 'recommendation-milestone-route',
+} as const
+
+export const RECOMMENDATION_COMPARISON_PATHWAY_TYPE_LABELS = {
+  direct: 'Available now',
+  blocked: 'Blocked but close',
+  composed: 'Strategic multi-step',
+} as const

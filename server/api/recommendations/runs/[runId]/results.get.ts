@@ -2,9 +2,21 @@ import { anyApi } from 'convex/server'
 import { getRouterParam } from 'h3'
 
 import { requireWorkspaceUserSession } from '../../../../utils/auth/requireUserSession'
+import {
+  buildRecommendationComparison,
+  buildRecommendationPathwayType,
+  type RecommendationComparison,
+  type RecommendationComparisonGroup,
+  type RecommendationPathwayType,
+} from '../../../../utils/recommendations/buildRecommendationComparison'
 import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
 import { MVP_PATHWAY_IDS } from '../../../../utils/pathways/mvpPathwayCatalog'
 
+/**
+ * Server-side recommendation result types.
+ * Client mirror: app/lib/recommendations/comparison.ts
+ * Test mirror: tests/support/fixtures/factories/recommendation-comparison-factory.ts
+ */
 type RecommendationResultTier = 'strong-fit' | 'conditional-fit' | 'lower-confidence'
 type RecommendationQualification = 'supported' | 'low-confidence' | 'withheld'
 type RecommendationConfidence = 'high' | 'medium' | 'low' | 'withheld'
@@ -55,6 +67,7 @@ type RankedDirectRecommendation = {
   blockers: RecommendationBlocker[]
   tradeoffs: RecommendationTradeoff[]
   improvementActions: RecommendationImprovementAction[]
+  pathwayType?: RecommendationPathwayType
 }
 
 type RankedBlockedRecommendation = {
@@ -72,6 +85,7 @@ type RankedBlockedRecommendation = {
   blockers: RecommendationBlocker[]
   tradeoffs: RecommendationTradeoff[]
   improvementActions: RecommendationImprovementAction[]
+  pathwayType?: RecommendationPathwayType
 }
 
 type RankedComposedRecommendation = {
@@ -90,6 +104,7 @@ type RankedComposedRecommendation = {
   blockers: RecommendationBlocker[]
   tradeoffs: RecommendationTradeoff[]
   improvementActions: RecommendationImprovementAction[]
+  pathwayType?: RecommendationPathwayType
 }
 
 type RecommendationResultsRecord = {
@@ -103,6 +118,7 @@ type RecommendationResultsRecord = {
     blocked: RankedBlockedRecommendation[]
     composed: RankedComposedRecommendation[]
   }
+  comparison?: RecommendationComparison
 } | null
 
 const supportedPathwayIds = new Set<string>(MVP_PATHWAY_IDS)
@@ -157,6 +173,14 @@ function normalizeImprovementActions(value: unknown): RecommendationImprovementA
     }))
 }
 
+function normalizeComposedSteps(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value.filter((step): step is string => typeof step === 'string' && step.trim().length > 0)
+}
+
 export default defineEventHandler(async (event) => {
   const { userId } = await requireWorkspaceUserSession(event)
   const runId = getRouterParam(event, 'runId')?.trim() || ''
@@ -195,6 +219,12 @@ export default defineEventHandler(async (event) => {
           blocked: [],
           composed: [],
         },
+        comparison: buildRecommendationComparison({
+          directCount: 0,
+          blockedCount: 0,
+          composedCount: 0,
+          noComposedReason: 'Recommendation evaluation is temporarily unavailable. Please retry later or update your inputs before rerunning.',
+        }),
         noComposedReason: 'Recommendation evaluation is temporarily unavailable. Please retry later or update your inputs before rerunning.',
       }
     }
@@ -205,67 +235,82 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const direct = sortByRank(record.results.direct)
+    .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
+    .map(candidate => ({
+      pathwayId: candidate.pathwayId,
+      type: 'direct' as const,
+      rank: candidate.rank,
+      tier: candidate.tier,
+      score: candidate.score,
+      rationale: candidate.rationale,
+      fitSignals: candidate.fitSignals,
+      qualification: candidate.qualification,
+      confidence: candidate.confidence,
+      freshness: candidate.freshness,
+      caveat: candidate.caveat,
+      blockers: normalizeBlockers(candidate.blockers),
+      tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
+      improvementActions: normalizeImprovementActions(candidate.improvementActions),
+      pathwayType: buildRecommendationPathwayType('direct'),
+    }))
+
+  const blocked = sortByRank(record.results.blocked)
+    .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
+    .map(candidate => ({
+      pathwayId: candidate.pathwayId,
+      type: 'blocked' as const,
+      rank: candidate.rank,
+      tier: candidate.tier,
+      score: candidate.score,
+      rationale: candidate.rationale,
+      fitSignals: candidate.fitSignals,
+      qualification: candidate.qualification,
+      confidence: candidate.confidence,
+      freshness: candidate.freshness,
+      caveat: candidate.caveat,
+      blockers: normalizeBlockers(candidate.blockers),
+      tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
+      improvementActions: normalizeImprovementActions(candidate.improvementActions),
+      pathwayType: buildRecommendationPathwayType('blocked'),
+    }))
+
+  const composed = sortByRank(record.results.composed)
+    .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
+    .map(candidate => ({
+      pathwayId: candidate.pathwayId,
+      type: 'composed' as const,
+      rank: candidate.rank,
+      tier: candidate.tier,
+      score: candidate.score,
+      composedSteps: normalizeComposedSteps(candidate.composedSteps),
+      rationale: candidate.rationale,
+      fitSignals: candidate.fitSignals,
+      qualification: candidate.qualification,
+      confidence: candidate.confidence,
+      freshness: candidate.freshness,
+      caveat: candidate.caveat,
+      blockers: normalizeBlockers(candidate.blockers),
+      tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
+      improvementActions: normalizeImprovementActions(candidate.improvementActions),
+      pathwayType: buildRecommendationPathwayType('composed'),
+    }))
+
   return {
     runId: record.runId,
     profileSnapshotId: record.profileSnapshotId,
     status: record.status,
     results: {
-      direct: sortByRank(record.results.direct)
-        .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
-        .map(candidate => ({
-          pathwayId: candidate.pathwayId,
-          type: 'direct' as const,
-          rank: candidate.rank,
-          tier: candidate.tier,
-          score: candidate.score,
-          rationale: candidate.rationale,
-          fitSignals: candidate.fitSignals,
-          qualification: candidate.qualification,
-          confidence: candidate.confidence,
-          freshness: candidate.freshness,
-          caveat: candidate.caveat,
-          blockers: normalizeBlockers(candidate.blockers),
-          tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-          improvementActions: normalizeImprovementActions(candidate.improvementActions),
-        })),
-      blocked: sortByRank(record.results.blocked)
-        .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
-        .map(candidate => ({
-          pathwayId: candidate.pathwayId,
-          type: 'blocked' as const,
-          rank: candidate.rank,
-          tier: candidate.tier,
-          score: candidate.score,
-          rationale: candidate.rationale,
-          fitSignals: candidate.fitSignals,
-          qualification: candidate.qualification,
-          confidence: candidate.confidence,
-          freshness: candidate.freshness,
-          caveat: candidate.caveat,
-          blockers: normalizeBlockers(candidate.blockers),
-          tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-          improvementActions: normalizeImprovementActions(candidate.improvementActions),
-        })),
-      composed: sortByRank(record.results.composed)
-        .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
-        .map(candidate => ({
-          pathwayId: candidate.pathwayId,
-          type: 'composed' as const,
-          rank: candidate.rank,
-          tier: candidate.tier,
-          score: candidate.score,
-          composedSteps: candidate.composedSteps,
-          rationale: candidate.rationale,
-          fitSignals: candidate.fitSignals,
-          qualification: candidate.qualification,
-          confidence: candidate.confidence,
-          freshness: candidate.freshness,
-          caveat: candidate.caveat,
-          blockers: normalizeBlockers(candidate.blockers),
-          tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-          improvementActions: normalizeImprovementActions(candidate.improvementActions),
-        })),
+      direct,
+      blocked,
+      composed,
     },
+    comparison: buildRecommendationComparison({
+      directCount: direct.length,
+      blockedCount: blocked.length,
+      composedCount: composed.length,
+      noComposedReason: record.noComposedReason,
+    }),
     noComposedReason: record.noComposedReason,
   }
 })
