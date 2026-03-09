@@ -1,6 +1,11 @@
 import type { BlockedPathwayOutcome, DirectPathwayOutcome } from '../pathways/evaluateDirectAndBlockedPathways'
 import type { ComposedPathwayOutcome } from '../pathways/generateComposedPathways'
-import type { RecommendationFitSignal } from './buildRecommendationRationale'
+import type {
+  RecommendationBlocker,
+  RecommendationFitSignal,
+  RecommendationImprovementAction,
+  RecommendationTradeoff,
+} from './buildRecommendationRationale'
 
 export const RECOMMENDATION_TIER_VALUES = ['strong-fit', 'conditional-fit', 'lower-confidence'] as const
 
@@ -14,6 +19,9 @@ export type RankedDirectRecommendation = {
   score: number
   rationale: string
   fitSignals: RecommendationFitSignal[]
+  blockers: RecommendationBlocker[]
+  tradeoffs: RecommendationTradeoff[]
+  improvementActions: RecommendationImprovementAction[]
 }
 
 export type RankedBlockedRecommendation = {
@@ -24,6 +32,9 @@ export type RankedBlockedRecommendation = {
   score: number
   rationale: string
   fitSignals: RecommendationFitSignal[]
+  blockers: RecommendationBlocker[]
+  tradeoffs: RecommendationTradeoff[]
+  improvementActions: RecommendationImprovementAction[]
 }
 
 export type RankedComposedRecommendation = {
@@ -35,6 +46,9 @@ export type RankedComposedRecommendation = {
   composedSteps: string[]
   rationale: string
   fitSignals: RecommendationFitSignal[]
+  blockers: RecommendationBlocker[]
+  tradeoffs: RecommendationTradeoff[]
+  improvementActions: RecommendationImprovementAction[]
 }
 
 type RankedCandidate =
@@ -123,6 +137,9 @@ function toRankedCandidates(candidates: UnrankedCandidate[]): RankedCandidate[] 
         composedSteps: [...(candidate.composedSteps || [])],
         rationale: '',
         fitSignals: [],
+        blockers: [],
+        tradeoffs: [],
+        improvementActions: [],
       }
     }
 
@@ -135,6 +152,9 @@ function toRankedCandidates(candidates: UnrankedCandidate[]): RankedCandidate[] 
         score,
         rationale: '',
         fitSignals: [],
+        blockers: [],
+        tradeoffs: [],
+        improvementActions: [],
       }
     }
 
@@ -146,6 +166,9 @@ function toRankedCandidates(candidates: UnrankedCandidate[]): RankedCandidate[] 
       score,
       rationale: '',
       fitSignals: [],
+      blockers: [],
+      tradeoffs: [],
+      improvementActions: [],
     }
   })
 }

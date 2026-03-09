@@ -47,6 +47,25 @@ type RecommendationResultsCandidate = {
   confidence: 'high' | 'medium' | 'low' | 'withheld'
   freshness: 'fresh' | 'stale' | 'unknown'
   caveat: string
+  blockers?: Array<{
+    id: string
+    label: string
+    detail: string
+    severity: 'critical' | 'high' | 'medium' | 'low'
+  }>
+  tradeoffs?: Array<{
+    id: string
+    dimension: 'effort' | 'timing' | 'complexity' | 'cost'
+    summary: string
+    impact: 'high' | 'medium' | 'low'
+  }>
+  improvementActions?: Array<{
+    id: string
+    title: string
+    detail: string
+    priority: 'now' | 'next' | 'later'
+    expectedImpact: string
+  }>
 }
 
 type RecommendationResultsRecord = {

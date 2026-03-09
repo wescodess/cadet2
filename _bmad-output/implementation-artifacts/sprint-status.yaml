@@ -56,7 +56,7 @@ development_status:
 
   epic-3: in-progress
   3-1-show-recommendation-rationale-and-fit-signals: done
-  3-2-surface-blockers-tradeoffs-and-improvement-actions: backlog
+  3-2-surface-blockers-tradeoffs-and-improvement-actions: done
   3-3-compare-immediate-and-longer-horizon-pathways: backlog
   3-4-display-citations-source-context-and-trust-boundaries: backlog
   epic-3-retrospective: optional

@@ -50,6 +50,54 @@ const recommendationFitSignalValidator = v.object({
   state: recommendationFitSignalStateValidator,
 })
 
+const recommendationBlockerSeverityValidator = v.union(
+  v.literal('critical'),
+  v.literal('high'),
+  v.literal('medium'),
+  v.literal('low'),
+)
+
+const recommendationTradeoffDimensionValidator = v.union(
+  v.literal('effort'),
+  v.literal('timing'),
+  v.literal('complexity'),
+  v.literal('cost'),
+)
+
+const recommendationTradeoffImpactValidator = v.union(
+  v.literal('high'),
+  v.literal('medium'),
+  v.literal('low'),
+)
+
+const recommendationImprovementPriorityValidator = v.union(
+  v.literal('now'),
+  v.literal('next'),
+  v.literal('later'),
+)
+
+const recommendationBlockerValidator = v.object({
+  id: v.string(),
+  label: v.string(),
+  detail: v.string(),
+  severity: recommendationBlockerSeverityValidator,
+})
+
+const recommendationTradeoffValidator = v.object({
+  id: v.string(),
+  dimension: recommendationTradeoffDimensionValidator,
+  summary: v.string(),
+  impact: recommendationTradeoffImpactValidator,
+})
+
+const recommendationImprovementActionValidator = v.object({
+  id: v.string(),
+  title: v.string(),
+  detail: v.string(),
+  priority: recommendationImprovementPriorityValidator,
+  expectedImpact: v.string(),
+})
+
 const rankedDirectRecommendationValidator = v.object({
   pathwayId: v.string(),
   type: v.literal('direct'),
@@ -62,6 +110,9 @@ const rankedDirectRecommendationValidator = v.object({
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
   caveat: v.optional(v.string()),
+  blockers: v.optional(v.array(recommendationBlockerValidator)),
+  tradeoffs: v.optional(v.array(recommendationTradeoffValidator)),
+  improvementActions: v.optional(v.array(recommendationImprovementActionValidator)),
 })
 
 const rankedBlockedRecommendationValidator = v.object({
@@ -76,6 +127,9 @@ const rankedBlockedRecommendationValidator = v.object({
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
   caveat: v.optional(v.string()),
+  blockers: v.optional(v.array(recommendationBlockerValidator)),
+  tradeoffs: v.optional(v.array(recommendationTradeoffValidator)),
+  improvementActions: v.optional(v.array(recommendationImprovementActionValidator)),
 })
 
 const rankedComposedRecommendationValidator = v.object({
@@ -91,6 +145,9 @@ const rankedComposedRecommendationValidator = v.object({
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
   caveat: v.optional(v.string()),
+  blockers: v.optional(v.array(recommendationBlockerValidator)),
+  tradeoffs: v.optional(v.array(recommendationTradeoffValidator)),
+  improvementActions: v.optional(v.array(recommendationImprovementActionValidator)),
 })
 
 export default defineSchema({
