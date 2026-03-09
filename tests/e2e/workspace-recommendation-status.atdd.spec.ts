@@ -2,6 +2,12 @@ import type { APIResponse, Page } from '@playwright/test'
 
 import { test, expect } from '../support/fixtures'
 import {
+  createRecommendationComparisonMetadata,
+  createRecommendationComparisonPathwayType,
+  type RecommendationComparisonMetadata,
+  type RecommendationComparisonPathwayType,
+} from '../support/fixtures/factories/recommendation-comparison-factory'
+import {
   createRecommendationLifecycleRecord,
   createRecommendationLifecycleRouteProbe,
   createRecommendationStatusPayload,
@@ -34,12 +40,14 @@ type MockRecommendationCandidate = {
   freshness: 'fresh' | 'stale' | 'unknown'
   caveat: string
   composedSteps?: string[]
+  pathwayType: RecommendationComparisonPathwayType
 }
 
 type MockRecommendationResultsPayload = {
   direct: MockRecommendationCandidate[]
   blocked: MockRecommendationCandidate[]
   composed: MockRecommendationCandidate[]
+  comparison?: RecommendationComparisonMetadata
   noComposedReason?: string
 }
 
@@ -179,6 +187,12 @@ async function mockRecommendationLifecycleResponses(
               blocked: [],
               composed: [],
             },
+        comparison: mockedResults?.comparison || createRecommendationComparisonMetadata({
+          directCount: mockedResults?.direct.length || 0,
+          blockedCount: mockedResults?.blocked.length || 0,
+          composedCount: mockedResults?.composed.length || 0,
+          noComposedReason: mockedResults?.noComposedReason,
+        }),
         noComposedReason: mockedResults?.noComposedReason || '',
       }),
     })
@@ -202,7 +216,7 @@ function createRunWithStatus(status: RecommendationLifecycleStatus, suffix: stri
 function createMockCandidate(
   overrides: Partial<MockRecommendationCandidate> = {},
 ): MockRecommendationCandidate {
-  return {
+  const candidate: MockRecommendationCandidate = {
     pathwayId: 'mvp-skilled-worker',
     type: 'direct',
     rank: 1,
@@ -222,7 +236,13 @@ function createMockCandidate(
     freshness: 'fresh',
     caveat: 'Direct-fit recommendation is supported by current profile and MVP pathway rules.',
     composedSteps: [],
+    pathwayType: createRecommendationComparisonPathwayType('direct'),
     ...overrides,
+  }
+
+  return {
+    ...candidate,
+    pathwayType: overrides.pathwayType || createRecommendationComparisonPathwayType(candidate.type),
   }
 }
 

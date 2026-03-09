@@ -28,5 +28,3 @@ tests/.auth
 !.env.example
 
 .data/pw-*
-
-.data/pw-7962-1773038887575

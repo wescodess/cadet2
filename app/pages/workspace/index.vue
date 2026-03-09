@@ -9,6 +9,7 @@ import {
 import RecommendationStatusBanner from '~/components/workspace/RecommendationStatusBanner.vue'
 import RecommendationRunList from '~/components/workspace/RecommendationRunList.vue'
 import RecommendationResultsPanel from '~/components/workspace/RecommendationResultsPanel.vue'
+import type { RecommendationResultsRecord } from '~/lib/recommendations/comparison'
 
 type RecommendationRunListItem = {
   runId: string
@@ -27,57 +28,6 @@ type RecommendationRunStatusRecord = {
   processingHeartbeatAt: string
   createdAt: string
   updatedAt: string
-}
-
-type RecommendationResultsCandidate = {
-  pathwayId: string
-  type: 'direct' | 'blocked' | 'composed'
-  rank: number
-  tier: 'strong-fit' | 'conditional-fit' | 'lower-confidence'
-  score: number
-  composedSteps?: string[]
-  rationale: string
-  fitSignals: Array<{
-    id: string
-    label: string
-    detail: string
-    state: 'strength' | 'watch' | 'gap'
-  }>
-  qualification: 'supported' | 'low-confidence' | 'withheld'
-  confidence: 'high' | 'medium' | 'low' | 'withheld'
-  freshness: 'fresh' | 'stale' | 'unknown'
-  caveat: string
-  blockers?: Array<{
-    id: string
-    label: string
-    detail: string
-    severity: 'critical' | 'high' | 'medium' | 'low'
-  }>
-  tradeoffs?: Array<{
-    id: string
-    dimension: 'effort' | 'timing' | 'complexity' | 'cost'
-    summary: string
-    impact: 'high' | 'medium' | 'low'
-  }>
-  improvementActions?: Array<{
-    id: string
-    title: string
-    detail: string
-    priority: 'now' | 'next' | 'later'
-    expectedImpact: string
-  }>
-}
-
-type RecommendationResultsRecord = {
-  runId: string
-  profileSnapshotId: string
-  status: string
-  results: {
-    direct: RecommendationResultsCandidate[]
-    blocked: RecommendationResultsCandidate[]
-    composed: RecommendationResultsCandidate[]
-  }
-  noComposedReason?: string
 }
 
 const { firstName } = useDisplayName()
@@ -140,11 +90,6 @@ async function loadRecommendationResults(runId: string, status: string) {
 
   if (!isRecommendationStatusTerminal(status)) {
     recommendationResultsMessage.value = 'Results will appear after recommendation processing is completed.'
-    return
-  }
-
-  if (status === 'failed') {
-    recommendationResultsMessage.value = 'This run failed before ranked recommendations could be generated.'
     return
   }
 
