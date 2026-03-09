@@ -10,6 +10,7 @@ import type {
 } from '../pathways/evaluateDirectAndBlockedPathways'
 import { normalizeStoredIntakeDraft } from '../intake/normalizeIntakePayload'
 import {
+  buildRecommendationExplanationModules,
   buildRecommendationRationale,
   toRecommendationProfileContext,
 } from './buildRecommendationRationale'
@@ -202,29 +203,63 @@ export async function generateRankedRecommendationsForRun(
   }
 
   const enriched = {
-    direct: qualified.direct.map(candidate => ({
-      ...candidate,
-      ...buildRecommendationRationale({
+    direct: qualified.direct.map((candidate) => {
+      const unmetConditions = blockedOutcomeIndex.get(candidate.pathwayId) || []
+      const rationalePayload = buildRecommendationRationale({
         candidate,
         profile: profileContext,
-      }),
-    })),
-    blocked: qualified.blocked.map(candidate => ({
-      ...candidate,
-      ...buildRecommendationRationale({
+        unmetConditions,
+      })
+      const explanationModules = buildRecommendationExplanationModules({
         candidate,
         profile: profileContext,
-        unmetConditions: blockedOutcomeIndex.get(candidate.pathwayId) || [],
-      }),
-    })),
-    composed: qualified.composed.map(candidate => ({
-      ...candidate,
-      ...buildRecommendationRationale({
+        unmetConditions,
+      })
+
+      return {
+        ...candidate,
+        ...rationalePayload,
+        ...explanationModules,
+      }
+    }),
+    blocked: qualified.blocked.map((candidate) => {
+      const unmetConditions = blockedOutcomeIndex.get(candidate.pathwayId) || []
+      const rationalePayload = buildRecommendationRationale({
         candidate,
         profile: profileContext,
-        unmetConditions: blockedOutcomeIndex.get(candidate.pathwayId) || [],
-      }),
-    })),
+        unmetConditions,
+      })
+      const explanationModules = buildRecommendationExplanationModules({
+        candidate,
+        profile: profileContext,
+        unmetConditions,
+      })
+
+      return {
+        ...candidate,
+        ...rationalePayload,
+        ...explanationModules,
+      }
+    }),
+    composed: qualified.composed.map((candidate) => {
+      const unmetConditions = blockedOutcomeIndex.get(candidate.pathwayId) || []
+      const rationalePayload = buildRecommendationRationale({
+        candidate,
+        profile: profileContext,
+        unmetConditions,
+      })
+      const explanationModules = buildRecommendationExplanationModules({
+        candidate,
+        profile: profileContext,
+        unmetConditions,
+      })
+
+      return {
+        ...candidate,
+        ...rationalePayload,
+        ...explanationModules,
+      }
+    }),
   }
 
   const persisted = await input.convex.mutation(

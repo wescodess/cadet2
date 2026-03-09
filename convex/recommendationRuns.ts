@@ -25,11 +25,34 @@ type RecommendationQualification = 'supported' | 'low-confidence' | 'withheld'
 type RecommendationConfidence = 'high' | 'medium' | 'low' | 'withheld'
 type RecommendationFreshness = 'fresh' | 'stale' | 'unknown'
 type RecommendationFitSignalState = 'strength' | 'watch' | 'gap'
+type RecommendationBlockerSeverity = 'critical' | 'high' | 'medium' | 'low'
+type RecommendationTradeoffDimension = 'effort' | 'timing' | 'complexity' | 'cost'
+type RecommendationTradeoffImpact = 'high' | 'medium' | 'low'
+type RecommendationImprovementPriority = 'now' | 'next' | 'later'
 type RecommendationFitSignal = {
   id: string
   label: string
   detail: string
   state: RecommendationFitSignalState
+}
+type RecommendationBlocker = {
+  id: string
+  label: string
+  detail: string
+  severity: RecommendationBlockerSeverity
+}
+type RecommendationTradeoff = {
+  id: string
+  dimension: RecommendationTradeoffDimension
+  summary: string
+  impact: RecommendationTradeoffImpact
+}
+type RecommendationImprovementAction = {
+  id: string
+  title: string
+  detail: string
+  priority: RecommendationImprovementPriority
+  expectedImpact: string
 }
 type RankedDirectRecommendation = {
   pathwayId: string
@@ -43,6 +66,9 @@ type RankedDirectRecommendation = {
   confidence?: RecommendationConfidence
   freshness?: RecommendationFreshness
   caveat?: string
+  blockers?: RecommendationBlocker[]
+  tradeoffs?: RecommendationTradeoff[]
+  improvementActions?: RecommendationImprovementAction[]
 }
 type RankedBlockedRecommendation = {
   pathwayId: string
@@ -56,6 +82,9 @@ type RankedBlockedRecommendation = {
   confidence?: RecommendationConfidence
   freshness?: RecommendationFreshness
   caveat?: string
+  blockers?: RecommendationBlocker[]
+  tradeoffs?: RecommendationTradeoff[]
+  improvementActions?: RecommendationImprovementAction[]
 }
 type RankedComposedRecommendation = {
   pathwayId: string
@@ -70,6 +99,9 @@ type RankedComposedRecommendation = {
   confidence?: RecommendationConfidence
   freshness?: RecommendationFreshness
   caveat?: string
+  blockers?: RecommendationBlocker[]
+  tradeoffs?: RecommendationTradeoff[]
+  improvementActions?: RecommendationImprovementAction[]
 }
 
 const directPathwayOutcomeValidator = v.object({
@@ -121,6 +153,54 @@ const recommendationFitSignalValidator = v.object({
   state: recommendationFitSignalStateValidator,
 })
 
+const recommendationBlockerSeverityValidator = v.union(
+  v.literal('critical'),
+  v.literal('high'),
+  v.literal('medium'),
+  v.literal('low'),
+)
+
+const recommendationTradeoffDimensionValidator = v.union(
+  v.literal('effort'),
+  v.literal('timing'),
+  v.literal('complexity'),
+  v.literal('cost'),
+)
+
+const recommendationTradeoffImpactValidator = v.union(
+  v.literal('high'),
+  v.literal('medium'),
+  v.literal('low'),
+)
+
+const recommendationImprovementPriorityValidator = v.union(
+  v.literal('now'),
+  v.literal('next'),
+  v.literal('later'),
+)
+
+const recommendationBlockerValidator = v.object({
+  id: v.string(),
+  label: v.string(),
+  detail: v.string(),
+  severity: recommendationBlockerSeverityValidator,
+})
+
+const recommendationTradeoffValidator = v.object({
+  id: v.string(),
+  dimension: recommendationTradeoffDimensionValidator,
+  summary: v.string(),
+  impact: recommendationTradeoffImpactValidator,
+})
+
+const recommendationImprovementActionValidator = v.object({
+  id: v.string(),
+  title: v.string(),
+  detail: v.string(),
+  priority: recommendationImprovementPriorityValidator,
+  expectedImpact: v.string(),
+})
+
 const rankedDirectRecommendationValidator = v.object({
   pathwayId: v.string(),
   type: v.literal('direct'),
@@ -133,6 +213,9 @@ const rankedDirectRecommendationValidator = v.object({
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
   caveat: v.optional(v.string()),
+  blockers: v.optional(v.array(recommendationBlockerValidator)),
+  tradeoffs: v.optional(v.array(recommendationTradeoffValidator)),
+  improvementActions: v.optional(v.array(recommendationImprovementActionValidator)),
 })
 
 const rankedBlockedRecommendationValidator = v.object({
@@ -147,6 +230,9 @@ const rankedBlockedRecommendationValidator = v.object({
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
   caveat: v.optional(v.string()),
+  blockers: v.optional(v.array(recommendationBlockerValidator)),
+  tradeoffs: v.optional(v.array(recommendationTradeoffValidator)),
+  improvementActions: v.optional(v.array(recommendationImprovementActionValidator)),
 })
 
 const rankedComposedRecommendationValidator = v.object({
@@ -162,6 +248,9 @@ const rankedComposedRecommendationValidator = v.object({
   confidence: v.optional(recommendationConfidenceValidator),
   freshness: v.optional(recommendationFreshnessValidator),
   caveat: v.optional(v.string()),
+  blockers: v.optional(v.array(recommendationBlockerValidator)),
+  tradeoffs: v.optional(v.array(recommendationTradeoffValidator)),
+  improvementActions: v.optional(v.array(recommendationImprovementActionValidator)),
 })
 
 const inProgressStatuses = new Set<RecommendationLifecycleStatus>(['queued', 'evaluating'])
@@ -413,64 +502,386 @@ function withDefaultFitSignal(signals: RecommendationFitSignal[], detail: string
   }]
 }
 
+function normalizeBlockerSeverity(value: unknown): RecommendationBlockerSeverity {
+  if (value === 'critical' || value === 'high' || value === 'medium' || value === 'low') {
+    return value
+  }
+
+  return 'medium'
+}
+
+function normalizeTradeoffDimension(value: unknown): RecommendationTradeoffDimension {
+  if (value === 'effort' || value === 'timing' || value === 'complexity' || value === 'cost') {
+    return value
+  }
+
+  return 'effort'
+}
+
+function normalizeTradeoffImpact(value: unknown): RecommendationTradeoffImpact {
+  if (value === 'high' || value === 'medium' || value === 'low') {
+    return value
+  }
+
+  return 'medium'
+}
+
+function normalizeActionPriority(value: unknown): RecommendationImprovementPriority {
+  if (value === 'now' || value === 'next' || value === 'later') {
+    return value
+  }
+
+  return 'next'
+}
+
+function fallbackBlockersForCandidate(candidate: {
+  pathwayId: string
+  type: 'direct' | 'blocked' | 'composed'
+  qualification: RecommendationQualification
+}): RecommendationBlocker[] {
+  if (candidate.qualification === 'supported') {
+    return []
+  }
+
+  if (candidate.type === 'blocked') {
+    return [{
+      id: 'conditional-readiness-gap',
+      label: 'Conditional readiness gap',
+      detail: `${candidate.pathwayId} remains conditional because key constraints are unresolved.`,
+      severity: 'high',
+    }]
+  }
+
+  if (candidate.type === 'composed') {
+    return [{
+      id: 'staged-pathway-dependency',
+      label: 'Staged dependency',
+      detail: `${candidate.pathwayId} requires intermediate milestones before direct-fit eligibility is likely.`,
+      severity: 'medium',
+    }]
+  }
+
+  return [{
+    id: 'profile-evidence-watch',
+    label: 'Profile evidence watch',
+    detail: `${candidate.pathwayId} should be monitored for changing profile constraints.`,
+    severity: 'medium',
+  }]
+}
+
+function normalizeBlockers(
+  value: unknown,
+  candidate: {
+    pathwayId: string
+    type: 'direct' | 'blocked' | 'composed'
+    qualification: RecommendationQualification
+  },
+): RecommendationBlocker[] {
+  if (!Array.isArray(value)) {
+    return fallbackBlockersForCandidate(candidate)
+  }
+
+  const normalized = value
+    .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
+    .map((entry, index) => {
+      const id = typeof entry.id === 'string' && entry.id.trim().length > 0
+        ? entry.id.trim()
+        : `blocker-${index + 1}`
+      const label = typeof entry.label === 'string' && entry.label.trim().length > 0
+        ? entry.label.trim()
+        : 'Pathway constraint'
+      const detail = typeof entry.detail === 'string' && entry.detail.trim().length > 0
+        ? entry.detail.trim()
+        : 'A pathway requirement remains unresolved.'
+
+      return {
+        id,
+        label,
+        detail,
+        severity: normalizeBlockerSeverity(entry.severity),
+      }
+    })
+
+  return normalized.length > 0
+    ? normalized
+    : fallbackBlockersForCandidate(candidate)
+}
+
+function fallbackTradeoffImpact(candidateType: 'direct' | 'blocked' | 'composed'): RecommendationTradeoffImpact {
+  if (candidateType === 'blocked' || candidateType === 'composed') {
+    return 'high'
+  }
+
+  return 'medium'
+}
+
+function fallbackTradeoffSummary(
+  pathwayId: string,
+  dimension: RecommendationTradeoffDimension,
+  candidateType: 'direct' | 'blocked' | 'composed',
+): string {
+  if (dimension === 'effort') {
+    return candidateType === 'composed'
+      ? `${pathwayId} requires staged effort across multiple milestones.`
+      : `${pathwayId} requires preparation effort that should be planned explicitly.`
+  }
+
+  if (dimension === 'timing') {
+    return `${pathwayId} timing depends on when key constraints are addressed.`
+  }
+
+  if (dimension === 'complexity') {
+    return candidateType === 'composed'
+      ? `${pathwayId} has higher sequencing complexity because multiple steps are required.`
+      : `${pathwayId} complexity should be considered when comparing alternatives.`
+  }
+
+  return `${pathwayId} can introduce additional financial overhead depending on execution choices.`
+}
+
+function normalizeTradeoffs(
+  value: unknown,
+  candidate: {
+    pathwayId: string
+    type: 'direct' | 'blocked' | 'composed'
+  },
+): RecommendationTradeoff[] {
+  const parsed = Array.isArray(value)
+    ? value
+      .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
+      .map((entry, index) => {
+        const dimension = normalizeTradeoffDimension(entry.dimension)
+        const id = typeof entry.id === 'string' && entry.id.trim().length > 0
+          ? entry.id.trim()
+          : `${candidate.pathwayId}-tradeoff-${dimension}-${index + 1}`
+        const summary = typeof entry.summary === 'string' && entry.summary.trim().length > 0
+          ? entry.summary.trim()
+          : fallbackTradeoffSummary(candidate.pathwayId, dimension, candidate.type)
+
+        return {
+          id,
+          dimension,
+          summary,
+          impact: normalizeTradeoffImpact(entry.impact),
+        }
+      })
+    : []
+
+  const requiredDimensions: RecommendationTradeoffDimension[] = ['effort', 'timing', 'complexity']
+  const seenDimensions = new Set(parsed.map(entry => entry.dimension))
+  const withDefaults = [...parsed]
+
+  for (const requiredDimension of requiredDimensions) {
+    if (!seenDimensions.has(requiredDimension)) {
+      withDefaults.push({
+        id: `${candidate.pathwayId}-tradeoff-${requiredDimension}`,
+        dimension: requiredDimension,
+        summary: fallbackTradeoffSummary(candidate.pathwayId, requiredDimension, candidate.type),
+        impact: fallbackTradeoffImpact(candidate.type),
+      })
+    }
+  }
+
+  return withDefaults
+}
+
+function fallbackActionsForCandidate(candidate: {
+  pathwayId: string
+  type: 'direct' | 'blocked' | 'composed'
+  qualification: RecommendationQualification
+}): RecommendationImprovementAction[] {
+  if (candidate.type === 'composed') {
+    return [{
+      id: 'action-sequence-composed-milestones',
+      title: 'Sequence composed milestones',
+      detail: 'Prioritize intermediate milestones in order so the staged route can progress predictably.',
+      priority: 'next',
+      expectedImpact: 'Improves pathway continuity and reduces staging complexity.',
+    }]
+  }
+
+  if (candidate.qualification === 'supported') {
+    return []
+  }
+
+  return [{
+    id: 'action-refresh-profile-evidence',
+    title: 'Refresh key profile inputs',
+    detail: 'Update profile constraints and rerun recommendations to improve confidence.',
+    priority: 'next',
+    expectedImpact: 'Converts unresolved constraints into actionable readiness improvements.',
+  }]
+}
+
+function normalizeImprovementActions(
+  value: unknown,
+  blockers: RecommendationBlocker[],
+  candidate: {
+    pathwayId: string
+    type: 'direct' | 'blocked' | 'composed'
+    qualification: RecommendationQualification
+  },
+): RecommendationImprovementAction[] {
+  const blockerIds = new Set(blockers.map(blocker => blocker.id))
+  const parsed = Array.isArray(value)
+    ? value
+      .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
+      .map((entry, index) => {
+        const normalizedId = typeof entry.id === 'string' && entry.id.trim().length > 0
+          ? entry.id.trim()
+          : `${candidate.pathwayId}-action-${index + 1}`
+        const id = blockerIds.has(normalizedId)
+          ? `action-${normalizedId}`
+          : normalizedId
+        const title = typeof entry.title === 'string' && entry.title.trim().length > 0
+          ? entry.title.trim()
+          : 'Improve pathway readiness'
+        const detail = typeof entry.detail === 'string' && entry.detail.trim().length > 0
+          ? entry.detail.trim()
+          : 'Complete a focused readiness action before rerunning recommendations.'
+        const expectedImpact = typeof entry.expectedImpact === 'string' && entry.expectedImpact.trim().length > 0
+          ? entry.expectedImpact.trim()
+          : 'Improves confidence and reduces unresolved pathway constraints.'
+
+        return {
+          id,
+          title,
+          detail,
+          priority: normalizeActionPriority(entry.priority),
+          expectedImpact,
+        }
+      })
+    : []
+
+  return parsed.length > 0
+    ? parsed
+    : fallbackActionsForCandidate(candidate)
+}
+
 function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommendation[]) {
-  return dedupeAndSortRankedCandidates(candidates).map(candidate => ({
-    pathwayId: candidate.pathwayId,
-    type: 'direct' as const,
-    rank: Math.max(1, Math.round(candidate.rank)),
-    tier: candidate.tier,
-    score: Math.max(1, Math.round(candidate.score)),
-    rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} appears based on current direct-fit pathway evaluation.`),
-    fitSignals: withDefaultFitSignal(
-      normalizeFitSignals(candidate.fitSignals),
-      'Direct-fit signal available from pathway scoring and qualification metadata.',
-    ),
-    qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
-    confidence: normalizeConfidence(candidate.confidence, 'low'),
-    freshness: normalizeFreshness(candidate.freshness, 'unknown'),
-    caveat: normalizeCaveat(candidate.caveat, 'Qualification metadata is unavailable for this recommendation. Treat as low-confidence guidance and rerun for updated evidence.'),
-  }))
+  return dedupeAndSortRankedCandidates(candidates).map((candidate) => {
+    const qualification = normalizeQualification(candidate.qualification, 'low-confidence')
+    const normalized = {
+      pathwayId: candidate.pathwayId,
+      type: 'direct' as const,
+      rank: Math.max(1, Math.round(candidate.rank)),
+      tier: candidate.tier,
+      score: Math.max(1, Math.round(candidate.score)),
+      rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} appears based on current direct-fit pathway evaluation.`),
+      fitSignals: withDefaultFitSignal(
+        normalizeFitSignals(candidate.fitSignals),
+        'Direct-fit signal available from pathway scoring and qualification metadata.',
+      ),
+      qualification,
+      confidence: normalizeConfidence(candidate.confidence, 'low'),
+      freshness: normalizeFreshness(candidate.freshness, 'unknown'),
+      caveat: normalizeCaveat(candidate.caveat, 'Qualification metadata is unavailable for this recommendation. Treat as low-confidence guidance and rerun for updated evidence.'),
+    }
+    const blockers = normalizeBlockers(candidate.blockers, {
+      pathwayId: normalized.pathwayId,
+      type: normalized.type,
+      qualification,
+    })
+
+    return {
+      ...normalized,
+      blockers,
+      tradeoffs: normalizeTradeoffs(candidate.tradeoffs, {
+        pathwayId: normalized.pathwayId,
+        type: normalized.type,
+      }),
+      improvementActions: normalizeImprovementActions(candidate.improvementActions, blockers, {
+        pathwayId: normalized.pathwayId,
+        type: normalized.type,
+        qualification,
+      }),
+    }
+  })
 }
 
 function normalizeRankedBlockedRecommendations(candidates: RankedBlockedRecommendation[]) {
-  return dedupeAndSortRankedCandidates(candidates).map(candidate => ({
-    pathwayId: candidate.pathwayId,
-    type: 'blocked' as const,
-    rank: Math.max(1, Math.round(candidate.rank)),
-    tier: candidate.tier,
-    score: Math.max(1, Math.round(candidate.score)),
-    rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} is conditionally shown because key pathway constraints are unresolved.`),
-    fitSignals: withDefaultFitSignal(
-      normalizeFitSignals(candidate.fitSignals),
-      'Conditional signal available because pathway requirements remain partially unmet.',
-    ),
-    qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
-    confidence: normalizeConfidence(candidate.confidence, 'low'),
-    freshness: normalizeFreshness(candidate.freshness, 'unknown'),
-    caveat: normalizeCaveat(candidate.caveat, `${candidate.pathwayId} is conditionally usable and should be treated as low-confidence guidance until refreshed evidence is available.`),
-  }))
+  return dedupeAndSortRankedCandidates(candidates).map((candidate) => {
+    const qualification = normalizeQualification(candidate.qualification, 'low-confidence')
+    const normalized = {
+      pathwayId: candidate.pathwayId,
+      type: 'blocked' as const,
+      rank: Math.max(1, Math.round(candidate.rank)),
+      tier: candidate.tier,
+      score: Math.max(1, Math.round(candidate.score)),
+      rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} is conditionally shown because key pathway constraints are unresolved.`),
+      fitSignals: withDefaultFitSignal(
+        normalizeFitSignals(candidate.fitSignals),
+        'Conditional signal available because pathway requirements remain partially unmet.',
+      ),
+      qualification,
+      confidence: normalizeConfidence(candidate.confidence, 'low'),
+      freshness: normalizeFreshness(candidate.freshness, 'unknown'),
+      caveat: normalizeCaveat(candidate.caveat, `${candidate.pathwayId} is conditionally usable and should be treated as low-confidence guidance until refreshed evidence is available.`),
+    }
+    const blockers = normalizeBlockers(candidate.blockers, {
+      pathwayId: normalized.pathwayId,
+      type: normalized.type,
+      qualification,
+    })
+
+    return {
+      ...normalized,
+      blockers,
+      tradeoffs: normalizeTradeoffs(candidate.tradeoffs, {
+        pathwayId: normalized.pathwayId,
+        type: normalized.type,
+      }),
+      improvementActions: normalizeImprovementActions(candidate.improvementActions, blockers, {
+        pathwayId: normalized.pathwayId,
+        type: normalized.type,
+        qualification,
+      }),
+    }
+  })
 }
 
 function normalizeRankedComposedRecommendations(candidates: RankedComposedRecommendation[]) {
-  return dedupeAndSortRankedCandidates(candidates).map(candidate => ({
-    pathwayId: candidate.pathwayId,
-    type: 'composed' as const,
-    rank: Math.max(1, Math.round(candidate.rank)),
-    tier: candidate.tier,
-    score: Math.max(1, Math.round(candidate.score)),
-    composedSteps: Array.from(new Set(candidate.composedSteps
-      .map(step => step.trim())
-      .filter(step => step.length > 0))),
-    rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} is presented as a staged route based on composed pathway evaluation.`),
-    fitSignals: withDefaultFitSignal(
-      normalizeFitSignals(candidate.fitSignals),
-      'Staged fit signal available because this pathway relies on a composed route.',
-    ),
-    qualification: normalizeQualification(candidate.qualification, 'low-confidence'),
-    confidence: normalizeConfidence(candidate.confidence, 'low'),
-    freshness: normalizeFreshness(candidate.freshness, 'unknown'),
-    caveat: normalizeCaveat(candidate.caveat, 'Composed pathway guidance is provisional and should be treated as low-confidence until refreshed evidence is available.'),
-  }))
+  return dedupeAndSortRankedCandidates(candidates).map((candidate) => {
+    const qualification = normalizeQualification(candidate.qualification, 'low-confidence')
+    const normalized = {
+      pathwayId: candidate.pathwayId,
+      type: 'composed' as const,
+      rank: Math.max(1, Math.round(candidate.rank)),
+      tier: candidate.tier,
+      score: Math.max(1, Math.round(candidate.score)),
+      composedSteps: Array.from(new Set(candidate.composedSteps
+        .map(step => step.trim())
+        .filter(step => step.length > 0))),
+      rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} is presented as a staged route based on composed pathway evaluation.`),
+      fitSignals: withDefaultFitSignal(
+        normalizeFitSignals(candidate.fitSignals),
+        'Staged fit signal available because this pathway relies on a composed route.',
+      ),
+      qualification,
+      confidence: normalizeConfidence(candidate.confidence, 'low'),
+      freshness: normalizeFreshness(candidate.freshness, 'unknown'),
+      caveat: normalizeCaveat(candidate.caveat, 'Composed pathway guidance is provisional and should be treated as low-confidence until refreshed evidence is available.'),
+    }
+    const blockers = normalizeBlockers(candidate.blockers, {
+      pathwayId: normalized.pathwayId,
+      type: normalized.type,
+      qualification,
+    })
+
+    return {
+      ...normalized,
+      blockers,
+      tradeoffs: normalizeTradeoffs(candidate.tradeoffs, {
+        pathwayId: normalized.pathwayId,
+        type: normalized.type,
+      }),
+      improvementActions: normalizeImprovementActions(candidate.improvementActions, blockers, {
+        pathwayId: normalized.pathwayId,
+        type: normalized.type,
+        qualification,
+      }),
+    }
+  })
 }
 
 export const createQueuedRun = mutation({
