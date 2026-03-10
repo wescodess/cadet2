@@ -23,10 +23,10 @@ function getTierMeaning(tier: 'strong-fit' | 'conditional-fit' | 'lower-confiden
   }
 
   if (tier === 'conditional-fit') {
-    return 'Partial alignment with caveats to review.'
+    return 'Partial alignment with caveats to review with caution.'
   }
 
-  return 'Low-confidence guidance; treat as provisional.'
+  return 'Low-confidence guidance; review with caution.'
 }
 
 function getToneClass(tier: 'strong-fit' | 'conditional-fit' | 'lower-confidence', qualification: 'supported' | 'low-confidence' | 'withheld') {

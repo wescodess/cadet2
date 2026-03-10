@@ -1,6 +1,6 @@
 # Story 3.3: Compare Immediate and Longer-Horizon Pathways
 
-Status: done
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -337,6 +337,8 @@ GPT-5 Codex
 - Applied code-review follow-up fixes by removing client-side comparison/pathway-type inference, reprioritizing mobile card content, and tightening AC3 coverage across API/integration tests.
 - Removed stray `*.red.*` explanation artifacts that were not part of Story 3.3 scope and updated shared E2E mocks to use the current server-owned results contract.
 - Reconciled remaining drift by collapsing redundant `.gitignore` Playwright temp entries and updating the Story 3.2 ATDD checklist so it references the maintained explanation suites instead of deleted red-only files.
+- Applied a fourth code-review pass to preserve structured fallback rendering for failed runs, make mobile disclosure IDs unique, remove fabricated citation freshness timestamps, and align shared mock contracts with the current results shape.
+- Applied a fifth code-review pass to remove synthetic citation/trust fallback generation, restore ESM-safe comparison test factories, correct zero-result fallback copy, preserve degraded-path rank ordering, and split citation disclosure from external source navigation for keyboard-safe accessibility.
 - Validation remains pending in this container because `node`, `npm`, and `pnpm` are unavailable, so follow-up status stays `in-progress` until the logged suites can be rerun.
 
 ### File List
@@ -347,18 +349,26 @@ GPT-5 Codex
 - `.gitignore`
 - `app/components/recommendations/MilestoneRoutePlanner.vue`
 - `app/components/recommendations/PathwayComparisonCard.vue`
+- `app/components/recommendations/EvidenceConfidencePanel.vue`
+- `app/components/recommendations/RecommendationCitationList.vue`
 - `app/components/recommendations/RecommendationSummaryBand.vue`
 - `app/components/workspace/RecommendationResultsPanel.vue`
 - `app/lib/recommendations/comparison.ts`
+- `app/lib/recommendations/citations.ts`
 - `app/pages/workspace/index.vue`
 - `server/api/recommendations/runs/[runId]/results.get.ts`
+- `server/utils/recommendations/buildRecommendationCitations.ts`
 - `server/utils/recommendations/buildRecommendationComparison.ts`
+- `server/utils/recommendations/classifyTrustBoundary.ts`
 - `tests/api/build-recommendation-comparison.spec.ts`
 - `tests/api/recommendation-comparison.atdd.spec.ts`
 - `tests/e2e/workspace-recommendation-comparison.atdd.spec.ts`
+- `tests/e2e/workspace-recommendation-citations.atdd.spec.ts`
 - `tests/e2e/workspace-recommendation-explanations.atdd.spec.ts`
 - `tests/e2e/workspace-recommendation-status.atdd.spec.ts`
+- `tests/integration/recommendation-citations.integration.spec.ts`
 - `tests/integration/recommendation-comparison.integration.spec.ts`
+- `tests/support/fixtures/factories/recommendation-citations-factory.ts`
 - `tests/support/fixtures/factories/recommendation-comparison-factory.ts`
 - `tests/support/fixtures/test-data.ts`
 
@@ -390,6 +400,19 @@ GPT-5 Codex
   - M4: Updated `RecommendationResultsPanel.vue` to render recommendation cards in a flat layout when comparison metadata is missing, instead of hiding all results.
   - L1: Removed unused `getBaseUrl` import and dead `recommendationComparisonAuthTestUser` constant from test factory.
   - L2: Added `aria-controls` and list `id` to the mobile fit-signals disclosure widget in `PathwayComparisonCard.vue`.
+- 2026-03-09: Fourth code review — 1 HIGH and 4 MEDIUM issues fixed:
+  - H1: `RecommendationResultsPanel.vue` now renders a structured fallback summary for failed runs even when no ranked candidates are returned.
+  - M1: `PathwayComparisonCard.vue` now generates unique mobile fit-signal disclosure IDs from type, pathway ID, and rank.
+  - M2: `results.get.ts` no longer fabricates citation retrieval timestamps, so freshness falls back to `unknown` instead of a misleading fixed date.
+  - M3: Shared comparison factories and Story 3.2 E2E mocks now include `citations` and `trustBoundary` fields to match the browser-facing contract.
+  - M4: Story and sprint tracking were resynced so Story 3.3 stays `in-progress` pending validation and Story 3.4 no longer appears falsely complete.
+- 2026-03-09: Fifth code review — 2 HIGH and 4 MEDIUM issues fixed:
+  - H1: `tests/support/fixtures/factories/recommendation-comparison-factory.ts` now uses an ESM-safe static import for `buildRecommendationComparison`, so comparison-dependent Playwright suites no longer depend on `require(...)` inside an ESM package.
+  - H2: `server/api/recommendations/runs/[runId]/results.get.ts` now preserves provenance honestly by only returning stored citations and by deriving fallback trust boundaries from actual normalized citation presence instead of synthesizing evidence references in the API route.
+  - M1: `server/utils/recommendations/buildRecommendationComparison.ts` now differentiates zero-result fallback copy from single-candidate fallback copy, and `tests/api/build-recommendation-comparison.spec.ts` now asserts the truthful zero-result behavior.
+  - M2: `RecommendationResultsPanel.vue` now rank-sorts the degraded flat-layout fallback path so rank context remains stable when comparison metadata is missing.
+  - M3: `RecommendationCitationList.vue` now uses a real disclosure button plus a separate source link instead of nesting an anchor inside a `role="button"` container.
+  - M4: Story 3.4 worktree files remain out of scope for Story 3.3 implementation and review; they were left untouched and are explicitly excluded from this story record.
 
 ## Change Log
 
@@ -397,3 +420,5 @@ GPT-5 Codex
 - 2026-03-09: Reconciled remaining drift in `.gitignore` and the Story 3.2 ATDD checklist after the red-only explanation artifacts were removed.
 - 2026-03-09: Second code review applied 8 fixes (H1–H4, M1–M4): failed-run comparison metadata, type export consolidation, template deduplication, unit test coverage, fallback limitation clarity, step-label sync TODO, and CSS variable fallbacks.
 - 2026-03-09: Third code review applied 10 fixes (H1–H4, M1–M4, L1–L2): failed-run result fetching, type contract alignment, cross-ref comments, test factory server delegation, composedSteps normalizer, step label fallback, fallback rendering recovery, unused imports cleanup, and aria-controls accessibility.
+- 2026-03-09: Fourth code review applied 5 fixes (H1, M1–M4): zero-result failed-run fallback rendering, unique fit-signal disclosure IDs, unknown citation freshness fallback, shared mock contract alignment, and sprint/story resynchronization.
+- 2026-03-09: Fifth code review applied 6 fixes (H1–H2, M1–M4): ESM-safe comparison factory imports, removal of synthetic citation/trust fallbacks, truthful zero-result fallback copy, degraded-path rank sorting, citation disclosure accessibility restructuring, and review-scope clarification for unrelated Story 3.4 worktree files.

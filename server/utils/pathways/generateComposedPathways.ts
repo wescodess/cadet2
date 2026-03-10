@@ -17,6 +17,12 @@ export type GenerateComposedPathwaysResult = {
   noComposedReason: string
 }
 
+const COMPOSED_PATHWAY_PRIORITY: Record<MvpPathwayId, number> = {
+  'mvp-study-to-work': 0,
+  'mvp-skilled-worker': 1,
+  'mvp-provincial-nominee': 2,
+}
+
 function hasUnmetCondition(blockedPathway: BlockedPathwayOutcome, unmetConditionId: string) {
   return blockedPathway.unmetConditions.includes(unmetConditionId)
 }
@@ -98,7 +104,14 @@ export function generateComposedPathways(
 
   const composed: ComposedPathwayOutcome[] = []
 
-  for (const blockedPathway of [...input.blocked].sort((left, right) => left.pathwayId.localeCompare(right.pathwayId))) {
+  for (const blockedPathway of [...input.blocked].sort((left, right) => {
+    const priorityDelta = COMPOSED_PATHWAY_PRIORITY[left.pathwayId] - COMPOSED_PATHWAY_PRIORITY[right.pathwayId]
+    if (priorityDelta !== 0) {
+      return priorityDelta
+    }
+
+    return left.pathwayId.localeCompare(right.pathwayId)
+  })) {
     const composedSteps = buildComposedSteps(blockedPathway, directPathwayIds)
     if (composedSteps.length === 0) {
       continue
@@ -110,7 +123,7 @@ export function generateComposedPathways(
       composedSteps,
     })
 
-    if (composed.length >= 2) {
+    if (composed.length >= 1) {
       break
     }
   }

@@ -55,6 +55,18 @@ const resultGroups = computed(() => {
   }))
 })
 
+const hasComparisonGroups = computed(() => resultGroups.value.length > 0)
+
+const totalCitationCount = computed(() => {
+  const all = [...directResults.value, ...blockedResults.value, ...composedResults.value]
+  return all.reduce((sum, candidate) => sum + (candidate.citations?.length || 0), 0)
+})
+
+const flatResults = computed(() => (
+  [...directResults.value, ...blockedResults.value, ...composedResults.value]
+    .sort((left, right) => left.rank - right.rank)
+))
+
 const comparisonMode = computed(() => resolvedComparison.value?.mode || 'fallback')
 
 const comparisonContainerClasses = computed(() =>
@@ -101,7 +113,7 @@ const comparisonContainerClasses = computed(() =>
     </div>
 
     <div
-      v-else-if="!hasAnyResults"
+      v-else-if="!resolvedComparison && !hasAnyResults"
       class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600"
     >
       No ranked recommendations are available for this run yet.
@@ -118,7 +130,7 @@ const comparisonContainerClasses = computed(() =>
 
       <div class="space-y-4">
         <PathwayComparisonCard
-          v-for="candidate in [...directResults, ...blockedResults, ...composedResults]"
+          v-for="candidate in flatResults"
           :key="`${candidate.type}:${candidate.pathwayId}`"
           :candidate="candidate"
         />
@@ -133,37 +145,52 @@ const comparisonContainerClasses = computed(() =>
       <RecommendationSummaryBand
         :comparison="resolvedComparison"
         :no-composed-reason="comparisonMode === 'fallback' ? (props.resultsRecord?.noComposedReason || null) : null"
+        :total-citation-count="totalCitationCount"
       />
 
       <div
         :data-testid="comparisonMode === 'fallback' ? 'recommendation-comparison-fallback' : undefined"
         :class="comparisonContainerClasses"
       >
-        <section
-          v-for="group in resultGroups"
-          :key="group.key"
-          data-testid="recommendation-comparison-group"
-          class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-4"
-        >
-          <div class="space-y-1">
-            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-              {{ group.label }}
-            </p>
-            <h4 class="text-base font-semibold text-slate-950">
-              {{ group.count }} ranked {{ group.count === 1 ? 'pathway' : 'pathways' }}
-            </h4>
-            <p class="text-sm text-slate-600">
-              {{ group.description }}
-            </p>
-          </div>
+        <template v-if="hasComparisonGroups">
+          <section
+            v-for="group in resultGroups"
+            :key="group.key"
+            data-testid="recommendation-comparison-group"
+            class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-4"
+          >
+            <div class="space-y-1">
+              <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                {{ group.label }}
+              </p>
+              <h4 class="text-base font-semibold text-slate-950">
+                {{ group.count }} ranked {{ group.count === 1 ? 'pathway' : 'pathways' }}
+              </h4>
+              <p class="text-sm text-slate-600">
+                {{ group.description }}
+              </p>
+            </div>
 
-          <div class="space-y-4">
-            <PathwayComparisonCard
-              v-for="candidate in group.items"
-              :key="`${candidate.type}:${candidate.pathwayId}`"
-              :candidate="candidate"
-            />
-          </div>
+            <div class="space-y-4">
+              <PathwayComparisonCard
+                v-for="candidate in group.items"
+                :key="`${candidate.type}:${candidate.pathwayId}`"
+                :candidate="candidate"
+              />
+            </div>
+          </section>
+        </template>
+
+        <section
+          v-else
+          class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4"
+        >
+          <h4 class="text-base font-semibold text-slate-950">
+            No ranked pathways could be shown for this run
+          </h4>
+          <p class="mt-2 text-sm leading-relaxed text-slate-700">
+            {{ props.resultsRecord?.noComposedReason || resolvedComparison.limitation || 'Comparison is limited for this run, so the workspace remains in a structured review state until you rerun the recommendation.' }}
+          </p>
         </section>
       </div>
     </div>

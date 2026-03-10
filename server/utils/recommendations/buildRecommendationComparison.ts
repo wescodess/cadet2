@@ -87,7 +87,11 @@ function buildFallbackLimitation(
   totalCandidateCount: number,
   noComposedReason?: string,
 ) {
-  if (totalCandidateCount <= 1) {
+  if (totalCandidateCount === 0) {
+    return noComposedReason?.trim() || 'No ranked pathways are available for this run yet, so the workspace stays in a structured review state.'
+  }
+
+  if (totalCandidateCount === 1) {
     return 'Only one ranked pathway is available for this run, so a full side-by-side comparison would be misleading.'
   }
 

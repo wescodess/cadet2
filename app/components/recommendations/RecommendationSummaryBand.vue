@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import type { RecommendationComparison } from '~/lib/recommendations/comparison'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   comparison: RecommendationComparison
   noComposedReason?: string | null
-}>()
+  totalCitationCount?: number
+}>(), {
+  noComposedReason: null,
+  totalCitationCount: 0,
+})
 
 const modeLabel = computed(() => (
   props.comparison.mode === 'workspace'
@@ -55,7 +59,7 @@ const fallbackNoComposedReason = computed(() => (
         </p>
       </div>
 
-      <dl class="grid min-w-[220px] grid-cols-2 gap-3 rounded-2xl border border-white/70 bg-white/80 p-3 text-sm">
+      <dl class="grid min-w-[220px] grid-cols-3 gap-3 rounded-2xl border border-white/70 bg-white/80 p-3 text-sm">
         <div class="rounded-xl bg-slate-50 px-3 py-2">
           <dt class="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
             Visible groups
@@ -72,7 +76,16 @@ const fallbackNoComposedReason = computed(() => (
             {{ props.comparison.totalCandidateCount }}
           </dd>
         </div>
+        <div class="rounded-xl bg-slate-50 px-3 py-2">
+          <dt class="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Citations
+          </dt>
+          <dd class="mt-1 text-lg font-semibold text-slate-950">
+            {{ props.totalCitationCount }}
+          </dd>
+        </div>
       </dl>
     </div>
   </section>
 </template>
+

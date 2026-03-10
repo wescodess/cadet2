@@ -3,10 +3,12 @@ import type { RecommendationResultsCandidate } from '~/lib/recommendations/compa
 
 import { ChevronDown } from 'lucide-vue-next'
 import BlockerAndTradeoffPanel from '~/components/recommendations/BlockerAndTradeoffPanel.vue'
+import EvidenceConfidencePanel from '~/components/recommendations/EvidenceConfidencePanel.vue'
 import MilestoneRoutePlanner from '~/components/recommendations/MilestoneRoutePlanner.vue'
 import NextActionQueue from '~/components/recommendations/NextActionQueue.vue'
 import RecommendationTierBadge from '~/components/workspace/RecommendationTierBadge.vue'
 import { normalizePathwayLabel } from '~/lib/recommendations/comparison'
+import { getRecommendationTrustBoundaryBadgeLabel } from '~/lib/recommendations/citations'
 
 const props = defineProps<{
   candidate: RecommendationResultsCandidate
@@ -66,7 +68,14 @@ function candidateOutcomeSummary(candidate: RecommendationResultsCandidate) {
 const blockers = computed(() => props.candidate.blockers || [])
 const tradeoffs = computed(() => props.candidate.tradeoffs || [])
 const actions = computed(() => props.candidate.improvementActions || [])
+const citations = computed(() => props.candidate.citations || [])
 const hasStrategicRoute = computed(() => Boolean(props.candidate.composedSteps && props.candidate.composedSteps.length > 0))
+const fitSignalsPanelId = computed(() => `fit-signals-${props.candidate.type}-${props.candidate.pathwayId}-${props.candidate.rank}`)
+const citationSummary = computed(() => (
+  citations.value.length === 1
+    ? '1 citation'
+    : `${citations.value.length} citations`
+))
 
 function toggleMobileFitSignals() {
   isMobileFitSignalsOpen.value = !isMobileFitSignalsOpen.value
@@ -88,6 +97,15 @@ function toggleMobileFitSignals() {
               class="inline-flex items-center rounded-full border border-slate-300 bg-white/85 px-3 py-1 text-xs font-semibold text-slate-950"
             >
               {{ pathwayType.label }}
+            </span>
+            <span
+              data-testid="trust-boundary-badge"
+              class="inline-flex items-center rounded-full border border-[var(--trust,#2563eb)]/20 bg-white/85 px-3 py-1 text-xs font-semibold text-slate-950"
+            >
+              {{ getRecommendationTrustBoundaryBadgeLabel(props.candidate.trustBoundary) }}
+            </span>
+            <span class="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-3 py-1 text-xs font-medium text-slate-700">
+              {{ citationSummary }}
             </span>
             <span class="text-xs font-medium text-slate-600">
               Rank #{{ props.candidate.rank }}
@@ -119,35 +137,13 @@ function toggleMobileFitSignals() {
       </p>
     </div>
 
-    <div class="space-y-3 md:hidden">
-      <MilestoneRoutePlanner
-        v-if="hasStrategicRoute"
-        :steps="props.candidate.composedSteps || []"
-      />
-
-      <NextActionQueue
-        v-if="actions.length > 0"
-        :actions="actions"
-      />
-
-      <BlockerAndTradeoffPanel
-        :blockers="blockers"
-        :tradeoffs="tradeoffs"
-      />
-
-      <p
-        v-if="props.candidate.qualification !== 'supported'"
-        class="rounded-xl border border-[var(--warning,#f59e0b)]/30 bg-white/80 px-3 py-2 text-xs leading-relaxed text-slate-800"
-      >
-        Caution: {{ props.candidate.caveat }}
-      </p>
-
+    <div class="md:hidden">
       <section class="rounded-xl border border-slate-200 bg-white/85">
         <button
           type="button"
           class="focus-visible:ring-[3px] focus-visible:ring-[var(--ring)]/40 flex min-h-[44px] w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left outline-none"
           :aria-expanded="isMobileFitSignalsOpen"
-          :aria-controls="`fit-signals-${props.candidate.pathwayId}`"
+          :aria-controls="fitSignalsPanelId"
           @click="toggleMobileFitSignals"
         >
           <span>
@@ -167,7 +163,7 @@ function toggleMobileFitSignals() {
 
         <ul
           v-if="isMobileFitSignalsOpen"
-          :id="`fit-signals-${props.candidate.pathwayId}`"
+          :id="fitSignalsPanelId"
           class="grid gap-2 border-t border-slate-200 px-3 py-3"
           aria-label="Recommendation fit signals"
         >
@@ -185,7 +181,7 @@ function toggleMobileFitSignals() {
       </section>
     </div>
 
-    <div class="hidden space-y-4 md:block">
+    <div class="hidden md:block">
       <ul
         class="grid gap-2"
         :class="props.candidate.fitSignals.length > 1 ? 'md:grid-cols-2' : 'md:grid-cols-1'"
@@ -202,30 +198,31 @@ function toggleMobileFitSignals() {
           <span> · {{ signal.detail }}</span>
         </li>
       </ul>
+    </div>
 
-      <MilestoneRoutePlanner
-        v-if="hasStrategicRoute"
-        :steps="props.candidate.composedSteps || []"
+    <MilestoneRoutePlanner
+      v-if="hasStrategicRoute"
+      :steps="props.candidate.composedSteps || []"
+    />
+
+    <div class="space-y-3">
+      <BlockerAndTradeoffPanel
+        :blockers="blockers"
+        :tradeoffs="tradeoffs"
       />
 
-      <div class="space-y-3">
-        <BlockerAndTradeoffPanel
-          :blockers="blockers"
-          :tradeoffs="tradeoffs"
-        />
-
-        <NextActionQueue
-          v-if="actions.length > 0"
-          :actions="actions"
-        />
-      </div>
-
-      <p
-        v-if="props.candidate.qualification !== 'supported'"
-        class="rounded-xl border border-[var(--warning,#f59e0b)]/30 bg-white/80 px-3 py-2 text-xs leading-relaxed text-slate-800"
-      >
-        Caution: {{ props.candidate.caveat }}
-      </p>
+      <NextActionQueue
+        v-if="actions.length > 0"
+        :actions="actions"
+      />
     </div>
+
+    <EvidenceConfidencePanel
+      :citations="citations"
+      :trust-boundary="props.candidate.trustBoundary"
+      :confidence="props.candidate.confidence"
+      :freshness="props.candidate.freshness"
+      :caveat="props.candidate.caveat"
+    />
   </article>
 </template>

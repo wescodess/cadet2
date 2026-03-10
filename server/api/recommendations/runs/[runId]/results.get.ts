@@ -6,9 +6,10 @@ import {
   buildRecommendationComparison,
   buildRecommendationPathwayType,
   type RecommendationComparison,
-  type RecommendationComparisonGroup,
   type RecommendationPathwayType,
 } from '../../../../utils/recommendations/buildRecommendationComparison'
+import { buildRecommendationCitations } from '../../../../utils/recommendations/buildRecommendationCitations'
+import { classifyTrustBoundary, type RecommendationTrustBoundary } from '../../../../utils/recommendations/classifyTrustBoundary'
 import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
 import { MVP_PATHWAY_IDS } from '../../../../utils/pathways/mvpPathwayCatalog'
 
@@ -21,7 +22,22 @@ type RecommendationResultTier = 'strong-fit' | 'conditional-fit' | 'lower-confid
 type RecommendationQualification = 'supported' | 'low-confidence' | 'withheld'
 type RecommendationConfidence = 'high' | 'medium' | 'low' | 'withheld'
 type RecommendationFreshness = 'fresh' | 'stale' | 'unknown'
+type RecommendationCitationSourceType = 'regulation' | 'policy-bulletin' | 'knowledge-base' | 'assessment-guide'
 type RecommendationFitSignalState = 'strength' | 'watch' | 'gap'
+
+type RecommendationSourceContext = {
+  excerpt: string
+  retrievalDate: string
+  freshness: RecommendationFreshness
+  sourceTitle: string
+  sourceType: RecommendationCitationSourceType
+  sourceUrl: string
+}
+
+type RecommendationCitation = RecommendationSourceContext & {
+  citationId: string
+  claimText: string
+}
 
 type RecommendationFitSignal = {
   id: string
@@ -67,6 +83,8 @@ type RankedDirectRecommendation = {
   blockers: RecommendationBlocker[]
   tradeoffs: RecommendationTradeoff[]
   improvementActions: RecommendationImprovementAction[]
+  citations: RecommendationCitation[]
+  trustBoundary: RecommendationTrustBoundary
   pathwayType?: RecommendationPathwayType
 }
 
@@ -85,6 +103,8 @@ type RankedBlockedRecommendation = {
   blockers: RecommendationBlocker[]
   tradeoffs: RecommendationTradeoff[]
   improvementActions: RecommendationImprovementAction[]
+  citations: RecommendationCitation[]
+  trustBoundary: RecommendationTrustBoundary
   pathwayType?: RecommendationPathwayType
 }
 
@@ -104,6 +124,8 @@ type RankedComposedRecommendation = {
   blockers: RecommendationBlocker[]
   tradeoffs: RecommendationTradeoff[]
   improvementActions: RecommendationImprovementAction[]
+  citations: RecommendationCitation[]
+  trustBoundary: RecommendationTrustBoundary
   pathwayType?: RecommendationPathwayType
 }
 
@@ -181,6 +203,47 @@ function normalizeComposedSteps(value: unknown): string[] {
   return value.filter((step): step is string => typeof step === 'string' && step.trim().length > 0)
 }
 
+function normalizeCitations(value: unknown): RecommendationCitation[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  // Delegate to the robust citation assembly utility which validates every
+  // field, normalises source types to the canonical set, and computes freshness
+  // from the retrieval date.  Fall back to the raw array shape for entries that
+  // already carry the final citation structure (e.g. pre-assembled by upstream
+  // pipeline steps).
+  const assembled = buildRecommendationCitations(value)
+  if (assembled.length > 0) {
+    return assembled
+  }
+
+  // If assembly returned nothing (all entries were malformed raw evidence),
+  // attempt a shallow passthrough for entries that already have the final shape.
+  return value
+    .filter((entry): entry is RecommendationCitation =>
+      Boolean(entry)
+      && typeof entry === 'object'
+      && !Array.isArray(entry)
+      && typeof (entry as Record<string, unknown>).citationId === 'string'
+      && typeof (entry as Record<string, unknown>).claimText === 'string'
+      && typeof (entry as Record<string, unknown>).sourceUrl === 'string'
+      && (entry as Record<string, unknown>).citationId !== ''
+      && (entry as Record<string, unknown>).claimText !== ''
+      && (entry as Record<string, unknown>).sourceUrl !== '',
+    )
+    .map(entry => ({
+      citationId: entry.citationId,
+      claimText: entry.claimText,
+      sourceTitle: entry.sourceTitle,
+      sourceUrl: entry.sourceUrl,
+      sourceType: entry.sourceType,
+      excerpt: entry.excerpt,
+      retrievalDate: entry.retrievalDate,
+      freshness: entry.freshness,
+    }))
+}
+
 export default defineEventHandler(async (event) => {
   const { userId } = await requireWorkspaceUserSession(event)
   const runId = getRouterParam(event, 'runId')?.trim() || ''
@@ -237,64 +300,94 @@ export default defineEventHandler(async (event) => {
 
   const direct = sortByRank(record.results.direct)
     .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
-    .map(candidate => ({
-      pathwayId: candidate.pathwayId,
-      type: 'direct' as const,
-      rank: candidate.rank,
-      tier: candidate.tier,
-      score: candidate.score,
-      rationale: candidate.rationale,
-      fitSignals: candidate.fitSignals,
-      qualification: candidate.qualification,
-      confidence: candidate.confidence,
-      freshness: candidate.freshness,
-      caveat: candidate.caveat,
-      blockers: normalizeBlockers(candidate.blockers),
-      tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-      improvementActions: normalizeImprovementActions(candidate.improvementActions),
-      pathwayType: buildRecommendationPathwayType('direct'),
-    }))
+    .map((candidate) => {
+      const citations = normalizeCitations(candidate.citations)
+
+      return {
+        pathwayId: candidate.pathwayId,
+        type: 'direct' as const,
+        rank: candidate.rank,
+        tier: candidate.tier,
+        score: candidate.score,
+        rationale: candidate.rationale,
+        fitSignals: candidate.fitSignals,
+        qualification: candidate.qualification,
+        confidence: candidate.confidence,
+        freshness: candidate.freshness,
+        caveat: candidate.caveat,
+        blockers: normalizeBlockers(candidate.blockers),
+        tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
+        improvementActions: normalizeImprovementActions(candidate.improvementActions),
+        citations,
+        trustBoundary: candidate.trustBoundary ?? classifyTrustBoundary({
+          citations,
+          confidence: candidate.confidence,
+          qualification: candidate.qualification,
+        }),
+        pathwayType: buildRecommendationPathwayType('direct'),
+      }
+    })
 
   const blocked = sortByRank(record.results.blocked)
     .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
-    .map(candidate => ({
-      pathwayId: candidate.pathwayId,
-      type: 'blocked' as const,
-      rank: candidate.rank,
-      tier: candidate.tier,
-      score: candidate.score,
-      rationale: candidate.rationale,
-      fitSignals: candidate.fitSignals,
-      qualification: candidate.qualification,
-      confidence: candidate.confidence,
-      freshness: candidate.freshness,
-      caveat: candidate.caveat,
-      blockers: normalizeBlockers(candidate.blockers),
-      tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-      improvementActions: normalizeImprovementActions(candidate.improvementActions),
-      pathwayType: buildRecommendationPathwayType('blocked'),
-    }))
+    .map((candidate) => {
+      const citations = normalizeCitations(candidate.citations)
+
+      return {
+        pathwayId: candidate.pathwayId,
+        type: 'blocked' as const,
+        rank: candidate.rank,
+        tier: candidate.tier,
+        score: candidate.score,
+        rationale: candidate.rationale,
+        fitSignals: candidate.fitSignals,
+        qualification: candidate.qualification,
+        confidence: candidate.confidence,
+        freshness: candidate.freshness,
+        caveat: candidate.caveat,
+        blockers: normalizeBlockers(candidate.blockers),
+        tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
+        improvementActions: normalizeImprovementActions(candidate.improvementActions),
+        citations,
+        trustBoundary: candidate.trustBoundary ?? classifyTrustBoundary({
+          citations,
+          confidence: candidate.confidence,
+          qualification: candidate.qualification,
+        }),
+        pathwayType: buildRecommendationPathwayType('blocked'),
+      }
+    })
 
   const composed = sortByRank(record.results.composed)
     .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
-    .map(candidate => ({
-      pathwayId: candidate.pathwayId,
-      type: 'composed' as const,
-      rank: candidate.rank,
-      tier: candidate.tier,
-      score: candidate.score,
-      composedSteps: normalizeComposedSteps(candidate.composedSteps),
-      rationale: candidate.rationale,
-      fitSignals: candidate.fitSignals,
-      qualification: candidate.qualification,
-      confidence: candidate.confidence,
-      freshness: candidate.freshness,
-      caveat: candidate.caveat,
-      blockers: normalizeBlockers(candidate.blockers),
-      tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-      improvementActions: normalizeImprovementActions(candidate.improvementActions),
-      pathwayType: buildRecommendationPathwayType('composed'),
-    }))
+    .map((candidate) => {
+      const citations = normalizeCitations(candidate.citations)
+
+      return {
+        pathwayId: candidate.pathwayId,
+        type: 'composed' as const,
+        rank: candidate.rank,
+        tier: candidate.tier,
+        score: candidate.score,
+        composedSteps: normalizeComposedSteps(candidate.composedSteps),
+        rationale: candidate.rationale,
+        fitSignals: candidate.fitSignals,
+        qualification: candidate.qualification,
+        confidence: candidate.confidence,
+        freshness: candidate.freshness,
+        caveat: candidate.caveat,
+        blockers: normalizeBlockers(candidate.blockers),
+        tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
+        improvementActions: normalizeImprovementActions(candidate.improvementActions),
+        citations,
+        trustBoundary: candidate.trustBoundary ?? classifyTrustBoundary({
+          citations,
+          confidence: candidate.confidence,
+          qualification: candidate.qualification,
+        }),
+        pathwayType: buildRecommendationPathwayType('composed'),
+      }
+    })
 
   return {
     runId: record.runId,
