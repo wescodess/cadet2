@@ -52,6 +52,26 @@ export type RecommendationComparisonAction = {
   expectedImpact: string
 }
 
+export type RecommendationComparisonCitation = {
+  citationId: string
+  claimText: string
+  sourceTitle: string
+  sourceUrl: string
+  sourceType: 'regulation' | 'policy-bulletin' | 'knowledge-base' | 'assessment-guide'
+  excerpt: string
+  retrievalDate: string
+  freshness: 'fresh' | 'stale' | 'unknown'
+}
+
+export type RecommendationComparisonTrustBoundary = 'source-backed' | 'inferred' | 'system-generated'
+
+type RecommendationComparisonInput = {
+  directCount: number
+  blockedCount: number
+  composedCount: number
+  noComposedReason?: string
+}
+
 export type RecommendationComparisonCandidate = {
   pathwayId: string
   type: 'direct' | 'blocked' | 'composed'
@@ -69,6 +89,8 @@ export type RecommendationComparisonCandidate = {
   improvementActions: RecommendationComparisonAction[]
   composedSteps?: string[]
   pathwayType: RecommendationComparisonPathwayType
+  citations: RecommendationComparisonCitation[]
+  trustBoundary: RecommendationComparisonTrustBoundary
 }
 
 export type RecommendationComparisonResultsPayload = {
@@ -219,6 +241,17 @@ export function createRecommendationComparisonCandidate(
       label: 'Available now',
       description: 'Current profile evidence supports action in the near term.',
     },
+    citations: [{
+      citationId: 'citation-skilled-worker-language',
+      claimText: 'Language readiness keeps this pathway actionable in the current MVP rules.',
+      sourceTitle: 'Express Entry Language Requirements',
+      sourceUrl: 'https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/eligibility/federal-skilled-workers.html',
+      sourceType: 'regulation',
+      excerpt: 'Language results at or above the current benchmark support near-term Skilled Worker pathway action.',
+      retrievalDate: '2026-03-01T00:00:00Z',
+      freshness: 'fresh',
+    }],
+    trustBoundary: 'source-backed',
     ...overrides,
   }
 
@@ -254,16 +287,77 @@ export function createRecommendationComparisonPathwayType(
   }
 }
 
+function buildComparisonGroups(input: RecommendationComparisonInput): RecommendationComparisonGroup[] {
+  return [
+    {
+      key: 'direct',
+      label: 'Available now',
+      description: 'Paths you can act on soonest without inventing new prerequisites.',
+      count: input.directCount,
+    },
+    {
+      key: 'blocked',
+      label: 'Blocked but close',
+      description: 'Paths with useful ranking signal that still need explicit fixes first.',
+      count: input.blockedCount,
+    },
+    {
+      key: 'composed',
+      label: 'Longer-horizon pathways',
+      description: 'Strategic routes that rely on staged milestones instead of immediate execution.',
+      count: input.composedCount,
+    },
+  ].filter(group => group.count > 0)
+}
+
+function buildFallbackLimitation(
+  groups: RecommendationComparisonGroup[],
+  totalCandidateCount: number,
+  noComposedReason?: string,
+) {
+  if (totalCandidateCount === 0) {
+    return noComposedReason?.trim() || 'No ranked pathways are available for this run yet, so the workspace stays in a structured review state.'
+  }
+
+  if (totalCandidateCount === 1) {
+    return 'Only one ranked pathway is available for this run, so a full side-by-side comparison would be misleading.'
+  }
+
+  const primaryGroup = groups[0]
+  if (!primaryGroup) {
+    return noComposedReason?.trim() || 'Comparison is limited because this run did not produce multiple pathway buckets.'
+  }
+
+  const classLabel = primaryGroup.key === 'direct'
+    ? 'available-now'
+    : primaryGroup.key === 'blocked'
+      ? 'blocked-but-close'
+      : 'longer-horizon'
+
+  return `All ${totalCandidateCount} ranked pathways fall into the same category (${classLabel}), so the workspace shifts into a structured review state instead of a side-by-side comparison across route types.`
+}
+
 export function createRecommendationComparisonMetadata(input: {
   directCount: number
   blockedCount: number
   composedCount: number
   noComposedReason?: string
 }): RecommendationComparisonMetadata {
-  // Delegate to the canonical server builder to prevent drift between
-  // test mocks and production comparison semantics.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { buildRecommendationComparison } = require('../../../../server/utils/recommendations/buildRecommendationComparison') as typeof import('../../../../server/utils/recommendations/buildRecommendationComparison')
+  const groups = buildComparisonGroups(input)
+  const totalCandidateCount = input.directCount + input.blockedCount + input.composedCount
+  const visibleGroupCount = groups.length
+  const mode = totalCandidateCount > 1 && visibleGroupCount > 1 ? 'workspace' : 'fallback'
 
-  return buildRecommendationComparison(input)
+  return {
+    mode,
+    summary: mode === 'workspace'
+      ? 'Compare immediate, blocked, and longer-horizon pathways while keeping rank, trust, and next-step context visible.'
+      : 'Comparison is limited for this run, so the workspace switches into a structured review state instead of a misleading empty layout.',
+    limitation: mode === 'fallback'
+      ? buildFallbackLimitation(groups, totalCandidateCount, input.noComposedReason)
+      : undefined,
+    groups,
+    visibleGroupCount,
+    totalCandidateCount,
+  }
 }

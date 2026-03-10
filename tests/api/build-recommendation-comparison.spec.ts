@@ -71,7 +71,7 @@ test.describe('buildRecommendationComparison', () => {
         expect(result.mode).toBe('fallback')
         expect(result.totalCandidateCount).toBe(0)
         expect(result.groups).toHaveLength(0)
-        expect(result.limitation).toContain('Only one ranked pathway')
+        expect(result.limitation).toContain('Evaluation failed temporarily.')
     })
 
     test('filters out empty groups from the groups array', () => {

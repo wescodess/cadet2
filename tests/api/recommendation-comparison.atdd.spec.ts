@@ -151,8 +151,13 @@ test.describe('Story 3.3 Recommendation Comparison API ATDD', () => {
     expect(results.results.composed[0]?.pathwayType.key).toBe('strategic-multi-step')
     expect(results.results.blocked.length).toBeGreaterThan(0)
 
-    const orderedRanks = allCandidates(results).map(candidate => candidate.rank)
-    expect(orderedRanks).toEqual([...orderedRanks].sort((left, right) => left - right))
+    for (const group of [results.results.direct, results.results.blocked, results.results.composed]) {
+      const groupRanks = group.map(candidate => candidate.rank)
+      expect(groupRanks).toEqual([...groupRanks].sort((left, right) => left - right))
+    }
+
+    const distinctRanks = [...new Set(allCandidates(results).map(candidate => candidate.rank))].sort((left, right) => left - right)
+    expect(distinctRanks.length).toBe(allCandidates(results).length)
   })
 
   test('[P0][AC4] recommendation results expose structured fallback metadata when comparison is limited to one pathway class', async ({

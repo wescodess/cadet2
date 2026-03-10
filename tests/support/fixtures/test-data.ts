@@ -219,3 +219,30 @@ export const RECOMMENDATION_COMPARISON_PATHWAY_TYPE_LABELS = {
   blocked: 'Blocked but close',
   composed: 'Strategic multi-step',
 } as const
+
+export const RECOMMENDATION_CITATIONS_ATDD_TEST_IDS = {
+  citationList: 'recommendation-citation-list',
+  citationItem: 'citation-item',
+  evidencePanel: 'evidence-confidence-panel',
+  trustBoundaryBadge: 'trust-boundary-badge',
+  caveatWarning: 'caveat-warning',
+} as const
+
+export const RECOMMENDATION_TRUST_BOUNDARY_VALUES = [
+  'source-backed',
+  'inferred',
+  'system-generated',
+] as const
+
+export const RECOMMENDATION_TRUST_BOUNDARY_LABELS = {
+  'source-backed': 'Source-backed',
+  'inferred': 'Strategic guidance',
+  'system-generated': 'Limited evidence',
+} as const
+
+export const RECOMMENDATION_CITATION_SOURCE_TYPES = [
+  'regulation',
+  'policy-bulletin',
+  'knowledge-base',
+  'assessment-guide',
+] as const

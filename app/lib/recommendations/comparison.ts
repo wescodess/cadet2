@@ -1,3 +1,8 @@
+import type {
+  RecommendationCitation,
+  RecommendationTrustBoundary,
+} from '~/lib/recommendations/citations'
+
 export type RecommendationFitSignal = {
   id: string
   label: string
@@ -55,6 +60,8 @@ export type RecommendationResultsCandidate = {
   tradeoffs: RecommendationTradeoff[]
   improvementActions: RecommendationImprovementAction[]
   pathwayType: RecommendationPathwayType
+  citations: RecommendationCitation[]
+  trustBoundary: RecommendationTrustBoundary
 }
 
 export type RecommendationComparisonGroup = {

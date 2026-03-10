@@ -27,6 +27,17 @@ type MockRecommendationFitSignal = {
   state: 'strength' | 'watch' | 'gap'
 }
 
+type MockRecommendationCitation = {
+  citationId: string
+  claimText: string
+  sourceTitle: string
+  sourceUrl: string
+  sourceType: 'regulation' | 'policy-bulletin' | 'knowledge-base' | 'assessment-guide'
+  excerpt: string
+  retrievalDate: string
+  freshness: 'fresh' | 'stale' | 'unknown'
+}
+
 type MockRecommendationCandidate = {
   pathwayId: string
   type: 'direct' | 'blocked' | 'composed'
@@ -41,6 +52,8 @@ type MockRecommendationCandidate = {
   caveat: string
   composedSteps?: string[]
   pathwayType: RecommendationComparisonPathwayType
+  citations: MockRecommendationCitation[]
+  trustBoundary: 'source-backed' | 'inferred' | 'system-generated'
 }
 
 type MockRecommendationResultsPayload = {
@@ -237,6 +250,17 @@ function createMockCandidate(
     caveat: 'Direct-fit recommendation is supported by current profile and MVP pathway rules.',
     composedSteps: [],
     pathwayType: createRecommendationComparisonPathwayType('direct'),
+    citations: [{
+      citationId: 'story21-language-readiness',
+      claimText: 'Language readiness supports this recommendation.',
+      sourceTitle: 'Recommendation Assessment Guide',
+      sourceUrl: 'https://example.com/recommendation-assessment-guide',
+      sourceType: 'assessment-guide',
+      excerpt: 'Language readiness remains a key decision input for the current recommendation surface.',
+      retrievalDate: '2026-03-01T00:00:00Z',
+      freshness: 'fresh',
+    }],
+    trustBoundary: 'source-backed',
     ...overrides,
   }
 
