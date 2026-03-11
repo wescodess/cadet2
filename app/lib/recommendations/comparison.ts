@@ -32,6 +32,20 @@ export type RecommendationImprovementAction = {
   expectedImpact: string
 }
 
+export type RecommendationNextStepPlanStep = {
+  id: string
+  title: string
+  detail: string
+  priority: 'now' | 'next' | 'later'
+  sequence: number
+}
+
+export type RecommendationNextStepPlan = {
+  summary: string
+  steps: RecommendationNextStepPlanStep[]
+  limitation: string
+}
+
 export type RecommendationPathwayType = {
   key: 'available-now' | 'blocked-but-close' | 'strategic-multi-step'
   label: string
@@ -62,6 +76,7 @@ export type RecommendationResultsCandidate = {
   pathwayType: RecommendationPathwayType
   citations: RecommendationCitation[]
   trustBoundary: RecommendationTrustBoundary
+  nextStepPlan: RecommendationNextStepPlan
 }
 
 export type RecommendationComparisonGroup = {
