@@ -69,8 +69,10 @@ const blockers = computed(() => props.candidate.blockers || [])
 const tradeoffs = computed(() => props.candidate.tradeoffs || [])
 const actions = computed(() => props.candidate.improvementActions || [])
 const citations = computed(() => props.candidate.citations || [])
+const nextStepPlan = computed(() => props.candidate.nextStepPlan || null)
 const hasStrategicRoute = computed(() => Boolean(props.candidate.composedSteps && props.candidate.composedSteps.length > 0))
 const fitSignalsPanelId = computed(() => `fit-signals-${props.candidate.type}-${props.candidate.pathwayId}-${props.candidate.rank}`)
+const nextStepPlanPanelIdBase = computed(() => `next-step-plan-${props.candidate.type}-${props.candidate.pathwayId}-${props.candidate.rank}`)
 const citationSummary = computed(() => (
   citations.value.length === 1
     ? '1 citation'
@@ -212,8 +214,10 @@ function toggleMobileFitSignals() {
       />
 
       <NextActionQueue
-        v-if="actions.length > 0"
+        v-if="nextStepPlan || actions.length > 0"
+        :plan="nextStepPlan"
         :actions="actions"
+        :panel-id-base="nextStepPlanPanelIdBase"
       />
     </div>
 

@@ -228,6 +228,14 @@ export const RECOMMENDATION_CITATIONS_ATDD_TEST_IDS = {
   caveatWarning: 'caveat-warning',
 } as const
 
+export const RECOMMENDATION_NEXT_STEP_PLAN_ATDD_TEST_IDS = {
+  plan: 'recommendation-next-step-plan',
+  item: 'recommendation-next-step-item',
+  summary: 'recommendation-next-step-summary',
+  limitation: 'recommendation-next-step-limitation',
+  toggle: 'recommendation-next-step-toggle',
+} as const
+
 export const RECOMMENDATION_TRUST_BOUNDARY_VALUES = [
   'source-backed',
   'inferred',

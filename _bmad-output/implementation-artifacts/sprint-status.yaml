@@ -59,10 +59,10 @@ development_status:
   3-2-surface-blockers-tradeoffs-and-improvement-actions: done
   3-3-compare-immediate-and-longer-horizon-pathways: done
   3-4-display-citations-source-context-and-trust-boundaries: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
 
-  epic-4: backlog
-  4-1-generate-a-clear-next-step-plan-from-recommendations: backlog
+  epic-4: in-progress
+  4-1-generate-a-clear-next-step-plan-from-recommendations: done
   4-2-revisit-and-preserve-prior-recommendation-runs: backlog
   4-3-show-changes-between-recommendation-runs: backlog
   4-4-support-ongoing-reuse-of-the-planning-workspace: backlog

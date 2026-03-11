@@ -9,6 +9,10 @@ import {
   type RecommendationPathwayType,
 } from '../../../../utils/recommendations/buildRecommendationComparison'
 import { buildRecommendationCitations } from '../../../../utils/recommendations/buildRecommendationCitations'
+import {
+  buildRecommendationNextStepPlan,
+  type RecommendationNextStepPlan,
+} from '../../../../utils/recommendations/buildRecommendationNextStepPlan'
 import { classifyTrustBoundary, type RecommendationTrustBoundary } from '../../../../utils/recommendations/classifyTrustBoundary'
 import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
 import { MVP_PATHWAY_IDS } from '../../../../utils/pathways/mvpPathwayCatalog'
@@ -85,6 +89,7 @@ type RankedDirectRecommendation = {
   improvementActions: RecommendationImprovementAction[]
   citations: RecommendationCitation[]
   trustBoundary: RecommendationTrustBoundary
+  nextStepPlan: RecommendationNextStepPlan
   pathwayType?: RecommendationPathwayType
 }
 
@@ -105,6 +110,7 @@ type RankedBlockedRecommendation = {
   improvementActions: RecommendationImprovementAction[]
   citations: RecommendationCitation[]
   trustBoundary: RecommendationTrustBoundary
+  nextStepPlan: RecommendationNextStepPlan
   pathwayType?: RecommendationPathwayType
 }
 
@@ -126,6 +132,7 @@ type RankedComposedRecommendation = {
   improvementActions: RecommendationImprovementAction[]
   citations: RecommendationCitation[]
   trustBoundary: RecommendationTrustBoundary
+  nextStepPlan: RecommendationNextStepPlan
   pathwayType?: RecommendationPathwayType
 }
 
@@ -301,7 +308,15 @@ export default defineEventHandler(async (event) => {
   const direct = sortByRank(record.results.direct)
     .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
     .map((candidate) => {
+      const blockers = normalizeBlockers(candidate.blockers)
+      const tradeoffs = normalizeTradeoffs(candidate.tradeoffs)
+      const improvementActions = normalizeImprovementActions(candidate.improvementActions)
       const citations = normalizeCitations(candidate.citations)
+      const trustBoundary = candidate.trustBoundary ?? classifyTrustBoundary({
+        citations,
+        confidence: candidate.confidence,
+        qualification: candidate.qualification,
+      })
 
       return {
         pathwayId: candidate.pathwayId,
@@ -315,14 +330,22 @@ export default defineEventHandler(async (event) => {
         confidence: candidate.confidence,
         freshness: candidate.freshness,
         caveat: candidate.caveat,
-        blockers: normalizeBlockers(candidate.blockers),
-        tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-        improvementActions: normalizeImprovementActions(candidate.improvementActions),
+        blockers,
+        tradeoffs,
+        improvementActions,
         citations,
-        trustBoundary: candidate.trustBoundary ?? classifyTrustBoundary({
-          citations,
-          confidence: candidate.confidence,
+        trustBoundary,
+        nextStepPlan: buildRecommendationNextStepPlan({
+          pathwayId: candidate.pathwayId,
+          type: 'direct',
           qualification: candidate.qualification,
+          confidence: candidate.confidence,
+          freshness: candidate.freshness,
+          caveat: candidate.caveat,
+          blockers,
+          tradeoffs,
+          improvementActions,
+          trustBoundary,
         }),
         pathwayType: buildRecommendationPathwayType('direct'),
       }
@@ -331,7 +354,15 @@ export default defineEventHandler(async (event) => {
   const blocked = sortByRank(record.results.blocked)
     .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
     .map((candidate) => {
+      const blockers = normalizeBlockers(candidate.blockers)
+      const tradeoffs = normalizeTradeoffs(candidate.tradeoffs)
+      const improvementActions = normalizeImprovementActions(candidate.improvementActions)
       const citations = normalizeCitations(candidate.citations)
+      const trustBoundary = candidate.trustBoundary ?? classifyTrustBoundary({
+        citations,
+        confidence: candidate.confidence,
+        qualification: candidate.qualification,
+      })
 
       return {
         pathwayId: candidate.pathwayId,
@@ -345,14 +376,22 @@ export default defineEventHandler(async (event) => {
         confidence: candidate.confidence,
         freshness: candidate.freshness,
         caveat: candidate.caveat,
-        blockers: normalizeBlockers(candidate.blockers),
-        tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-        improvementActions: normalizeImprovementActions(candidate.improvementActions),
+        blockers,
+        tradeoffs,
+        improvementActions,
         citations,
-        trustBoundary: candidate.trustBoundary ?? classifyTrustBoundary({
-          citations,
-          confidence: candidate.confidence,
+        trustBoundary,
+        nextStepPlan: buildRecommendationNextStepPlan({
+          pathwayId: candidate.pathwayId,
+          type: 'blocked',
           qualification: candidate.qualification,
+          confidence: candidate.confidence,
+          freshness: candidate.freshness,
+          caveat: candidate.caveat,
+          blockers,
+          tradeoffs,
+          improvementActions,
+          trustBoundary,
         }),
         pathwayType: buildRecommendationPathwayType('blocked'),
       }
@@ -361,7 +400,16 @@ export default defineEventHandler(async (event) => {
   const composed = sortByRank(record.results.composed)
     .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
     .map((candidate) => {
+      const blockers = normalizeBlockers(candidate.blockers)
+      const tradeoffs = normalizeTradeoffs(candidate.tradeoffs)
+      const improvementActions = normalizeImprovementActions(candidate.improvementActions)
+      const composedSteps = normalizeComposedSteps(candidate.composedSteps)
       const citations = normalizeCitations(candidate.citations)
+      const trustBoundary = candidate.trustBoundary ?? classifyTrustBoundary({
+        citations,
+        confidence: candidate.confidence,
+        qualification: candidate.qualification,
+      })
 
       return {
         pathwayId: candidate.pathwayId,
@@ -369,21 +417,30 @@ export default defineEventHandler(async (event) => {
         rank: candidate.rank,
         tier: candidate.tier,
         score: candidate.score,
-        composedSteps: normalizeComposedSteps(candidate.composedSteps),
+        composedSteps,
         rationale: candidate.rationale,
         fitSignals: candidate.fitSignals,
         qualification: candidate.qualification,
         confidence: candidate.confidence,
         freshness: candidate.freshness,
         caveat: candidate.caveat,
-        blockers: normalizeBlockers(candidate.blockers),
-        tradeoffs: normalizeTradeoffs(candidate.tradeoffs),
-        improvementActions: normalizeImprovementActions(candidate.improvementActions),
+        blockers,
+        tradeoffs,
+        improvementActions,
         citations,
-        trustBoundary: candidate.trustBoundary ?? classifyTrustBoundary({
-          citations,
-          confidence: candidate.confidence,
+        trustBoundary,
+        nextStepPlan: buildRecommendationNextStepPlan({
+          pathwayId: candidate.pathwayId,
+          type: 'composed',
           qualification: candidate.qualification,
+          confidence: candidate.confidence,
+          freshness: candidate.freshness,
+          caveat: candidate.caveat,
+          blockers,
+          tradeoffs,
+          improvementActions,
+          composedSteps,
+          trustBoundary,
         }),
         pathwayType: buildRecommendationPathwayType('composed'),
       }
