@@ -41,13 +41,11 @@ const navItems: NavItem[] = [
     label: 'Recommendations',
     to: '/workspace/recommendations',
     icon: Sparkles,
-    disabled: true,
   },
   {
     label: 'History',
     to: '/workspace/history',
     icon: History,
-    disabled: true,
   },
   {
     label: 'Settings',
@@ -58,6 +56,18 @@ const navItems: NavItem[] = [
 ]
 
 const dashboardItem = navItems[0]!
+const quickAccessItems = navItems.filter(item => !item.disabled && item.to !== dashboardItem.to && item.to !== '/workspace/intake')
+
+const pageTitle = computed(() => {
+  const activeItem = navItems.find(item => isActive(item))
+  return activeItem?.label || 'Workspace'
+})
+
+const contentContainerClass = computed(() => {
+  return route.path.startsWith('/workspace/history') || route.path.startsWith('/workspace/recommendations')
+    ? 'w-full max-w-7xl'
+    : 'w-full max-w-3xl'
+})
 
 function isActive(item: NavItem) {
   if (item.to === '/workspace') {
@@ -124,6 +134,24 @@ async function handleSignOut() {
             >
               <ClipboardList class="size-4 shrink-0" />
               <span>Start Intake</span>
+            </NuxtLink>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <NuxtLink
+              v-for="item in quickAccessItems"
+              :key="item.label"
+              :to="item.to"
+              class="flex min-h-[44px] items-center gap-3 px-6 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+              :class="[
+                isActive(item)
+                  ? 'border-l-4 border-white bg-white/10 text-white'
+                  : 'border-l-4 border-transparent text-white/80 hover:bg-white/10',
+              ]"
+              :aria-current="isActive(item) ? 'page' : undefined"
+            >
+              <component :is="item.icon" class="size-5 shrink-0" />
+              <span>{{ item.label }}</span>
             </NuxtLink>
           </div>
 
@@ -246,7 +274,7 @@ async function handleSignOut() {
 
           <!-- Page title (desktop) -->
           <h1 class="hidden text-lg font-bold text-slate-800 lg:block">
-            Dashboard
+            {{ pageTitle }}
           </h1>
 
           <!-- Mobile branding -->
@@ -271,7 +299,7 @@ async function handleSignOut() {
 
       <!-- Content Area -->
       <main class="flex flex-1 flex-col items-center px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-8 lg:pt-8">
-        <div class="w-full max-w-3xl">
+        <div :class="contentContainerClass">
           <slot />
         </div>
       </main>

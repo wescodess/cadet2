@@ -942,6 +942,14 @@ export const listForUser = query({
       .collect()
 
     return rows.map(row => ({
+      recommendationCount: row.recommendationResults?.rankedAt
+        ? (
+            (row.recommendationResults?.direct?.length || 0)
+            + (row.recommendationResults?.blocked?.length || 0)
+            + (row.recommendationResults?.composed?.length || 0)
+          )
+        : 0,
+      hasRankedPayload: Boolean(row.recommendationResults?.rankedAt),
       runId: row.runId,
       profileSnapshotId: row.profileSnapshotId,
       refreshedFromRunId: row.refreshedFromRunId,

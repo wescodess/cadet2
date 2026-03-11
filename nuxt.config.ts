@@ -1,6 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite'
 
+const localHubDbDataDir = process.env.NUXT_HUB_DB_DATA_DIR || '.data/db/pglite-dev'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -41,9 +43,10 @@ export default defineNuxtConfig({
     db: {
       dialect: 'postgresql',
       connection: {
-        // Keep using local PGlite in dev, but isolate from a corrupted prior store.
-        // Override with NUXT_HUB_DB_DATA_DIR when needed.
-        dataDir: process.env.NUXT_HUB_DB_DATA_DIR || '.data/db/pglite-main',
+        // Keep local dev on an isolated PGlite store so legacy `pglite-main`
+        // corruption does not block `pnpm dev`. Override when you need a
+        // specific local database snapshot.
+        dataDir: localHubDbDataDir,
       },
       // Avoid opening PGlite during both Nitro build and dev runtime startup.
       // In practice this can abort the local WASM engine before auth/session queries run.

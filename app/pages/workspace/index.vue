@@ -1,208 +1,24 @@
 <script setup lang="ts">
 import { Compass, Shield, Zap, BadgeCheck } from 'lucide-vue-next'
 import { useDisplayName } from '~/composables/useDisplayName'
-import {
-  getDefaultStatusMessage,
-  isCanonicalRecommendationStatus,
-  isInProgressStatus,
-} from '~/lib/recommendation-lifecycle'
 import RecommendationStatusBanner from '~/components/workspace/RecommendationStatusBanner.vue'
 import RecommendationRunList from '~/components/workspace/RecommendationRunList.vue'
 import RecommendationResultsPanel from '~/components/workspace/RecommendationResultsPanel.vue'
-import type { RecommendationResultsRecord } from '~/lib/recommendations/comparison'
-
-type RecommendationRunListItem = {
-  runId: string
-  profileSnapshotId: string
-  status: string
-  createdAt: string
-  updatedAt: string
-}
-
-type RecommendationRunStatusRecord = {
-  runId: string
-  profileSnapshotId: string
-  status: string
-  statusMessage: string
-  resumable: boolean
-  processingHeartbeatAt: string
-  createdAt: string
-  updatedAt: string
-}
+import { useWorkspaceRecommendationReview } from '~/composables/useWorkspaceRecommendationReview'
 
 const { firstName } = useDisplayName()
-const recommendationRuns = ref<RecommendationRunListItem[]>([])
-const isLoadingRuns = ref(true)
-const runListErrorMessage = ref<string | null>(null)
-const activeRunStatus = ref<RecommendationRunStatusRecord | null>(null)
-const isLoadingRunStatus = ref(false)
-const runStatusErrorMessage = ref<string | null>(null)
-const recommendationResults = ref<RecommendationResultsRecord | null>(null)
-const isLoadingResults = ref(false)
-const recommendationResultsMessage = ref<string | null>(null)
-
-async function readRunStatus(runId: string) {
-  return await $fetch<RecommendationRunStatusRecord>(
-    `/api/recommendations/runs/${encodeURIComponent(runId)}/status`,
-  )
-}
-
-async function startRunProcessing(runId: string) {
-  await $fetch<RecommendationRunStatusRecord>(
-    `/api/recommendations/runs/${encodeURIComponent(runId)}/start`,
-    {
-      method: 'POST',
-    },
-  )
-}
-
-function toStatusCode(error: unknown) {
-  if (!error || typeof error !== 'object') {
-    return null
-  }
-
-  const errorWithStatus = error as {
-    statusCode?: number
-    data?: {
-      statusCode?: number
-    }
-  }
-
-  if (typeof errorWithStatus.statusCode === 'number') {
-    return errorWithStatus.statusCode
-  }
-
-  if (typeof errorWithStatus.data?.statusCode === 'number') {
-    return errorWithStatus.data.statusCode
-  }
-
-  return null
-}
-
-function isRecommendationStatusTerminal(status: string) {
-  return status === 'completed' || status === 'degraded' || status === 'failed'
-}
-
-async function loadRecommendationResults(runId: string, status: string) {
-  recommendationResults.value = null
-  recommendationResultsMessage.value = null
-  isLoadingResults.value = false
-
-  if (!isRecommendationStatusTerminal(status)) {
-    recommendationResultsMessage.value = 'Results will appear after recommendation processing is completed.'
-    return
-  }
-
-  isLoadingResults.value = true
-
-  try {
-    recommendationResults.value = await $fetch<RecommendationResultsRecord>(
-      `/api/recommendations/runs/${encodeURIComponent(runId)}/results`,
-    )
-  }
-  catch (error) {
-    const statusCode = toStatusCode(error)
-
-    if (statusCode === 409) {
-      recommendationResultsMessage.value = 'Recommendation ranking is still in progress for this run.'
-    }
-    else if (statusCode === 404) {
-      recommendationResultsMessage.value = 'No ranked recommendation payload was found for this run.'
-    }
-    else {
-      recommendationResultsMessage.value = 'We could not load ranked recommendations right now.'
-    }
-  }
-  finally {
-    isLoadingResults.value = false
-  }
-}
-
-function fallbackStatusFromRun(run: RecommendationRunListItem): RecommendationRunStatusRecord {
-  const canonicalStatus = isCanonicalRecommendationStatus(run.status)
-    ? run.status
-    : 'queued'
-
-  return {
-    runId: run.runId,
-    profileSnapshotId: run.profileSnapshotId,
-    status: run.status,
-    statusMessage: canonicalStatus
-      ? getDefaultStatusMessage(canonicalStatus)
-      : 'Recommendation processing status is available in your run timeline.',
-    resumable: canonicalStatus ? isInProgressStatus(canonicalStatus) : false,
-    processingHeartbeatAt: run.updatedAt,
-    createdAt: run.createdAt,
-    updatedAt: run.updatedAt,
-  }
-}
-
-async function loadActiveRunStatus() {
-  const latestRun = recommendationRuns.value[0]
-  runStatusErrorMessage.value = null
-
-  if (!latestRun) {
-    activeRunStatus.value = null
-    recommendationResults.value = null
-    recommendationResultsMessage.value = null
-    isLoadingResults.value = false
-    return
-  }
-
-  isLoadingRunStatus.value = true
-
-  try {
-    activeRunStatus.value = await readRunStatus(latestRun.runId)
-
-    const normalizedStatus = activeRunStatus.value?.status || ''
-    if (isCanonicalRecommendationStatus(normalizedStatus) && isInProgressStatus(normalizedStatus)) {
-      try {
-        await startRunProcessing(latestRun.runId)
-        activeRunStatus.value = await readRunStatus(latestRun.runId)
-      }
-      catch {
-      }
-    }
-
-    await loadRecommendationResults(
-      latestRun.runId,
-      activeRunStatus.value?.status || latestRun.status,
-    )
-  }
-  catch {
-    activeRunStatus.value = fallbackStatusFromRun(latestRun)
-    runStatusErrorMessage.value = null
-    await loadRecommendationResults(
-      latestRun.runId,
-      activeRunStatus.value?.status || latestRun.status,
-    )
-  }
-  finally {
-    isLoadingRunStatus.value = false
-  }
-}
-
-async function loadRecommendationRuns() {
-  isLoadingRuns.value = true
-  runListErrorMessage.value = null
-
-  try {
-    recommendationRuns.value = await $fetch<RecommendationRunListItem[]>('/api/workspace/recommendation-runs')
-    await loadActiveRunStatus()
-  }
-  catch {
-    recommendationRuns.value = []
-    runListErrorMessage.value = 'We could not load your recommendation run continuity right now.'
-    activeRunStatus.value = null
-    runStatusErrorMessage.value = null
-    recommendationResults.value = null
-    recommendationResultsMessage.value = null
-    isLoadingResults.value = false
-  }
-  finally {
-    isLoadingRuns.value = false
-  }
-}
+const {
+  recommendationRuns,
+  isLoadingRuns,
+  runListErrorMessage,
+  activeRunStatus,
+  isLoadingRunStatus,
+  runStatusErrorMessage,
+  recommendationResults,
+  isLoadingResults,
+  recommendationResultsMessage,
+  loadRecommendationRuns,
+} = useWorkspaceRecommendationReview()
 
 onMounted(async () => {
   await loadRecommendationRuns()

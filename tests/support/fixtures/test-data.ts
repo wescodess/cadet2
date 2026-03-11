@@ -12,8 +12,6 @@ export const WORKSPACE_ATDD_REQUIRED_PAYLOAD_KEYS = [
 ] as const
 
 export const WORKSPACE_ATDD_DISABLED_NAV_LABELS = [
-  'Recommendations',
-  'History',
   'Settings',
 ] as const
 
@@ -234,6 +232,33 @@ export const RECOMMENDATION_NEXT_STEP_PLAN_ATDD_TEST_IDS = {
   summary: 'recommendation-next-step-summary',
   limitation: 'recommendation-next-step-limitation',
   toggle: 'recommendation-next-step-toggle',
+} as const
+
+export const RECOMMENDATION_RUN_HISTORY_ATDD_TEST_IDS = {
+  list: 'recommendation-history-list',
+  filterBar: 'run-history-filter-bar',
+  statusBadge: 'run-status-badge',
+  latestBadge: 'run-history-latest-badge',
+  emptyState: 'recommendation-history-empty-state',
+  backLink: 'recommendation-history-back-link',
+  totalCount: 'recommendation-history-count',
+  unavailableReason: 'run-unavailable-reason',
+  expandToggle: 'run-card-expand-toggle',
+} as const
+
+export const RECOMMENDATION_RUN_HISTORY_FILTER_LABELS = [
+  'All',
+  'Completed',
+  'Degraded',
+  'Failed',
+] as const
+
+export const RECOMMENDATION_RUN_HISTORY_STATUS_LABELS = {
+  completed: 'Completed',
+  degraded: 'Degraded',
+  failed: 'Failed',
+  unavailable: 'Unavailable',
+  latest: 'Latest',
 } as const
 
 export const RECOMMENDATION_TRUST_BOUNDARY_VALUES = [
