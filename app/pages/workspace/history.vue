@@ -3,7 +3,11 @@ import { ArchiveX, History } from 'lucide-vue-next'
 
 import RecommendationRunCard from '~/components/workspace/RecommendationRunCard.vue'
 import RunHistoryFilterBar from '~/components/workspace/RunHistoryFilterBar.vue'
+import { isRecommendationRunHistoryStatus } from '~/lib/workspace/recommendation-run-history'
 import { useRecommendationRunHistory } from '~/composables/useRecommendationRunHistory'
+
+const route = useRoute()
+const router = useRouter()
 
 const {
   filteredRuns,
@@ -12,7 +16,8 @@ const {
   error,
   activeFilter,
   totalRunCount,
-  fetchRuns,
+  latestRun,
+  navigateToComparisonWithContext,
   navigateToRun,
   setFilter,
 } = useRecommendationRunHistory()
@@ -27,8 +32,34 @@ const filterLabel = computed(() => {
   return activeFilter.value
 })
 
+const initialFilter = computed(() => {
+  const value = typeof route.query.filter === 'string' ? route.query.filter.trim() : ''
+  return isRecommendationRunHistoryStatus(value) ? value : 'all'
+})
+
+async function applyFilter(status: 'all' | 'completed' | 'degraded' | 'failed') {
+  await setFilter(status)
+
+  const nextQuery = status === 'all'
+    ? { ...route.query, filter: undefined }
+    : { ...route.query, filter: status }
+  await router.replace({ query: nextQuery })
+}
+
+async function handleCompareRuns(runAId: string, runBId: string) {
+  await navigateToComparisonWithContext(runAId, runBId, activeFilter.value)
+}
+
 onMounted(async () => {
-  await fetchRuns('all')
+  await setFilter(initialFilter.value)
+})
+
+watch(initialFilter, async (nextFilter, previousFilter) => {
+  if (nextFilter === previousFilter || nextFilter === activeFilter.value) {
+    return
+  }
+
+  await setFilter(nextFilter)
 })
 </script>
 
@@ -66,7 +97,7 @@ onMounted(async () => {
 
     <RunHistoryFilterBar
       :active-filter="activeFilter"
-      @filter-change="setFilter"
+      @filter-change="applyFilter"
     />
 
     <div
@@ -97,6 +128,8 @@ onMounted(async () => {
         :key="run.id"
         :run="run"
         :is-latest="run.isLatest"
+        :comparison-target-run-id="latestRun?.id || null"
+        @compare-runs="handleCompareRuns"
         @view-results="navigateToRun"
       />
     </section>
@@ -146,7 +179,7 @@ onMounted(async () => {
           type="button"
           variant="outline"
           class="min-h-[44px] rounded-xl border-slate-300 bg-white px-5 text-slate-900 hover:bg-slate-100"
-          @click="setFilter('all')"
+          @click="applyFilter('all')"
         >
           Show all runs
         </Button>

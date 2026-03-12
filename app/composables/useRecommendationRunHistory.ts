@@ -83,6 +83,35 @@ export function useRecommendationRunHistory() {
     await navigateTo(targetPath)
   }
 
+  async function navigateToComparison(runAId: string, runBId: string) {
+    const targetPath = `/workspace/compare?runA=${encodeURIComponent(runAId)}&runB=${encodeURIComponent(runBId)}`
+
+    if (import.meta.client) {
+      window.location.assign(targetPath)
+      return
+    }
+
+    await navigateTo(targetPath)
+  }
+
+  async function navigateToComparisonWithContext(
+    runAId: string,
+    runBId: string,
+    historyFilter: RecommendationRunHistoryFilter = activeFilter.value,
+  ) {
+    const query = historyFilter !== 'all'
+      ? `&historyFilter=${encodeURIComponent(historyFilter)}`
+      : ''
+    const targetPath = `/workspace/compare?runA=${encodeURIComponent(runAId)}&runB=${encodeURIComponent(runBId)}${query}`
+
+    if (import.meta.client) {
+      window.location.assign(targetPath)
+      return
+    }
+
+    await navigateTo(targetPath)
+  }
+
   return {
     runs,
     hasLoaded,
@@ -95,5 +124,7 @@ export function useRecommendationRunHistory() {
     fetchRuns,
     setFilter,
     navigateToRun,
+    navigateToComparison,
+    navigateToComparisonWithContext,
   }
 }

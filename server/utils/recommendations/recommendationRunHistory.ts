@@ -18,6 +18,12 @@ type RecommendationProfileSnapshotRow = {
   submittedPayload: unknown
 }
 
+export type RecommendationProfileSnapshotStoredRecord = {
+  snapshotId: string
+  createdAt: string
+  submittedPayload: unknown
+}
+
 type RecommendationRunSummaryInput = {
   run: RecommendationRunRecord
   recommendationCount: number
@@ -128,10 +134,28 @@ export async function loadRecommendationProfileSnapshotMap(input: {
   userId: string
   snapshotIds: string[]
 }) {
+  const snapshotMap = await loadRecommendationProfileSnapshotRecordMap(input)
+
+  return new Map(
+    Array.from(snapshotMap.values()).map(record => [
+      record.snapshotId,
+      buildRecommendationProfileSnapshotPresentation({
+        snapshotId: record.snapshotId,
+        createdAt: record.createdAt,
+        submittedPayload: record.submittedPayload,
+      }),
+    ]),
+  )
+}
+
+export async function loadRecommendationProfileSnapshotRecordMap(input: {
+  userId: string
+  snapshotIds: string[]
+}) {
   const uniqueSnapshotIds = [...new Set(input.snapshotIds.filter(Boolean))]
 
   if (uniqueSnapshotIds.length === 0) {
-    return new Map<string, RecommendationProfileSnapshotPresentation>()
+    return new Map<string, RecommendationProfileSnapshotStoredRecord>()
   }
 
   const snapshotIdValues = uniqueSnapshotIds.map(snapshotId => sql`${snapshotId}`)
@@ -149,11 +173,11 @@ export async function loadRecommendationProfileSnapshotMap(input: {
   return new Map(
     rows.map(row => [
       row.snapshotId,
-      buildRecommendationProfileSnapshotPresentation({
+      {
         snapshotId: row.snapshotId,
-        createdAt: row.createdAt,
+        createdAt: toIsoString(row.createdAt),
         submittedPayload: row.submittedPayload,
-      }),
+      },
     ]),
   )
 }

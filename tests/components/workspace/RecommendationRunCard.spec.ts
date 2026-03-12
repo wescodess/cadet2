@@ -56,6 +56,7 @@ function mountRunCard(runOverrides: Partial<RecommendationRunSummary> = {}, isLa
     props: {
       run: createRun(runOverrides),
       isLatest,
+      comparisonTargetRunId: 'run_latest',
     },
     global: {
       stubs: {
@@ -75,10 +76,19 @@ describe('RecommendationRunCard', () => {
     expect(wrapper.get('[data-testid="run-history-latest-badge"]').text()).toContain('Latest')
     expect(wrapper.find('[data-testid="run-unavailable-reason"]').exists()).toBe(false)
 
-    const buttons = wrapper.findAll('button')
-    await buttons[1]!.trigger('click')
+    const viewResultsButton = wrapper.findAll('button').find(button => button.text().includes('View Results'))
+    await viewResultsButton!.trigger('click')
 
     expect(wrapper.emitted('view-results')).toEqual([['run_42']])
+  })
+
+  it('emits compare-runs when a non-latest available run has a latest comparison target', async () => {
+    const wrapper = mountRunCard()
+
+    const compareButton = wrapper.findAll('button').find(button => button.text().includes('Compare'))
+    await compareButton!.trigger('click')
+
+    expect(wrapper.emitted('compare-runs')).toEqual([['run_42', 'run_latest']])
   })
 
   it('renders unavailable runs without a view-results action', () => {
