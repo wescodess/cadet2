@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RecommendationRunSummary } from '~/lib/workspace/recommendation-run-history'
 
-import { ChevronDown, Clock3, Eye, Lock } from 'lucide-vue-next'
+import { ChevronDown, Clock3, Eye, GitCompareArrows, Lock } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 
 import RunStatusBadge from '~/components/workspace/RunStatusBadge.vue'
@@ -9,14 +9,19 @@ import RunStatusBadge from '~/components/workspace/RunStatusBadge.vue'
 const props = defineProps<{
   run: RecommendationRunSummary
   isLatest?: boolean
+  comparisonTargetRunId?: string | null
 }>()
 
 const emit = defineEmits<{
   'view-results': [runId: string]
+  'compare-runs': [runId: string, comparisonTargetRunId: string]
 }>()
 
 const isExpanded = ref(false)
 const panelId = computed(() => `run-card-panel-${props.run.id}`)
+const canCompare = computed(() =>
+  Boolean(props.run.isAvailable && props.comparisonTargetRunId && props.run.id !== props.comparisonTargetRunId),
+)
 
 function formatRunDate(value: string) {
   const parsed = new Date(value)
@@ -36,6 +41,14 @@ function formatRunDate(value: string) {
 
 function toggleExpanded() {
   isExpanded.value = !isExpanded.value
+}
+
+function emitCompareRuns() {
+  if (!props.comparisonTargetRunId) {
+    return
+  }
+
+  emit('compare-runs', props.run.id, props.comparisonTargetRunId)
 }
 </script>
 
@@ -118,16 +131,31 @@ function toggleExpanded() {
         <span>{{ props.run.unavailableReason || 'Archived run data is no longer available.' }}</span>
       </p>
 
-      <Button
+      <div
         v-if="props.run.isAvailable"
-        type="button"
-        variant="outline"
-        class="min-h-[44px] w-full justify-center rounded-xl border-slate-300 bg-white text-slate-900 hover:bg-slate-100"
-        @click="emit('view-results', props.run.id)"
+        class="grid gap-2 sm:grid-cols-2"
       >
-        <Eye class="size-4" />
-        View Results
-      </Button>
+        <Button
+          type="button"
+          variant="outline"
+          class="min-h-[44px] w-full justify-center rounded-xl border-slate-300 bg-white text-slate-900 hover:bg-slate-100"
+          @click="emit('view-results', props.run.id)"
+        >
+          <Eye class="size-4" />
+          View Results
+        </Button>
+
+        <Button
+          v-if="canCompare"
+          type="button"
+          variant="outline"
+          class="min-h-[44px] w-full justify-center rounded-xl border-[var(--trust,#2563eb)]/25 bg-[var(--trust-soft,#dbeafe)] text-[var(--trust,#2563eb)] hover:bg-[var(--trust-soft,#dbeafe)]/80"
+          @click="emitCompareRuns"
+        >
+          <GitCompareArrows class="size-4" />
+          Compare
+        </Button>
+      </div>
     </div>
   </article>
 </template>

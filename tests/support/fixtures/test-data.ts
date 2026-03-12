@@ -261,6 +261,16 @@ export const RECOMMENDATION_RUN_HISTORY_STATUS_LABELS = {
   latest: 'Latest',
 } as const
 
+export const RECOMMENDATION_RUN_COMPARISON_ATDD_TEST_IDS = {
+  dashboard: 'run-comparison-dashboard',
+  changedStat: 'comparison-stat-pathways-changed',
+  confidenceStat: 'comparison-stat-overall-confidence',
+  evidenceStat: 'comparison-stat-new-evidence',
+  profilePanel: 'profile-delta-section',
+  trustPanel: 'trust-evidence-section',
+  caveatPanel: 'caveat-changes-panel',
+} as const
+
 export const RECOMMENDATION_TRUST_BOUNDARY_VALUES = [
   'source-backed',
   'inferred',
