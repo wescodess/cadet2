@@ -461,7 +461,7 @@ test.describe('Story 2.1 Recommendation Status Banner E2E ATDD', () => {
       await expect(panel).toContainText(/caution/i)
     })
 
-    test('[P0][AC2][AC3] run list and status banner hooks remain stable for workspace automation', async ({ page, appBaseUrl }) => {
+    test('[P0][AC2][AC3] workspace continuity hub and status banner hooks remain stable for workspace automation', async ({ page, appBaseUrl }) => {
       await ensureAuthenticatedPage(page, appBaseUrl)
       const evaluatingRun = createRunWithStatus('evaluating', '6')
       const queuedRun = createRunWithStatus('queued', '7')
@@ -484,9 +484,9 @@ test.describe('Story 2.1 Recommendation Status Banner E2E ATDD', () => {
       await page.goto(routeProbe.workspacePath)
       await expect(page.getByText('Loading your recommendation runs...')).toBeHidden({ timeout: 20_000 })
 
-      await expect(page.getByTestId(RECOMMENDATION_LIFECYCLE_ATDD_TEST_IDS.runList)).toBeVisible()
-      await expect(page.getByTestId(RECOMMENDATION_LIFECYCLE_ATDD_TEST_IDS.runItem)).toHaveCount(2)
+      await expect(page.getByTestId('planning-workspace-hub')).toBeVisible()
       await expect(page.getByTestId(RECOMMENDATION_LIFECYCLE_ATDD_TEST_IDS.statusBanner)).toBeVisible()
+      await expect(page.getByText('2 current runs')).toBeVisible()
     })
   })
 })

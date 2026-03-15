@@ -119,6 +119,30 @@ test.describe('Guided intake draft API', () => {
     expect(body.values.personal?.firstName).toBe(payload.fieldValues.personal?.firstName)
   })
 
+  test('saved draft restores persisted new-cycle lineage', async ({ request, appBaseUrl }) => {
+    const probe = createIntakeRouteProbe(appBaseUrl)
+    const payload = createIntakeDraftPayload({
+      currentSection: 'goals',
+      sourceRunId: 'run_story44_source_cycle',
+    })
+
+    await ensureAuthenticatedRequest(request, appBaseUrl)
+
+    await request.post(probe.draftApiPath, {
+      data: payload,
+    })
+
+    const response = await request.get(probe.draftApiPath)
+    const body = await response.json() as {
+      currentSection: string
+      sourceRunId?: string | null
+    }
+
+    expect(response.status()).toBe(200)
+    expect(body.currentSection).toBe(payload.currentSection)
+    expect(body.sourceRunId).toBe(payload.sourceRunId)
+  })
+
   test('draft read payload excludes recommendation and audit entities', async ({ request, appBaseUrl }) => {
     const probe = createIntakeRouteProbe(appBaseUrl)
 
@@ -131,7 +155,7 @@ test.describe('Guided intake draft API', () => {
     for (const field of ['recommendationRunId', 'pathwayDefinitionId', 'auditTrail']) {
       expect(Object.prototype.hasOwnProperty.call(body, field)).toBe(false)
     }
-    expect(INTAKE_ATDD_REQUIRED_STORAGE_KEYS.length).toBe(3)
+    expect(INTAKE_ATDD_REQUIRED_STORAGE_KEYS.length).toBe(4)
   })
 
   test('invalid section identifiers are rejected with validation details', async ({ request, appBaseUrl }) => {

@@ -132,6 +132,10 @@ export const intakeDraftInputSchema = z.object({
   currentSection: intakeSectionSchema,
   sectionProgress: sectionProgressSchema,
   fieldValues: sectionFieldValuesSchema,
+  sourceRunId: z.union([
+    z.string().trim().min(1),
+    z.null(),
+  ]).optional(),
 }).strict()
 
 export type IntakeDraftInput = z.infer<typeof intakeDraftInputSchema>
@@ -140,6 +144,7 @@ export type IntakeDraftRecord = {
   currentSection: IntakeSection
   sectionProgress: Record<IntakeSection, boolean>
   fieldValues: Record<IntakeSection, Record<string, unknown>>
+  sourceRunId: string | null
 }
 
 export const defaultSectionProgress: Record<IntakeSection, boolean> = {

@@ -64,7 +64,10 @@ const pageTitle = computed(() => {
 })
 
 const contentContainerClass = computed(() => {
-  return route.path.startsWith('/workspace/history') || route.path.startsWith('/workspace/recommendations')
+  return route.path === '/workspace'
+    || route.path.startsWith('/workspace/history')
+    || route.path.startsWith('/workspace/recommendations')
+    || route.path.startsWith('/workspace/compare')
     ? 'w-full max-w-7xl'
     : 'w-full max-w-3xl'
 })

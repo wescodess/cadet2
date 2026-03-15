@@ -65,7 +65,7 @@ development_status:
   4-1-generate-a-clear-next-step-plan-from-recommendations: done
   4-2-revisit-and-preserve-prior-recommendation-runs: done
   4-3-show-changes-between-recommendation-runs: done
-  4-4-support-ongoing-reuse-of-the-planning-workspace: backlog
+  4-4-support-ongoing-reuse-of-the-planning-workspace: done
   epic-4-retrospective: optional
 
   epic-5: backlog

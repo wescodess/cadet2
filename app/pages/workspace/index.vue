@@ -1,16 +1,26 @@
 <script setup lang="ts">
-import { Compass, Shield, Zap, BadgeCheck } from 'lucide-vue-next'
 import { useDisplayName } from '~/composables/useDisplayName'
+import PlanningProgressTimeline from '~/components/workspace/PlanningProgressTimeline.vue'
+import PlanningWorkspaceActionPanel from '~/components/workspace/PlanningWorkspaceActionPanel.vue'
+import PlanningWorkspaceHero from '~/components/workspace/PlanningWorkspaceHero.vue'
 import RecommendationStatusBanner from '~/components/workspace/RecommendationStatusBanner.vue'
-import RecommendationRunList from '~/components/workspace/RecommendationRunList.vue'
 import RecommendationResultsPanel from '~/components/workspace/RecommendationResultsPanel.vue'
+import { useWorkspaceContinuity } from '~/composables/useWorkspaceContinuity'
 import { useWorkspaceRecommendationReview } from '~/composables/useWorkspaceRecommendationReview'
 
 const { firstName } = useDisplayName()
 const {
+  summary,
+  isLoading: isLoadingSummary,
+  error: continuityError,
+  activeActionKey,
+  primaryAction,
+  secondaryActions,
+  fetchSummary,
+  executeAction,
+} = useWorkspaceContinuity()
+const {
   recommendationRuns,
-  isLoadingRuns,
-  runListErrorMessage,
   activeRunStatus,
   isLoadingRunStatus,
   runStatusErrorMessage,
@@ -21,79 +31,95 @@ const {
 } = useWorkspaceRecommendationReview()
 
 onMounted(async () => {
-  await loadRecommendationRuns()
+  await Promise.all([
+    fetchSummary(),
+    loadRecommendationRuns(),
+  ])
 })
 </script>
 
 <template>
   <section
     data-testid="workspace-dashboard"
-    class="flex w-full flex-1 flex-col items-center gap-6 py-6 md:py-10"
+    class="flex w-full flex-1 flex-col gap-6 py-6 md:py-10"
   >
-    <!-- Welcome Card -->
-    <div class="w-full rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-sm sm:p-12">
-      <!-- Icon -->
-      <div class="mb-8 flex justify-center">
-        <div class="flex size-20 items-center justify-center rounded-full bg-[var(--trust-soft)]">
-          <Compass class="size-10 text-[var(--trust)]" />
-        </div>
-      </div>
+    <div
+      data-testid="planning-workspace-hub"
+      class="grid gap-6 xl:grid-cols-[1.55fr_1fr]"
+    >
+      <div class="space-y-6">
+        <PlanningWorkspaceHero
+          :first-name="firstName"
+          :summary="summary"
+          :primary-action="primaryAction"
+          @action="executeAction"
+        />
 
-      <!-- Heading -->
-      <h2 class="mb-4 text-2xl font-bold text-slate-900 md:text-3xl">
-        Welcome to Cadet2, {{ firstName }}. Let's build your pathway plan.
-      </h2>
-
-      <!-- Description -->
-      <p class="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-slate-500">
-        We'll help you turn your unique situation into a clear, evidence-based
-        immigration strategy for your journey to Canada.
-      </p>
-
-      <!-- CTA Button -->
-      <div class="flex justify-center">
-        <NuxtLink
-          to="/workspace/intake"
-          class="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-[var(--trust)] px-8 py-3.5 font-bold text-white shadow-md transition-colors hover:bg-[var(--trust)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+        <div
+          v-if="continuityError"
+          class="rounded-3xl border border-[var(--destructive,#ef4444)]/20 bg-[var(--destructive-soft,#fef2f2)] p-6 text-sm text-rose-900"
         >
-          Start Guided Intake
-        </NuxtLink>
+          {{ continuityError }}
+        </div>
+
+        <PlanningProgressTimeline :summary="summary" />
       </div>
 
-      <!-- Trust Badges -->
-      <div class="mt-16 flex justify-center gap-12 border-t border-slate-50 pt-8">
-        <div class="flex flex-col items-center gap-2 text-slate-500 opacity-50">
-          <BadgeCheck class="size-5" />
-          <span class="text-xs font-medium">IRCC Compliant</span>
+      <PlanningWorkspaceActionPanel
+        :summary="summary"
+        :actions="secondaryActions"
+        :active-action-key="activeActionKey"
+        @action="executeAction"
+      />
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <RecommendationStatusBanner
+        :status-record="activeRunStatus"
+        :is-loading="isLoadingRunStatus || isLoadingSummary"
+        :error-message="runStatusErrorMessage"
+      />
+
+      <RecommendationResultsPanel
+        :status-record="activeRunStatus"
+        :results-record="recommendationResults"
+        :is-loading="isLoadingResults"
+        :message="recommendationResultsMessage"
+      />
+    </div>
+
+    <div
+      v-if="!isLoadingSummary && summary"
+      class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+    >
+      <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div class="space-y-2">
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Continuity snapshot
+          </p>
+          <h3 class="text-xl font-semibold text-slate-950">
+            Return context stays attached to your workspace
+          </h3>
+          <p class="max-w-3xl text-sm leading-relaxed text-slate-600">
+            {{ summary.latestRun?.profileSnapshotSummary || 'Your next planning cycle will appear here after you save intake progress or generate a run.' }}
+          </p>
         </div>
-        <div class="flex flex-col items-center gap-2 text-slate-500 opacity-50">
-          <Shield class="size-5" />
-          <span class="text-xs font-medium">Data Secured</span>
-        </div>
-        <div class="flex flex-col items-center gap-2 opacity-50">
-          <Zap class="size-5" />
-          <span class="text-xs font-medium">Fast Analysis</span>
+
+        <div class="flex flex-wrap gap-2">
+          <Badge
+            variant="outline"
+            class="rounded-full border-slate-300 bg-slate-50 px-4 py-2 text-slate-700"
+          >
+            {{ summary.archive.availableRuns }} reviewable run{{ summary.archive.availableRuns === 1 ? '' : 's' }}
+          </Badge>
+          <Badge
+            variant="outline"
+            class="rounded-full border-slate-300 bg-slate-50 px-4 py-2 text-slate-700"
+          >
+            {{ recommendationRuns.length }} current run{{ recommendationRuns.length === 1 ? '' : 's' }}
+          </Badge>
         </div>
       </div>
     </div>
-
-    <RecommendationRunList
-      :runs="recommendationRuns"
-      :is-loading="isLoadingRuns"
-      :error-message="runListErrorMessage"
-    />
-
-    <RecommendationStatusBanner
-      :status-record="activeRunStatus"
-      :is-loading="isLoadingRunStatus"
-      :error-message="runStatusErrorMessage"
-    />
-
-    <RecommendationResultsPanel
-      :status-record="activeRunStatus"
-      :results-record="recommendationResults"
-      :is-loading="isLoadingResults"
-      :message="recommendationResultsMessage"
-    />
   </section>
 </template>

@@ -7,12 +7,17 @@ import {
   createIncompleteIntakeDraftPayload,
   createIntakeSubmitRouteProbe,
 } from '../support/fixtures/factories/intake-submit-factory'
+import { createRecommendationNextStepPlanEvaluationPayload } from '../support/fixtures/factories/recommendation-next-step-plan-factory'
 import { RECOMMENDATION_RUN_ATDD_REQUIRED_KEYS } from '../support/fixtures/test-data'
 import { getTestEnvironment } from '../support/helpers/env'
 
 type RecommendationRunApiRecord = {
   runId: string
   profileSnapshotId: string
+  refreshedFromRunId?: string
+  previousProfileSnapshotId?: string
+  refreshRootRunId?: string
+  refreshSequence?: number
   status: string
   createdAt: string
   updatedAt: string
@@ -81,6 +86,46 @@ async function seedDraft(
   expect(response.status()).toBe(200)
 }
 
+async function seedRecommendationRun(
+  request: APIRequestContext,
+  appBaseUrl: string,
+  input: {
+    runId: string
+    profileSnapshotId: string
+    status: 'queued' | 'completed' | 'degraded' | 'failed'
+    submittedPayload?: unknown
+  },
+) {
+  const response = await request.post(`${appBaseUrl}/api/recommendations/testing/seed`, {
+    data: input,
+    failOnStatusCode: false,
+  })
+
+  expect(response.status()).toBe(200)
+  return await response.json() as RecommendationRunApiRecord
+}
+
+async function readNewCycleDraft(
+  request: APIRequestContext,
+  routeProbe: ReturnType<typeof createIntakeSubmitRouteProbe>,
+  sourceRunId: string,
+) {
+  const response = await request.get(routeProbe.draftApiPath, {
+    params: {
+      mode: 'new-cycle',
+      sourceRun: sourceRunId,
+    },
+    failOnStatusCode: false,
+  })
+
+  expect(response.status()).toBe(200)
+  return await response.json() as {
+    currentSection: string
+    values: Record<string, Record<string, unknown>>
+    sourceRunId?: string | null
+  }
+}
+
 test.describe('Story 1.4 Intake Submit and Recommendation Run Tracking API ATDD (RED)', () => {
   test('[P0][AC1] unauthenticated intake submission is denied by workspace session guard', async ({ request, appBaseUrl }) => {
     const routeProbe = createIntakeSubmitRouteProbe(appBaseUrl)
@@ -120,6 +165,148 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Tracking API ATDD 
       for (const forbiddenField of ['recommendations', 'pathwayRankings', 'citations', 'confidenceScore', 'auditTrail']) {
         expect(Object.prototype.hasOwnProperty.call(body, forbiddenField)).toBe(false)
       }
+    })
+
+    test('[P0][AC2][AC5] submitting a new planning cycle preserves source-run lineage and existing history', async ({ request, appBaseUrl }) => {
+      const routeProbe = createIntakeSubmitRouteProbe(appBaseUrl)
+      await ensureAuthenticatedRequest(request, appBaseUrl)
+
+      const sourceRun = await seedRecommendationRun(request, appBaseUrl, {
+        runId: `run_story44_cycle_source_${Date.now().toString(36)}`,
+        profileSnapshotId: `snapshot_story44_cycle_source_${Date.now().toString(36)}`,
+        status: 'completed',
+        submittedPayload: createRecommendationNextStepPlanEvaluationPayload(),
+      })
+
+      await seedDraft(request, routeProbe, createCompletedIntakeDraftPayload({
+        fieldValues: {
+          goals: {
+            primaryGoal: 'permanent-residency',
+            targetTimelineMonths: 18,
+            budgetCad: 24000,
+            priorityPreference: 'highest-odds',
+            locationPreference: 'targeted-provinces',
+            willingToStudyOrRetrain: 'yes',
+            hasFamilyInCanada: 'no',
+            additionalContext: 'Updated after reviewing the previous planning cycle.',
+          },
+        },
+      }))
+
+      const submitResponse = await request.post(routeProbe.submitApiPath, {
+        data: {
+          sourceRunId: sourceRun.runId,
+        },
+        failOnStatusCode: false,
+      })
+      const submittedRun = await submitResponse.json() as RecommendationRunApiRecord
+
+      expect(submitResponse.status()).toBe(201)
+      expect(submittedRun.runId).not.toBe(sourceRun.runId)
+      expect(submittedRun.refreshedFromRunId).toBe(sourceRun.runId)
+      expect(submittedRun.previousProfileSnapshotId).toBe(sourceRun.profileSnapshotId)
+      expect(submittedRun.refreshRootRunId).toBe(sourceRun.runId)
+      expect(submittedRun.refreshSequence).toBe(1)
+
+      const runsResponse = await request.get(routeProbe.recommendationRunsApiPath, {
+        failOnStatusCode: false,
+      })
+      const runs = await runsResponse.json() as RecommendationRunApiRecord[]
+
+      expect(runsResponse.status()).toBe(200)
+      expect(runs.some(run => run.runId === sourceRun.runId)).toBe(true)
+
+      const createdRun = runs.find(run => run.runId === submittedRun.runId)
+      expect(createdRun).toBeTruthy()
+      expect(createdRun?.refreshedFromRunId).toBe(sourceRun.runId)
+      expect(createdRun?.previousProfileSnapshotId).toBe(sourceRun.profileSnapshotId)
+    })
+
+    test('[P1][AC2][AC5] submitting a new planning cycle rejects unknown source lineage without creating a run', async ({ request, appBaseUrl }) => {
+      const routeProbe = createIntakeSubmitRouteProbe(appBaseUrl)
+      await ensureAuthenticatedRequest(request, appBaseUrl)
+      await seedDraft(request, routeProbe, createCompletedIntakeDraftPayload())
+
+      const submitResponse = await request.post(routeProbe.submitApiPath, {
+        data: {
+          sourceRunId: `run_story44_missing_source_${Date.now().toString(36)}`,
+        },
+        failOnStatusCode: false,
+      })
+
+      expect(submitResponse.status()).toBe(404)
+
+      const runsResponse = await request.get(routeProbe.recommendationRunsApiPath, {
+        failOnStatusCode: false,
+      })
+      const runs = await runsResponse.json() as RecommendationRunApiRecord[]
+
+      expect(runsResponse.status()).toBe(200)
+      expect(runs).toHaveLength(0)
+    })
+
+    test('[P0][AC2][AC5] refresh from latest profile preserves the source snapshot instead of leaking active draft edits', async ({ request, appBaseUrl }) => {
+      const routeProbe = createIntakeSubmitRouteProbe(appBaseUrl)
+      await ensureAuthenticatedRequest(request, appBaseUrl)
+
+      const sourcePayload = createCompletedIntakeDraftPayload({
+        fieldValues: {
+          goals: {
+            primaryGoal: 'permanent-residency',
+            targetTimelineMonths: 14,
+            budgetCad: 18000,
+            priorityPreference: 'highest-odds',
+            locationPreference: 'targeted-provinces',
+            willingToStudyOrRetrain: 'yes',
+            hasFamilyInCanada: 'no',
+            additionalContext: 'Use the preserved planning cycle snapshot.',
+          },
+        },
+      })
+      const activeDraftPayload = createCompletedIntakeDraftPayload({
+        fieldValues: {
+          goals: {
+            primaryGoal: 'study-to-pr',
+            targetTimelineMonths: 48,
+            budgetCad: 42000,
+            priorityPreference: 'lowest-cost',
+            locationPreference: 'major-city-focus',
+            willingToStudyOrRetrain: 'yes',
+            hasFamilyInCanada: 'yes',
+            additionalContext: 'This newer draft should not leak into refresh-from-latest-profile.',
+          },
+        },
+      })
+
+      const sourceRun = await seedRecommendationRun(request, appBaseUrl, {
+        runId: `run_story44_refresh_source_${Date.now().toString(36)}`,
+        profileSnapshotId: `snapshot_story44_refresh_source_${Date.now().toString(36)}`,
+        status: 'completed',
+        submittedPayload: sourcePayload,
+      })
+
+      await seedDraft(request, routeProbe, activeDraftPayload)
+
+      const refreshResponse = await request.post(
+        `${appBaseUrl}/api/recommendations/runs/${encodeURIComponent(sourceRun.runId)}/refresh`,
+        {
+          failOnStatusCode: false,
+        },
+      )
+      const refreshedRun = await refreshResponse.json() as RecommendationRunApiRecord
+
+      expect(refreshResponse.status()).toBe(202)
+      expect(refreshedRun.refreshedFromRunId).toBe(sourceRun.runId)
+
+      const hydratedDraft = await readNewCycleDraft(request, routeProbe, refreshedRun.runId)
+
+      expect(hydratedDraft.sourceRunId).toBe(refreshedRun.runId)
+      expect(hydratedDraft.currentSection).toBe(sourcePayload.currentSection)
+      expect(hydratedDraft.values.goals?.primaryGoal).toBe(sourcePayload.fieldValues.goals?.primaryGoal)
+      expect(hydratedDraft.values.goals?.additionalContext).toBe(sourcePayload.fieldValues.goals?.additionalContext)
+      expect(hydratedDraft.values.goals?.additionalContext).not.toBe(activeDraftPayload.fieldValues.goals?.additionalContext)
+      expect(hydratedDraft.values.goals?.targetTimelineMonths).toBe(sourcePayload.fieldValues.goals?.targetTimelineMonths)
+      expect(hydratedDraft.values.goals?.targetTimelineMonths).not.toBe(activeDraftPayload.fieldValues.goals?.targetTimelineMonths)
     })
 
     test('[P0][AC1] submission is rejected when required intake sections are incomplete', async ({ request, appBaseUrl }) => {

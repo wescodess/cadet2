@@ -45,6 +45,7 @@ export const INTAKE_ATDD_REQUIRED_STORAGE_KEYS = [
   'currentSection',
   'sectionProgress',
   'fieldValues',
+  'sourceRunId',
 ] as const
 
 export const INTAKE_CONSTRAINTS_ATDD_FIELD_LABELS = {

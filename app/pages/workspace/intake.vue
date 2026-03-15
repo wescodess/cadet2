@@ -9,6 +9,9 @@ definePageMeta({
   middleware: ['auth'],
 })
 
+const route = useRoute()
+const router = useRouter()
+
 type IntakeSection = 'personal' | 'education' | 'work' | 'immigration' | 'goals'
 
 type IntakeFieldOption = {
@@ -43,13 +46,16 @@ type IntakeDraftResponse = {
   status: string
   savedAt: string | null
   currentSection: IntakeSection
+  sectionProgress?: Partial<SectionProgress>
   values: Record<string, Record<string, unknown>>
+  sourceRunId?: string | null
 }
 
 type IntakeDraftPayload = {
   currentSection: IntakeSection
   sectionProgress: SectionProgress
   fieldValues: SectionFieldValues
+  sourceRunId?: string | null
 }
 
 type SaveFeedback = {
@@ -60,6 +66,10 @@ type SaveFeedback = {
 type IntakeSubmitResponse = {
   runId: string
   profileSnapshotId: string
+  refreshedFromRunId?: string
+  previousProfileSnapshotId?: string
+  refreshRootRunId?: string
+  refreshSequence?: number
   status: string
   createdAt: string
   updatedAt: string
@@ -686,6 +696,7 @@ const sectionValidationSchemas = {
 } satisfies Record<IntakeSection, z.ZodTypeAny>
 
 const currentSection = ref<IntakeSection>('personal')
+const currentCycleSourceRunId = ref<string | null>(null)
 const validationSummary = ref<string[]>([])
 const saveFeedback = ref<SaveFeedback | null>(null)
 const submitFeedback = ref<SaveFeedback | null>(null)
@@ -693,6 +704,8 @@ const isSaving = ref(false)
 const isSubmitting = ref(false)
 const isHydrating = ref(true)
 
+const requestedMode = computed(() => typeof route.query.mode === 'string' ? route.query.mode.trim() : '')
+const requestedSourceRunId = computed(() => typeof route.query.sourceRun === 'string' ? route.query.sourceRun.trim() : '')
 const currentSectionIndex = computed(() => sectionIds.findIndex(sectionId => sectionId === currentSection.value))
 const activeSection = computed(() => sections[currentSectionIndex.value] || sections[0]!)
 const goalsSectionFields = sections.find(section => section.id === 'goals')?.fields || []
@@ -736,12 +749,29 @@ function coerceString(value: unknown): string {
   return String(value)
 }
 
+function setSectionProgress(progress: Partial<SectionProgress>) {
+  for (const sectionId of sectionIds) {
+    sectionProgress[sectionId] = progress[sectionId] === true
+  }
+}
+
 function restoreProgressBySection(sectionId: IntakeSection) {
   const activeIndex = sectionIds.findIndex(id => id === sectionId)
 
   for (const [index, id] of sectionIds.entries()) {
     sectionProgress[id] = index < activeIndex
   }
+}
+
+async function clearNewCycleQueryParams() {
+  if (!requestedMode.value && !requestedSourceRunId.value) {
+    return
+  }
+
+  const nextQuery = { ...route.query }
+  delete nextQuery.mode
+  delete nextQuery.sourceRun
+  await router.replace({ query: nextQuery })
 }
 
 function hydrateFieldValues(values: Record<string, Record<string, unknown>>) {
@@ -803,14 +833,23 @@ function createDraftPayload(options?: {
       immigration: { ...fieldValues.immigration },
       goals: { ...fieldValues.goals },
     },
+    sourceRunId: currentCycleSourceRunId.value,
   }
 }
 
-async function saveDraft(payload: IntakeDraftPayload = createDraftPayload()) {
+async function saveDraft(
+  payload: IntakeDraftPayload = createDraftPayload(),
+  options: {
+    silent?: boolean
+  } = {},
+) {
   isSaving.value = true
-  saveFeedback.value = {
-    tone: 'info',
-    message: 'Saving your draft...',
+
+  if (!options.silent) {
+    saveFeedback.value = {
+      tone: 'info',
+      message: 'Saving your draft...',
+    }
   }
 
   try {
@@ -819,19 +858,23 @@ async function saveDraft(payload: IntakeDraftPayload = createDraftPayload()) {
       body: payload,
     })
 
-    saveFeedback.value = {
-      tone: 'success',
-      message: response.savedAt
-        ? `Draft saved at ${new Date(response.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`
-        : 'Draft saved successfully.',
+    if (!options.silent) {
+      saveFeedback.value = {
+        tone: 'success',
+        message: response.savedAt
+          ? `Draft saved at ${new Date(response.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`
+          : 'Draft saved successfully.',
+      }
     }
 
     return true
   }
   catch {
-    saveFeedback.value = {
-      tone: 'error',
-      message: 'We could not save your draft. Please try again.',
+    if (!options.silent) {
+      saveFeedback.value = {
+        tone: 'error',
+        message: 'We could not save your draft. Please try again.',
+      }
     }
 
     return false
@@ -956,13 +999,19 @@ async function submitIntake() {
   try {
     const response = await $fetch<IntakeSubmitResponse>('/api/intake/submit', {
       method: 'POST',
+      body: currentCycleSourceRunId.value
+        ? {
+            sourceRunId: currentCycleSourceRunId.value,
+          }
+        : undefined,
     })
 
     void triggerRecommendationStart(response.runId)
+    currentCycleSourceRunId.value = null
 
     submitFeedback.value = {
       tone: 'success',
-      message: `Your profile was submitted for recommendation processing. Next state: run ${response.runId} is ${response.status} in your workspace.`,
+      message: `Your profile was submitted for recommendation processing. Next state: run ${response.runId} is ${response.status} in your workspace.${response.refreshedFromRunId ? ` This planning cycle stays linked to ${response.refreshedFromRunId}.` : ''}`,
     }
   }
   catch (error) {
@@ -977,8 +1026,19 @@ async function submitIntake() {
 }
 
 async function hydrateDraft() {
+  const sourceRunIdFromQuery = requestedMode.value === 'new-cycle'
+    ? requestedSourceRunId.value
+    : ''
+
   try {
-    const response = await $fetch<IntakeDraftResponse>('/api/intake/draft')
+    const response = await $fetch<IntakeDraftResponse>('/api/intake/draft', {
+      query: sourceRunIdFromQuery
+        ? {
+            mode: 'new-cycle',
+            sourceRun: sourceRunIdFromQuery,
+          }
+        : undefined,
+    })
 
     if (response?.values) {
       hydrateFieldValues(response.values)
@@ -986,7 +1046,31 @@ async function hydrateDraft() {
 
     if (response?.currentSection && isIntakeSection(response.currentSection)) {
       currentSection.value = response.currentSection
+    }
+
+    if (response?.sectionProgress) {
+      setSectionProgress(response.sectionProgress)
+    }
+    else if (response?.currentSection && isIntakeSection(response.currentSection)) {
       restoreProgressBySection(response.currentSection)
+    }
+
+    if (sourceRunIdFromQuery) {
+      currentCycleSourceRunId.value = sourceRunIdFromQuery
+
+      const hydratedSourceDraftSaved = await saveDraft(createDraftPayload(), { silent: true })
+      if (hydratedSourceDraftSaved) {
+        await clearNewCycleQueryParams()
+      }
+    }
+    else {
+      currentCycleSourceRunId.value = response?.sourceRunId?.trim() || null
+    }
+  }
+  catch (error) {
+    submitFeedback.value = {
+      tone: 'error',
+      message: resolveErrorMessage(error, 'We could not restore your saved draft. Please try again.'),
     }
   }
   finally {
