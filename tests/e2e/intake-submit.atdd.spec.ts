@@ -115,6 +115,12 @@ async function waitForRunListLoad(page: Page) {
   await expect(page.getByText('Loading your recommendation runs...')).toBeHidden({ timeout: 20_000 })
 }
 
+async function expectWorkspaceStatusBannerToShowRun(page: Page, runId: string) {
+  const statusBanner = page.getByTestId('recommendation-status-banner')
+  await expect(statusBanner).toBeVisible()
+  await expect(statusBanner).toContainText(runId)
+}
+
 async function mockRecommendationStart(page: Page) {
   await page.route('**/api/recommendations/runs/*/start**', async (route) => {
     const url = new URL(route.request().url())
@@ -280,9 +286,9 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
       // And the created run is visible on workspace continuity surface
       await page.goto(routeProbe.workspacePath)
       await waitForRunListLoad(page)
-      const runItems = page.getByTestId(INTAKE_SUBMIT_ATDD_TEST_IDS.runItem)
-      await expect(runItems).toHaveCount(1)
-      await expect(runItems.first()).toContainText('run_story14_1')
+      await expect(page.getByTestId('planning-workspace-hub')).toBeVisible()
+      await expectWorkspaceStatusBannerToShowRun(page, 'run_story14_1')
+      await expect(page.getByText('1 current run')).toBeVisible()
     })
 
     test('[P0][AC5] duplicate submission attempts are blocked while submit request is in progress', async ({ page, appBaseUrl }) => {
@@ -316,7 +322,7 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
       expect(submitRequestCount).toBe(1)
     })
 
-    test('[P0][AC2] workspace dashboard shows recommendation run list placeholders for the signed-in user', async ({ page, appBaseUrl }) => {
+    test('[P0][AC2] workspace dashboard shows recommendation continuity surfaces for the signed-in user', async ({ page, appBaseUrl }) => {
       await ensureAuthenticatedPage(page, appBaseUrl)
       const routeProbe = createIntakeSubmitRouteProbe(appBaseUrl)
       const runListFixture = createRecommendationRunListFixture()
@@ -335,9 +341,10 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
       await page.goto(routeProbe.workspacePath)
       await waitForRunListLoad(page)
 
-      // Then a stable run list and run item hooks are rendered with at least one entry
-      await expect(page.getByTestId(INTAKE_SUBMIT_ATDD_TEST_IDS.runList)).toBeVisible()
-      await expect(page.getByTestId(INTAKE_SUBMIT_ATDD_TEST_IDS.runItem)).toHaveCount(runListFixture.length)
+      // Then the continuity dashboard exposes the latest run and aggregate count
+      await expect(page.getByTestId('planning-workspace-hub')).toBeVisible()
+      await expectWorkspaceStatusBannerToShowRun(page, runListFixture[0]!.runId)
+      await expect(page.getByText(`${runListFixture.length} current runs`)).toBeVisible()
     })
 
     test('[P0][AC2][AC5] repeated submissions create distinct run records in reverse-chronological order', async ({ page, appBaseUrl }) => {
@@ -389,11 +396,10 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
       await page.goto(routeProbe.workspacePath)
       await waitForRunListLoad(page)
 
-      // Then both runs are visible in reverse-chronological order
-      const runItems = page.getByTestId(INTAKE_SUBMIT_ATDD_TEST_IDS.runItem)
-      await expect(runItems).toHaveCount(2)
-      await expect(runItems.nth(0)).toContainText('run-repeat-2')
-      await expect(runItems.nth(1)).toContainText('run-repeat-1')
+      // Then the newest run is active and the dashboard reflects the aggregate continuity count
+      await expect(page.getByTestId('planning-workspace-hub')).toBeVisible()
+      await expectWorkspaceStatusBannerToShowRun(page, 'run-repeat-2')
+      await expect(page.getByText('2 current runs')).toBeVisible()
     })
   })
 })

@@ -72,8 +72,14 @@ export function useRecommendationRunHistory() {
     await fetchRuns(status)
   }
 
-  async function navigateToRun(runId: string) {
-    const targetPath = `/workspace/recommendations/${encodeURIComponent(runId)}`
+  async function navigateToRun(
+    runId: string,
+    historyFilter: RecommendationRunHistoryFilter = activeFilter.value,
+  ) {
+    const query = historyFilter !== 'all'
+      ? `?historyFilter=${encodeURIComponent(historyFilter)}`
+      : ''
+    const targetPath = `/workspace/recommendations/${encodeURIComponent(runId)}${query}`
 
     if (import.meta.client) {
       window.location.assign(targetPath)

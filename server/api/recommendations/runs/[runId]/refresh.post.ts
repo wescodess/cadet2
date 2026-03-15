@@ -9,12 +9,6 @@ import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
 import { normalizeStoredIntakeDraft } from '../../../../utils/intake/normalizeIntakePayload'
 import { normalizeStatusResponse } from '../../../../utils/recommendations/lifecycle'
 
-type IntakeDraftRow = {
-  currentSection: string
-  sectionProgress: unknown
-  fieldValues: unknown
-}
-
 type RecommendationProfileRow = {
   submittedPayload: unknown
 }
@@ -35,26 +29,6 @@ type RecommendationSourceRunRecord = {
 }
 
 async function loadLatestRefreshPayload(userId: string, sourceProfileSnapshotId: string) {
-  const draftResult = await db.execute(sql`
-    SELECT
-      "currentSection",
-      "sectionProgress",
-      "fieldValues"
-    FROM "intake_draft"
-    WHERE "userId" = ${userId}
-    ORDER BY "updatedAt" DESC
-    LIMIT 1;
-  `)
-
-  const draftRow = ((draftResult as { rows?: IntakeDraftRow[] }).rows || [])[0]
-  if (draftRow) {
-    return normalizeStoredIntakeDraft({
-      currentSection: draftRow.currentSection,
-      sectionProgress: draftRow.sectionProgress,
-      fieldValues: draftRow.fieldValues,
-    })
-  }
-
   const sourceSnapshotResult = await db.execute(sql`
     SELECT "submittedPayload"
     FROM "recommendation_profiles"
@@ -195,6 +169,12 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!refreshedRun) {
+    await db.execute(sql`
+      DELETE FROM "recommendation_profiles"
+      WHERE "snapshotId" = ${newProfileSnapshotId}
+        AND "userId" = ${userId};
+    `)
+
     throw createError({
       statusCode: 500,
       statusMessage: 'Unable to create refreshed recommendation run',

@@ -113,11 +113,21 @@ function normalizeCurrentSection(value: unknown): IntakeSection {
   return 'personal'
 }
 
+function normalizeSourceRunId(value: unknown): string | null {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const normalized = value.trim()
+  return normalized.length > 0 ? normalized : null
+}
+
 export function normalizeIntakePayload(payload: IntakeDraftInput): IntakeDraftRecord {
   return {
     currentSection: payload.currentSection,
     sectionProgress: normalizeSectionProgress(payload.sectionProgress),
     fieldValues: normalizeFieldValues(payload.fieldValues),
+    sourceRunId: normalizeSourceRunId(payload.sourceRunId),
   }
 }
 
@@ -125,6 +135,7 @@ export function normalizeStoredIntakeDraft(input: {
   currentSection?: unknown
   sectionProgress?: unknown
   fieldValues?: unknown
+  sourceRunId?: unknown
 }): IntakeDraftRecord {
   const sectionProgress = toRecord(parseJsonIfString(input.sectionProgress))
   const fieldValues = toRecord(parseJsonIfString(input.fieldValues))
@@ -133,6 +144,7 @@ export function normalizeStoredIntakeDraft(input: {
     currentSection: normalizeCurrentSection(input.currentSection),
     sectionProgress: normalizeSectionProgress(sectionProgress),
     fieldValues: normalizeFieldValues(fieldValues),
+    sourceRunId: normalizeSourceRunId(input.sourceRunId),
   }
 }
 
@@ -141,5 +153,6 @@ export function createEmptyIntakeDraft(): IntakeDraftRecord {
     currentSection: 'personal',
     sectionProgress: { ...defaultSectionProgress },
     fieldValues: { ...emptyFieldValues },
+    sourceRunId: null,
   }
 }

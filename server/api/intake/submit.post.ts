@@ -17,12 +17,27 @@ type SnapshotRow = {
   createdAt: Date | string
 }
 
+type SubmitRequestBody = {
+  sourceRunId?: unknown
+}
+
 type RecommendationRunRecord = {
   runId: string
   profileSnapshotId: string
+  refreshedFromRunId?: string
+  previousProfileSnapshotId?: string
+  refreshRootRunId?: string
+  refreshSequence?: number
   status: string
   createdAt: number
   updatedAt: number
+}
+
+type RecommendationSourceRunRecord = {
+  runId: string
+  profileSnapshotId: string
+  refreshRootRunId?: string
+  refreshSequence?: number
 }
 
 const requiredFieldKeysBySection: Record<IntakeSection, string[]> = {
@@ -106,6 +121,14 @@ function hasRequiredValue(value: unknown): boolean {
   return false
 }
 
+function toSourceRunId(value: unknown) {
+  if (typeof value !== 'string') {
+    return ''
+  }
+
+  return value.trim()
+}
+
 function isDraftSubmissionComplete(input: {
   sectionProgress: Record<IntakeSection, boolean>
   fieldValues: Record<IntakeSection, Record<string, unknown>>
@@ -130,6 +153,8 @@ function isDraftSubmissionComplete(input: {
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireWorkspaceUserSession(event)
+  const body = await readBody<SubmitRequestBody | null>(event)
+  const sourceRunId = toSourceRunId(body?.sourceRunId)
 
   const draftResult = await db.execute(sql`
     SELECT
@@ -165,6 +190,26 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const convex = await createConvexAdminClient()
+  let sourceRun: RecommendationSourceRunRecord | null = null
+
+  if (sourceRunId) {
+    sourceRun = await convex.query(
+      (anyApi as any).recommendationRuns.readStatusForUser,
+      {
+        runId: sourceRunId,
+        userId,
+      },
+    ) as RecommendationSourceRunRecord | null
+
+    if (!sourceRun) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Source planning cycle not found',
+      })
+    }
+  }
+
   const profileSnapshotId = `snapshot_${randomUUID().replace(/-/g, '')}`
   const runId = `run_${randomUUID().replace(/-/g, '')}`
   const serializedPayload = JSON.stringify(normalizedDraft)
@@ -194,7 +239,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const convex = await createConvexAdminClient()
   let run: RecommendationRunRecord
 
   try {
@@ -204,6 +248,10 @@ export default defineEventHandler(async (event) => {
         runId,
         userId,
         profileSnapshotId,
+        refreshedFromRunId: sourceRun?.runId,
+        previousProfileSnapshotId: sourceRun?.profileSnapshotId,
+        refreshRootRunId: sourceRun ? (sourceRun.refreshRootRunId || sourceRun.runId) : undefined,
+        refreshSequence: sourceRun ? Math.max(0, sourceRun.refreshSequence || 0) + 1 : undefined,
       },
     ) as RecommendationRunRecord
   }
@@ -228,6 +276,10 @@ export default defineEventHandler(async (event) => {
   return {
     runId: run.runId,
     profileSnapshotId: run.profileSnapshotId,
+    refreshedFromRunId: run.refreshedFromRunId,
+    previousProfileSnapshotId: run.previousProfileSnapshotId,
+    refreshRootRunId: run.refreshRootRunId,
+    refreshSequence: run.refreshSequence,
     status: run.status,
     createdAt: toIsoString(run.createdAt, fallbackCreatedAt),
     updatedAt: toIsoString(run.updatedAt, fallbackCreatedAt),

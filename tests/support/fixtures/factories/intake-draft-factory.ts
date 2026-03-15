@@ -6,6 +6,7 @@ export type IntakeDraftPayload = {
   currentSection: IntakeSection
   sectionProgress: Record<IntakeSection, boolean>
   fieldValues: Record<string, Record<string, unknown>>
+  sourceRunId?: string | null
 }
 
 export type GoalsConstraintsValues = {

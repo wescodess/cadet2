@@ -14,6 +14,7 @@ import RecommendationResultsPanel from '~/components/workspace/RecommendationRes
 
 const route = useRoute()
 const runId = computed(() => String(route.params.runId || '').trim())
+const historyFilter = computed(() => typeof route.query.historyFilter === 'string' ? route.query.historyFilter.trim() : '')
 const detail = ref<RecommendationRunHistoryDetailResponse | null>(null)
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
@@ -229,6 +230,12 @@ const hasRenderableResults = computed(() => {
   return candidates.length > 0
 })
 
+const historyBackLink = computed(() => (
+  historyFilter.value
+    ? `/workspace/history?filter=${encodeURIComponent(historyFilter.value)}`
+    : '/workspace/history'
+))
+
 async function loadRunDetail() {
   if (!runId.value) {
     detail.value = null
@@ -279,7 +286,7 @@ watch(runId, async (nextRunId, previousRunId) => {
   <section class="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <NuxtLink
-        to="/workspace/history"
+        :to="historyBackLink"
         data-testid="recommendation-history-back-link"
         class="mb-4 inline-flex min-h-[44px] w-fit items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-[var(--trust,#2563eb)] transition-colors hover:bg-[var(--trust-soft,#dbeafe)] hover:text-[var(--trust,#2563eb)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--trust,#2563eb)]/30"
       >

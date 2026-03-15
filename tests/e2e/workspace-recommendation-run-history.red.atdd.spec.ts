@@ -206,7 +206,7 @@ test.describe('Story 4.2 Recommendation Run History E2E RED ATDD', () => {
     appBaseUrl,
   }) => {
     const runs = createRecommendationRunHistoryListFixture().filter(run => run.isAvailable)
-    const targetRun = runs[1] || runs[0]
+    const targetRun = runs.find(run => run.status === 'degraded') || runs[1] || runs[0]
 
     await ensureAuthenticatedPage(page, appBaseUrl)
     const routeProbe = await mockRecommendationRunHistoryData(page, appBaseUrl, runs)
@@ -216,11 +216,12 @@ test.describe('Story 4.2 Recommendation Run History E2E RED ATDD', () => {
     }
 
     await page.goto(routeProbe.historyPath)
+    await page.getByRole('button', { name: 'Degraded' }).click()
 
     await page.getByTestId(runCardTestId(targetRun.id)).getByRole('button', { name: 'View Results' }).click()
 
-    await expect(page).toHaveURL(new RegExp(`/workspace/recommendations/${targetRun.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))
-    await expect(page.getByTestId(RECOMMENDATION_RUN_HISTORY_ATDD_TEST_IDS.backLink)).toHaveAttribute('href', '/workspace/history')
+    await expect(page).toHaveURL(new RegExp(`/workspace/recommendations/${targetRun.id.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\?historyFilter=degraded$`))
+    await expect(page.getByTestId(RECOMMENDATION_RUN_HISTORY_ATDD_TEST_IDS.backLink)).toHaveAttribute('href', '/workspace/history?filter=degraded')
     await expect(page.getByText(targetRun.profileSnapshotSummary)).toBeVisible()
   })
 

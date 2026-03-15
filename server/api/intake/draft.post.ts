@@ -59,6 +59,7 @@ export default defineEventHandler(async (event) => {
       "currentSection",
       "sectionProgress",
       "fieldValues",
+      "sourceRunId",
       "createdAt",
       "updatedAt"
     )
@@ -67,6 +68,7 @@ export default defineEventHandler(async (event) => {
       ${normalized.currentSection},
       ${serializedProgress}::jsonb,
       ${serializedValues}::jsonb,
+      ${normalized.sourceRunId},
       now(),
       now()
     )
@@ -75,6 +77,7 @@ export default defineEventHandler(async (event) => {
       "currentSection" = EXCLUDED."currentSection",
       "sectionProgress" = EXCLUDED."sectionProgress",
       "fieldValues" = EXCLUDED."fieldValues",
+      "sourceRunId" = EXCLUDED."sourceRunId",
       "updatedAt" = now()
     RETURNING "updatedAt", "currentSection", "fieldValues";
   `)
