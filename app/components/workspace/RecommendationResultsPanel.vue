@@ -133,6 +133,7 @@ const comparisonContainerClasses = computed(() =>
           v-for="candidate in flatResults"
           :key="`${candidate.type}:${candidate.pathwayId}`"
           :candidate="candidate"
+          :run-id="props.resultsRecord?.runId || props.statusRecord?.runId || ''"
         />
       </div>
     </div>
@@ -176,6 +177,7 @@ const comparisonContainerClasses = computed(() =>
                 v-for="candidate in group.items"
                 :key="`${candidate.type}:${candidate.pathwayId}`"
                 :candidate="candidate"
+                :run-id="props.resultsRecord?.runId || props.statusRecord?.runId || ''"
               />
             </div>
           </section>

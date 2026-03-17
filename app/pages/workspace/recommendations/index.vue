@@ -2,13 +2,18 @@
 import { History, Sparkles } from 'lucide-vue-next'
 
 import RecommendationResultsPanel from '~/components/workspace/RecommendationResultsPanel.vue'
+import RecommendationRunList from '~/components/workspace/RecommendationRunList.vue'
 import RecommendationStatusBanner from '~/components/workspace/RecommendationStatusBanner.vue'
 import { useWorkspaceRecommendationReview } from '~/composables/useWorkspaceRecommendationReview'
 
+const route = useRoute()
+const router = useRouter()
 const {
   activeRunStatus,
   isLoadingResults,
   isLoadingRunStatus,
+  isLoadingRuns,
+  loadActiveRunStatus,
   loadRecommendationRuns,
   recommendationResults,
   recommendationResultsMessage,
@@ -17,8 +22,51 @@ const {
   runStatusErrorMessage,
 } = useWorkspaceRecommendationReview()
 
+const targetRunId = computed(() => {
+  return typeof route.query.runId === 'string' ? route.query.runId.trim() : ''
+})
+
+const submissionFeedbackMessage = computed(() => {
+  if (route.query.submitted !== '1') {
+    return ''
+  }
+
+  const runId = targetRunId.value
+  const status = typeof route.query.status === 'string' ? route.query.status.trim() : ''
+  const refreshedFromRunId = typeof route.query.refreshedFromRunId === 'string'
+    ? route.query.refreshedFromRunId.trim()
+    : ''
+
+  if (!runId || !status) {
+    return 'Your profile was submitted for recommendation processing. Next state is now visible in your workspace.'
+  }
+
+  return `Your profile was submitted for recommendation processing. Next state: run ${runId} is ${status} in your workspace.${refreshedFromRunId ? ` This planning cycle stays linked to ${refreshedFromRunId}.` : ''}`
+})
+
+async function selectRun(runId: string) {
+  if (!runId || runId === targetRunId.value) {
+    return
+  }
+
+  await router.replace({
+    query: {
+      ...route.query,
+      runId,
+    },
+  })
+}
+
 onMounted(async () => {
-  await loadRecommendationRuns()
+  await loadRecommendationRuns(targetRunId.value || undefined)
+})
+
+watch(targetRunId, async (nextRunId, previousRunId) => {
+  if (nextRunId === previousRunId) {
+    return
+  }
+
+  await loadActiveRunStatus(nextRunId || undefined)
 })
 </script>
 
@@ -59,6 +107,16 @@ onMounted(async () => {
     </div>
 
     <div
+      v-if="submissionFeedbackMessage"
+      data-testid="intake-submit-feedback"
+      class="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700"
+      role="status"
+      aria-live="polite"
+    >
+      {{ submissionFeedbackMessage }}
+    </div>
+
+    <div
       v-if="runListErrorMessage"
       class="rounded-3xl border border-[var(--destructive,#ef4444)]/20 bg-[var(--destructive-soft,#fef2f2)] p-6 text-sm text-rose-900"
     >
@@ -93,6 +151,13 @@ onMounted(async () => {
     </section>
 
     <template v-else>
+      <RecommendationRunList
+        :runs="recommendationRuns"
+        :is-loading="isLoadingRuns"
+        :active-run-id="activeRunStatus?.runId || targetRunId || recommendationRuns[0]?.runId || null"
+        @select-run="selectRun"
+      />
+
       <RecommendationStatusBanner
         :status-record="activeRunStatus"
         :is-loading="isLoadingRunStatus"

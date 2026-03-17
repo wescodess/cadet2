@@ -1013,6 +1013,18 @@ async function submitIntake() {
       tone: 'success',
       message: `Your profile was submitted for recommendation processing. Next state: run ${response.runId} is ${response.status} in your workspace.${response.refreshedFromRunId ? ` This planning cycle stays linked to ${response.refreshedFromRunId}.` : ''}`,
     }
+
+    const nextQuery = new URLSearchParams({
+      submitted: '1',
+      runId: response.runId,
+      status: response.status,
+    })
+
+    if (response.refreshedFromRunId) {
+      nextQuery.set('refreshedFromRunId', response.refreshedFromRunId)
+    }
+
+    await navigateTo(`/workspace/recommendations?${nextQuery.toString()}`)
   }
   catch (error) {
     submitFeedback.value = {
@@ -1249,6 +1261,7 @@ onMounted(async () => {
               {{ isSubmitting ? 'Submitting...' : 'Submit Intake' }}
             </button>
             <button
+              v-if="!isSubmitStage"
               type="button"
               data-testid="intake-next"
               :disabled="isHydrating"
@@ -1286,6 +1299,7 @@ onMounted(async () => {
           {{ isSaving ? 'Saving...' : 'Save Draft' }}
         </button>
         <button
+          v-if="!isSubmitStage"
           type="button"
           data-testid="intake-next-mobile"
           :disabled="isHydrating"

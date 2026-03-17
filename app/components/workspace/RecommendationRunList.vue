@@ -16,10 +16,16 @@ const props = withDefaults(defineProps<{
   runs: RecommendationRunListItem[]
   isLoading?: boolean
   errorMessage?: string | null
+  activeRunId?: string | null
 }>(), {
   isLoading: false,
   errorMessage: null,
+  activeRunId: null,
 })
+
+const emit = defineEmits<{
+  'select-run': [runId: string]
+}>()
 
 function formatTimestamp(value: string) {
   const parsed = new Date(value)
@@ -39,6 +45,10 @@ function formatTimestamp(value: string) {
 
 function shortRunId(runId: string) {
   return runId.length > 18 ? `${runId.slice(0, 18)}...` : runId
+}
+
+function isActiveRun(runId: string) {
+  return props.activeRunId === runId
 }
 </script>
 
@@ -79,15 +89,24 @@ function shortRunId(runId: string) {
         v-for="run in props.runs"
         :key="run.runId"
         data-testid="workspace-run-item"
-        class="rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3"
+        class="rounded-xl border"
+        :class="isActiveRun(run.runId) ? 'border-[var(--trust,#2563eb)]/35 bg-[var(--trust-soft,#dbeafe)]/60' : 'border-slate-200 bg-slate-50/70'"
       >
-        <div class="flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          class="flex min-h-[44px] w-full flex-wrap items-center justify-between gap-3 px-4 py-3 text-left"
+          :aria-pressed="isActiveRun(run.runId)"
+          @click="emit('select-run', run.runId)"
+        >
           <div>
             <p class="text-sm font-semibold text-slate-900">
               {{ shortRunId(run.runId) }}
             </p>
             <p class="text-xs text-slate-500">
               Submitted {{ formatTimestamp(run.createdAt) }}
+            </p>
+            <p class="mt-1 text-xs font-medium" :class="isActiveRun(run.runId) ? 'text-[var(--trust,#2563eb)]' : 'text-slate-600'">
+              {{ isActiveRun(run.runId) ? 'Viewing pathways for this run' : 'View results and pathways' }}
             </p>
           </div>
           <span
@@ -96,7 +115,7 @@ function shortRunId(runId: string) {
           >
             {{ getRecommendationStatusLabel(run.status) }}
           </span>
-        </div>
+        </button>
       </li>
     </ul>
 

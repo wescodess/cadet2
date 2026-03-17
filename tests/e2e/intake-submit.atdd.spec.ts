@@ -283,12 +283,10 @@ test.describe('Story 1.4 Intake Submit and Recommendation Run Continuity E2E ATD
         await expect(submitFeedback).toContainText(new RegExp(snippet, 'i'))
       }
 
-      // And the created run is visible on workspace continuity surface
-      await page.goto(routeProbe.workspacePath)
+      // And the user is handed off to workspace review with the created run visible
+      await expect(page).toHaveURL(/\/workspace\/recommendations(?:\?.*)?$/)
       await waitForRunListLoad(page)
-      await expect(page.getByTestId('planning-workspace-hub')).toBeVisible()
       await expectWorkspaceStatusBannerToShowRun(page, 'run_story14_1')
-      await expect(page.getByText('1 current run')).toBeVisible()
     })
 
     test('[P0][AC5] duplicate submission attempts are blocked while submit request is in progress', async ({ page, appBaseUrl }) => {

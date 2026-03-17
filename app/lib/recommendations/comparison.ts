@@ -108,6 +108,12 @@ export type RecommendationResultsRecord = {
   noComposedReason?: string
 }
 
+export const recommendationCandidateTypes = ['direct', 'blocked', 'composed'] as const
+
+export function isRecommendationCandidateType(value: string): value is RecommendationResultsCandidate['type'] {
+  return (recommendationCandidateTypes as readonly string[]).includes(value)
+}
+
 const pathwayLabels: Record<string, string> = {
   'mvp-skilled-worker': 'Skilled Worker pathway',
   'mvp-provincial-nominee': 'Provincial Nominee pathway',
@@ -116,4 +122,57 @@ const pathwayLabels: Record<string, string> = {
 
 export function normalizePathwayLabel(pathwayId: string) {
   return pathwayLabels[pathwayId] || pathwayId
+}
+
+export function flattenRecommendationCandidates(record: RecommendationResultsRecord | null | undefined) {
+  if (!record) {
+    return []
+  }
+
+  return [
+    ...record.results.direct,
+    ...record.results.blocked,
+    ...record.results.composed,
+  ]
+}
+
+export function findRecommendationCandidate(input: {
+  record: RecommendationResultsRecord | null | undefined
+  pathwayId: string
+  type?: RecommendationResultsCandidate['type'] | null
+}) {
+  const pathwayId = input.pathwayId.trim()
+  if (!pathwayId) {
+    return null
+  }
+
+  return flattenRecommendationCandidates(input.record).find((candidate) => {
+    if (candidate.pathwayId !== pathwayId) {
+      return false
+    }
+
+    if (input.type && candidate.type !== input.type) {
+      return false
+    }
+
+    return true
+  }) || null
+}
+
+export function buildRecommendationPathwayDetailPath(input: {
+  runId: string
+  pathwayId: string
+  type: RecommendationResultsCandidate['type']
+  historyFilter?: string | null
+}) {
+  const path = `/workspace/recommendations/${encodeURIComponent(input.runId)}/pathways/${encodeURIComponent(input.pathwayId)}`
+  const query = new URLSearchParams({
+    type: input.type,
+  })
+
+  if (input.historyFilter?.trim()) {
+    query.set('historyFilter', input.historyFilter.trim())
+  }
+
+  return `${path}?${query.toString()}`
 }
