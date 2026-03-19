@@ -70,7 +70,7 @@ development_status:
 
   epic-5: in-progress
   5-1-manage-the-supported-mvp-pathway-inventory: done
-  5-2-update-pathway-rules-and-curate-evidence-sources: backlog
+  5-2-update-pathway-rules-and-curate-evidence-sources: ready-for-dev
   5-3-review-recommendation-trustworthiness-and-correct-weak-support: backlog
   5-4-audit-trust-sensitive-changes-and-preserve-governance-boundaries: backlog
   epic-5-retrospective: optional
