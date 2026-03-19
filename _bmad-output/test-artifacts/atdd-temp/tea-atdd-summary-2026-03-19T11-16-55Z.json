@@ -1,0 +1,36 @@
+{
+  "tdd_phase": "RED",
+  "total_tests": 10,
+  "api_tests": 5,
+  "e2e_tests": 5,
+  "all_tests_skipped": true,
+  "expected_to_fail": true,
+  "fixtures_created": 0,
+  "fixtures_reused": 3,
+  "acceptance_criteria_covered": [
+    "AC1 admin-only access to the pathway management interface",
+    "AC2 controlled pathway status and inventory changes",
+    "AC3 minimum pathway fields only",
+    "AC4 unsupported pathways excluded from recommendations"
+  ],
+  "knowledge_fragments_used": [
+    "data-factories",
+    "component-tdd",
+    "test-quality",
+    "selector-resilience",
+    "api-request",
+    "auth-session",
+    "fixtures-composition",
+    "test-levels-framework",
+    "test-priorities-matrix",
+    "playwright-cli"
+  ],
+  "subagent_execution": "SEQUENTIAL (API -> E2E)",
+  "performance_gain": "baseline (no parallel speedup)",
+  "validation": {
+    "api_listed": true,
+    "api_skipped_run": true,
+    "e2e_listed": true,
+    "e2e_skipped_run": true
+  }
+}

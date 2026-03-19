@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "subagent": "atdd-api-tests",
+  "tests": [
+    {
+      "file": "tests/api/admin-pathway-management.red.atdd.spec.ts",
+      "description": "Story 5.1 API red-phase coverage for admin-only access, minimum-field CRUD, and recommendation-scope filtering.",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AC1 admin-only access to pathway inventory endpoints",
+        "AC2 controlled create, update, and status-change operations",
+        "AC3 minimum governance field contract",
+        "AC4 inactive pathways excluded from future recommendation outputs"
+      ],
+      "priority_coverage": {
+        "P0": 5,
+        "P1": 0,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": [
+    "existing auth session helpers",
+    "pathway inventory factory",
+    "recommendation testing seed/reset endpoints"
+  ],
+  "knowledge_fragments_used": [
+    "data-factories",
+    "test-quality",
+    "api-request",
+    "auth-session",
+    "test-levels-framework",
+    "test-priorities-matrix"
+  ],
+  "test_count": 5,
+  "tdd_phase": "RED",
+  "summary": "Generated 5 skipped API red-phase tests for Story 5.1 without touching the implemented green suite."
+}

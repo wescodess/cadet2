@@ -1,0 +1,38 @@
+{
+  "success": true,
+  "subagent": "atdd-e2e-tests",
+  "tests": [
+    {
+      "file": "tests/e2e/admin-pathway-inventory.red.atdd.spec.ts",
+      "description": "Story 5.1 E2E red-phase coverage for route protection, inventory rendering, status confirmation, and mobile layout.",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AC1 admin-only admin page access",
+        "AC2 confirmation-driven inventory status mutation",
+        "AC3 seeded minimum-field inventory display",
+        "AC4 inactive inventory shown as out-of-scope in the UI workflow"
+      ],
+      "priority_coverage": {
+        "P0": 4,
+        "P1": 1,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": [
+    "existing Better Auth browser bootstrap helper",
+    "pathway inventory route mocks",
+    "pathway inventory factory"
+  ],
+  "knowledge_fragments_used": [
+    "selector-resilience",
+    "test-quality",
+    "playwright-cli",
+    "auth-session",
+    "fixtures-composition"
+  ],
+  "test_count": 5,
+  "tdd_phase": "RED",
+  "summary": "Generated 5 skipped E2E red-phase tests for Story 5.1 using resilient locators and server-mediated mocks."
+}
