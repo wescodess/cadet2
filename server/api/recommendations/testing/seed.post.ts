@@ -5,11 +5,15 @@ import { sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { requireWorkspaceUserSession } from '../../../utils/auth/requireUserSession'
-import { createConvexAdminClient } from '../../../utils/convex-admin-client'
+import { createConvexUserHttpClientForEvent } from '../../../utils/convex-admin-client'
 import {
   canonicalRecommendationStatuses,
   normalizeStatusResponse,
 } from '../../../utils/recommendations/lifecycle'
+import {
+  resetFallbackRecommendationRunsForUser,
+  seedFallbackRecommendationRun,
+} from '../../../utils/recommendations/testRecommendationRunFallback'
 import { assertRecommendationTestModeEnabled } from '../../../utils/recommendations/testMode'
 
 const recommendationSeedPayloadSchema = z.object({
@@ -49,15 +53,30 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const convex = await createConvexAdminClient()
   const runId = parsed.data.runId || `run_seed_${randomUUID().replace(/-/g, '')}`
   const profileSnapshotId = parsed.data.profileSnapshotId || `snapshot_seed_${randomUUID().replace(/-/g, '')}`
+  let convex: Awaited<ReturnType<typeof createConvexUserHttpClientForEvent>> | null = null
+
+  try {
+    convex = await createConvexUserHttpClientForEvent(event)
+  }
+  catch {
+    convex = null
+  }
 
   if (parsed.data.resetExisting) {
-    await convex.mutation(
-      (anyApi as any).recommendationRuns.resetRunsForUser,
-      { userId },
-    )
+    if (convex) {
+      try {
+        await convex.mutation(
+          (anyApi as any).recommendationRuns.resetRunsForUser,
+          { userId },
+        )
+      }
+      catch {
+      }
+    }
+
+    resetFallbackRecommendationRunsForUser(userId)
 
     await db.execute(sql`
       DELETE FROM "recommendation_profiles"
@@ -112,16 +131,32 @@ export default defineEventHandler(async (event) => {
     ON CONFLICT ("snapshotId") DO NOTHING;
   `)
 
-  const seededRun = await convex.mutation(
-    (anyApi as any).recommendationRuns.seedRunForUser,
-    {
-      userId,
-      runId,
-      profileSnapshotId,
-      status: parsed.data.status,
-      statusMessage: parsed.data.statusMessage,
-    },
-  ) as SeededRunRecord
+  if (convex) {
+    try {
+      const seededRun = await convex.mutation(
+        (anyApi as any).recommendationRuns.seedRunForUser,
+        {
+          userId,
+          runId,
+          profileSnapshotId,
+          status: parsed.data.status,
+          statusMessage: parsed.data.statusMessage,
+        },
+      ) as SeededRunRecord
+
+      return normalizeStatusResponse(seededRun)
+    }
+    catch {
+    }
+  }
+
+  const seededRun = seedFallbackRecommendationRun({
+    userId,
+    runId,
+    profileSnapshotId,
+    status: parsed.data.status,
+    statusMessage: parsed.data.statusMessage,
+  })
 
   return normalizeStatusResponse(seededRun)
 })

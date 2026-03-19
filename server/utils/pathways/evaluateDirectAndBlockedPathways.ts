@@ -1,6 +1,7 @@
 import {
   MVP_PATHWAY_CATALOG,
   type MvpPathwayId,
+  type MvpPathwayDefinition,
   type NormalizedPathwayProfile,
 } from './mvpPathwayCatalog'
 
@@ -31,6 +32,7 @@ export type BlockedPathwayOutcome = {
 export type EvaluateDirectAndBlockedPathwaysInput = {
   profileSnapshot: NormalizedProfileSnapshot
   mode: RecommendationProcessingMode
+  pathwayCatalog?: readonly MvpPathwayDefinition[]
 }
 
 export type EvaluateDirectAndBlockedPathwaysResult = {
@@ -102,8 +104,9 @@ export function evaluateDirectAndBlockedPathways(
   const forceBlocked = input.mode === 'recoverable-delay'
   const direct: DirectPathwayOutcome[] = []
   const blocked: BlockedPathwayOutcome[] = []
+  const pathwayCatalog = input.pathwayCatalog || MVP_PATHWAY_CATALOG
 
-  for (const pathway of MVP_PATHWAY_CATALOG) {
+  for (const pathway of pathwayCatalog) {
     const unmetConditions = pathway.rules
       .filter(rule => !rule.isSatisfied(profile))
       .map(rule => rule.unmetConditionId)

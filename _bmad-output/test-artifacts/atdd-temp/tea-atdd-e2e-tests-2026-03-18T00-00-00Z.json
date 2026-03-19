@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "subagent": "atdd-e2e-tests",
+  "tests": [
+    {
+      "file": "tests/e2e/admin-pathway-inventory.atdd.spec.ts",
+      "description": "ATDD E2E red-phase tests for Story 5.1 admin pathway inventory route and UI workflows",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AC1 admin-only access to the pathway management interface",
+        "AC2 controlled pathway status changes",
+        "AC3 minimum pathway fields only",
+        "AC4 unsupported pathways excluded from recommendations"
+      ],
+      "priority_coverage": {
+        "P0": 4,
+        "P1": 1,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": [
+    "adminPathwayInventoryRouteMocks",
+    "authenticatedBrowserSession"
+  ],
+  "knowledge_fragments_used": [
+    "selector-resilience",
+    "timing-debugging",
+    "fixtures-composition",
+    "playwright-cli"
+  ],
+  "test_count": 5,
+  "tdd_phase": "RED",
+  "summary": "Generated 5 RED-phase E2E tests for Story 5.1 admin pathway inventory route, filtering, and mobile layout"
+}

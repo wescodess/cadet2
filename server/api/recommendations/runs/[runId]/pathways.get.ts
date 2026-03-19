@@ -2,8 +2,8 @@ import { anyApi } from 'convex/server'
 import { getRouterParam } from 'h3'
 
 import { requireWorkspaceUserSession } from '../../../../utils/auth/requireUserSession'
-import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
-import { MVP_PATHWAY_IDS } from '../../../../utils/pathways/mvpPathwayCatalog'
+import { createConvexUserHttpClientForEvent } from '../../../../utils/convex-admin-client'
+import { readFallbackRecommendationRun } from '../../../../utils/recommendations/testRecommendationRunFallback'
 
 type DirectPathwayOutcome = {
   pathwayId: string
@@ -24,8 +24,6 @@ type RecommendationPathwayEvaluationRecord = {
   evaluatedAt: number | null
 } | null
 
-const supportedPathways = new Set<string>(MVP_PATHWAY_IDS)
-
 export default defineEventHandler(async (event) => {
   const { userId } = await requireWorkspaceUserSession(event)
   const runId = getRouterParam(event, 'runId')?.trim() || ''
@@ -37,14 +35,34 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const convex = await createConvexAdminClient()
-  const evaluation = await convex.query(
-    (anyApi as any).recommendationRuns.readPathwayEvaluationForUser,
-    {
-      runId,
+  let evaluation: RecommendationPathwayEvaluationRecord = null
+
+  try {
+    const convex = await createConvexUserHttpClientForEvent(event)
+    evaluation = await convex.query(
+      (anyApi as any).recommendationRuns.readPathwayEvaluationForUser,
+      {
+        runId,
+        userId,
+      },
+    ) as RecommendationPathwayEvaluationRecord
+  }
+  catch {
+    const fallbackRun = readFallbackRecommendationRun({
       userId,
-    },
-  ) as RecommendationPathwayEvaluationRecord
+      runId,
+    })
+
+    if (fallbackRun?.pathwayEvaluation) {
+      evaluation = {
+        runId: fallbackRun.runId,
+        profileSnapshotId: fallbackRun.profileSnapshotId,
+        direct: fallbackRun.pathwayEvaluation.direct,
+        blocked: fallbackRun.pathwayEvaluation.blocked,
+        evaluatedAt: fallbackRun.pathwayEvaluation.evaluatedAt,
+      }
+    }
+  }
 
   if (!evaluation) {
     throw createError({
@@ -63,20 +81,16 @@ export default defineEventHandler(async (event) => {
   return {
     runId: evaluation.runId,
     profileSnapshotId: evaluation.profileSnapshotId,
-    direct: evaluation.direct
-      .filter(pathway => supportedPathways.has(pathway.pathwayId))
-      .map(pathway => ({
-        pathwayId: pathway.pathwayId,
-        status: 'direct' as const,
-      })),
-    blocked: evaluation.blocked
-      .filter(pathway => supportedPathways.has(pathway.pathwayId))
-      .map(pathway => ({
-        pathwayId: pathway.pathwayId,
-        status: 'blocked' as const,
-        unmetConditions: Array.isArray(pathway.unmetConditions)
-          ? pathway.unmetConditions.filter(condition => typeof condition === 'string' && condition.trim().length > 0)
-          : [],
-      })),
+    direct: evaluation.direct.map(pathway => ({
+      pathwayId: pathway.pathwayId,
+      status: 'direct' as const,
+    })),
+    blocked: evaluation.blocked.map(pathway => ({
+      pathwayId: pathway.pathwayId,
+      status: 'blocked' as const,
+      unmetConditions: Array.isArray(pathway.unmetConditions)
+        ? pathway.unmetConditions.filter(condition => typeof condition === 'string' && condition.trim().length > 0)
+        : [],
+    })),
   }
 })

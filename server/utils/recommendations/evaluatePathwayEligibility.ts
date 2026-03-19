@@ -7,6 +7,7 @@ import {
   type BlockedPathwayOutcome,
   type DirectPathwayOutcome,
 } from '../pathways/evaluateDirectAndBlockedPathways'
+import { resolveRecommendationPathwayCatalog } from '../pathways/pathwayDefinitionService'
 
 type RecommendationProcessingMode =
   | 'standard'
@@ -88,6 +89,7 @@ export async function evaluatePathwayEligibilityForRun(input: EvaluatePathwayEli
   const pathwayEvaluation = evaluateDirectAndBlockedPathways({
     profileSnapshot,
     mode: input.mode,
+    pathwayCatalog: await resolveRecommendationPathwayCatalog(),
   })
 
   return await input.convex.mutation(
