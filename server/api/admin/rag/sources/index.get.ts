@@ -1,19 +1,30 @@
 import { anyApi } from 'convex/server'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
+import {
+  evidenceSourceListQuerySchema,
+  toEvidenceSourceRecord,
+} from '../../../../utils/admin/evidenceSourceSchema'
 
 type SourceStatus = 'pending_approval' | 'approved' | 'rejected' | 'paused'
 type SourceType = 'website' | 'youtube_channel'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireAdminSession(event)
+  const { session } = await requireAdminSession(event, {
+    allowBootstrapFromAllowlist: true,
+  })
+  const parsedQuery = evidenceSourceListQuerySchema.safeParse(getQuery(event))
 
-  const query = getQuery(event) as {
-    showOnlyMine?: string
-    status?: string
-    type?: string
-    tenantId?: string
+  if (!parsedQuery.success) {
+    const issue = parsedQuery.error.issues[0]
+
+    throw createError({
+      statusCode: 400,
+      statusMessage: `Invalid query: ${issue?.message || 'Request query is invalid'}`,
+    })
   }
+
+  const query = parsedQuery.data
 
   const status = query.status && ['pending_approval', 'approved', 'rejected', 'paused'].includes(query.status)
     ? query.status as SourceStatus
@@ -46,6 +57,10 @@ export default defineEventHandler(async (event) => {
 
   return {
     ok: true,
-    ...result,
+    currentUserIsAdmin: result.currentUserIsAdmin,
+    items: result.items.map(item => ({
+      ...item,
+      ...toEvidenceSourceRecord(item as never),
+    })),
   }
 })

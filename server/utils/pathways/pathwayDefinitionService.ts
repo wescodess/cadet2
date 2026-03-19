@@ -7,6 +7,10 @@ import {
   type MvpPathwayDefinition,
 } from './mvpPathwayCatalog'
 import {
+  isMissingPathwayRuleRelationError,
+  resolveStoredRecommendationPathwayCatalog,
+} from './pathwayRuleService'
+import {
   pathwayDefinitionRecordSchema,
   type CreatePathwayDefinitionInput,
   type PathwayDefinitionRecord,
@@ -303,8 +307,22 @@ export async function resolveRecommendationPathwayIds() {
 }
 
 export async function resolveRecommendationPathwayCatalog(): Promise<readonly MvpPathwayDefinition[]> {
-  const activeIds = await resolveRecommendationPathwayIds()
-  return activeIds
-    .map(pathwayId => pathwayCatalogById.get(pathwayId))
-    .filter((pathway): pathway is MvpPathwayDefinition => Boolean(pathway))
+  try {
+    const activeIds = await resolveRecommendationPathwayIds()
+    const storedCatalog = await resolveStoredRecommendationPathwayCatalog(activeIds)
+    const storedCatalogById = new Map(
+      storedCatalog.map(pathway => [pathway.pathwayId, pathway] as const),
+    )
+
+    return activeIds
+      .map(pathwayId => storedCatalogById.get(pathwayId) || pathwayCatalogById.get(pathwayId))
+      .filter((pathway): pathway is MvpPathwayDefinition => Boolean(pathway))
+  }
+  catch (error) {
+    if (isMissingRelationError(error) || isMissingPathwayRuleRelationError(error)) {
+      return [...MVP_PATHWAY_CATALOG]
+    }
+
+    throw error
+  }
 }

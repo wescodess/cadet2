@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { adminNavigationLinks } from '@/lib/admin/navigation'
+
 type SourceStatus = 'pending_approval' | 'approved' | 'rejected' | 'paused'
 type SourceType = 'website' | 'youtube_channel'
 type ScheduleFrequency = 'daily' | 'manual' | 'interval'
@@ -589,6 +591,20 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
         Create and approve sources, then trigger Phase 2 ingestion batches and inspect source-run job tracking. Admin actions are proxied through Nuxt routes protected by the Phase 0 allowlist.
       </p>
     </header>
+
+    <nav class="flex flex-wrap gap-2" aria-label="Admin navigation">
+      <NuxtLink
+        v-for="link in adminNavigationLinks"
+        :key="link.href"
+        :to="link.href"
+        class="rounded-full border px-3 py-1.5 text-xs transition"
+        :class="link.href === '/admin/rag-sources'
+          ? 'border-cyan-400/40 bg-cyan-500/10 text-cyan-100'
+          : 'border-slate-700 bg-slate-900/70 text-slate-300 hover:border-slate-500 hover:text-white'"
+      >
+        {{ link.label }}
+      </NuxtLink>
+    </nav>
 
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
       <div class="flex flex-wrap items-center justify-between gap-3">

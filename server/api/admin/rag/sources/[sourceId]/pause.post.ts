@@ -1,13 +1,12 @@
 import { anyApi } from 'convex/server'
 import { requireAdminSession } from '../../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClient } from '../../../../../utils/convex-admin-client'
-
-type PauseBody = {
-  note?: unknown
-}
+import { pauseEvidenceSourceActionSchema } from '../../../../../utils/admin/evidenceSourceSchema'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireAdminSession(event)
+  const { session } = await requireAdminSession(event, {
+    allowBootstrapFromAllowlist: true,
+  })
   const sourceId = getRouterParam(event, 'sourceId')
 
   if (!sourceId) {
@@ -17,7 +16,19 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const body = await readBody<PauseBody>(event)
+  const body = await readBody<unknown>(event)
+  const parsed = pauseEvidenceSourceActionSchema.safeParse(body ?? {})
+
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0]
+    const issuePath = issue?.path.join('.') || 'payload'
+
+    throw createError({
+      statusCode: 400,
+      statusMessage: `Invalid ${issuePath}: ${issue?.message || 'Request body is invalid'}`,
+    })
+  }
+
   const convex = await createConvexAdminClient()
 
   const result = await convex.mutation(
@@ -26,7 +37,7 @@ export default defineEventHandler(async (event) => {
       sourceId,
       actorUserId: session.user.id,
       actorEmail: session.user.email,
-      note: typeof body?.note === 'string' ? body.note : undefined,
+      note: parsed.data.note,
     },
   )
 
