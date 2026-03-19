@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 import PathwayDefinitionTable from '@/components/admin/PathwayDefinitionTable.vue'
 import { Button } from '@/components/ui/button'
+import { adminNavigationLinks } from '@/lib/admin/navigation'
 import type {
   CreatePathwayDefinitionPayload,
   PathwayDefinitionRecord,
@@ -35,12 +36,6 @@ const pending = ref(false)
 const submitting = ref(false)
 const statusUpdatingPathwayId = ref<string | null>(null)
 const feedback = ref<{ tone: 'success' | 'error', message: string } | null>(null)
-
-const adminLinks = [
-  { label: 'Pathway inventory', href: '/admin/pathways' },
-  { label: 'RAG sources', href: '/admin/rag-sources' },
-  { label: 'Phase 0 readiness', href: '/admin/rag-phase0' },
-] as const
 
 const activeCount = computed(() => items.value.filter(item => item.status === 'active').length)
 
@@ -209,7 +204,7 @@ if (import.meta.client) {
 
         <nav class="mt-6 space-y-2" aria-label="Admin navigation">
           <NuxtLink
-            v-for="link in adminLinks"
+            v-for="link in adminNavigationLinks"
             :key="link.href"
             :to="link.href"
             class="flex items-center justify-between rounded-2xl border px-3 py-3 text-sm transition"

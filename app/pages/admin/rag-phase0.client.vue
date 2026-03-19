@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { adminNavigationLinks } from '@/lib/admin/navigation'
+
 type Phase0Response = {
   ok: boolean
   phase: string
@@ -82,6 +84,20 @@ const sectionEntries = computed(() => {
         Verifies environment naming, AI Search / AI Gateway / OpenRouter config presence, and admin allowlist access.
       </p>
     </header>
+
+    <nav class="flex flex-wrap gap-2" aria-label="Admin navigation">
+      <NuxtLink
+        v-for="link in adminNavigationLinks"
+        :key="link.href"
+        :to="link.href"
+        class="rounded-full border px-3 py-1.5 text-xs transition"
+        :class="link.href === '/admin/rag-phase0'
+          ? 'border-amber-400/40 bg-amber-500/10 text-amber-100'
+          : 'border-slate-700 bg-slate-900/70 text-slate-300 hover:border-slate-500 hover:text-white'"
+      >
+        {{ link.label }}
+      </NuxtLink>
+    </nav>
 
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
       <div class="flex flex-wrap items-center justify-between gap-3">

@@ -244,3 +244,40 @@ export const resumeSourceAsNuxtAdmin = internalMutation({
     return { ok: true, status: 'approved' as const }
   },
 })
+
+export const removeSourceAsNuxtAdmin = internalMutation({
+  args: {
+    sourceId: v.id('sources'),
+  },
+  handler: async (ctx, args) => {
+    const source = await ctx.db.get(args.sourceId)
+    if (!source) {
+      throw new Error('Source not found')
+    }
+
+    const auditRows = await ctx.db
+      .query('approval_audit_log')
+      .withIndex('by_sourceId', q => q.eq('sourceId', args.sourceId))
+      .collect()
+
+    for (const auditRow of auditRows) {
+      await ctx.db.delete(auditRow._id)
+    }
+
+    const sourceItems = await ctx.db
+      .query('source_items')
+      .withIndex('by_sourceId', q => q.eq('sourceId', args.sourceId))
+      .collect()
+
+    for (const sourceItem of sourceItems) {
+      await ctx.db.delete(sourceItem._id)
+    }
+
+    await ctx.db.delete(args.sourceId)
+
+    return {
+      ok: true,
+      sourceId: args.sourceId,
+    }
+  },
+})

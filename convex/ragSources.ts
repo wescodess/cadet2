@@ -283,6 +283,9 @@ export const createSourceSubmission = mutation({
   args: {
     type: v.union(v.literal('website'), v.literal('youtube_channel')),
     name: v.string(),
+    description: v.optional(v.string()),
+    trustScore: v.optional(v.number()),
+    linkedPathwayIds: v.optional(v.array(v.string())),
     tenantId: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
     schedule: scheduleValidator,
@@ -332,8 +335,11 @@ export const createSourceSubmission = mutation({
       type,
       status: 'pending_approval',
       name,
+      description: toSafeString(args.description) || undefined,
+      trustScore: Number.isFinite(args.trustScore) ? Math.max(0, Math.min(100, Math.round(args.trustScore!))) : undefined,
       tenantId: toSafeString(args.tenantId) || 'default',
       tags: uniqueStrings(args.tags ?? []),
+      linkedPathwayIds: uniqueStrings(args.linkedPathwayIds ?? []),
       createdByUserId: identity.userId,
       createdByEmail: identity.email,
       lastConfigUpdatedAt: now,
@@ -363,6 +369,10 @@ export const updateSourceConfig = mutation({
   args: {
     sourceId: v.id('sources'),
     name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    trustScore: v.optional(v.number()),
+    tenantId: v.optional(v.string()),
+    linkedPathwayIds: v.optional(v.array(v.string())),
     tags: v.optional(v.array(v.string())),
     schedule: v.optional(scheduleValidator),
     enabled: v.optional(v.boolean()),
@@ -385,6 +395,26 @@ export const updateSourceConfig = mutation({
     if (typeof args.name === 'string') {
       patch.name = toSafeString(args.name)
       diffParts.push('name')
+    }
+
+    if (typeof args.description === 'string') {
+      patch.description = toSafeString(args.description) || undefined
+      diffParts.push('description')
+    }
+
+    if (typeof args.trustScore === 'number' && Number.isFinite(args.trustScore)) {
+      patch.trustScore = Math.max(0, Math.min(100, Math.round(args.trustScore)))
+      diffParts.push('trustScore')
+    }
+
+    if (typeof args.tenantId === 'string') {
+      patch.tenantId = toSafeString(args.tenantId) || source.tenantId
+      diffParts.push('tenantId')
+    }
+
+    if (Array.isArray(args.linkedPathwayIds)) {
+      patch.linkedPathwayIds = uniqueStrings(args.linkedPathwayIds)
+      diffParts.push('linkedPathwayIds')
     }
 
     if (Array.isArray(args.tags)) {
@@ -423,7 +453,7 @@ export const updateSourceConfig = mutation({
       diffSummary: diffParts.join(', ') || 'none',
     })
 
-    return { ok: true }
+    return { ok: true, sourceId: args.sourceId }
   },
 })
 

@@ -5,7 +5,7 @@
 - **Epic:** Epic 5 — Internal Trust Governance and Pathway Operations
 - **FRs Implemented:** FR37, FR38
 - **Previous Story:** [5-1-manage-the-supported-mvp-pathway-inventory.md](file:///Users/wesleyukadike/Desktop/cadet2/_bmad-output/implementation-artifacts/5-1-manage-the-supported-mvp-pathway-inventory.md)
-- **Status:** draft
+- **Status:** done
 
 > As an internal admin or ops user,
 > I want to update pathway logic and manage trusted evidence sources,
@@ -127,32 +127,32 @@ The existing `rag_sources` and related tables in the RAG system should be levera
 
 ### Key Implementation Tasks
 
-- [ ] **Task 1: Database migration** — Create the `pathway_rules` table migration. Seed with rules from the existing hard-coded `MVP_PATHWAY_CATALOG` (3 pathways × their rules), converting function-based predicates to declarative JSON DSL format.
-- [ ] **Task 2: Drizzle schema** — Add the `pathwayRules` table to the Drizzle schema file.
-- [ ] **Task 3: Pathway rules service** — Create `server/utils/pathways/pathwayRuleService.ts` with functions: `listRulesForPathway(pathwayId)`, `createRule(pathwayId, data)`, `updateRule(ruleId, data)`, `deleteRule(ruleId)`, `bulkSaveRules(pathwayId, rules[])`.
-- [ ] **Task 4: Pathway rules Zod schemas** — Create `server/utils/pathways/pathwayRuleSchema.ts` with request/response validation schemas for rule CRUD.
-- [ ] **Task 5: Rules API routes** — Create admin API endpoints:
+- [x] **Task 1: Database migration** — Create the `pathway_rules` table migration. Seed with rules from the existing hard-coded `MVP_PATHWAY_CATALOG` (3 pathways × their rules), converting function-based predicates to declarative JSON DSL format.
+- [x] **Task 2: Drizzle schema** — Add the `pathwayRules` table to the Drizzle schema file.
+- [x] **Task 3: Pathway rules service** — Create `server/utils/pathways/pathwayRuleService.ts` with functions: `listRulesForPathway(pathwayId)`, `createRule(pathwayId, data)`, `updateRule(ruleId, data)`, `deleteRule(ruleId)`, `bulkSaveRules(pathwayId, rules[])`.
+- [x] **Task 4: Pathway rules Zod schemas** — Create `server/utils/pathways/pathwayRuleSchema.ts` with request/response validation schemas for rule CRUD.
+- [x] **Task 5: Rules API routes** — Create admin API endpoints:
   - `GET /api/admin/pathways/[pathwayId]/rules` — List all rules for a pathway
   - `POST /api/admin/pathways/[pathwayId]/rules` — Create a new rule
   - `PATCH /api/admin/pathways/[pathwayId]/rules/[ruleId]` — Update a rule
   - `DELETE /api/admin/pathways/[pathwayId]/rules/[ruleId]` — Delete a rule
   - `PUT /api/admin/pathways/[pathwayId]/rules` — Bulk save/replace all rules for a pathway
-- [ ] **Task 6: Eligibility DSL evaluator** — Create `server/utils/pathways/eligibilityDslEvaluator.ts` that converts declarative rule records into evaluation predicates compatible with the existing `evaluateDirectAndBlockedPathways` contract. Update `resolveRecommendationPathwayCatalog()` in `pathwayDefinitionService.ts` to build `MvpPathwayDefinition[]` from persisted rules.
-- [ ] **Task 7: Pathway Rules Editor page** — Create `app/pages/admin/pathway-rules.client.vue` with the approved Concept C: Accordion Form Editor layout (see Approved Design Package below). Include:
+- [x] **Task 6: Eligibility DSL evaluator** — Create `server/utils/pathways/eligibilityDslEvaluator.ts` that converts declarative rule records into evaluation predicates compatible with the existing `evaluateDirectAndBlockedPathways` contract. Update `resolveRecommendationPathwayCatalog()` in `pathwayDefinitionService.ts` to build `MvpPathwayDefinition[]` from persisted rules.
+- [x] **Task 7: Pathway Rules Editor page** — Create `app/pages/admin/pathway-rules.client.vue` with the approved Concept C: Accordion Form Editor layout (see Approved Design Package below). Include:
   - Accordion per pathway showing identity + rule builder
   - Structured form fields per rule (condition, operator, threshold, field path)
   - Add/remove rule buttons per pathway
   - Per-pathway "Save Changes" with confirmation dialog for active pathways
   - Expand All / Collapse All toggles
-- [ ] **Task 8: Evidence Sources Curation page** — Create `app/pages/admin/evidence-sources.client.vue` with the approved Concept C: Master-Detail Split View layout (see Approved Design Package below). Include:
+- [x] **Task 8: Evidence Sources Curation page** — Create `app/pages/admin/evidence-sources.client.vue` with the approved Concept C: Master-Detail Split View layout (see Approved Design Package below). Include:
   - Left panel: source list with search and filter
   - Right panel: selected source detail with metadata, trust info, linked pathways, actions
   - Add/Pause/Resume/Edit/Refresh/Remove operations
   - Confirmation dialog for pause/remove on active sources
-- [ ] **Task 9: Evidence source API extensions** — Evaluate whether the existing `server/api/admin/rag/sources/` endpoints are sufficient or need extension for trust score, linked pathways, and lifecycle status fields required by the design. Add any missing endpoints or extend existing ones.
-- [ ] **Task 10: Update evaluation pipeline** — Refactor `evaluateDirectAndBlockedPathways.ts` to use the eligibility DSL evaluator instead of the hard-coded catalog. Keep hard-coded catalog as a fallback during bootstrap/transition.
-- [ ] **Task 11: Update admin navigation** — Add "Pathway Rules" and "Evidence Sources" links to the admin sidebar navigation in existing admin pages.
-- [ ] **Task 12: Tests** — Write:
+- [x] **Task 9: Evidence source API extensions** — Evaluate whether the existing `server/api/admin/rag/sources/` endpoints are sufficient or need extension for trust score, linked pathways, and lifecycle status fields required by the design. Add any missing endpoints or extend existing ones.
+- [x] **Task 10: Update evaluation pipeline** — Refactor `evaluateDirectAndBlockedPathways.ts` to use the eligibility DSL evaluator instead of the hard-coded catalog. Keep hard-coded catalog as a fallback during bootstrap/transition.
+- [x] **Task 11: Update admin navigation** — Add "Pathway Rules" and "Evidence Sources" links to the admin sidebar navigation in existing admin pages.
+- [x] **Task 12: Tests** — Write:
   - API tests for rule CRUD endpoints (including auth guard assertions)
   - API tests for evidence source lifecycle operations
   - Eligibility DSL evaluator unit tests (verify parity with existing hard-coded rules)
@@ -294,3 +294,96 @@ Per the approved UX design specification, governance review patterns apply:
 - Mobile uses separate list and detail views with navigation between them (vue-router or component toggle)
 - Status colors: sage/green active, amber paused, red stale — always paired with text labels
 - Consider whether to refactor the existing `rag-sources.client.vue` or create a parallel page — existing page is 41KB and handles RAG-specific concerns that may not fully overlap with this design
+
+## Dev Agent Record
+
+### Stitch Retrieval Log
+
+- Retrieved Stitch project `6257021077077987630` and validated the approved Story 5.2 surfaces before implementation.
+- Pathway Rules desktop reference: `4ca2e696c59648388671a115396d7bf8` and mobile reference: `4fb37b1e5c74418eb47732c8b208c67d`.
+- Evidence Sources desktop reference: `360cadf835f243d1aafec60907b897f7`, mobile list: `ea13bd3801334df9985c68ede76b12b1`, mobile detail: `d1756b0e248c451b92189e6c9a1326b8`.
+- Retrieved `get_screen` and `fetch_screen_code` outputs for the approved desktop/mobile pairings and used them as layout, spacing, and hierarchy references. `fetch_screen_image` failed with an `EROFS` write-path issue, so visual confirmation relied on screen metadata plus fetched code structure.
+
+### UI Implementation Mapping
+
+- `app/pages/admin/pathway-rules.client.vue` maps the approved accordion editor into the existing Trust Operations shell, with one persisted rule editor per pathway, dirty-state indicators, expand/collapse controls, and active-pathway save confirmation.
+- `app/components/admin/PathwayRuleAccordion.vue` and `app/components/admin/PathwayRuleFormRow.vue` translate the Stitch accordion/content rhythm into reusable Vue components backed by the persisted DSL rule contract.
+- `app/pages/admin/evidence-sources.client.vue` implements the approved master-detail split layout: searchable/filterable source list on the left, selected source detail/editor on the right, and mobile back-navigation behavior when detail mode is active.
+- `app/components/admin/EvidenceSourceList.vue` and `app/components/admin/EvidenceSourceDetail.vue` map the approved list/detail surfaces into reusable components with trust-score display, lifecycle badges, linked-pathway chips, and governed actions.
+
+### Implementation Notes
+
+- Added PostgreSQL persistence for pathway rules with deterministic seed data mirroring the prior hard-coded pathway catalog and a runtime fallback if the new table is unavailable.
+- Added a declarative eligibility DSL evaluator and updated recommendation pathway catalog resolution so active recommendation pathways now compile from persisted rules first and fall back to the legacy catalog during bootstrap/transition.
+- Extended Convex/Nuxt evidence-source handling with description, trust score, linked pathway IDs, source detail retrieval, source updates, and source removal while keeping the existing pause/resume and manual ingestion flows intact.
+- Added shared admin navigation, client-side governance types, and Story 5.2 admin pages/components without removing the existing inventory or RAG pages.
+- During live validation against the running app on `:3000`, started the local Convex deployment on `:3210`, fixed evidence-source timestamp normalization for Convex `_creationTime` values, and stabilized the Chromium governance ATDD by serializing the browser suite and asserting rule-row growth instead of an ambiguous repeated text match.
+
+### Completion Notes
+
+- Implemented Story 5.2 end-to-end across persistence, API, evaluation, admin UI, and test assets.
+- `pnpm exec vitest run tests/unit/eligibilityDslEvaluator.spec.ts tests/components/admin/PathwayRuleAccordion.spec.ts tests/components/admin/EvidenceSourceList.spec.ts` passed.
+- `CI=1 BASE_URL=http://127.0.0.1:3000 TEST_ADMIN_EMAIL=codex-admin-story52@example.com pnpm exec playwright test tests/api/admin-pathway-governance.atdd.spec.ts --project=api` passed after local Convex was restored.
+- `CI=1 BASE_URL=http://127.0.0.1:3000 pnpm exec playwright test tests/e2e/admin-governance.atdd.spec.ts --project=chromium` passed against the already running app on `:3000`.
+- `pnpm exec nuxi typecheck` now reports broader repo type issues outside the targeted governance validation path, including pre-existing failures in shared UI, recommendation, and Convex integration files.
+
+### Senior Developer Review (AI)
+
+- 2026-03-19 review findings were addressed by adding the missing per-rule CRUD service methods and admin routes, tightening `pathway_rules` integrity constraints, restricting boolean rule operators at both the schema and UI layers, and restoring shared admin navigation on the remaining legacy admin pages.
+- Expanded automated coverage to include rule CRUD + auth assertions in the governance API ATDD, a dedicated `EvidenceSourceDetail` component spec, and UI-flow assertions for pathway-rule save confirmation and evidence-source pause confirmation.
+- `pnpm exec vitest run tests/unit/eligibilityDslEvaluator.spec.ts tests/components/admin/PathwayRuleAccordion.spec.ts tests/components/admin/EvidenceSourceList.spec.ts tests/components/admin/EvidenceSourceDetail.spec.ts` passed.
+- `CI=1 BASE_URL=http://localhost:3001 pnpm exec playwright test tests/api/admin-pathway-governance.atdd.spec.ts --project=api` passed against a clean local Nuxt process.
+- `CI=1 BASE_URL=http://localhost:3001 pnpm exec playwright test tests/e2e/admin-governance.atdd.spec.ts --project=chromium` passed against the same clean local Nuxt process.
+- The previously running app on `:3000` still returns Better Auth `500` responses for email sign-in/sign-up, but the clean `:3001` process confirms this is a stale local runtime issue rather than a remaining Story 5.2 code defect.
+
+## File List
+
+- `_bmad-output/implementation-artifacts/5-2-update-pathway-rules-and-curate-evidence-sources.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `app/components/admin/EvidenceSourceDetail.vue`
+- `app/components/admin/EvidenceSourceList.vue`
+- `app/components/admin/PathwayRuleAccordion.vue`
+- `app/components/admin/PathwayRuleFormRow.vue`
+- `app/lib/admin/evidenceSources.ts`
+- `app/lib/admin/navigation.ts`
+- `app/lib/admin/pathwayRules.ts`
+- `app/pages/admin/evidence-sources.client.vue`
+- `app/pages/admin/pathway-rules.client.vue`
+- `app/pages/admin/pathways.client.vue`
+- `app/pages/admin/rag-phase0.client.vue`
+- `app/pages/admin/rag-sources.client.vue`
+- `convex/ragSources.ts`
+- `convex/ragSourcesInternal.ts`
+- `convex/schema.ts`
+- `server/api/admin/pathways/[pathwayId]/rules.get.ts`
+- `server/api/admin/pathways/[pathwayId]/rules.post.ts`
+- `server/api/admin/pathways/[pathwayId]/rules.put.ts`
+- `server/api/admin/pathways/[pathwayId]/rules/[ruleId].delete.ts`
+- `server/api/admin/pathways/[pathwayId]/rules/[ruleId].patch.ts`
+- `server/api/admin/rag/sources/[sourceId].delete.ts`
+- `server/api/admin/rag/sources/[sourceId].get.ts`
+- `server/api/admin/rag/sources/[sourceId].patch.ts`
+- `server/api/admin/rag/sources/[sourceId]/approve.post.ts`
+- `server/api/admin/rag/sources/[sourceId]/pause.post.ts`
+- `server/api/admin/rag/sources/[sourceId]/reject.post.ts`
+- `server/api/admin/rag/sources/[sourceId]/resume.post.ts`
+- `server/api/admin/rag/sources/index.get.ts`
+- `server/api/admin/rag/sources/index.post.ts`
+- `server/db/migrations/postgresql/0005_pathway_rules.sql`
+- `server/db/schema/pathwayRules.ts`
+- `server/utils/admin/evidenceSourceSchema.ts`
+- `server/utils/pathways/eligibilityDslEvaluator.ts`
+- `server/utils/pathways/pathwayDefinitionService.ts`
+- `server/utils/pathways/pathwayRuleSchema.ts`
+- `server/utils/pathways/pathwayRuleService.ts`
+- `tests/api/admin-pathway-governance.atdd.spec.ts`
+- `tests/components/admin/EvidenceSourceDetail.spec.ts`
+- `tests/components/admin/EvidenceSourceList.spec.ts`
+- `tests/components/admin/PathwayRuleAccordion.spec.ts`
+- `tests/e2e/admin-governance.atdd.spec.ts`
+- `tests/unit/eligibilityDslEvaluator.spec.ts`
+
+## Change Log
+
+- 2026-03-19: Implemented Story 5.2 pathway-rule persistence, eligibility DSL evaluation, curated evidence-source admin surfaces, and initial automated coverage.
+- 2026-03-19: Addressed code review findings by adding per-rule CRUD, integrity constraints, stricter rule/action validation, legacy admin navigation links, and missing automated coverage; verified on a clean local Nuxt process with passing Vitest and Playwright governance suites.
