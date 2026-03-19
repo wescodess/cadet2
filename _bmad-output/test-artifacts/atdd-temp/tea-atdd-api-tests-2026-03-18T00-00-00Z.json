@@ -1,0 +1,37 @@
+{
+  "success": true,
+  "subagent": "atdd-api-tests",
+  "tests": [
+    {
+      "file": "tests/api/admin-pathway-management.atdd.spec.ts",
+      "description": "ATDD API red-phase tests for Story 5.1 admin pathway inventory contracts",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "AC1 admin-only access to the pathway management interface",
+        "AC2 controlled pathway status changes",
+        "AC3 minimum pathway fields only",
+        "AC4 unsupported pathways excluded from recommendations"
+      ],
+      "priority_coverage": {
+        "P0": 5,
+        "P1": 0,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": [
+    "allowlistedAdminSessionBootstrap",
+    "pathwayDefinitionFactory"
+  ],
+  "knowledge_fragments_used": [
+    "api-request",
+    "data-factories",
+    "test-quality",
+    "auth-session",
+    "recurse"
+  ],
+  "test_count": 5,
+  "tdd_phase": "RED",
+  "summary": "Generated 5 RED-phase API tests for Story 5.1 admin pathway inventory and recommendation filtering"
+}

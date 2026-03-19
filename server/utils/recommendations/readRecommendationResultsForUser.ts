@@ -13,7 +13,6 @@ import {
 } from './buildRecommendationNextStepPlan'
 import { classifyTrustBoundary, type RecommendationTrustBoundary } from './classifyTrustBoundary'
 import { createConvexAdminClient } from '../convex-admin-client'
-import { MVP_PATHWAY_IDS } from '../pathways/mvpPathwayCatalog'
 
 type RecommendationResultTier = 'strong-fit' | 'conditional-fit' | 'lower-confidence'
 type RecommendationQualification = 'supported' | 'low-confidence' | 'withheld'
@@ -181,8 +180,6 @@ export type RecommendationResultsLookup =
       record: RecommendationResultsRecord
     }
 
-const supportedPathwayIds = new Set<string>(MVP_PATHWAY_IDS)
-
 function sortByRank<T extends { rank: number }>(candidates: T[]) {
   return [...candidates].sort((left, right) => left.rank - right.rank)
 }
@@ -305,7 +302,6 @@ function normalizeRecommendationResultsRecord(
   }
 
   const direct = sortByRank(record.results.direct)
-    .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
     .map((candidate) => {
       const blockers = normalizeBlockers(candidate.blockers)
       const tradeoffs = normalizeTradeoffs(candidate.tradeoffs)
@@ -351,7 +347,6 @@ function normalizeRecommendationResultsRecord(
     })
 
   const blocked = sortByRank(record.results.blocked)
-    .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
     .map((candidate) => {
       const blockers = normalizeBlockers(candidate.blockers)
       const tradeoffs = normalizeTradeoffs(candidate.tradeoffs)
@@ -397,7 +392,6 @@ function normalizeRecommendationResultsRecord(
     })
 
   const composed = sortByRank(record.results.composed)
-    .filter(candidate => supportedPathwayIds.has(candidate.pathwayId))
     .map((candidate) => {
       const blockers = normalizeBlockers(candidate.blockers)
       const tradeoffs = normalizeTradeoffs(candidate.tradeoffs)

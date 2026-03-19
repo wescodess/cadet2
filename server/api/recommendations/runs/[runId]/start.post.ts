@@ -1,14 +1,22 @@
 import { anyApi } from 'convex/server'
+import { sql } from 'drizzle-orm'
 import { getRouterParam } from 'h3'
 
 import { requireWorkspaceUserSession } from '../../../../utils/auth/requireUserSession'
-import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
+import { createConvexUserHttpClientForEvent } from '../../../../utils/convex-admin-client'
+import { normalizeStoredIntakeDraft } from '../../../../utils/intake/normalizeIntakePayload'
+import { evaluateDirectAndBlockedPathways } from '../../../../utils/pathways/evaluateDirectAndBlockedPathways'
+import { resolveRecommendationPathwayCatalog } from '../../../../utils/pathways/pathwayDefinitionService'
 import {
   isCanonicalRecommendationStatus,
   normalizeStatusResponse,
   recommendationStartPayloadSchema,
 } from '../../../../utils/recommendations/lifecycle'
 import { assertRecommendationTestModeEnabled } from '../../../../utils/recommendations/testMode'
+import {
+  readFallbackRecommendationRun,
+  writeFallbackRecommendationRunEvaluation,
+} from '../../../../utils/recommendations/testRecommendationRunFallback'
 import { evaluatePathwayEligibilityForRun } from '../../../../utils/recommendations/evaluatePathwayEligibility'
 import { generateRankedRecommendationsForRun } from '../../../../utils/recommendations/generateRankedRecommendations'
 
@@ -25,6 +33,10 @@ type RecommendationLifecycleRecord = {
   processingHeartbeatAt?: number | string
   createdAt: number | string | Date
   updatedAt: number | string | Date
+}
+
+type ProfileSnapshotRow = {
+  submittedPayload: unknown
 }
 
 function isTerminalRecommendationStatus(status: RecommendationLifecycleRecord['status']) {
@@ -106,14 +118,86 @@ export default defineEventHandler(async (event) => {
     assertRecommendationTestModeEnabled()
   }
 
-  const convex = await createConvexAdminClient()
-  const existingRun = await convex.query(
-    (anyApi as any).recommendationRuns.readStatusForUser,
-    {
-      runId,
+  let convex: Awaited<ReturnType<typeof createConvexUserHttpClientForEvent>> | null = null
+
+  try {
+    convex = await createConvexUserHttpClientForEvent(event)
+  }
+  catch {
+    convex = null
+  }
+
+  let existingRun: RecommendationLifecycleRecord | null = null
+
+  if (convex) {
+    try {
+      existingRun = await convex.query(
+        (anyApi as any).recommendationRuns.readStatusForUser,
+        {
+          runId,
+          userId,
+        },
+      ) as RecommendationLifecycleRecord | null
+    }
+    catch {
+      convex = null
+    }
+  }
+
+  if (!convex) {
+    const fallbackRun = readFallbackRecommendationRun({
       userId,
-    },
-  ) as RecommendationLifecycleRecord | null
+      runId,
+    })
+
+    if (!fallbackRun) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Recommendation run not found',
+      })
+    }
+
+    const result = await db.execute(sql`
+      SELECT "submittedPayload"
+      FROM "recommendation_profiles"
+      WHERE "snapshotId" = ${fallbackRun.profileSnapshotId}
+        AND "userId" = ${userId}
+      LIMIT 1;
+    `)
+    const row = ((result as { rows?: ProfileSnapshotRow[] }).rows || [])[0]
+
+    if (!row) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Recommendation profile snapshot not found',
+      })
+    }
+
+    const pathwayEvaluation = evaluateDirectAndBlockedPathways({
+      profileSnapshot: normalizeStoredIntakeDraft(row.submittedPayload as {
+        currentSection?: unknown
+        sectionProgress?: unknown
+        fieldValues?: unknown
+      }),
+      mode: requestedMode,
+      pathwayCatalog: await resolveRecommendationPathwayCatalog(),
+    })
+    const updatedRun = writeFallbackRecommendationRunEvaluation({
+      userId,
+      runId,
+      direct: pathwayEvaluation.direct,
+      blocked: pathwayEvaluation.blocked,
+    })
+
+    if (!updatedRun) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Recommendation run not found',
+      })
+    }
+
+    return normalizeStatusResponse(updatedRun)
+  }
 
   if (!existingRun) {
     throw createError({

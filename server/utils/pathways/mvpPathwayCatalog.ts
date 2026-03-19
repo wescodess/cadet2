@@ -27,6 +27,30 @@ export type MvpPathwayDefinition = {
   rules: readonly MvpPathwayRule[]
 }
 
+export type MvpPathwayInventorySeed = {
+  pathwayId: MvpPathwayId
+  displayName: string
+  description: string
+}
+
+export const MVP_PATHWAY_INVENTORY_SEEDS: readonly MvpPathwayInventorySeed[] = [
+  {
+    pathwayId: 'mvp-skilled-worker',
+    displayName: 'Skilled Worker pathway',
+    description: 'Core skilled worker pathway supported in the MVP recommendation catalog.',
+  },
+  {
+    pathwayId: 'mvp-provincial-nominee',
+    displayName: 'Provincial Nominee pathway',
+    description: 'Province-linked route that requires offer and relocation flexibility.',
+  },
+  {
+    pathwayId: 'mvp-study-to-work',
+    displayName: 'Study-to-Work pathway',
+    description: 'Longer-horizon study route available for candidates open to retraining.',
+  },
+] as const
+
 export const MVP_PATHWAY_CATALOG: readonly MvpPathwayDefinition[] = [
   {
     pathwayId: 'mvp-skilled-worker',

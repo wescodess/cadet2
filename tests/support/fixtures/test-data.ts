@@ -145,6 +145,35 @@ export const RECOMMENDATION_PATHWAY_UNSUPPORTED_IDS = [
   'mvp-humanitarian-stream',
 ] as const
 
+export const PATHWAY_INVENTORY_STATUS_VALUES = [
+  'active',
+  'inactive',
+  'draft',
+] as const
+
+export const PATHWAY_INVENTORY_MINIMUM_FIELD_KEYS = [
+  'pathwayId',
+  'displayName',
+  'description',
+  'status',
+  'createdAt',
+  'updatedAt',
+] as const
+
+export const PATHWAY_INVENTORY_ATDD_TEST_IDS = {
+  page: 'admin-pathway-page',
+  table: 'admin-pathway-table',
+  row: 'admin-pathway-row',
+  search: 'admin-pathway-search',
+  statusFilter: 'admin-pathway-filter',
+  addButton: 'admin-pathway-add-button',
+  statusBadge: 'admin-pathway-status-badge',
+  actionsTrigger: 'admin-pathway-row-actions',
+  confirmDialog: 'admin-pathway-status-confirmation',
+  mobileCard: 'admin-pathway-card',
+  emptyState: 'admin-pathway-empty-state',
+} as const
+
 export const RECOMMENDATION_RESULT_TYPES = [
   'direct',
   'blocked',
