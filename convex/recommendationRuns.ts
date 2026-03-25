@@ -944,10 +944,10 @@ export const listForUser = query({
     return rows.map(row => ({
       recommendationCount: row.recommendationResults?.rankedAt
         ? (
-            (row.recommendationResults?.direct?.length || 0)
-            + (row.recommendationResults?.blocked?.length || 0)
-            + (row.recommendationResults?.composed?.length || 0)
-          )
+          (row.recommendationResults?.direct?.length || 0)
+          + (row.recommendationResults?.blocked?.length || 0)
+          + (row.recommendationResults?.composed?.length || 0)
+        )
         : 0,
       hasRankedPayload: Boolean(row.recommendationResults?.rankedAt),
       runId: row.runId,
@@ -1364,5 +1364,90 @@ export const listRunsForUserTesting = query({
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }))
+  },
+})
+
+/**
+ * ADMIN-ONLY — Security boundary: This query MUST only be invoked from
+ * server-mediated Nitro endpoints that enforce `requireAdminSession`.
+ * It returns cross-user data (userId, profileSnapshotId, full results)
+ * and has NO Convex-level authorization. Direct browser access to this
+ * query would expose all user recommendation data.
+ */
+export const listForAdmin = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const rows = await ctx.db.query('recommendation_runs').collect()
+    const limit = typeof args.limit === 'number' && Number.isFinite(args.limit)
+      ? Math.max(1, Math.round(args.limit))
+      : null
+
+    rows.sort((left, right) => {
+      if (left.createdAt !== right.createdAt) {
+        return right.createdAt - left.createdAt
+      }
+
+      return right.updatedAt - left.updatedAt
+    })
+
+    return rows
+      .slice(0, limit ?? rows.length)
+      .map(row => ({
+        runId: row.runId,
+        userId: row.userId,
+        profileSnapshotId: row.profileSnapshotId,
+        refreshedFromRunId: row.refreshedFromRunId,
+        previousProfileSnapshotId: row.previousProfileSnapshotId,
+        refreshRootRunId: row.refreshRootRunId,
+        refreshSequence: row.refreshSequence,
+        status: row.status,
+        statusMessage: row.statusMessage || buildDefaultStatusMessage(row.status),
+        resumable: typeof row.resumable === 'boolean' ? row.resumable : inProgressStatuses.has(row.status),
+        processingHeartbeatAt: row.processingHeartbeatAt,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        pathwayEvaluation: row.pathwayEvaluation,
+        recommendationResults: row.recommendationResults,
+      }))
+  },
+})
+
+/**
+ * ADMIN-ONLY — Security boundary: This query MUST only be invoked from
+ * server-mediated Nitro endpoints that enforce `requireAdminSession`.
+ * See listForAdmin for full rationale.
+ */
+export const readRankedRecommendationsForAdmin = query({
+  args: {
+    runId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const row = await ctx.db
+      .query('recommendation_runs')
+      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .first()
+
+    if (!row) {
+      return null
+    }
+
+    return {
+      runId: row.runId,
+      userId: row.userId,
+      profileSnapshotId: row.profileSnapshotId,
+      status: row.status,
+      statusMessage: row.statusMessage || buildDefaultStatusMessage(row.status),
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      rankedAt: row.recommendationResults?.rankedAt ?? null,
+      noComposedReason: row.recommendationResults?.noComposedReason ?? '',
+      results: {
+        direct: row.recommendationResults?.direct || [],
+        blocked: row.recommendationResults?.blocked || [],
+        composed: row.recommendationResults?.composed || [],
+      },
+    }
   },
 })

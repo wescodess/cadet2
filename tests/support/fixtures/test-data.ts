@@ -256,6 +256,59 @@ export const RECOMMENDATION_CITATIONS_ATDD_TEST_IDS = {
   caveatWarning: 'caveat-warning',
 } as const
 
+export const RECOMMENDATION_REVIEW_STATES = [
+  'pending',
+  'flagged',
+  'resolved',
+  'dismissed',
+] as const
+
+export const RECOMMENDATION_REVIEW_TRUST_SCORES = [
+  'high',
+  'medium',
+  'low',
+] as const
+
+export const RECOMMENDATION_REVIEW_FRESHNESS_LABELS = [
+  'current',
+  'stale',
+  'expired',
+] as const
+
+export const RECOMMENDATION_REVIEW_SUPPORT_STRENGTHS = [
+  'strong',
+  'adequate',
+  'weak',
+  'unsupported',
+] as const
+
+export const RECOMMENDATION_REVIEW_FILTER_LABELS = [
+  'All Citations',
+  'Weak Support',
+  'Stale Sources',
+  'Missing References',
+] as const
+
+export const RECOMMENDATION_REVIEW_ATDD_TEST_IDS = {
+  page: 'admin-recommendation-review-page',
+  panel: 'admin-recommendation-review-panel',
+  runList: 'admin-recommendation-review-run-list',
+  runItem: 'admin-recommendation-review-run-item',
+  runStatusBadge: 'admin-recommendation-review-run-status',
+  trustScore: 'admin-recommendation-review-trust-score',
+  reviewStateBadge: 'admin-recommendation-review-state',
+  citationFilters: 'admin-recommendation-review-filters',
+  citationCard: 'admin-recommendation-review-citation-card',
+  citationFlagButton: 'admin-recommendation-review-flag-citation',
+  runFlagButton: 'admin-recommendation-review-flag-run',
+  pauseSourceButton: 'admin-recommendation-review-pause-source',
+  confirmationDialog: 'admin-recommendation-review-confirmation',
+  mobileTabs: 'admin-recommendation-review-mobile-tabs',
+  mobileRunTab: 'admin-recommendation-review-mobile-runs',
+  mobileCitationTab: 'admin-recommendation-review-mobile-citations',
+  mobileActionBar: 'admin-recommendation-review-mobile-actions',
+} as const
+
 export const RECOMMENDATION_NEXT_STEP_PLAN_ATDD_TEST_IDS = {
   plan: 'recommendation-next-step-plan',
   item: 'recommendation-next-step-item',

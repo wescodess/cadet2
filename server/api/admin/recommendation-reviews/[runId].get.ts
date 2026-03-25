@@ -1,0 +1,29 @@
+import { getRouterParam } from 'h3'
+
+import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
+import { getRecommendationReviewDetail } from '../../../utils/recommendations/recommendationReviewService'
+
+export default defineEventHandler(async (event) => {
+  await requireAdminSession(event, {
+    allowBootstrapFromAllowlist: true,
+  })
+  const runId = getRouterParam(event, 'runId')?.trim() || ''
+
+  if (!runId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'runId is required',
+    })
+  }
+
+  const detail = await getRecommendationReviewDetail(event, runId)
+
+  if (!detail) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Recommendation review run not found',
+    })
+  }
+
+  return detail
+})
