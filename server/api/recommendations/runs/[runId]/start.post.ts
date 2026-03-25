@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm'
 import { getRouterParam } from 'h3'
 
 import { requireWorkspaceUserSession } from '../../../../utils/auth/requireUserSession'
-import { createConvexUserHttpClientForEvent } from '../../../../utils/convex-admin-client'
+import { createConvexAdminClient } from '../../../../utils/convex-admin-client'
 import { normalizeStoredIntakeDraft } from '../../../../utils/intake/normalizeIntakePayload'
 import { evaluateDirectAndBlockedPathways } from '../../../../utils/pathways/evaluateDirectAndBlockedPathways'
 import { resolveRecommendationPathwayCatalog } from '../../../../utils/pathways/pathwayDefinitionService'
@@ -118,10 +118,10 @@ export default defineEventHandler(async (event) => {
     assertRecommendationTestModeEnabled()
   }
 
-  let convex: Awaited<ReturnType<typeof createConvexUserHttpClientForEvent>> | null = null
+  let convex: Awaited<ReturnType<typeof createConvexAdminClient>> | null = null
 
   try {
-    convex = await createConvexUserHttpClientForEvent(event)
+    convex = await createConvexAdminClient()
   }
   catch {
     convex = null
@@ -144,19 +144,14 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if (!convex) {
-    const fallbackRun = readFallbackRecommendationRun({
-      userId,
-      runId,
-    })
-
-    if (!fallbackRun) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Recommendation run not found',
+  const fallbackRun = !existingRun
+    ? readFallbackRecommendationRun({
+        userId,
+        runId,
       })
-    }
+    : null
 
+  if (!existingRun && fallbackRun) {
     const result = await db.execute(sql`
       SELECT "submittedPayload"
       FROM "recommendation_profiles"
@@ -182,11 +177,29 @@ export default defineEventHandler(async (event) => {
       mode: requestedMode,
       pathwayCatalog: await resolveRecommendationPathwayCatalog(),
     })
+    const fallbackStatus = (() => {
+      switch (requestedMode) {
+        case 'recoverable-delay':
+          return fallbackRun.status === 'evaluating' ? 'evaluating' : 'queued'
+        case 'mock-completed':
+        case 'standard':
+          return 'completed'
+        case 'mock-degraded':
+          return 'degraded'
+        case 'mock-failed':
+          return 'failed'
+      }
+    })()
     const updatedRun = writeFallbackRecommendationRunEvaluation({
       userId,
       runId,
       direct: pathwayEvaluation.direct,
       blocked: pathwayEvaluation.blocked,
+      status: fallbackStatus,
+      statusMessage: requestedMode === 'recoverable-delay'
+        ? 'Processing is active and resumable while internal services catch up.'
+        : undefined,
+      resumable: requestedMode === 'recoverable-delay',
     })
 
     if (!updatedRun) {

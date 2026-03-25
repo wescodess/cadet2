@@ -94,11 +94,24 @@ export function readFallbackRecommendationRun(input: {
   return getFallbackStore().get(toKey(input.userId, input.runId)) || null
 }
 
+export function listFallbackRecommendationRuns() {
+  return Array.from(getFallbackStore().values()).sort((left, right) => {
+    if (left.createdAt !== right.createdAt) {
+      return right.createdAt - left.createdAt
+    }
+
+    return right.updatedAt - left.updatedAt
+  })
+}
+
 export function writeFallbackRecommendationRunEvaluation(input: {
   userId: string
   runId: string
   direct: DirectPathwayOutcome[]
   blocked: BlockedPathwayOutcome[]
+  status?: RecommendationLifecycleStatus
+  statusMessage?: string
+  resumable?: boolean
 }) {
   const existing = readFallbackRecommendationRun({
     userId: input.userId,
@@ -110,11 +123,14 @@ export function writeFallbackRecommendationRunEvaluation(input: {
   }
 
   const now = Date.now()
+  const status = input.status || 'completed'
   const updated: FallbackRecommendationRunRecord = {
     ...existing,
-    status: 'completed',
-    statusMessage: getDefaultStatusMessage('completed'),
-    resumable: false,
+    status,
+    statusMessage: input.statusMessage?.trim() || getDefaultStatusMessage(status),
+    resumable: typeof input.resumable === 'boolean'
+      ? input.resumable
+      : status === 'queued' || status === 'evaluating',
     processingHeartbeatAt: now,
     updatedAt: now,
     pathwayEvaluation: {
