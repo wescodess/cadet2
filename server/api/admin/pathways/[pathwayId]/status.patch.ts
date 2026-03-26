@@ -1,11 +1,15 @@
 import { getRouterParam } from 'h3'
 
+import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import { updatePathwayStatus } from '../../../../utils/pathways/pathwayDefinitionService'
+import {
+  getPathwayDefinition,
+  updatePathwayStatus,
+} from '../../../../utils/pathways/pathwayDefinitionService'
 import { updatePathwayStatusSchema } from '../../../../utils/pathways/pathwayDefinitionSchema'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
+  const adminSession = await requireAdminSession(event, {
     allowBootstrapFromAllowlist: true,
   })
 
@@ -31,6 +35,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const before = await getPathwayDefinition(pathwayId)
   const updated = await updatePathwayStatus(pathwayId, parsed.data.status)
 
   if (!updated) {
@@ -39,6 +44,18 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Pathway definition not found',
     })
   }
+
+  await recordGovernanceAction(event, {
+    actionType: 'PATHWAY_STATUS_CHANGED',
+    entityType: 'PATHWAY',
+    entityId: updated.pathwayId,
+    entityLabel: updated.displayName,
+    changeContext: {
+      before,
+      after: updated,
+    },
+    reason: `Status changed to ${updated.status}`,
+  }, adminSession)
 
   return updated
 })

@@ -1,14 +1,16 @@
 import { getRouterParam } from 'h3'
 
+import { recordGovernanceAction } from '../../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../../utils/auth/requireAdminSession'
 import {
   PathwayRuleConflictError,
+  listPathwayRules,
   updateRule,
 } from '../../../../../utils/pathways/pathwayRuleService'
 import { pathwayRuleInputSchema } from '../../../../../utils/pathways/pathwayRuleSchema'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
+  const adminSession = await requireAdminSession(event, {
     allowBootstrapFromAllowlist: true,
   })
 
@@ -50,6 +52,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const before = (await listPathwayRules(pathwayId)).find(item => item.id === ruleId) || null
     const item = await updateRule(ruleId, parsed.data, pathwayId)
 
     if (!item) {
@@ -58,6 +61,17 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Pathway rule not found',
       })
     }
+
+    await recordGovernanceAction(event, {
+      actionType: 'PATHWAY_RULE_UPDATED',
+      entityType: 'PATHWAY_RULE',
+      entityId: item.id,
+      entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+      changeContext: {
+        before,
+        after: item,
+      },
+    }, adminSession)
 
     return {
       ok: true,

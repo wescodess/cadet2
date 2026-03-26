@@ -98,6 +98,11 @@ const recommendationImprovementActionValidator = v.object({
   expectedImpact: v.string(),
 })
 
+const auditChangeContextValidator = v.object({
+  before: v.union(v.null(), v.any()),
+  after: v.union(v.null(), v.any()),
+})
+
 const rankedDirectRecommendationValidator = v.object({
   pathwayId: v.string(),
   type: v.literal('direct'),
@@ -190,6 +195,48 @@ export default defineSchema({
     .index('by_runId', ['runId'])
     .index('by_userId', ['userId'])
     .index('by_userId_createdAt', ['userId', 'createdAt']),
+
+  auditLog: defineTable({
+    actorId: v.string(),
+    actorEmail: v.optional(v.string()),
+    actorRole: v.optional(v.string()),
+    actionType: v.union(
+      v.literal('PATHWAY_CREATED'),
+      v.literal('PATHWAY_UPDATED'),
+      v.literal('PATHWAY_STATUS_CHANGED'),
+      v.literal('PATHWAY_RULE_CREATED'),
+      v.literal('PATHWAY_RULE_UPDATED'),
+      v.literal('PATHWAY_RULE_DELETED'),
+      v.literal('EVIDENCE_SOURCE_CREATED'),
+      v.literal('EVIDENCE_SOURCE_UPDATED'),
+      v.literal('EVIDENCE_SOURCE_PAUSED'),
+      v.literal('EVIDENCE_SOURCE_RESUMED'),
+      v.literal('EVIDENCE_SOURCE_APPROVED'),
+      v.literal('EVIDENCE_SOURCE_REJECTED'),
+      v.literal('EVIDENCE_SOURCE_DELETED'),
+      v.literal('RECOMMENDATION_FLAGGED'),
+      v.literal('RECOMMENDATION_DISMISSED'),
+      v.literal('RECOMMENDATION_RESOLVED'),
+      v.literal('GOVERNANCE_SETTING_CHANGED'),
+    ),
+    entityType: v.union(
+      v.literal('PATHWAY'),
+      v.literal('PATHWAY_RULE'),
+      v.literal('EVIDENCE_SOURCE'),
+      v.literal('RECOMMENDATION_RUN'),
+      v.literal('GOVERNANCE_SETTING'),
+    ),
+    entityId: v.string(),
+    entityLabel: v.string(),
+    changeContext: auditChangeContextValidator,
+    reason: v.optional(v.string()),
+    timestamp: v.number(),
+  })
+    .index('by_timestamp', ['timestamp'])
+    .index('by_actionType', ['actionType'])
+    .index('by_entityType', ['entityType'])
+    .index('by_actorId', ['actorId'])
+    .index('by_entityId', ['entityId']),
 
   rag_admins: defineTable({
     userId: v.string(),

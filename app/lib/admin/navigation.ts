@@ -5,4 +5,5 @@ export const adminNavigationLinks = [
   { label: 'Recommendation reviews', href: '/admin/recommendation-reviews' },
   { label: 'RAG sources', href: '/admin/rag-sources' },
   { label: 'Phase 0 readiness', href: '/admin/rag-phase0' },
+  { label: 'Audit trail', href: '/admin/audit-trail' },
 ] as const

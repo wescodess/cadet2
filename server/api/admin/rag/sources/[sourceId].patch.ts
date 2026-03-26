@@ -1,5 +1,6 @@
 import { anyApi } from 'convex/server'
 
+import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
 import {
@@ -10,9 +11,10 @@ import {
 } from '../../../../utils/admin/evidenceSourceSchema'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireAdminSession(event, {
+  const adminSession = await requireAdminSession(event, {
     allowBootstrapFromAllowlist: true,
   })
+  const { session } = adminSession
   const sourceId = getRouterParam(event, 'sourceId')
 
   if (!sourceId) {
@@ -41,6 +43,13 @@ export default defineEventHandler(async (event) => {
     name: session.user.name,
   })
 
+  const beforeDetail = await convex.query(
+    (anyApi as any).ragSources.getSource,
+    { sourceId },
+  ) as {
+    source: Record<string, unknown> | null
+  } | null
+
   await convex.mutation(
     (anyApi as any).ragSources.updateSourceConfig,
     {
@@ -64,6 +73,17 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Source not found after update',
     })
   }
+
+  await recordGovernanceAction(event, {
+    actionType: 'EVIDENCE_SOURCE_UPDATED',
+    entityType: 'EVIDENCE_SOURCE',
+    entityId: sourceId,
+    entityLabel: String((detail.source as { name?: unknown }).name || sourceId),
+    changeContext: {
+      before: beforeDetail?.source || null,
+      after: detail.source,
+    },
+  }, adminSession)
 
   return evidenceSourceDetailSchema.parse({
     currentUserIsAdmin: detail.currentUserIsAdmin,

@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "subagent": "atdd-e2e-tests",
+  "tests": [
+    {
+      "file": "tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+      "description": "ATDD E2E tests for Story 5.4 admin audit trail journey (RED PHASE)",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "End users cannot access the admin audit trail surface",
+        "Authorized admins can inspect the audit panel root and summary shell",
+        "Audit filters and change diffs remain reviewable in the governed workflow",
+        "Mobile audit inspection preserves events and details continuity"
+      ],
+      "priority_coverage": {
+        "P0": 3,
+        "P1": 2,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": [
+    "admin-access-mock",
+    "audit-trail-ui-mock"
+  ],
+  "knowledge_fragments_used": [
+    "selector-resilience",
+    "timing-debugging",
+    "intercept-network-call",
+    "fixtures-composition"
+  ],
+  "test_count": 5,
+  "tdd_phase": "RED",
+  "summary": "Generated 5 skipped E2E red-phase tests for Story 5.4 audit trail UI and access boundaries"
+}

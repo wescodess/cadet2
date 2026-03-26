@@ -1,15 +1,20 @@
 import { getRouterParam } from 'h3'
 
+import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import {
   recommendationReviewActionInputSchema,
 } from '../../../../utils/recommendations/recommendationReviewSchema'
-import { setRecommendationRunReviewState } from '../../../../utils/recommendations/recommendationReviewStateService'
+import {
+  loadRecommendationRunReviewStateMap,
+  setRecommendationRunReviewState,
+} from '../../../../utils/recommendations/recommendationReviewStateService'
 
 export default defineEventHandler(async (event) => {
-  const { session, userId } = await requireAdminSession(event, {
+  const adminSession = await requireAdminSession(event, {
     allowBootstrapFromAllowlist: true,
   })
+  const { session, userId } = adminSession
   const runId = getRouterParam(event, 'runId')?.trim() || ''
 
   if (!runId) {
@@ -30,6 +35,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const before = (await loadRecommendationRunReviewStateMap([runId])).get(runId) || null
   const review = await setRecommendationRunReviewState({
     runId,
     reviewState: 'dismissed',
@@ -39,6 +45,24 @@ export default defineEventHandler(async (event) => {
       email: session.user.email,
     },
   })
+
+  await recordGovernanceAction(event, {
+    actionType: 'RECOMMENDATION_DISMISSED',
+    entityType: 'RECOMMENDATION_RUN',
+    entityId: runId,
+    entityLabel: `Recommendation run ${runId}`,
+    changeContext: {
+      before,
+      after: review ? {
+        reviewState: review.reviewState,
+        reason: review.reason,
+        actorUserId: review.actorUserId,
+        actorEmail: review.actorEmail,
+        updatedAt: review.updatedAt,
+      } : null,
+    },
+    reason: parsed.data.reason,
+  }, adminSession)
 
   return {
     ok: true,
