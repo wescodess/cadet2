@@ -1,4 +1,5 @@
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
+import { recordGovernanceAction } from '../../../utils/audit/recordGovernanceAction'
 import {
   PathwayDefinitionConflictError,
   createPathwayDefinition,
@@ -6,7 +7,7 @@ import {
 import { createPathwayDefinitionSchema } from '../../../utils/pathways/pathwayDefinitionSchema'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
+  const adminSession = await requireAdminSession(event, {
     allowBootstrapFromAllowlist: true,
   })
 
@@ -32,6 +33,17 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Unable to create pathway definition',
       })
     }
+
+    await recordGovernanceAction(event, {
+      actionType: 'PATHWAY_CREATED',
+      entityType: 'PATHWAY',
+      entityId: created.pathwayId,
+      entityLabel: created.displayName,
+      changeContext: {
+        before: null,
+        after: created,
+      },
+    }, adminSession)
 
     setResponseStatus(event, 201)
     return created

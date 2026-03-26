@@ -309,6 +309,56 @@ export const RECOMMENDATION_REVIEW_ATDD_TEST_IDS = {
   mobileActionBar: 'admin-recommendation-review-mobile-actions',
 } as const
 
+export const AUDIT_TRAIL_ACTION_TYPES = [
+  'PATHWAY_CREATED',
+  'PATHWAY_UPDATED',
+  'PATHWAY_STATUS_CHANGED',
+  'PATHWAY_RULE_CREATED',
+  'PATHWAY_RULE_UPDATED',
+  'PATHWAY_RULE_DELETED',
+  'EVIDENCE_SOURCE_CREATED',
+  'EVIDENCE_SOURCE_UPDATED',
+  'EVIDENCE_SOURCE_PAUSED',
+  'EVIDENCE_SOURCE_RESUMED',
+  'EVIDENCE_SOURCE_APPROVED',
+  'EVIDENCE_SOURCE_REJECTED',
+  'EVIDENCE_SOURCE_DELETED',
+  'RECOMMENDATION_FLAGGED',
+  'RECOMMENDATION_DISMISSED',
+  'RECOMMENDATION_RESOLVED',
+  'GOVERNANCE_SETTING_CHANGED',
+] as const
+
+export const AUDIT_TRAIL_ENTITY_TYPES = [
+  'PATHWAY',
+  'PATHWAY_RULE',
+  'EVIDENCE_SOURCE',
+  'RECOMMENDATION_RUN',
+  'GOVERNANCE_SETTING',
+] as const
+
+export const AUDIT_TRAIL_FILTER_LABELS = [
+  'All actions',
+  'Pathway changes',
+  'Evidence changes',
+  'Recommendation actions',
+  'Governance settings',
+] as const
+
+export const AUDIT_TRAIL_ATDD_TEST_IDS = {
+  page: 'admin-audit-page',
+  panel: 'admin-audit-panel',
+  summaryBar: 'admin-audit-summary-bar',
+  filterRibbon: 'admin-audit-filter-ribbon',
+  eventList: 'admin-audit-event-list',
+  eventRow: 'admin-audit-event-row',
+  detailPanel: 'admin-audit-detail-panel',
+  diffPanel: 'admin-audit-diff-panel',
+  mobileTabs: 'admin-audit-mobile-tabs',
+  mobileEventsTab: 'admin-audit-mobile-events',
+  mobileDetailTab: 'admin-audit-mobile-detail',
+} as const
+
 export const RECOMMENDATION_NEXT_STEP_PLAN_ATDD_TEST_IDS = {
   plan: 'recommendation-next-step-plan',
   item: 'recommendation-next-step-item',

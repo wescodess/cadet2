@@ -1,5 +1,6 @@
 import { getRouterParam } from 'h3'
 
+import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import {
   PathwayRuleConflictError,
@@ -8,7 +9,7 @@ import {
 import { pathwayRuleInputSchema } from '../../../../utils/pathways/pathwayRuleSchema'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
+  const adminSession = await requireAdminSession(event, {
     allowBootstrapFromAllowlist: true,
   })
 
@@ -36,6 +37,19 @@ export default defineEventHandler(async (event) => {
 
   try {
     const item = await createRule(pathwayId, parsed.data)
+
+    if (item) {
+      await recordGovernanceAction(event, {
+        actionType: 'PATHWAY_RULE_CREATED',
+        entityType: 'PATHWAY_RULE',
+        entityId: item.id,
+        entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+        changeContext: {
+          before: null,
+          after: item,
+        },
+      }, adminSession)
+    }
 
     return {
       ok: true,

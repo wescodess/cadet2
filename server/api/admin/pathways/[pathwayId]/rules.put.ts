@@ -1,14 +1,16 @@
 import { getRouterParam } from 'h3'
 
+import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import {
   PathwayRuleConflictError,
   bulkSaveRules,
+  listPathwayRules,
 } from '../../../../utils/pathways/pathwayRuleService'
 import { replacePathwayRulesSchema } from '../../../../utils/pathways/pathwayRuleSchema'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
+  const adminSession = await requireAdminSession(event, {
     allowBootstrapFromAllowlist: true,
   })
 
@@ -35,7 +37,43 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const before = await listPathwayRules(pathwayId)
     const items = await bulkSaveRules(pathwayId, parsed.data.rules)
+    const beforeById = new Map(before.map(item => [item.id, item] as const))
+    const afterById = new Map(items.map(item => [item.id, item] as const))
+
+    for (const item of items) {
+      const previous = beforeById.get(item.id) || null
+      const actionType = previous ? 'PATHWAY_RULE_UPDATED' : 'PATHWAY_RULE_CREATED'
+
+      if (!previous || JSON.stringify(previous) !== JSON.stringify(item)) {
+        await recordGovernanceAction(event, {
+          actionType,
+          entityType: 'PATHWAY_RULE',
+          entityId: item.id,
+          entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+          changeContext: {
+            before: previous,
+            after: item,
+          },
+        }, adminSession)
+      }
+    }
+
+    for (const item of before) {
+      if (!afterById.has(item.id)) {
+        await recordGovernanceAction(event, {
+          actionType: 'PATHWAY_RULE_DELETED',
+          entityType: 'PATHWAY_RULE',
+          entityId: item.id,
+          entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+          changeContext: {
+            before: item,
+            after: null,
+          },
+        }, adminSession)
+      }
+    }
 
     return {
       ok: true,

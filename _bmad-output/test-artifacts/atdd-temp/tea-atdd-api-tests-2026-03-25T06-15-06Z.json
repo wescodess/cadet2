@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "subagent": "atdd-api-tests",
+  "tests": [
+    {
+      "file": "tests/api/admin-audit-trail.red.atdd.spec.ts",
+      "description": "ATDD API tests for Story 5.4 admin audit trail (RED PHASE)",
+      "expected_to_fail": true,
+      "acceptance_criteria_covered": [
+        "Trust-sensitive governance actions record auditable events",
+        "Audit persistence stays bounded to the minimum viable record structure",
+        "Audit trail endpoints enforce admin-only governance boundaries",
+        "Audit model remains extensible for future governance controls"
+      ],
+      "priority_coverage": {
+        "P0": 3,
+        "P1": 2,
+        "P2": 0,
+        "P3": 0
+      }
+    }
+  ],
+  "fixture_needs": [
+    "admin-session-bootstrap",
+    "audit-trail-route-probe"
+  ],
+  "knowledge_fragments_used": [
+    "data-factories",
+    "test-quality",
+    "api-request",
+    "auth-session"
+  ],
+  "test_count": 5,
+  "tdd_phase": "RED",
+  "summary": "Generated 5 skipped API red-phase tests for Story 5.4 audit trail contracts"
+}
