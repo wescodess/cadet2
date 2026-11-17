@@ -28,6 +28,18 @@ _Avoid_: Practice administrator, superuser, representative
 The applicant who owns their account and profile, whether using cadet2 alone or working with a Practice.
 _Avoid_: Customer, lead
 
+**Tracked date**:
+A date a Client records for reference or reminders, with its source stated. It is not a determination of immigration status, legal rights or a required action.
+_Avoid_: Calculated legal deadline, status guarantee
+
+**Document checklist**:
+A sourced list a Client uses to organize documents, independently or for a Case. Completing it does not establish that the evidence is sufficient or an application is ready.
+_Avoid_: Eligibility checklist, application approval, submission-ready score
+
+**Vault document**:
+A Client-owned file kept privately and shared into a Case only by the Client's explicit selection. It is separate from the Practice-retained record.
+_Avoid_: Practice-owned attachment, permanent Case archive
+
 **Case**:
 One Client's immigration matter at one Practice.
 _Avoid_: Account, profile, household
