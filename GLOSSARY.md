@@ -16,6 +16,14 @@ _Avoid_: Agent, advisor role, consultant role
 A Practice member who prepares work for a Representative and cannot sign a plan.
 _Avoid_: Agent, signer, representative
 
+**Practice administrator**:
+A Practice member who manages its membership and invitations. This responsibility alone gives neither access to Case contents nor authority to sign.
+_Avoid_: Practice owner role, tenant admin, signer
+
+**cadet2 admin**:
+A person appointed to administer cadet2 and check Representatives' licences. This role does not make them a Representative or grant general access to Clients' matters.
+_Avoid_: Practice administrator, superuser, representative
+
 **Client**:
 The applicant who owns their account and profile, whether using cadet2 alone or working with a Practice.
 _Avoid_: Customer, lead
@@ -23,6 +31,10 @@ _Avoid_: Customer, lead
 **Case**:
 One Client's immigration matter at one Practice.
 _Avoid_: Account, profile, household
+
+**Case assignment**:
+A Practice member's explicit responsibility for specified work on one Case. It grants no authority on another Case and does not replace the Client's Consent.
+_Avoid_: Client ownership, blanket caseload access
 
 **Draft assessment**:
 System output prepared for a Practice's review and editing, never shown to the Client unsigned.
