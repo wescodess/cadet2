@@ -93,7 +93,7 @@ A final aggregate probe ran on 2026-11-17 at `756267d71da748d4cabce877d998814127
 
 ## Matrix
 
-This ticket retains the existing `chromium` Desktop Chrome and `api` Playwright projects and two CI shards. It does not establish an acceptance/regression/signoff matrix. The existing CI retry count remains 2; journey, accessibility and signoff policy belong to #27. No `qa/` files or existing Playwright suites are changed.
+This ticket retains the existing `chromium` Desktop Chrome and `api` Playwright projects and two CI shards. Playwright and burn-in jobs use `ubuntu-24.04`: run 44029938944 proved Verify green but the old `ubuntu-latest` runner had moved to Ubuntu 26.04, which the locked Playwright 1.58.2 rejects before browser installation. It does not establish an acceptance/regression/signoff matrix. The existing CI retry count remains 2; journey, accessibility and signoff policy belong to #27. No `qa/` files or existing Playwright suites are changed.
 
 ## Budgets
 

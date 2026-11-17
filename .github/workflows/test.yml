@@ -68,7 +68,7 @@ jobs:
 
   test:
     name: Playwright (Shard ${{ matrix.shard }}/${{ strategy.job-total }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     needs: verify
 
@@ -215,7 +215,7 @@ jobs:
 
   burn_in:
     name: Burn-In
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     needs: [test, contract_test]
     if: ${{ needs.test.result == 'success' && needs.contract_test.result == 'success' && (github.event_name == 'pull_request' || github.event_name == 'schedule') }}
