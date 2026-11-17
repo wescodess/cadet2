@@ -36,6 +36,12 @@ test('an admitted admin still reads governance review through the real HTTP guar
     JSON.stringify(body).includes(stack.fixtureRun.runId),
     'the actual fixture is returned, not fallback emptiness',
   )
+  const detail = await fetch(
+    `${stack.origin}/api/admin/recommendation-reviews/${stack.fixtureRun.runId}`,
+    { headers: { cookie: stack.admin.cookie } },
+  )
+  assert.equal(detail.status, 200)
+  assert.equal((await detail.json()).run.runId, stack.fixtureRun.runId)
   assert.equal(
     (await stack.clientFor(stack.admin).query('ragSources:getAdminStatus', {})).currentUserIsAdmin,
     true,
