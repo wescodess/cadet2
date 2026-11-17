@@ -1,0 +1,12 @@
+
+> cadet2@ verify /private/tmp/fix-pr55-sig
+> exec node scripts/quality/verify.mjs
+
+Quality evidence: .quality-output/run-jF0q3g
+baselines: PASS (valid schemas; no increases against integration merge-base)
+
+>>> typecheck
+probe row: typecheck
+
+>>> lint
+^CVerification aborted: SIGINT

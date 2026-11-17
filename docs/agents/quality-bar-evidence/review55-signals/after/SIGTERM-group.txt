@@ -1,0 +1,15 @@
+
+> cadet2@ verify /private/tmp/fix-pr55-sig
+> exec node scripts/quality/verify.mjs
+
+Quality evidence: .quality-output/run-7CaPHD
+baselines: PASS (valid schemas; no increases against integration merge-base)
+
+>>> typecheck
+probe row: typecheck
+
+>>> lint
+probe row: lint
+descendant ready
+Verification aborted: SIGTERM
+ ELIFECYCLE  Command failed with exit code 143.

@@ -1,0 +1,249 @@
+{
+  "terminal-ctrl-c": {
+    "signal": "SIGINT",
+    "target": "group",
+    "terminal_ctrl_c": true,
+    "exit": 0,
+    "shell_exit": 0,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.2"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-yFz5aW"
+  },
+  "SIGINT-group": {
+    "signal": "SIGINT",
+    "target": "group",
+    "terminal_ctrl_c": false,
+    "exit": 0,
+    "shell_exit": 0,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-dmXI3F"
+  },
+  "SIGINT-parent": {
+    "signal": "SIGINT",
+    "target": "parent",
+    "terminal_ctrl_c": false,
+    "exit": 0,
+    "shell_exit": 0,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": true,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-dQDzAi"
+  },
+  "SIGINT-gate": {
+    "signal": "SIGINT",
+    "target": "gate",
+    "terminal_ctrl_c": false,
+    "exit": -2,
+    "shell_exit": 130,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": true,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-ulLBmR"
+  },
+  "SIGINT-row": {
+    "signal": "SIGINT",
+    "target": "row",
+    "terminal_ctrl_c": false,
+    "exit": null,
+    "shell_exit": null,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-PoZWGk"
+  },
+  "SIGTERM-group": {
+    "signal": "SIGTERM",
+    "target": "group",
+    "terminal_ctrl_c": false,
+    "exit": -15,
+    "shell_exit": 143,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-Cj6fUK"
+  },
+  "SIGTERM-parent": {
+    "signal": "SIGTERM",
+    "target": "parent",
+    "terminal_ctrl_c": false,
+    "exit": -15,
+    "shell_exit": 143,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": true,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-2WHGvf"
+  },
+  "SIGTERM-gate": {
+    "signal": "SIGTERM",
+    "target": "gate",
+    "terminal_ctrl_c": false,
+    "exit": -15,
+    "shell_exit": 143,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": true,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-ybsHqs"
+  },
+  "SIGTERM-row": {
+    "signal": "SIGTERM",
+    "target": "row",
+    "terminal_ctrl_c": false,
+    "exit": null,
+    "shell_exit": null,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-YaKids"
+  },
+  "SIGHUP-group": {
+    "signal": "SIGHUP",
+    "target": "group",
+    "terminal_ctrl_c": false,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-oSCPg6"
+  },
+  "SIGHUP-parent": {
+    "signal": "SIGHUP",
+    "target": "parent",
+    "terminal_ctrl_c": false,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": true,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-wxc1C0"
+  },
+  "SIGHUP-gate": {
+    "signal": "SIGHUP",
+    "target": "gate",
+    "terminal_ctrl_c": false,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": true,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-96gTjF"
+  },
+  "SIGHUP-row": {
+    "signal": "SIGHUP",
+    "target": "row",
+    "terminal_ctrl_c": false,
+    "exit": null,
+    "shell_exit": null,
+    "manifest": [
+      {
+        "row": "typecheck",
+        "status": "PASS",
+        "seconds": "0.0"
+      }
+    ],
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": true
+    },
+    "directory": ".quality-output/run-4rejEU"
+  }
+}

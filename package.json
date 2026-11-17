@@ -22,7 +22,7 @@
     "secrets:all": "node scripts/quality/secrets.mjs --all-branches",
     "dependencies:check": "node scripts/quality/dependencies.mjs",
     "test:policy": "node scripts/quality/test-policy.mjs",
-    "verify": "node scripts/quality/verify.mjs"
+    "verify": "exec node scripts/quality/verify.mjs"
   },
   "dependencies": {
     "@better-auth/core": "1.4.9",
