@@ -1,8 +1,8 @@
 import type { H3Event } from 'h3'
-import { createError, requireUserSession } from '#imports'
+import { createError } from 'h3'
 import { getRagFoundationConfig } from './rag-foundation'
 
-function matchAdmin(event: H3Event, session: { user: { id: string, email: string } }) {
+function matchAdmin(event: H3Event, session: { user: { id: string; email: string } }) {
   const config = getRagFoundationConfig(event)
   const userId = session.user.id
   const email = session.user.email.toLowerCase()
@@ -27,10 +27,7 @@ export async function requireRagAdminSession(event: H3Event) {
       statusCode: 503,
       statusMessage: 'RAG admin allowlist is not configured',
       data: {
-        requiredEnvVars: [
-          'NUXT_RAG_ADMIN_USER_IDS',
-          'NUXT_RAG_ADMIN_EMAILS',
-        ],
+        requiredEnvVars: ['NUXT_RAG_ADMIN_USER_IDS', 'NUXT_RAG_ADMIN_EMAILS'],
       },
     })
   }

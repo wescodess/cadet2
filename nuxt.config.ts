@@ -6,6 +6,10 @@ const localHubDbDataDir = process.env.NUXT_HUB_DB_DATA_DIR || '.data/db/pglite-d
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  typescript: {
+    strict: true,
+    tsConfig: { compilerOptions: { noUncheckedIndexedAccess: true } },
+  },
 
   css: ['~/assets/css/tailwind.css'],
 
@@ -51,9 +55,7 @@ export default defineNuxtConfig({
       // Avoid opening PGlite during both Nitro build and dev runtime startup.
       // In practice this can abort the local WASM engine before auth/session queries run.
       applyMigrationsDuringBuild: Boolean(
-        process.env.DATABASE_URL
-        || process.env.POSTGRES_URL
-        || process.env.POSTGRESQL_URL,
+        process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRESQL_URL,
       ),
     },
   },
@@ -76,8 +78,6 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    plugins: [
-      tailwindcss(),
-    ],
+    plugins: [tailwindcss()],
   },
 })

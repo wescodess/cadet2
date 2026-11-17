@@ -116,3 +116,5 @@ tests/.auth
 .data/pw-30477-1774437115960
 .data/pw-32335-1774437401590
 .data/pw-33817-1774437594936
+.quality-output/
+.husky/_/

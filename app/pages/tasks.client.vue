@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { api } from '#convex/api'
+import { api } from '../../convex/_generated/api'
 
 type DemoTask = {
   id: string
@@ -43,8 +43,7 @@ async function fetchConvexToken({ forceRefreshToken }: { forceRefreshToken: bool
 
     const body = JSON.parse(raw) as { token?: string } | null
     return body?.token ?? null
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -70,8 +69,7 @@ if (import.meta.client) {
   await waitForSession()
   if (!loggedIn.value || !user.value?.id) {
     pending.value = false
-  }
-  else {
+  } else {
     const userId = user.value.id
 
     // Prewarm Convex auth to avoid an initial unauthorized subscription race.
@@ -92,9 +90,7 @@ if (import.meta.client) {
           pending.value = false
         },
         (queryError) => {
-          error.value = queryError instanceof Error
-            ? queryError
-            : new Error(String(queryError))
+          error.value = queryError instanceof Error ? queryError : new Error(String(queryError))
           pending.value = false
         },
       )
@@ -122,17 +118,19 @@ async function logout() {
 </script>
 
 <template>
-  <main data-testid="tasks-page" class="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-6 py-16">
+  <main
+    data-testid="tasks-page"
+    class="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-6 py-16"
+  >
     <header class="flex flex-wrap items-start justify-between gap-3">
       <div class="space-y-1">
-        <NuxtLink to="/" class="text-xs text-slate-400 hover:text-slate-200">
-          ← Home
-        </NuxtLink>
+        <NuxtLink to="/" class="text-xs text-slate-400 hover:text-slate-200"> ← Home </NuxtLink>
         <h1 data-testid="tasks-heading" class="text-2xl font-semibold text-white">
           Protected Convex Query
         </h1>
         <p class="text-sm text-slate-400">
-          Uses <code>useUserSession()</code> + a client-side Convex subscription for demo task updates.
+          Uses <code>useUserSession()</code> + a client-side Convex subscription for demo task
+          updates.
         </p>
       </div>
 
@@ -146,7 +144,10 @@ async function logout() {
       </button>
     </header>
 
-    <section data-testid="tasks-session-summary" class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 text-sm">
+    <section
+      data-testid="tasks-session-summary"
+      class="rounded-xl border border-slate-800 bg-slate-900/70 p-4 text-sm"
+    >
       <p class="text-slate-300">
         <span class="text-slate-400">User ID:</span>
         <code data-testid="tasks-user-id" class="ml-1">{{ user?.id ?? 'not loaded' }}</code>
@@ -157,11 +158,12 @@ async function logout() {
       </p>
     </section>
 
-    <section data-testid="tasks-list-panel" class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+    <section
+      data-testid="tasks-list-panel"
+      class="rounded-xl border border-slate-800 bg-slate-900/70 p-4"
+    >
       <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-medium text-slate-200">
-          Demo Tasks (from Convex)
-        </h2>
+        <h2 class="text-sm font-medium text-slate-200">Demo Tasks (from Convex)</h2>
         <button
           type="button"
           class="rounded-md border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800"
@@ -171,9 +173,7 @@ async function logout() {
         </button>
       </div>
 
-      <p v-if="pending" class="text-sm text-slate-400">
-        Loading tasks…
-      </p>
+      <p v-if="pending" class="text-sm text-slate-400">Loading tasks…</p>
 
       <p
         v-else-if="error"
@@ -201,9 +201,7 @@ async function logout() {
         </li>
       </ul>
 
-      <p v-else data-testid="tasks-empty-state" class="text-sm text-slate-400">
-        No tasks yet.
-      </p>
+      <p v-else data-testid="tasks-empty-state" class="text-sm text-slate-400">No tasks yet.</p>
     </section>
   </main>
 </template>

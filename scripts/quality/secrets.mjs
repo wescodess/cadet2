@@ -1,0 +1,66 @@
+import { createHash } from 'node:crypto'
+import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
+import { files, git, json, main, outputDir, run, writeJSON, writingBaseline } from './common.mjs'
+import { gitleaks } from './install-gitleaks.mjs'
+
+const baselinePath = 'scripts/quality/baselines/secrets.json'
+
+function scan(binary, directory, name, args) {
+  const report = join(directory, 'report.json')
+  writeFileSync(report, '[]', { mode: 0o600 })
+  const result = run(binary, [
+    ...args,
+    '--no-banner',
+    '--report-format=json',
+    `--report-path=${report}`,
+  ])
+  if (![0, 1].includes(result.status))
+    throw new Error(`gitleaks ${name} failed (exit ${result.status})`)
+  const findings = JSON.parse(readFileSync(report, 'utf8'))
+  return findings.map((finding) => {
+    const file = finding.File.replace(`${join(directory, 'tree')}/`, '')
+    const digest = createHash('sha256').update(finding.Secret).digest('hex')
+    return `${finding.RuleID}|${file}|${digest}`
+  })
+}
+
+main(async () => {
+  if (git('rev-parse', '--is-shallow-repository') !== 'false')
+    throw new Error('Secret history scan requires a full checkout (fetch-depth: 0)')
+  const binary = await gitleaks()
+  const base = process.env.QUALITY_BASE_REF || 'origin/dev'
+  const mergeBase = git('merge-base', base, 'HEAD')
+  const directory = mkdtempSync(join(tmpdir(), 'cadet2-secrets-'))
+  const found = {}
+  try {
+    found.history = scan(binary, directory, 'history', ['git', '--log-opts=--all', '.'])
+    found.diff = scan(binary, directory, 'diff', ['git', `--log-opts=${mergeBase}..HEAD`, '.'])
+    for (const file of files()) {
+      const destination = join(directory, 'tree', file)
+      mkdirSync(dirname(destination), { recursive: true })
+      copyFileSync(file, destination)
+    }
+    found.working = scan(binary, directory, 'working', ['dir', join(directory, 'tree')])
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
+  writeJSON(`${outputDir}/secrets.json`, found)
+  if (writingBaseline) {
+    writeJSON(baselinePath, [...new Set(Object.values(found).flat())].sort())
+    console.log(
+      `secrets: wrote ${json(baselinePath).length} exact rule/file/secret-digest exceptions`,
+    )
+    return
+  }
+  const baseline = json(baselinePath)
+  for (const [name, findings] of Object.entries(found)) {
+    const fresh = findings.filter((finding) => !baseline.includes(finding))
+    if (fresh.length)
+      throw new Error(
+        `secrets ${name}: ${fresh.length} new findings (secret values withheld)\n${fresh.join('\n')}`,
+      )
+    console.log(`secrets ${name}: PASS (${findings.length} existing findings; zero new)`)
+  }
+})

@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-17",
+  "commit": "fe2b4a4e4f8b4b861fb5c92661b9e411a84ef0b3",
+  "counts": {
+    "app/components/admin/EvidenceSourceDetail.vue|TS2322": 3,
+    "app/components/admin/EvidenceSourceDetail.vue|TS2345": 1,
+    "app/components/admin/EvidenceSourceDetail.vue|TS7006": 4,
+    "app/components/admin/PathwayRuleAccordion.vue|TS2322": 1,
+    "app/components/admin/PathwayRuleAccordion.vue|TS7006": 1,
+    "app/components/admin/PathwayRuleFormRow.vue|TS2322": 3,
+    "app/components/admin/PathwayRuleFormRow.vue|TS7006": 1,
+    "app/components/ui/chart/ChartLegendContent.vue|TS18048": 1,
+    "app/components/ui/native-select/NativeSelectOptGroup.vue|TS2353": 1,
+    "app/components/ui/native-select/NativeSelectOption.vue|TS2353": 1,
+    "app/pages/admin/evidence-sources.client.vue|TS2322": 1,
+    "convex/recommendationRuns.ts|TS18048": 7,
+    "convex/recommendationRuns.ts|TS2532": 2,
+    "nuxt.config.ts|TS2322": 1,
+    "server/api/admin/rag/sources/index.get.ts|TS7006": 1,
+    "server/api/recommendations/runs/[runId]/refresh.post.ts|TS2322": 2,
+    "server/api/recommendations/runs/[runId]/start.post.ts|TS18047": 4,
+    "server/api/recommendations/runs/[runId]/start.post.ts|TS2322": 7,
+    "server/api/recommendations/runs/[runId]/status.get.ts|TS2322": 2,
+    "server/api/recommendations/testing/seed.post.ts|TS2345": 1,
+    "server/utils/convex-admin-client.ts|TS2339": 2
+  }
+}

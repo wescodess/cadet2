@@ -1,0 +1,16 @@
+node_modules/
+.nuxt/
+.output/
+.data/
+.cache/
+.quality-output/
+playwright-report/
+test-results/
+convex/_generated/
+pnpm-lock.yaml
+_bmad/
+_bmad-output/
+.agent/
+.agents/
+.claude/
+.tmp-skills/
