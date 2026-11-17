@@ -19,6 +19,7 @@
     "lint": "node scripts/quality/lint.mjs",
     "format:check": "node scripts/quality/format.mjs",
     "secrets:check": "node scripts/quality/secrets.mjs",
+    "secrets:all": "node scripts/quality/secrets.mjs --all-branches",
     "dependencies:check": "node scripts/quality/dependencies.mjs",
     "test:policy": "node scripts/quality/test-policy.mjs",
     "verify": "node scripts/quality/verify.mjs"

@@ -30,23 +30,31 @@ main(async () => {
   if (git('rev-parse', '--is-shallow-repository') !== 'false')
     throw new Error('Secret history scan requires a full checkout (fetch-depth: 0)')
   const binary = await gitleaks()
-  const base = process.env.QUALITY_BASE_REF || 'origin/dev'
-  const mergeBase = git('merge-base', base, 'HEAD')
+  const allBranches = process.argv.includes('--all-branches')
   const directory = mkdtempSync(join(tmpdir(), 'cadet2-secrets-'))
   const found = {}
   try {
-    found.history = scan(binary, directory, 'history', ['git', '--log-opts=--all', '.'])
-    found.diff = scan(binary, directory, 'diff', ['git', `--log-opts=${mergeBase}..HEAD`, '.'])
-    for (const file of files()) {
-      const destination = join(directory, 'tree', file)
-      mkdirSync(dirname(destination), { recursive: true })
-      copyFileSync(file, destination)
+    const history = allBranches ? 'all-branches' : 'history'
+    found[history] = scan(binary, directory, history, [
+      'git',
+      `--log-opts=${allBranches ? '--all' : 'HEAD'}`,
+      '.',
+    ])
+    if (!allBranches) {
+      const base = process.env.QUALITY_BASE_REF || 'origin/dev'
+      const mergeBase = git('merge-base', base, 'HEAD')
+      found.diff = scan(binary, directory, 'diff', ['git', `--log-opts=${mergeBase}..HEAD`, '.'])
+      for (const file of files()) {
+        const destination = join(directory, 'tree', file)
+        mkdirSync(dirname(destination), { recursive: true })
+        copyFileSync(file, destination)
+      }
+      found.working = scan(binary, directory, 'working', ['dir', join(directory, 'tree')])
     }
-    found.working = scan(binary, directory, 'working', ['dir', join(directory, 'tree')])
   } finally {
     rmSync(directory, { recursive: true, force: true })
   }
-  writeJSON(`${outputDir}/secrets.json`, found)
+  writeJSON(`${outputDir}/secrets${allBranches ? '-all-branches' : ''}.json`, found)
   if (writingBaseline) {
     writeJSON(baselinePath, [...new Set(Object.values(found).flat())].sort())
     console.log(
