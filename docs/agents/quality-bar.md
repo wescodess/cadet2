@@ -85,6 +85,8 @@ Observed 2026-11-17 against implementation commit `f126e70a170e550e05880f2d229c2
 
 The synthetic-secret commit was `5479aae3690dc8694218e73cdc3dd7bd544e7655` on the discarded branch. Its values are withheld from retained evidence. None of these violations is on the PR branch.
 
+Follow-up probes ran on 2026-11-17 at `910eb561293b2617c73d702a509e494825347be5` on `scratch/quality-bar-static-rows-followup`, also discarded. Six additional negative cases exited 1: [namespace focus](quality-bar-evidence/test-namespace-focus.txt), [indirect focus reference](quality-bar-evidence/test-focus-reference.txt), [aliased bracket skip](quality-bar-evidence/test-alias-skip.txt), [trailing inline suppression without a ticket](quality-bar-evidence/lint-inline-ticket.txt), [invalid calendar expiry](quality-bar-evidence/allowlist-invalid-date.txt), and [uncommitted synthetic secret](quality-bar-evidence/secrets-uncommitted.txt). Two positive controls exited 0: [ticketed conditional skip](quality-bar-evidence/test-ticketed-conditional.txt) and [ticketed inline suppression](quality-bar-evidence/lint-ticketed-inline.txt). The [follow-up ledger](quality-bar-evidence/followup-ledger.json) records exact results. Retained console text normalizes blank-line trailing whitespace; external raw logs remain in the local proof evidence directory.
+
 ## Matrix
 
 This ticket retains the existing `chromium` Desktop Chrome and `api` Playwright projects and two CI shards. It does not establish an acceptance/regression/signoff matrix. The existing CI retry count remains 2; journey, accessibility and signoff policy belong to #27. No `qa/` files or existing Playwright suites are changed.

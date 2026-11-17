@@ -42,7 +42,7 @@ AssertionError: expected 1 to be 2 // Object.is equality
       1| import { expect, test } from 'vitest'
       2| test('purposeful failing assertion', () => { expect(1).toBe(2) })
        |                                                        ^
-      3| 
+      3|
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
 

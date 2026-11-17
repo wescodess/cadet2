@@ -1,0 +1,8 @@
+$ pnpm test:policy
+
+> cadet2@ test:policy /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> node scripts/quality/test-policy.mjs
+
+test-policy: PASS (52 current; 52 baseline)
+
+Exit: 0
