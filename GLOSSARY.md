@@ -48,6 +48,38 @@ _Avoid_: Automated emergency advice, eligibility result
 Programs and situations cadet2 declines to assess, including Quebec-selected, family, business, humanitarian, and refugee pathways for this pilot.
 _Avoid_: Ineligible, blocked, unsupported guess
 
+**Assessment finding**:
+A conclusion about an explicitly named program, stage, or criterion on stated facts and dated rules, or an explicit statement that cadet2 cannot assess it. It is not a prediction of an invitation or approval.
+_Avoid_: Recommendation rank, eligibility guarantee
+
+**Supported**:
+An assessment finding whose stated claim is established by the required facts and applicable, verified rules. Support for one criterion does not establish the whole program.
+_Avoid_: Strong fit, high confidence, approved
+
+**Blocked**:
+An assessment finding with a demonstrated unmet mandatory criterion under an applicable, verified rule. Missing facts or missing engine coverage do not establish a blocker.
+_Avoid_: Probably ineligible, low score, unknown
+
+**Unknown**:
+An assessment finding cadet2 cannot establish because required facts, applicable rules, evidence, or assessment capability are missing or unresolved.
+_Avoid_: Failed, blocked, out of scope
+
+**Generic pathway**:
+A broad planning category, such as study-to-work, that does not identify a particular immigration program and its requirements.
+_Avoid_: Named program, supported program coverage
+
+**Calculation receipt**:
+The record of an official-rule calculation's inputs, missing facts, rule version, steps, and result, or the explicit reason the calculation is unavailable.
+_Avoid_: Fit score, approval probability
+
+**Claim citation**:
+A reference connecting one assessment claim to the exact passage of a retained official source and its verification record.
+_Avoid_: Related link, source badge
+
+**Verified as of**:
+The date a particular claim's use of an official source was checked for meaning and applicability. It does not promise that the source or rules remain unchanged afterward.
+_Avoid_: Fresh, current forever, run date
+
 **Client portal**:
 The free, mobile-first experience for intake, Signed plans, and non-advice utilities.
 _Avoid_: Customer portal, consumer planner
