@@ -1,14 +1,11 @@
 import { anyApi } from 'convex/server'
 import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
 import { createEvidenceSourceSchema } from '../../../../utils/admin/evidenceSourceSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
-  const { session } = adminSession
+  const adminSession = await requireAdminSession(event)
+  const { convex } = adminSession
   const body = await readBody<unknown>(event)
   const parsed = createEvidenceSourceSchema.safeParse(body ?? {})
 
@@ -22,39 +19,36 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const convex = await createConvexAdminClientActingAs(event, {
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
-  })
-
   const result = await convex.mutation(
     (anyApi as any).ragSources.createSourceSubmission,
     parsed.data,
   )
 
-  const detail = await convex.query(
-    (anyApi as any).ragSources.getSource,
-    { sourceId: result.sourceId },
-  ) as {
+  const detail = (await convex.query((anyApi as any).ragSources.getSource, {
+    sourceId: result.sourceId,
+  })) as {
     source: Record<string, unknown> | null
   } | null
 
-  await recordGovernanceAction(event, {
-    actionType: 'EVIDENCE_SOURCE_CREATED',
-    entityType: 'EVIDENCE_SOURCE',
-    entityId: result.sourceId,
-    entityLabel: parsed.data.name,
-    changeContext: {
-      before: null,
-      after: detail?.source || {
-        sourceId: result.sourceId,
-        name: parsed.data.name,
-        type: parsed.data.type,
-        status: result.status,
+  await recordGovernanceAction(
+    event,
+    {
+      actionType: 'EVIDENCE_SOURCE_CREATED',
+      entityType: 'EVIDENCE_SOURCE',
+      entityId: result.sourceId,
+      entityLabel: parsed.data.name,
+      changeContext: {
+        before: null,
+        after: detail?.source || {
+          sourceId: result.sourceId,
+          name: parsed.data.name,
+          type: parsed.data.type,
+          status: result.status,
+        },
       },
     },
-  }, adminSession)
+    adminSession,
+  )
 
   return {
     ok: true,

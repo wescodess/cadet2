@@ -1,7 +1,6 @@
 import { anyApi } from 'convex/server'
 
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
 import {
   evidenceSourceDetailSchema,
   toEvidenceAuditRecord,
@@ -9,9 +8,7 @@ import {
 } from '../../../../utils/admin/evidenceSourceSchema'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const { convex } = await requireAdminSession(event)
   const sourceId = getRouterParam(event, 'sourceId')
 
   if (!sourceId) {
@@ -21,16 +18,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const convex = await createConvexAdminClientActingAs(event, {
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
-  })
-
-  const result = await convex.query(
-    (anyApi as any).ragSources.getSource,
-    { sourceId },
-  ) as {
+  const result = (await convex.query((anyApi as any).ragSources.getSource, { sourceId })) as {
     source: Record<string, unknown> | null
     audit: Array<Record<string, unknown>>
     currentUserIsAdmin: boolean
@@ -46,6 +34,6 @@ export default defineEventHandler(async (event) => {
   return evidenceSourceDetailSchema.parse({
     currentUserIsAdmin: result.currentUserIsAdmin,
     source: toEvidenceSourceRecord(result.source as never),
-    audit: (result.audit || []).map(item => toEvidenceAuditRecord(item as never)),
+    audit: (result.audit || []).map((item) => toEvidenceAuditRecord(item as never)),
   })
 })

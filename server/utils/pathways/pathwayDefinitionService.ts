@@ -1,15 +1,7 @@
 import { sql } from 'drizzle-orm'
 
-import {
-  MVP_PATHWAY_CATALOG,
-  MVP_PATHWAY_IDS,
-  MVP_PATHWAY_INVENTORY_SEEDS,
-  type MvpPathwayDefinition,
-} from './mvpPathwayCatalog'
-import {
-  isMissingPathwayRuleRelationError,
-  resolveStoredRecommendationPathwayCatalog,
-} from './pathwayRuleService'
+import { MVP_PATHWAY_IDS, type MvpPathwayDefinition } from './mvpPathwayCatalog'
+import { resolveStoredRecommendationPathwayCatalog } from './pathwayRuleService'
 import {
   pathwayDefinitionRecordSchema,
   type CreatePathwayDefinitionInput,
@@ -27,10 +19,6 @@ type PathwayDefinitionRow = {
   updatedAt: Date | string
 }
 
-type CountRow = {
-  count: number | string
-}
-
 export class PathwayDefinitionConflictError extends Error {
   constructor(message = 'Pathway definition already exists') {
     super(message)
@@ -38,23 +26,10 @@ export class PathwayDefinitionConflictError extends Error {
   }
 }
 
-const pathwayCatalogById = new Map(
-  MVP_PATHWAY_CATALOG.map(pathway => [pathway.pathwayId, pathway] as const),
-)
-
 const pathwayOrderCase = sql.join(
   MVP_PATHWAY_IDS.map((pathwayId, index) => sql`WHEN "pathway_id" = ${pathwayId} THEN ${index}`),
   sql` `,
 )
-
-const seededPathwayEntries = MVP_PATHWAY_INVENTORY_SEEDS.map((seed) => {
-  return {
-    id: `pathway-${seed.pathwayId}`,
-    pathwayId: seed.pathwayId,
-    displayName: seed.displayName,
-    description: seed.description,
-  }
-})
 
 function toIsoString(value: Date | string) {
   if (value instanceof Date) {
@@ -85,71 +60,30 @@ function toPathwayDefinitionRecord(row: PathwayDefinitionRow): PathwayDefinition
   })
 }
 
-function isMissingRelationError(error: unknown) {
-  const code = typeof error === 'object' && error !== null && 'code' in error
-    ? String((error as { code?: unknown }).code || '')
-    : ''
-  const message = error instanceof Error ? error.message : ''
-
-  return code === '42P01' || message.includes('pathway_definitions') && message.includes('does not exist')
-}
-
 function isUniqueViolationError(error: unknown) {
-  const code = typeof error === 'object' && error !== null && 'code' in error
-    ? String((error as { code?: unknown }).code || '')
-    : ''
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code?: unknown }).code || '')
+      : ''
 
   return code === '23505'
 }
 
-async function ensureSeededPathwayDefinitions() {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS "pathway_definitions" (
-      "id" varchar(120) PRIMARY KEY,
-      "pathway_id" varchar(100) NOT NULL UNIQUE,
-      "display_name" varchar(255) NOT NULL,
-      "description" text,
-      "status" varchar(20) NOT NULL DEFAULT 'active',
-      "created_at" timestamptz NOT NULL DEFAULT now(),
-      "updated_at" timestamptz NOT NULL DEFAULT now()
-    );
-  `)
-
-  const countResult = await db.execute(sql`
-    SELECT COUNT(*)::int AS "count"
-    FROM "pathway_definitions";
-  `)
-  const row = ((countResult as { rows?: CountRow[] }).rows || [])[0]
-  const count = Number(row?.count || 0)
-
-  if (count > 0) {
-    return
+async function requirePathwayDefinitions() {
+  try {
+    await db.execute(sql`SELECT 1 FROM "pathway_definitions" LIMIT 0`)
+  } catch {
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Pathway storage is unavailable. Contact the operator.',
+    })
   }
-
-  await db.execute(sql`
-    INSERT INTO "pathway_definitions" (
-      "id",
-      "pathway_id",
-      "display_name",
-      "description",
-      "status",
-      "created_at",
-      "updated_at"
-    )
-    VALUES
-      (${seededPathwayEntries[0]!.id}, ${seededPathwayEntries[0]!.pathwayId}, ${seededPathwayEntries[0]!.displayName}, ${seededPathwayEntries[0]!.description}, 'active', now(), now()),
-      (${seededPathwayEntries[1]!.id}, ${seededPathwayEntries[1]!.pathwayId}, ${seededPathwayEntries[1]!.displayName}, ${seededPathwayEntries[1]!.description}, 'active', now(), now()),
-      (${seededPathwayEntries[2]!.id}, ${seededPathwayEntries[2]!.pathwayId}, ${seededPathwayEntries[2]!.displayName}, ${seededPathwayEntries[2]!.description}, 'active', now(), now())
-    ON CONFLICT ("pathway_id") DO NOTHING;
-  `)
 }
 
 async function listPathwayDefinitionRows(status?: PathwayDefinitionStatus) {
-  await ensureSeededPathwayDefinitions()
+  await requirePathwayDefinitions()
 
-  const whereClause = status
-    ? sql`WHERE "status" = ${status}`
-    : sql``
+  const whereClause = status ? sql`WHERE "status" = ${status}` : sql``
 
   const result = await db.execute(sql`
     SELECT
@@ -170,7 +104,7 @@ async function listPathwayDefinitionRows(status?: PathwayDefinitionStatus) {
       "pathway_id" ASC;
   `)
 
-  return ((result as { rows?: PathwayDefinitionRow[] }).rows || [])
+  return (result as { rows?: PathwayDefinitionRow[] }).rows || []
 }
 
 export async function listPathwayDefinitions(status?: PathwayDefinitionStatus) {
@@ -179,7 +113,7 @@ export async function listPathwayDefinitions(status?: PathwayDefinitionStatus) {
 }
 
 export async function getPathwayDefinition(pathwayId: string) {
-  await ensureSeededPathwayDefinitions()
+  await requirePathwayDefinitions()
 
   const result = await db.execute(sql`
     SELECT
@@ -199,7 +133,7 @@ export async function getPathwayDefinition(pathwayId: string) {
 }
 
 export async function createPathwayDefinition(input: CreatePathwayDefinitionInput) {
-  await ensureSeededPathwayDefinitions()
+  await requirePathwayDefinitions()
 
   try {
     const result = await db.execute(sql`
@@ -232,8 +166,7 @@ export async function createPathwayDefinition(input: CreatePathwayDefinitionInpu
 
     const row = ((result as { rows?: PathwayDefinitionRow[] }).rows || [])[0]
     return row ? toPathwayDefinitionRecord(row) : null
-  }
-  catch (error) {
+  } catch (error) {
     if (isUniqueViolationError(error)) {
       throw new PathwayDefinitionConflictError()
     }
@@ -242,8 +175,11 @@ export async function createPathwayDefinition(input: CreatePathwayDefinitionInpu
   }
 }
 
-export async function updatePathwayDefinition(pathwayId: string, input: UpdatePathwayDefinitionInput) {
-  await ensureSeededPathwayDefinitions()
+export async function updatePathwayDefinition(
+  pathwayId: string,
+  input: UpdatePathwayDefinitionInput,
+) {
+  await requirePathwayDefinitions()
 
   const result = await db.execute(sql`
     UPDATE "pathway_definitions"
@@ -266,7 +202,7 @@ export async function updatePathwayDefinition(pathwayId: string, input: UpdatePa
 }
 
 export async function updatePathwayStatus(pathwayId: string, status: PathwayDefinitionStatus) {
-  await ensureSeededPathwayDefinitions()
+  await requirePathwayDefinitions()
 
   const result = await db.execute(sql`
     UPDATE "pathway_definitions"
@@ -289,40 +225,19 @@ export async function updatePathwayStatus(pathwayId: string, status: PathwayDefi
 
 export async function listActivePathwayIds() {
   const items = await listPathwayDefinitions('active')
-  return items.map(item => item.pathwayId)
+  return items.map((item) => item.pathwayId)
 }
 
 export async function resolveRecommendationPathwayIds() {
-  try {
-    const activeIds = await listActivePathwayIds()
-    return activeIds.filter((pathwayId): pathwayId is typeof MVP_PATHWAY_IDS[number] => MVP_PATHWAY_IDS.includes(pathwayId as typeof MVP_PATHWAY_IDS[number]))
-  }
-  catch (error) {
-    if (isMissingRelationError(error)) {
-      return [...MVP_PATHWAY_IDS]
-    }
-
-    throw error
-  }
+  const activeIds = await listActivePathwayIds()
+  return activeIds.filter((pathwayId): pathwayId is (typeof MVP_PATHWAY_IDS)[number] =>
+    MVP_PATHWAY_IDS.includes(pathwayId as (typeof MVP_PATHWAY_IDS)[number]),
+  )
 }
 
-export async function resolveRecommendationPathwayCatalog(): Promise<readonly MvpPathwayDefinition[]> {
-  try {
-    const activeIds = await resolveRecommendationPathwayIds()
-    const storedCatalog = await resolveStoredRecommendationPathwayCatalog(activeIds)
-    const storedCatalogById = new Map(
-      storedCatalog.map(pathway => [pathway.pathwayId, pathway] as const),
-    )
-
-    return activeIds
-      .map(pathwayId => storedCatalogById.get(pathwayId) || pathwayCatalogById.get(pathwayId))
-      .filter((pathway): pathway is MvpPathwayDefinition => Boolean(pathway))
-  }
-  catch (error) {
-    if (isMissingRelationError(error) || isMissingPathwayRuleRelationError(error)) {
-      return [...MVP_PATHWAY_CATALOG]
-    }
-
-    throw error
-  }
+export async function resolveRecommendationPathwayCatalog(): Promise<
+  readonly MvpPathwayDefinition[]
+> {
+  const activeIds = await resolveRecommendationPathwayIds()
+  return resolveStoredRecommendationPathwayCatalog(activeIds)
 }

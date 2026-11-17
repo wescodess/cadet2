@@ -4,9 +4,7 @@ import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { listPathwayRules } from '../../../../utils/pathways/pathwayRuleService'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  await requireAdminSession(event)
 
   const pathwayId = getRouterParam(event, 'pathwayId')?.trim() || ''
 

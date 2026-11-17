@@ -31,9 +31,7 @@ function toOptionalNumber(value: unknown) {
 }
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  await requireAdminSession(event)
 
   const query = getQuery(event)
   const actionType = isAuditActionType(query.actionType) ? query.actionType : undefined

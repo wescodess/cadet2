@@ -317,21 +317,6 @@ async function runManualIngestion(sourceIds?: string[]) {
   }
 }
 
-async function bootstrapAdmin() {
-  actionPending.value = true
-  errorMessage.value = ''
-  try {
-    await $fetch('/api/admin/rag/convex-admin/sync-current-user', {
-      method: 'POST',
-    })
-    await refreshAll()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Admin sync failed'
-  } finally {
-    actionPending.value = false
-  }
-}
-
 async function submitSource() {
   actionPending.value = true
   errorMessage.value = ''
@@ -601,7 +586,7 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="space-y-1">
           <p class="text-sm text-slate-300">
-            Phase 0 allowlist access:
+            Admin access:
             <span :class="phase0Ready ? 'text-emerald-300' : 'text-rose-300'">{{
               phase0Ready ? 'ok' : 'failed'
             }}</span>
@@ -625,15 +610,6 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
             @click="runManualIngestion()"
           >
             Run Due Sources (Phase 2)
-          </button>
-          <button
-            v-if="phase0Ready && adminStatus && !adminStatus.currentUserIsAdmin"
-            type="button"
-            class="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100 hover:bg-amber-500/20 disabled:opacity-60"
-            :disabled="actionPending"
-            @click="bootstrapAdmin"
-          >
-            Sync Allowlisted Admin To Convex
           </button>
           <button
             type="button"

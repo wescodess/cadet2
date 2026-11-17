@@ -1,0 +1,17 @@
+✖ failing tests:
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:112:1
+✖ RAG status discloses no admin count to anonymous, ordinary or email-only accounts (5296.395084ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:114:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Authentication required|Admin access required/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✖ Failed to run command `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'`: `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'` exited with non-zero code: 1

@@ -10,9 +10,7 @@ import {
 import { pathwayRuleInputSchema } from '../../../../../utils/pathways/pathwayRuleSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const adminSession = await requireAdminSession(event)
 
   const pathwayId = getRouterParam(event, 'pathwayId')?.trim() || ''
   const ruleId = getRouterParam(event, 'ruleId')?.trim() || ''
@@ -52,7 +50,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const before = (await listPathwayRules(pathwayId)).find(item => item.id === ruleId) || null
+    const before = (await listPathwayRules(pathwayId)).find((item) => item.id === ruleId) || null
     const item = await updateRule(ruleId, parsed.data, pathwayId)
 
     if (!item) {
@@ -62,23 +60,26 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    await recordGovernanceAction(event, {
-      actionType: 'PATHWAY_RULE_UPDATED',
-      entityType: 'PATHWAY_RULE',
-      entityId: item.id,
-      entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-      changeContext: {
-        before,
-        after: item,
+    await recordGovernanceAction(
+      event,
+      {
+        actionType: 'PATHWAY_RULE_UPDATED',
+        entityType: 'PATHWAY_RULE',
+        entityId: item.id,
+        entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+        changeContext: {
+          before,
+          after: item,
+        },
       },
-    }, adminSession)
+      adminSession,
+    )
 
     return {
       ok: true,
       item,
     }
-  }
-  catch (error) {
+  } catch (error) {
     if (error instanceof PathwayRuleConflictError) {
       throw createError({
         statusCode: 409,

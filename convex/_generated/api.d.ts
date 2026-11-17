@@ -8,9 +8,10 @@
  * @module
  */
 
+import type * as auditLog from "../auditLog.js";
+import type * as lib_ragAdmin from "../lib/ragAdmin.js";
 import type * as ragIngestionInternal from "../ragIngestionInternal.js";
 import type * as ragSources from "../ragSources.js";
-import type * as ragSourcesInternal from "../ragSourcesInternal.js";
 import type * as recommendationRuns from "../recommendationRuns.js";
 
 import type {
@@ -20,9 +21,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auditLog: typeof auditLog;
+  "lib/ragAdmin": typeof lib_ragAdmin;
   ragIngestionInternal: typeof ragIngestionInternal;
   ragSources: typeof ragSources;
-  ragSourcesInternal: typeof ragSourcesInternal;
   recommendationRuns: typeof recommendationRuns;
 }>;
 

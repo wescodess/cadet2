@@ -2,16 +2,11 @@ import { getRouterParam } from 'h3'
 
 import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import {
-  PathwayRuleConflictError,
-  createRule,
-} from '../../../../utils/pathways/pathwayRuleService'
+import { PathwayRuleConflictError, createRule } from '../../../../utils/pathways/pathwayRuleService'
 import { pathwayRuleInputSchema } from '../../../../utils/pathways/pathwayRuleSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const adminSession = await requireAdminSession(event)
 
   const pathwayId = getRouterParam(event, 'pathwayId')?.trim() || ''
 
@@ -39,24 +34,27 @@ export default defineEventHandler(async (event) => {
     const item = await createRule(pathwayId, parsed.data)
 
     if (item) {
-      await recordGovernanceAction(event, {
-        actionType: 'PATHWAY_RULE_CREATED',
-        entityType: 'PATHWAY_RULE',
-        entityId: item.id,
-        entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-        changeContext: {
-          before: null,
-          after: item,
+      await recordGovernanceAction(
+        event,
+        {
+          actionType: 'PATHWAY_RULE_CREATED',
+          entityType: 'PATHWAY_RULE',
+          entityId: item.id,
+          entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+          changeContext: {
+            before: null,
+            after: item,
+          },
         },
-      }, adminSession)
+        adminSession,
+      )
     }
 
     return {
       ok: true,
       item,
     }
-  }
-  catch (error) {
+  } catch (error) {
     if (error instanceof PathwayRuleConflictError) {
       throw createError({
         statusCode: 409,

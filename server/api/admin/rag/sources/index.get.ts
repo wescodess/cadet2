@@ -1,6 +1,5 @@
 import { anyApi } from 'convex/server'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
 import {
   evidenceSourceListQuerySchema,
   toEvidenceSourceRecord,
@@ -10,9 +9,7 @@ type SourceStatus = 'pending_approval' | 'approved' | 'rejected' | 'paused'
 type SourceType = 'website' | 'youtube_channel'
 
 export default defineEventHandler(async (event) => {
-  const { session } = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const { convex } = await requireAdminSession(event)
   const parsedQuery = evidenceSourceListQuerySchema.safeParse(getQuery(event))
 
   if (!parsedQuery.success) {
@@ -26,39 +23,32 @@ export default defineEventHandler(async (event) => {
 
   const query = parsedQuery.data
 
-  const status = query.status && ['pending_approval', 'approved', 'rejected', 'paused'].includes(query.status)
-    ? query.status as SourceStatus
-    : undefined
+  const status =
+    query.status && ['pending_approval', 'approved', 'rejected', 'paused'].includes(query.status)
+      ? (query.status as SourceStatus)
+      : undefined
 
-  const type = query.type && ['website', 'youtube_channel'].includes(query.type)
-    ? query.type as SourceType
-    : undefined
+  const type =
+    query.type && ['website', 'youtube_channel'].includes(query.type)
+      ? (query.type as SourceType)
+      : undefined
 
-  const tenantId = typeof query.tenantId === 'string' && query.tenantId.trim()
-    ? query.tenantId.trim()
-    : undefined
+  const tenantId =
+    typeof query.tenantId === 'string' && query.tenantId.trim() ? query.tenantId.trim() : undefined
 
   const showOnlyMine = query.showOnlyMine === '1' || query.showOnlyMine === 'true'
 
-  const convex = await createConvexAdminClientActingAs(event, {
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
+  const result = await convex.query((anyApi as any).ragSources.listSources, {
+    includeAllForAdmin: !showOnlyMine,
+    status,
+    type,
+    tenantId,
   })
-  const result = await convex.query(
-    (anyApi as any).ragSources.listSources,
-    {
-      includeAllForAdmin: !showOnlyMine,
-      status,
-      type,
-      tenantId,
-    },
-  )
 
   return {
     ok: true,
     currentUserIsAdmin: result.currentUserIsAdmin,
-    items: result.items.map(item => ({
+    items: result.items.map((item) => ({
       ...item,
       ...toEvidenceSourceRecord(item as never),
     })),

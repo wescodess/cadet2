@@ -175,20 +175,24 @@ export default defineSchema({
     resumable: v.optional(v.boolean()),
     processingStartedAt: v.optional(v.number()),
     processingHeartbeatAt: v.optional(v.number()),
-    pathwayEvaluation: v.optional(v.object({
-      evaluatedAt: v.number(),
-      evaluatorVersion: v.string(),
-      direct: v.array(pathwayDirectOutcomeValidator),
-      blocked: v.array(pathwayBlockedOutcomeValidator),
-    })),
-    recommendationResults: v.optional(v.object({
-      rankedAt: v.number(),
-      rankerVersion: v.string(),
-      noComposedReason: v.optional(v.string()),
-      direct: v.array(rankedDirectRecommendationValidator),
-      blocked: v.array(rankedBlockedRecommendationValidator),
-      composed: v.array(rankedComposedRecommendationValidator),
-    })),
+    pathwayEvaluation: v.optional(
+      v.object({
+        evaluatedAt: v.number(),
+        evaluatorVersion: v.string(),
+        direct: v.array(pathwayDirectOutcomeValidator),
+        blocked: v.array(pathwayBlockedOutcomeValidator),
+      }),
+    ),
+    recommendationResults: v.optional(
+      v.object({
+        rankedAt: v.number(),
+        rankerVersion: v.string(),
+        noComposedReason: v.optional(v.string()),
+        direct: v.array(rankedDirectRecommendationValidator),
+        blocked: v.array(rankedBlockedRecommendationValidator),
+        composed: v.array(rankedComposedRecommendationValidator),
+      }),
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -243,6 +247,13 @@ export default defineSchema({
     email: v.optional(v.string()),
     createdAt: v.number(),
     grantedByUserId: v.optional(v.string()),
+    subjectBinding: v.optional(
+      v.object({
+        issuer: v.string(),
+        reviewedAt: v.number(),
+        operatorEvidence: v.string(),
+      }),
+    ),
   })
     .index('by_userId', ['userId'])
     .index('by_email', ['email']),
@@ -406,12 +417,14 @@ export default defineSchema({
       transcriptSucceededWithTimestamps: v.optional(v.number()),
       transcriptDescriptionFallback: v.optional(v.number()),
     }),
-    errors: v.array(v.object({
-      code: v.string(),
-      message: v.string(),
-      retryable: v.optional(v.boolean()),
-      timestamp: v.number(),
-    })),
+    errors: v.array(
+      v.object({
+        code: v.string(),
+        message: v.string(),
+        retryable: v.optional(v.boolean()),
+        timestamp: v.number(),
+      }),
+    ),
     attempt: v.number(),
     maxAttempts: v.number(),
     retryOfSourceRunId: v.optional(v.id('source_runs')),

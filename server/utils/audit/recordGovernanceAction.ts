@@ -9,14 +9,12 @@ export async function recordGovernanceAction(
   input: GovernanceAuditEventInput,
   sessionContext?: Awaited<ReturnType<typeof requireAdminSession>>,
 ) {
-  const resolvedSession = sessionContext || await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const resolvedSession = sessionContext || (await requireAdminSession(event))
 
   return await insertAuditLogEvent({
     actorId: resolvedSession.userId,
     actorEmail: normalizeOptionalString(resolvedSession.session.user.email) || undefined,
-    actorRole: normalizeOptionalString((resolvedSession.session.user as { role?: unknown }).role) || 'admin',
+    actorRole: 'admin',
     actionType: input.actionType,
     entityType: input.entityType,
     entityId: input.entityId,
@@ -26,8 +24,9 @@ export async function recordGovernanceAction(
       after: normalizeJsonRecord(input.changeContext.after),
     },
     reason: normalizeOptionalString(input.reason) || undefined,
-    timestamp: typeof input.timestamp === 'number' && Number.isFinite(input.timestamp)
-      ? Math.round(input.timestamp)
-      : Date.now(),
+    timestamp:
+      typeof input.timestamp === 'number' && Number.isFinite(input.timestamp)
+        ? Math.round(input.timestamp)
+        : Date.now(),
   })
 }

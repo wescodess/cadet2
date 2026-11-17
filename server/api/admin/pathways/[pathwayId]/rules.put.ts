@@ -10,9 +10,7 @@ import {
 import { replacePathwayRulesSchema } from '../../../../utils/pathways/pathwayRuleSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const adminSession = await requireAdminSession(event)
 
   const pathwayId = getRouterParam(event, 'pathwayId')?.trim() || ''
 
@@ -39,39 +37,47 @@ export default defineEventHandler(async (event) => {
   try {
     const before = await listPathwayRules(pathwayId)
     const items = await bulkSaveRules(pathwayId, parsed.data.rules)
-    const beforeById = new Map(before.map(item => [item.id, item] as const))
-    const afterById = new Map(items.map(item => [item.id, item] as const))
+    const beforeById = new Map(before.map((item) => [item.id, item] as const))
+    const afterById = new Map(items.map((item) => [item.id, item] as const))
 
     for (const item of items) {
       const previous = beforeById.get(item.id) || null
       const actionType = previous ? 'PATHWAY_RULE_UPDATED' : 'PATHWAY_RULE_CREATED'
 
       if (!previous || JSON.stringify(previous) !== JSON.stringify(item)) {
-        await recordGovernanceAction(event, {
-          actionType,
-          entityType: 'PATHWAY_RULE',
-          entityId: item.id,
-          entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-          changeContext: {
-            before: previous,
-            after: item,
+        await recordGovernanceAction(
+          event,
+          {
+            actionType,
+            entityType: 'PATHWAY_RULE',
+            entityId: item.id,
+            entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+            changeContext: {
+              before: previous,
+              after: item,
+            },
           },
-        }, adminSession)
+          adminSession,
+        )
       }
     }
 
     for (const item of before) {
       if (!afterById.has(item.id)) {
-        await recordGovernanceAction(event, {
-          actionType: 'PATHWAY_RULE_DELETED',
-          entityType: 'PATHWAY_RULE',
-          entityId: item.id,
-          entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-          changeContext: {
-            before: item,
-            after: null,
+        await recordGovernanceAction(
+          event,
+          {
+            actionType: 'PATHWAY_RULE_DELETED',
+            entityType: 'PATHWAY_RULE',
+            entityId: item.id,
+            entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+            changeContext: {
+              before: item,
+              after: null,
+            },
           },
-        }, adminSession)
+          adminSession,
+        )
       }
     }
 
@@ -80,8 +86,7 @@ export default defineEventHandler(async (event) => {
       items,
       totalCount: items.length,
     }
-  }
-  catch (error) {
+  } catch (error) {
     if (error instanceof PathwayRuleConflictError) {
       throw createError({
         statusCode: 409,

@@ -1,0 +1,39 @@
+✖ failing tests:
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:308:1
+✖ phase-0 diagnostics disclose configuration presence without configured values (16.466125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  true !== false
+
+      at TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:312:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:342:1
+✖ explicit isolated operator migrations preserve every enabled admin operation (5518.962708ms)
+  AssertionError [ERR_ASSERTION]: POST /api/admin/pathways/synthetic-public/rules: {"ok":true,"item":{"unmetConditionId":"synthetic-condition","fieldPath":"englishClb","operator":">=","comparisonValue":8,"id":"synthetic-public-rule-4f4e571c-1e0b-456a-bcb7-e4c41dcb8ec8","pathwayId":"synthetic-public","displayOrder":0,"createdAt":"2026-11-17T23:18:35.516Z","updatedAt":"2026-11-17T23:18:35.516Z"}}
+
+  200 !== 201
+
+      at successful (file://<workspace>/tests/security/admin-rag.test.mjs:338:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:357:19)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 201,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✖ Failed to run command `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'`: `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'` exited with non-zero code: 1

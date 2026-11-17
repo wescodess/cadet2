@@ -23,6 +23,7 @@
     "secrets:all": "node scripts/quality/secrets.mjs --all-branches",
     "dependencies:check": "node scripts/quality/dependencies.mjs",
     "test:policy": "node scripts/quality/test-policy.mjs",
+    "security:admin": "node scripts/security/run-boundaries.mjs",
     "verify": "exec node scripts/quality/verify.mjs",
     "boundaries:check": "node scripts/quality/boundaries.mjs",
     "dead-code:check": "node scripts/quality/dead-code.mjs",

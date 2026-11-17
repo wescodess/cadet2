@@ -49,17 +49,6 @@ function hasValue(value: unknown) {
   return typeof value === 'string' ? value.trim().length > 0 : Boolean(value)
 }
 
-function parseList(value: unknown) {
-  if (typeof value !== 'string') {
-    return []
-  }
-
-  return value
-    .split(/[\n,]/g)
-    .map(entry => entry.trim())
-    .filter(Boolean)
-}
-
 function toOptionalString(value: unknown) {
   return typeof value === 'string' && value.trim() ? value.trim() : ''
 }
@@ -80,8 +69,9 @@ export function getRagFoundationConfig(event: H3Event) {
   const gatewayAccountId = toOptionalString(aiGateway.accountId)
   const gatewayId = toOptionalString(aiGateway.gatewayId)
   const gatewayBaseUrlOverride = toOptionalString(aiGateway.baseUrl)
-  const resolvedGatewayBaseUrl = gatewayBaseUrlOverride
-    || (gatewayAccountId && gatewayId
+  const resolvedGatewayBaseUrl =
+    gatewayBaseUrlOverride ||
+    (gatewayAccountId && gatewayId
       ? `https://gateway.ai.cloudflare.com/v1/${gatewayAccountId}/${gatewayId}`
       : '')
 
@@ -107,8 +97,6 @@ export function getRagFoundationConfig(event: H3Event) {
     },
     rag: {
       defaultTenantId: toOptionalString(rag.defaultTenantId) || 'default',
-      adminUserIds: parseList(rag.adminUserIds),
-      adminEmails: parseList(rag.adminEmails).map(email => email.toLowerCase()),
       schedulerSecret: toOptionalString(rag.schedulerSecret),
     },
   }
@@ -137,12 +125,6 @@ export function getRagPhase0Readiness(event: H3Event): RagPhase0Readiness {
     !hasValue(config.openRouter.defaultModel) ? 'NUXT_OPENROUTER_DEFAULT_MODEL' : null,
   ].filter((value): value is string => Boolean(value))
 
-  const adminMissing = [
-    config.rag.adminUserIds.length === 0 && config.rag.adminEmails.length === 0
-      ? 'NUXT_RAG_ADMIN_USER_IDS or NUXT_RAG_ADMIN_EMAILS'
-      : null,
-  ].filter((value): value is string => Boolean(value))
-
   const schedulerMissing = [
     !hasValue(config.rag.schedulerSecret) ? 'NUXT_RAG_SCHEDULER_SECRET' : null,
   ].filter((value): value is string => Boolean(value))
@@ -152,7 +134,7 @@ export function getRagPhase0Readiness(event: H3Event): RagPhase0Readiness {
       ready: aiSearchMissing.length === 0,
       missingEnvVars: aiSearchMissing,
       notes: [
-        'Instance name or instance ID is required; either is acceptable.',
+        'Configuration presence only. AI Search remains disabled pending provider and corpus approval.',
       ],
     },
     aiGateway: {
@@ -171,23 +153,19 @@ export function getRagPhase0Readiness(event: H3Event): RagPhase0Readiness {
       ],
     },
     adminAuthorization: {
-      ready: adminMissing.length === 0,
-      missingEnvVars: adminMissing,
-      notes: [
-        'Admin access is allowlist-based in Phase 0 (email and/or user ID).',
-      ],
+      ready: true,
+      missingEnvVars: [],
+      notes: ['Access requires the authenticated subject and a current stored admin grant.'],
     },
     schedulerSecret: {
       ready: schedulerMissing.length === 0,
       missingEnvVars: schedulerMissing,
-      notes: [
-        'Reserved for internal scheduler/cron endpoints in Phase 2.',
-      ],
+      notes: ['Reserved for internal scheduler/cron endpoints in Phase 2.'],
     },
   } satisfies RagPhase0Readiness['sections']
 
   return {
-    overallReady: Object.values(sections).every(section => section.ready),
+    overallReady: false,
     checkedAt: new Date().toISOString(),
     configSummary: {
       defaultTenantId: config.rag.defaultTenantId,
@@ -202,7 +180,7 @@ export function getRagPhase0Readiness(event: H3Event): RagPhase0Readiness {
         gatewayIdConfigured: hasValue(config.aiGateway.gatewayId),
         baseUrlConfigured: hasValue(config.aiGateway.baseUrl),
         apiTokenConfigured: hasValue(config.aiGateway.apiToken),
-        resolvedBaseUrl: config.aiGateway.resolvedBaseUrl || null,
+        resolvedBaseUrl: null,
       },
       openRouter: {
         apiKeyConfigured: hasValue(config.openRouter.apiKey),
@@ -211,8 +189,8 @@ export function getRagPhase0Readiness(event: H3Event): RagPhase0Readiness {
         appUrlConfigured: hasValue(config.openRouter.appUrl),
       },
       adminAuth: {
-        adminUserIdsCount: config.rag.adminUserIds.length,
-        adminEmailsCount: config.rag.adminEmails.length,
+        adminUserIdsCount: 0,
+        adminEmailsCount: 0,
       },
     },
     sections,

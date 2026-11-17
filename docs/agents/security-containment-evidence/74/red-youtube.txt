@@ -1,0 +1,65 @@
+✖ failing tests:
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:202:1
+✖ YouTube submissions and every activation transition stay frozen for admins (7.602792ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection: createSourceSubmission
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:210:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /YouTube ingestion is frozen/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:214:1
+✖ manual and force preparation cannot select or reuse frozen YouTube jobs (4.144333ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection: prepareManualBatchAsNuxtAdmin
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:217:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /YouTube ingestion is frozen/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:224:1
+✖ scheduled preparation excludes YouTube and keeps website preparation working (26.750875ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(plan.items.every((item) => item.source.type === 'website'))
+
+      at TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:229:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:234:1
+✖ already-prepared YouTube work cannot claim, execute, finalize, retry or sync (5.448208ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection: startBatchExecutionFromNuxt
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:242:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /YouTube ingestion is frozen/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✖ Failed to run command `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'`: `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'` exited with non-zero code: 1

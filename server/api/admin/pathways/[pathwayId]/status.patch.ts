@@ -9,9 +9,7 @@ import {
 import { updatePathwayStatusSchema } from '../../../../utils/pathways/pathwayDefinitionSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const adminSession = await requireAdminSession(event)
 
   const pathwayId = getRouterParam(event, 'pathwayId')?.trim() || ''
 
@@ -45,17 +43,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await recordGovernanceAction(event, {
-    actionType: 'PATHWAY_STATUS_CHANGED',
-    entityType: 'PATHWAY',
-    entityId: updated.pathwayId,
-    entityLabel: updated.displayName,
-    changeContext: {
-      before,
-      after: updated,
+  await recordGovernanceAction(
+    event,
+    {
+      actionType: 'PATHWAY_STATUS_CHANGED',
+      entityType: 'PATHWAY',
+      entityId: updated.pathwayId,
+      entityLabel: updated.displayName,
+      changeContext: {
+        before,
+        after: updated,
+      },
+      reason: `Status changed to ${updated.status}`,
     },
-    reason: `Status changed to ${updated.status}`,
-  }, adminSession)
+    adminSession,
+  )
 
   return updated
 })

@@ -36,8 +36,6 @@ export default defineNuxtConfig({
     },
     rag: {
       defaultTenantId: 'default',
-      adminUserIds: '',
-      adminEmails: '',
       schedulerSecret: '',
     },
   },

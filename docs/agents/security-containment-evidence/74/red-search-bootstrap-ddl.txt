@@ -1,0 +1,73 @@
+✖ failing tests:
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:247:1
+✖ AI Search API and SSR page deny non-admins and remain off for admins (8.910291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  503 !== 401
+
+      at TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:253:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 503,
+    expected: 401,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:265:1
+✖ bootstrap and allowlist-sync registrations are absent (8.307542ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  401 !== 404
+
+      at TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:267:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 401,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:285:1
+✖ built server and browser artifacts contain no transcript proxy or embedded-key caller (245.577125ms)
+  AssertionError [ERR_ASSERTION]: forbidden YouTube implementation is shipped
+
+  true !== false
+
+      at TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:287:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:290:1
+✖ admin pathway reads cannot initialize missing tables or return demo inventory (52.522666ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  200 !== 503
+
+      at TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:291:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 503,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✖ Failed to run command `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'`: `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'` exited with non-zero code: 1

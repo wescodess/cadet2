@@ -1,0 +1,36 @@
+
+ RUN  v4.0.18 <workspace>
+
+ ❯ tests/unit/ragStorage.spec.mjs (1 test | 1 failed) 12ms
+   × reports unavailable without approved hosted storage and never writes a local success 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/ragStorage.spec.mjs > reports unavailable without approved hosted storage and never writes a local success
+AssertionError: promise resolved "{ mode: 'local-fallback', …(1) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "key": "containment/synthetic.md",
++   "mode": "local-fallback",
+  }
+
+ ❯ tests/unit/ragStorage.spec.mjs:15:8
+     13|     await expect(putRagObject({
+     14|       key: 'containment/synthetic.md', body: 'Synthetic public informa…
+     15|     })).rejects.toMatchObject({ statusCode: 503 })
+       |        ^
+     16|     expect(getRagStorageMode()).toBe('unavailable')
+     17|   } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  18:15:32
+   Duration  323ms (transform 32ms, setup 0ms, import 132ms, tests 12ms, environment 0ms)

@@ -4,9 +4,7 @@ import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 import { getAuditTrailEvent } from '../../../utils/audit/auditTrailService'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  await requireAdminSession(event)
 
   const eventId = getRouterParam(event, 'eventId')?.trim() || ''
   if (!eventId) {

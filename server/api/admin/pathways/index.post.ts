@@ -7,9 +7,7 @@ import {
 import { createPathwayDefinitionSchema } from '../../../utils/pathways/pathwayDefinitionSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const adminSession = await requireAdminSession(event)
 
   const body = await readBody<unknown>(event)
   const parsed = createPathwayDefinitionSchema.safeParse(body ?? {})
@@ -34,21 +32,24 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    await recordGovernanceAction(event, {
-      actionType: 'PATHWAY_CREATED',
-      entityType: 'PATHWAY',
-      entityId: created.pathwayId,
-      entityLabel: created.displayName,
-      changeContext: {
-        before: null,
-        after: created,
+    await recordGovernanceAction(
+      event,
+      {
+        actionType: 'PATHWAY_CREATED',
+        entityType: 'PATHWAY',
+        entityId: created.pathwayId,
+        entityLabel: created.displayName,
+        changeContext: {
+          before: null,
+          after: created,
+        },
       },
-    }, adminSession)
+      adminSession,
+    )
 
     setResponseStatus(event, 201)
     return created
-  }
-  catch (error) {
+  } catch (error) {
     if (error instanceof PathwayDefinitionConflictError) {
       throw createError({
         statusCode: 409,

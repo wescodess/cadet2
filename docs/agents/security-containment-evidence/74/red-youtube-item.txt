@@ -1,0 +1,17 @@
+✖ failing tests:
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:524:1
+✖ website completion cannot inject a YouTube item through a different source type (7.5425ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:525:3)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /YouTube ingestion is frozen|ArgumentValidationError/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+✖ Failed to run command `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'`: `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'` exited with non-zero code: 1

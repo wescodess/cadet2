@@ -1,0 +1,35 @@
+✖ failing tests:
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:134:1
+✖ every source operation requires admin and preserves official-source administration (48.208416ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection: listSources
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:148:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Authentication required|Admin access required/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at ../../../../../../../..<workspace>/tests/security/admin-rag.test.mjs:163:1
+✖ allowlisted ordinary accounts cannot enter admin HTTP routes (29.541708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  200 !== 403
+
+      at TestContext.<anonymous> (file://<workspace>/tests/security/admin-rag.test.mjs:165:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 403,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+✖ Failed to run command `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'`: `'/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node' --test '<workspace>/tests/security/admin-rag.test.mjs'` exited with non-zero code: 1

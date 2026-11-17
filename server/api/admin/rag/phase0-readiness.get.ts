@@ -2,9 +2,7 @@ import { getRagPhase0Readiness } from '../../../utils/rag-foundation'
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 
 export default defineEventHandler(async (event) => {
-  const { session, authorizationSource } = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const { session, authorizationSource } = await requireAdminSession(event)
   const readiness = getRagPhase0Readiness(event)
 
   return {
@@ -16,9 +14,6 @@ export default defineEventHandler(async (event) => {
       authorizationSource,
     },
     readiness,
-    docs: [
-      'docs/rag-v1-phase-0-checklist.md',
-      'docs/rag-v1-phase-0-api-contract-deltas.md',
-    ],
+    docs: ['docs/rag-v1-phase-0-checklist.md', 'docs/rag-v1-phase-0-api-contract-deltas.md'],
   }
 })
