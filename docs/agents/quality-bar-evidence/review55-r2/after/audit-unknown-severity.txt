@@ -1,0 +1,19 @@
+Invalid pnpm audit report: [
+  {
+    "received": "unknown",
+    "code": "invalid_enum_value",
+    "options": [
+      "info",
+      "low",
+      "moderate",
+      "high",
+      "critical"
+    ],
+    "path": [
+      "advisories",
+      "1102341",
+      "severity"
+    ],
+    "message": "Invalid enum value. Expected 'info' | 'low' | 'moderate' | 'high' | 'critical', received 'unknown'"
+  }
+]

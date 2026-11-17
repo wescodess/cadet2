@@ -61,7 +61,7 @@ jobs:
         with:
           name: secrets-all-branches
           include-hidden-files: true
-          path: .quality-output/secrets-all-branches.json
+          path: .quality-output/run-*/secrets-all-branches.json
           retention-days: 14
 
   verify:
@@ -100,7 +100,7 @@ jobs:
         with:
           name: quality-output
           include-hidden-files: true
-          path: .quality-output/
+          path: .quality-output/run-*/
           retention-days: 14
 
   test:

@@ -1,0 +1,1 @@
+ENOENT: no such file or directory, open '/var/folders/xt/h8ndt65x0zgbydh0q57vd2tr0000gn/T/cadet2-secrets-E2fzee/diff.json'

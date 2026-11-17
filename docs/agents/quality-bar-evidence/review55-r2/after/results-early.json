@@ -1,0 +1,58 @@
+[
+  {
+    "probe": "scanner-exit1-no-report",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/fake-scanner:$PATH"
+    },
+    "exit": 1
+  },
+  {
+    "probe": "scanner-exit1-no-report-all",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs",
+      "--all-branches"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/fake-scanner:$PATH"
+    },
+    "exit": 1
+  },
+  {
+    "probe": "scanner-missing-offline",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "--require",
+      "/tmp/review-pr55-r2-evidence/fix-after/offline.cjs",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/missing-scanner"
+    },
+    "exit": 1
+  },
+  {
+    "probe": "shallow-secrets",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {},
+    "exit": 1
+  },
+  {
+    "probe": "missing-dev-secrets",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/fake-scanner:$PATH"
+    },
+    "exit": 1
+  }
+]

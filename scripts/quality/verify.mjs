@@ -1,6 +1,7 @@
 import { main, outputDir, run, writeJSON } from './common.mjs'
 
 main(() => {
+  console.log(`Quality evidence: ${outputDir}`)
   const policy = run('node', ['scripts/quality/baseline-policy.mjs'])
   process.stdout.write(policy.stdout)
   process.stderr.write(policy.stderr)
@@ -19,12 +20,18 @@ main(() => {
   for (const row of rows) {
     const start = Date.now()
     console.log(`\n>>> ${row}`)
-    const result = run('pnpm', ['run', row])
-    process.stdout.write(result.stdout)
-    process.stderr.write(result.stderr)
+    let status = 'FAIL'
+    try {
+      const result = run('pnpm', ['run', row])
+      process.stdout.write(result.stdout)
+      process.stderr.write(result.stderr)
+      if (result.status === 0) status = 'PASS'
+    } catch (error) {
+      console.error(error.message)
+    }
     results.push({
       row,
-      status: result.status === 0 ? 'PASS' : 'FAIL',
+      status,
       seconds: ((Date.now() - start) / 1000).toFixed(1),
     })
     writeJSON(`${outputDir}/verification.json`, results)

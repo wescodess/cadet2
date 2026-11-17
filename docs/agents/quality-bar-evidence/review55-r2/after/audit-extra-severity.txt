@@ -1,0 +1,13 @@
+Invalid pnpm audit report: [
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "unknown"
+    ],
+    "path": [
+      "metadata",
+      "vulnerabilities"
+    ],
+    "message": "Unrecognized key(s) in object: 'unknown'"
+  }
+]

@@ -1,0 +1,17 @@
+Invalid pnpm audit report: [
+  {
+    "code": "too_small",
+    "minimum": 1,
+    "type": "array",
+    "inclusive": true,
+    "exact": false,
+    "message": "Array must contain at least 1 element(s)",
+    "path": [
+      "advisories",
+      "1102341",
+      "findings",
+      0,
+      "paths"
+    ]
+  }
+]

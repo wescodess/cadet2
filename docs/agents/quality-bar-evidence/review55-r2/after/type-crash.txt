@@ -1,0 +1,3 @@
+Typecheck did not complete (exit 137): app/components/admin/EvidenceSourceDetail.vue(1,1): error TS2322: existing diagnostic emitted before failure
+Killed: compiler aborted before completing its project
+

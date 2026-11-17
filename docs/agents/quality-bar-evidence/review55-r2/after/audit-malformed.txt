@@ -1,0 +1,118 @@
+Invalid pnpm audit report: [
+  {
+    "code": "invalid_type",
+    "expected": "number",
+    "received": "undefined",
+    "path": [
+      "advisories",
+      "unknown",
+      "id"
+    ],
+    "message": "Required"
+  },
+  {
+    "received": "unrecognized",
+    "code": "invalid_enum_value",
+    "options": [
+      "info",
+      "low",
+      "moderate",
+      "high",
+      "critical"
+    ],
+    "path": [
+      "advisories",
+      "unknown",
+      "severity"
+    ],
+    "message": "Invalid enum value. Expected 'info' | 'low' | 'moderate' | 'high' | 'critical', received 'unrecognized'"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "advisories",
+      "unknown",
+      "module_name"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "advisories",
+      "unknown",
+      "url"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "advisories",
+      "unknown",
+      "github_advisory_id"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "undefined",
+    "path": [
+      "advisories",
+      "unknown",
+      "findings"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "number",
+    "received": "undefined",
+    "path": [
+      "metadata",
+      "vulnerabilities",
+      "info"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "number",
+    "received": "undefined",
+    "path": [
+      "metadata",
+      "vulnerabilities",
+      "low"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "number",
+    "received": "undefined",
+    "path": [
+      "metadata",
+      "vulnerabilities",
+      "moderate"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "number",
+    "received": "undefined",
+    "path": [
+      "metadata",
+      "vulnerabilities",
+      "critical"
+    ],
+    "message": "Required"
+  }
+]

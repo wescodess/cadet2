@@ -1,0 +1,15 @@
+Invalid pnpm audit report: [
+  {
+    "code": "too_small",
+    "minimum": 0,
+    "type": "number",
+    "inclusive": true,
+    "exact": false,
+    "message": "Number must be greater than or equal to 0",
+    "path": [
+      "metadata",
+      "vulnerabilities",
+      "high"
+    ]
+  }
+]

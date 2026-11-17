@@ -1,4 +1,5 @@
 import { writeFileSync } from 'node:fs'
+import { z } from 'zod'
 import { json, main, outputDir, run, writeJSON, writingBaseline } from './common.mjs'
 
 const expiry = '2027-01-16'
@@ -22,16 +23,63 @@ const permittedLicenses = new Set([
   '(MIT OR CC0-1.0)',
 ])
 
-function auditFindings(audit) {
-  if (!audit.advisories || !audit.metadata?.vulnerabilities)
-    throw new Error('Unrecognized pnpm audit report')
+const severities = ['info', 'low', 'moderate', 'high', 'critical']
+const nonempty = z.string().trim().min(1)
+const auditSchema = z.object({
+  advisories: z.record(
+    z.object({
+      id: z.number().int().positive(),
+      severity: z.enum(severities),
+      module_name: nonempty,
+      url: z.string().regex(/^https:\/\/github\.com\/advisories\/GHSA-[\w-]+$/),
+      github_advisory_id: z.string().regex(/^GHSA-[\w-]+$/),
+      findings: z
+        .array(z.object({ version: nonempty, paths: z.array(nonempty).nonempty() }))
+        .nonempty(),
+    }),
+  ),
+  metadata: z.object({
+    vulnerabilities: z
+      .object(
+        Object.fromEntries(
+          severities.map((severity) => [severity, z.number().int().nonnegative()]),
+        ),
+      )
+      .strict(),
+  }),
+})
+
+function validateAudit(report) {
+  const parsed = auditSchema.safeParse(report)
+  if (!parsed.success) throw new Error(`Invalid pnpm audit report: ${parsed.error.message}`)
+  const audit = parsed.data
+  const totals = Object.fromEntries(severities.map((severity) => [severity, 0]))
+  for (const [key, advisory] of Object.entries(audit.advisories)) {
+    const id = advisory.github_advisory_id
+    if (String(advisory.id) !== key || !advisory.url.endsWith(`/${id}`))
+      throw new Error(`Audit advisory identity mismatch: ${key}`)
+    for (const finding of advisory.findings) {
+      if (
+        finding.paths.some((path) => !path.endsWith(`${advisory.module_name}@${finding.version}`))
+      )
+        throw new Error(`Audit advisory has unmatched dependency paths: ${key}`)
+    }
+    totals[advisory.severity] += advisory.findings.length
+  }
+  for (const severity of severities) {
+    if (totals[severity] !== audit.metadata.vulnerabilities[severity])
+      throw new Error(`Audit ${severity} count does not match parsed advisories`)
+  }
+  return audit
+}
+
+function auditFindings(report) {
+  const audit = validateAudit(report)
   const findings = {}
   for (const advisory of Object.values(audit.advisories)) {
     if (!['high', 'critical'].includes(advisory.severity)) continue
-    const id = /GHSA-[\w-]+/.exec(advisory.url)?.[0]
-    if (!id) throw new Error('Audit advisory has no GHSA identifier')
     for (const finding of advisory.findings) {
-      const key = `${id}|${advisory.module_name}@${finding.version}`
+      const key = `${advisory.github_advisory_id}|${advisory.module_name}@${finding.version}`
       findings[key] = [...new Set([...(findings[key] ?? []), ...finding.paths])].sort()
     }
   }

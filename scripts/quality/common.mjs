@@ -1,18 +1,33 @@
 import { spawnSync } from 'node:child_process'
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, mkdtempSync } from 'node:fs'
 import { relative } from 'node:path'
 
 export const baselineCommit = 'fe2b4a4e4f8b4b861fb5c92661b9e411a84ef0b3'
 export const writingBaseline = process.argv.includes('--write-baseline')
-export const outputDir = '.quality-output'
-mkdirSync(outputDir, { recursive: true })
+if (
+  (Object.hasOwn(process.env, 'CI') || Object.hasOwn(process.env, 'GITHUB_ACTIONS')) &&
+  process.argv.some((arg) => /^--(?:write|fix|update)(?:-|=|$)/.test(arg))
+)
+  throw new Error('Quality baseline and writer flags are forbidden in CI')
+
+export const commandTimeout = Number(process.env.QUALITY_TIMEOUT_MS ?? 300_000)
+if (!Number.isInteger(commandTimeout) || commandTimeout < 1 || commandTimeout > 300_000)
+  throw new Error('QUALITY_TIMEOUT_MS must be an integer from 1 to 300000')
+
+mkdirSync('.quality-output', { recursive: true })
+export const outputDir = process.env.QUALITY_OUTPUT_DIR ?? mkdtempSync('.quality-output/run-')
+process.env.QUALITY_OUTPUT_DIR = outputDir
 
 export function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
     ...options,
+    timeout: commandTimeout,
+    killSignal: 'SIGKILL',
   })
+  if (result.error?.code === 'ETIMEDOUT')
+    throw new Error(`${command} timed out after ${commandTimeout}ms`)
   if (result.error) throw result.error
   if (result.signal) throw new Error(`${command} terminated by ${result.signal}`)
   return result

@@ -1,0 +1,6 @@
+
+> cadet2@ typecheck /private/tmp/fix-pr55-r2
+> node scripts/quality/types.mjs
+
+types: PASS (47 current; 47 baseline)
+types-convex: PASS (10 current; 10 baseline)

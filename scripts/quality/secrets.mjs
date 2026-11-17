@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { files, git, json, main, outputDir, run, writeJSON, writingBaseline } from './common.mjs'
@@ -8,17 +8,27 @@ import { gitleaks } from './install-gitleaks.mjs'
 const baselinePath = 'scripts/quality/baselines/secrets.json'
 
 function scan(binary, directory, name, args) {
-  const report = join(directory, 'report.json')
-  writeFileSync(report, '[]', { mode: 0o600 })
+  const report = join(directory, `${name}.json`)
   const result = run(binary, [
     ...args,
     '--no-banner',
     '--report-format=json',
+    '--exit-code=42',
     `--report-path=${report}`,
   ])
-  if (![0, 1].includes(result.status))
+  if (![0, 42].includes(result.status))
     throw new Error(`gitleaks ${name} failed (exit ${result.status})`)
   const findings = JSON.parse(readFileSync(report, 'utf8'))
+  if (
+    !Array.isArray(findings) ||
+    findings.some((finding) =>
+      ['File', 'RuleID', 'Secret'].some(
+        (key) => typeof finding?.[key] !== 'string' || !finding[key].length,
+      ),
+    ) ||
+    (result.status === 42) !== findings.length > 0
+  )
+    throw new Error(`gitleaks ${name} produced an invalid or inconsistent report`)
   return findings.map((finding) => {
     const file = finding.File.replace(`${join(directory, 'tree')}/`, '')
     const digest = createHash('sha256').update(finding.Secret).digest('hex')
