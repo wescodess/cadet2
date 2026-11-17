@@ -1,0 +1,9 @@
+
+ RUN  v4.0.18 /private/tmp/fix-pr55-schema
+
+ ✓ tests/unit/quality-parsers.spec.mjs (23 tests) 19ms
+
+ Test Files  1 passed (1)
+      Tests  23 passed (23)
+   Start at  16:18:17
+   Duration  165ms (transform 34ms, setup 0ms, import 67ms, tests 19ms, environment 0ms)

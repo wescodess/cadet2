@@ -1,0 +1,51 @@
+{
+  "valid": {
+    "status": 2,
+    "stdout": "app/fixture.ts(1,2): error TS2322: Fixture diagnostic\n  Fixture continuation\n",
+    "stderr": ""
+  },
+  "invalid": [
+    {
+      "status": 2,
+      "stdout": "scanner unavailable\n",
+      "stderr": ""
+    },
+    {
+      "status": 2,
+      "stdout": "app/fixture.ts(1,2): error TS2322: Fixture diagnostic\n  Fixture continuation",
+      "stderr": ""
+    },
+    {
+      "status": 0,
+      "stdout": "app/fixture.ts(1,2): error TS2322: Fixture diagnostic\n  Fixture continuation\n",
+      "stderr": ""
+    },
+    {
+      "status": 2,
+      "stdout": "  orphan continuation\n",
+      "stderr": ""
+    },
+    {
+      "status": 2,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "status": 2,
+      "stdout": "app/fixture.ts(1,2): error TS2322: Fixture diagnostic\n  Fixture continuation\n",
+      "stderr": "scanner unavailable"
+    },
+    {
+      "status": 3,
+      "stdout": "app/fixture.ts(1,2): error TS2322: Fixture diagnostic\n  Fixture continuation\n",
+      "stderr": ""
+    }
+  ],
+  "alsoValid": [
+    {
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

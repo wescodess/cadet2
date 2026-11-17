@@ -1,0 +1,13 @@
+{
+  "valid": "{\"MIT\": [{\"name\": \"fixture\", \"versions\": [\"1.0.0\"]}]}",
+  "invalid": [
+    "{\"MIT\": null}",
+    "{\"MIT\": \"scanner unavailable\"}",
+    "{\"MIT\": []}",
+    "{\"MIT\": [{}]}",
+    "{\"MIT\": [{\"name\": \"fixture\", \"versions\": []}]}",
+    "{\"MIT\": [{\"name\": 123, \"versions\": [\"1\"]}]}",
+    "{\"MIT\": [{\"name\": \"fixture\", \"versions\": [\"1\"], \"unknown\": true}]}"
+  ],
+  "alsoValid": []
+}

@@ -1,0 +1,22 @@
+{
+  "valid": {
+    "ignored": false,
+    "inferredParser": "typescript"
+  },
+  "invalid": [
+    {
+      "ignored": "false",
+      "inferredParser": "typescript"
+    },
+    {
+      "ignored": false,
+      "inferredParser": ""
+    }
+  ],
+  "alsoValid": [
+    {
+      "ignored": true,
+      "inferredParser": null
+    }
+  ]
+}

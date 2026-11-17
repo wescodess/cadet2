@@ -1,0 +1,42 @@
+{
+  "valid": {
+    "status": 42,
+    "stdout": "[{\"RuleID\": \"fixture\", \"Description\": \"fixture\", \"StartLine\": 216, \"EndLine\": 216, \"StartColumn\": 51, \"EndColumn\": 132, \"Match\": \"fixture\", \"Secret\": \"fixture\", \"File\": \"fixture\", \"SymlinkFile\": \"\", \"Commit\": \"fixture\", \"Link\": \"fixture\", \"Entropy\": 3.7858343, \"Author\": \"fixture\", \"Email\": \"fixture\", \"Date\": \"fixture\", \"Message\": \"fixture\", \"Tags\": [], \"Fingerprint\": \"fixture\"}]"
+  },
+  "invalid": [
+    {
+      "status": 0,
+      "stdout": "[{\"RuleID\": \"fixture\", \"Description\": \"fixture\", \"StartLine\": 216, \"EndLine\": 216, \"StartColumn\": 51, \"EndColumn\": 132, \"Match\": \"fixture\", \"Secret\": \"fixture\", \"File\": \"fixture\", \"SymlinkFile\": \"\", \"Commit\": \"fixture\", \"Link\": \"fixture\", \"Entropy\": 3.7858343, \"Author\": \"fixture\", \"Email\": \"fixture\", \"Date\": \"fixture\", \"Message\": \"fixture\", \"Tags\": [], \"Fingerprint\": \"fixture\"}]"
+    },
+    {
+      "status": 42,
+      "stdout": "[]"
+    },
+    {
+      "status": 42,
+      "stdout": "[{}]"
+    },
+    {
+      "status": 42,
+      "stdout": "[{\"RuleID\": \"fixture\", \"Description\": \"fixture\", \"StartLine\": 216, \"EndLine\": 216, \"StartColumn\": 51, \"EndColumn\": 132, \"Match\": \"fixture\", \"Secret\": null, \"File\": \"fixture\", \"SymlinkFile\": \"\", \"Commit\": \"fixture\", \"Link\": \"fixture\", \"Entropy\": 3.7858343, \"Author\": \"fixture\", \"Email\": \"fixture\", \"Date\": \"fixture\", \"Message\": \"fixture\", \"Tags\": [], \"Fingerprint\": \"fixture\"}]"
+    },
+    {
+      "status": 42,
+      "stdout": "[{\"RuleID\": \"fixture\", \"Description\": \"fixture\", \"StartLine\": 216, \"EndLine\": 216, \"StartColumn\": 51, \"EndColumn\": 132, \"Match\": \"fixture\", \"Secret\": \"fixture\", \"File\": \"\", \"SymlinkFile\": \"\", \"Commit\": \"fixture\", \"Link\": \"fixture\", \"Entropy\": 3.7858343, \"Author\": \"fixture\", \"Email\": \"fixture\", \"Date\": \"fixture\", \"Message\": \"fixture\", \"Tags\": [], \"Fingerprint\": \"fixture\"}]"
+    },
+    {
+      "status": 42,
+      "stdout": "[{\"RuleID\": \"fixture\", \"Description\": \"fixture\", \"StartLine\": 216, \"EndLine\": -1, \"StartColumn\": 51, \"EndColumn\": 132, \"Match\": \"fixture\", \"Secret\": \"fixture\", \"File\": \"fixture\", \"SymlinkFile\": \"\", \"Commit\": \"fixture\", \"Link\": \"fixture\", \"Entropy\": 3.7858343, \"Author\": \"fixture\", \"Email\": \"fixture\", \"Date\": \"fixture\", \"Message\": \"fixture\", \"Tags\": [], \"Fingerprint\": \"fixture\"}]"
+    },
+    {
+      "status": 42,
+      "stdout": "[{\"RuleID\": \"fixture\", \"Description\": \"fixture\", \"StartLine\": 216, \"EndLine\": 216, \"StartColumn\": 51, \"EndColumn\": 132, \"Match\": \"fixture\", \"Secret\": \"fixture\", \"File\": \"fixture\", \"SymlinkFile\": \"\", \"Commit\": \"fixture\", \"Link\": \"fixture\", \"Entropy\": 3.7858343, \"Author\": \"fixture\", \"Email\": \"fixture\", \"Date\": \"fixture\", \"Message\": \"fixture\", \"Tags\": [], \"Fingerprint\": \"fixture\", \"unknown\": true}]"
+    }
+  ],
+  "alsoValid": [
+    {
+      "status": 0,
+      "stdout": "[]"
+    }
+  ]
+}

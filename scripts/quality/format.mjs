@@ -1,6 +1,9 @@
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import * as prettier from 'prettier'
+import { parse as parseInfo } from './prettier-info.parser.mjs'
+import { parse as parseCheck } from './prettier-check.parser.mjs'
+import { parse as parseConfig } from './prettier-config.parser.mjs'
 import {
   baselineCommit,
   files,
@@ -16,10 +19,10 @@ async function legacyHash(file, baseline, original) {
   const text = readFileSync(file, 'utf8')
   const hash = `sha256:${createHash('sha256').update(text).digest('hex')}`
   if (!writingBaseline && baseline[file] === hash) return hash
-  const info = await prettier.getFileInfo(file, { ignorePath: '.prettierignore' })
+  const info = parseInfo(await prettier.getFileInfo(file, { ignorePath: '.prettierignore' }))
   if (info.ignored || !info.inferredParser) return null
-  const options = { ...(await prettier.resolveConfig(file)), filepath: file }
-  if (await prettier.check(text, options)) return null
+  const options = { ...parseConfig(await prettier.resolveConfig(file)), filepath: file }
+  if (parseCheck(await prettier.check(text, options))) return null
   if (writingBaseline && !original.has(file))
     throw new Error(`New files must be formatted: ${file}`)
   return hash

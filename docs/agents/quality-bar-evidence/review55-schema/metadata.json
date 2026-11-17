@@ -1,0 +1,25 @@
+{
+  "baseHead": "2e55a7f39bd4f57e7bdd2a5841e08f7141d160f6",
+  "validationBypass": "Temporarily replaced licenses.parser.mjs parse export with (raw) => JSON.parse(raw); shared test exited 1 on null; restored original export and test exited 0.",
+  "licenseProbes": {
+    "before": "All three malformed permitted MIT categories exited 0.",
+    "after": "All three exited 1 with pnpm licenses schema errors; valid MIT exited 0; valid GPL exited 1."
+  },
+  "gitleaksDownload": "Forced missing-system-binary path using PATH=/usr/bin:/bin; live GitHub release metadata, pinned archive digest, extraction and installed version check passed.",
+  "cleanFrozenInstallExit": 0,
+  "verifyExit": 0,
+  "verificationCommand": "BETTER_AUTH_SECRET=$(openssl rand -hex 32) NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3000 CONVEX_SITE_URL=http://127.0.0.1:3000 pnpm verify",
+  "vitest": {
+    "files": 19,
+    "tests": 63,
+    "parserTests": 23
+  },
+  "unchanged": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "scripts/quality/baselines/",
+    ".github/workflows/",
+    "scripts/quality/common.mjs",
+    "scripts/quality/verify.mjs"
+  ]
+}

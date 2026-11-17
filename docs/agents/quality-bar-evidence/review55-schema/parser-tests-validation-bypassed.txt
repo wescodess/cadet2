@@ -1,0 +1,54 @@
+
+ RUN  v4.0.18 /private/tmp/fix-pr55-schema
+
+ ❯ tests/unit/quality-parsers.spec.mjs (23 tests | 1 failed) 20ms
+     ✓ registers a fixture for every parser module and no stale fixtures 1ms
+       ✓ accepts valid tool output 2ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 3ms
+       ✓ accepts valid tool output 1ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 2ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       × rejects the shared malformed corpus and tool-specific inconsistencies 2ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > licenses.parser.mjs > rejects the shared malformed corpus and tool-specific inconsistencies
+AssertionError: null: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/unit/quality-parsers.spec.mjs:64:61
+     62|       it('rejects the shared malformed corpus and tool-specific incons…
+     63|         for (const value of [...malformedInputs(fixture.valid), ...fix…
+     64|           expect(() => parse(value), JSON.stringify(value)).toThrow(/I…
+       |                                                             ^
+     65|       })
+     66|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 22 passed (23)
+   Start at  16:12:17
+   Duration  173ms (transform 33ms, setup 0ms, import 69ms, tests 20ms, environment 0ms)

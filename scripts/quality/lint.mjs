@@ -1,3 +1,4 @@
+import { parse } from './lint.parser.mjs'
 import { ESLint } from 'eslint'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { count, localPath, main, outputDir, ratchet, sourceFiles } from './common.mjs'
@@ -12,7 +13,7 @@ main(async () => {
     : sourceFiles()
   if (!selected.length) return
   const eslint = new ESLint()
-  const results = await eslint.lintFiles(selected)
+  const results = parse({ files: selected, results: await eslint.lintFiles(selected) }).results
   writeFileSync(
     `${outputDir}/lint.json`,
     JSON.stringify(
