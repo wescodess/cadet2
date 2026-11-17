@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cadet option 1: Margin (preview)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..600&family=Schibsted+Grotesk:wght@400..700&display=swap">
+<style>:root{--font-sans:"Schibsted Grotesk", system-ui, sans-serif;--font-display:"Literata", Georgia, serif;--font-reading:"Literata", Georgia, serif;--font-mono:ui-monospace, "SF Mono", Menlo, monospace;--radius:0.25rem;--dur-1:160ms;--ease:cubic-bezier(.2,0,0,1);}
+:root,.theme-light{color-scheme:light;--background:#F3F4F6;--foreground:#161C28;--card:#FFFFFF;--card-foreground:#161C28;--popover:#FFFFFF;--popover-foreground:#161C28;--primary:#1F2B47;--primary-foreground:#FFFFFF;--secondary:#E6E9EE;--secondary-foreground:#161C28;--muted:#ECEEF2;--muted-foreground:#4D5666;--accent:#E4E8F0;--accent-foreground:#161C28;--destructive:#A3243B;--destructive-foreground:#FFFFFF;--border:#D3D8E0;--input:#7B8494;--ring:#2B4CC0;--sidebar:#ECEEF2;--sidebar-foreground:#161C28;--sidebar-primary:#1F2B47;--sidebar-primary-foreground:#FFFFFF;--sidebar-accent:#E0E4EB;--sidebar-accent-foreground:#161C28;--sidebar-border:#D3D8E0;--sidebar-ring:#2B4CC0;--positive:#1D6B40;--positive-foreground:#FFFFFF;--positive-soft:#E4F1E8;--positive-ink:#1A5F39;--negative:#A3243B;--negative-foreground:#FFFFFF;--negative-soft:#F9E5E8;--negative-ink:#93203A;--caution:#8A5800;--caution-foreground:#FFFFFF;--caution-soft:#FAEFD6;--caution-ink:#7A4E00;--progress:#0D6175;--progress-foreground:#FFFFFF;--progress-soft:#E0EFF2;--progress-ink:#0B5566;--seal:#2B44A8;--seal-foreground:#FFFFFF;--seal-soft:#E8ECF9;--seal-ink:#253C96;--scope:#6B3F9C;--scope-foreground:#FFFFFF;--scope-soft:#F0EAF7;--scope-ink:#5F378C;--history:#6D5845;--history-foreground:#FFFFFF;--history-soft:#F0ECE6;--history-ink:#5F4C3B;--urgent:#B4410E;--urgent-foreground:#FFFFFF;--urgent-soft:#FCEBE2;--urgent-ink:#9A370B;--scrim:rgba(22,28,40,.45);--shadow-overlay:0 18px 40px -14px rgba(22,28,40,.32), 0 1px 3px rgba(22,28,40,.10);}
+.dark,.theme-dark{color-scheme:dark;--background:#11151D;--foreground:#E6E9EF;--card:#181D27;--card-foreground:#E6E9EF;--popover:#1D2330;--popover-foreground:#E6E9EF;--primary:#D5DCEC;--primary-foreground:#11151D;--secondary:#252C3A;--secondary-foreground:#E6E9EF;--muted:#1F2531;--muted-foreground:#A2AAB8;--accent:#262E3E;--accent-foreground:#E6E9EF;--destructive:#F28B9E;--destructive-foreground:#11151D;--border:#2D3545;--input:#737D90;--ring:#8EA8FF;--sidebar:#151A23;--sidebar-foreground:#E6E9EF;--sidebar-primary:#D5DCEC;--sidebar-primary-foreground:#11151D;--sidebar-accent:#232A38;--sidebar-accent-foreground:#E6E9EF;--sidebar-border:#2D3545;--sidebar-ring:#8EA8FF;--positive:#74C996;--positive-foreground:#0C1A12;--positive-soft:#142A1D;--positive-ink:#7FD0A0;--negative:#F28B9E;--negative-foreground:#1E0B10;--negative-soft:#33161D;--negative-ink:#F59AAB;--caution:#E5B04C;--caution-foreground:#1C1405;--caution-soft:#2E2410;--caution-ink:#EDBB5C;--progress:#5FC0D3;--progress-foreground:#06191E;--progress-soft:#0F2930;--progress-ink:#6FCADC;--seal:#9FB2F7;--seal-foreground:#0E1430;--seal-soft:#1A2342;--seal-ink:#AEBFFA;--scope:#C6A6EE;--scope-foreground:#170F22;--scope-soft:#271D3A;--scope-ink:#CFB2F2;--history:#C9B49F;--history-foreground:#17120D;--history-soft:#28221C;--history-ink:#D3BFAB;--urgent:#FF9B6E;--urgent-foreground:#1E0C04;--urgent-soft:#3A1D10;--urgent-ink:#FFA67C;--scrim:rgba(4,6,10,.62);--shadow-overlay:0 18px 40px -12px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.06);}
+.x-client{--t-display-size:36px;--t-display-lh:42px;--t-display-weight:560;--t-display-family:var(--font-display);--t-display-track:-0.01em;--t-display-stretch:100%;--t-h1-size:30px;--t-h1-lh:36px;--t-h1-weight:560;--t-h1-family:var(--font-display);--t-h1-track:-0.005em;--t-h1-stretch:100%;--t-h2-size:23px;--t-h2-lh:30px;--t-h2-weight:560;--t-h2-family:var(--font-display);--t-h2-track:normal;--t-h2-stretch:100%;--t-h3-size:19px;--t-h3-lh:26px;--t-h3-weight:600;--t-h3-family:var(--font-sans);--t-h3-track:normal;--t-h3-stretch:100%;--t-body-size:18px;--t-body-lh:29px;--t-body-weight:400;--t-body-family:var(--font-reading);--t-body-track:normal;--t-body-stretch:100%;--t-ui-size:17px;--t-ui-lh:22px;--t-ui-weight:600;--t-ui-family:var(--font-sans);--t-ui-track:normal;--t-ui-stretch:100%;--t-small-size:15px;--t-small-lh:22px;--t-small-weight:400;--t-small-family:var(--font-sans);--t-small-track:normal;--t-small-stretch:100%;--t-label-size:17px;--t-label-lh:24px;--t-label-weight:600;--t-label-family:var(--font-sans);--t-label-track:normal;--t-label-stretch:100%;--c-h:52px;--c-px:22px;--c-radius:4px;--card-radius:6px;--chip-h:28px;--chip-px:10px;--chip-radius:0;--chip-fs:15px;--chip-h-sm:22px;--chip-fs-sm:13.5px;--chip-px-sm:8px;--pad:20px;--input-bw:2px;--focus-w:3px;--focus-off:2px;--check-size:28px;}
+.x-rep{--t-display-size:26px;--t-display-lh:32px;--t-display-weight:560;--t-display-family:var(--font-display);--t-display-track:normal;--t-display-stretch:100%;--t-h1-size:22px;--t-h1-lh:28px;--t-h1-weight:560;--t-h1-family:var(--font-display);--t-h1-track:normal;--t-h1-stretch:100%;--t-h2-size:17px;--t-h2-lh:24px;--t-h2-weight:600;--t-h2-family:var(--font-display);--t-h2-track:normal;--t-h2-stretch:100%;--t-h3-size:15px;--t-h3-lh:20px;--t-h3-weight:650;--t-h3-family:var(--font-sans);--t-h3-track:normal;--t-h3-stretch:100%;--t-body-size:14px;--t-body-lh:21px;--t-body-weight:400;--t-body-family:var(--font-sans);--t-body-track:normal;--t-body-stretch:100%;--t-ui-size:14px;--t-ui-lh:18px;--t-ui-weight:600;--t-ui-family:var(--font-sans);--t-ui-track:normal;--t-ui-stretch:100%;--t-small-size:13px;--t-small-lh:18px;--t-small-weight:400;--t-small-family:var(--font-sans);--t-small-track:normal;--t-small-stretch:100%;--t-label-size:13px;--t-label-lh:18px;--t-label-weight:600;--t-label-family:var(--font-sans);--t-label-track:normal;--t-label-stretch:100%;--c-h:34px;--c-px:12px;--c-radius:4px;--card-radius:5px;--chip-h:24px;--chip-px:8px;--chip-radius:0;--chip-fs:13px;--chip-h-sm:20px;--chip-fs-sm:12.5px;--chip-px-sm:6px;--pad:14px;--input-bw:1px;--focus-w:2px;--focus-off:2px;--check-size:20px;--check-row:28px;}
+.t-display{font-family:var(--t-display-family);font-size:var(--t-display-size);line-height:var(--t-display-lh);font-weight:var(--t-display-weight);letter-spacing:var(--t-display-track);font-stretch:var(--t-display-stretch)}.t-h1{font-family:var(--t-h1-family);font-size:var(--t-h1-size);line-height:var(--t-h1-lh);font-weight:var(--t-h1-weight);letter-spacing:var(--t-h1-track);font-stretch:var(--t-h1-stretch)}.t-h2{font-family:var(--t-h2-family);font-size:var(--t-h2-size);line-height:var(--t-h2-lh);font-weight:var(--t-h2-weight);letter-spacing:var(--t-h2-track);font-stretch:var(--t-h2-stretch)}.t-h3{font-family:var(--t-h3-family);font-size:var(--t-h3-size);line-height:var(--t-h3-lh);font-weight:var(--t-h3-weight);letter-spacing:var(--t-h3-track);font-stretch:var(--t-h3-stretch)}.t-body{font-family:var(--t-body-family);font-size:var(--t-body-size);line-height:var(--t-body-lh);font-weight:var(--t-body-weight);letter-spacing:var(--t-body-track);font-stretch:var(--t-body-stretch)}.t-ui{font-family:var(--t-ui-family);font-size:var(--t-ui-size);line-height:var(--t-ui-lh);font-weight:var(--t-ui-weight);letter-spacing:var(--t-ui-track);font-stretch:var(--t-ui-stretch)}.t-small{font-family:var(--t-small-family);font-size:var(--t-small-size);line-height:var(--t-small-lh);font-weight:var(--t-small-weight);letter-spacing:var(--t-small-track);font-stretch:var(--t-small-stretch)}.t-label{font-family:var(--t-label-family);font-size:var(--t-label-size);line-height:var(--t-label-lh);font-weight:var(--t-label-weight);letter-spacing:var(--t-label-track);font-stretch:var(--t-label-stretch)}[data-role="positive"]{--r:var(--positive);--r-ink:var(--positive-ink);--r-soft:var(--positive-soft);--r-fg:var(--positive-foreground)}[data-role="negative"]{--r:var(--negative);--r-ink:var(--negative-ink);--r-soft:var(--negative-soft);--r-fg:var(--negative-foreground)}[data-role="caution"]{--r:var(--caution);--r-ink:var(--caution-ink);--r-soft:var(--caution-soft);--r-fg:var(--caution-foreground)}[data-role="progress"]{--r:var(--progress);--r-ink:var(--progress-ink);--r-soft:var(--progress-soft);--r-fg:var(--progress-foreground)}[data-role="seal"]{--r:var(--seal);--r-ink:var(--seal-ink);--r-soft:var(--seal-soft);--r-fg:var(--seal-foreground)}[data-role="scope"]{--r:var(--scope);--r-ink:var(--scope-ink);--r-soft:var(--scope-soft);--r-fg:var(--scope-foreground)}[data-role="history"]{--r:var(--history);--r-ink:var(--history-ink);--r-soft:var(--history-soft);--r-fg:var(--history-foreground)}[data-role="urgent"]{--r:var(--urgent);--r-ink:var(--urgent-ink);--r-soft:var(--urgent-soft);--r-fg:var(--urgent-foreground)}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--background);color:var(--foreground);font-family:var(--font-sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.theme-light,.theme-dark{background:var(--background);color:var(--foreground)}
+.x-client,.x-rep{font-family:var(--t-body-family);font-size:var(--t-body-size);line-height:var(--t-body-lh);font-weight:var(--t-body-weight)}
+p,h1,h2,h3,h4,h5,dl,dd,ul,ol,figure,fieldset{margin:0}
+ul,ol{padding:0;list-style:none}
+svg{display:block}.i{flex:none}
+a{color:inherit;text-underline-offset:.2em}
+button,input,select,textarea{font:inherit;color:inherit}
+time,.num{font-variant-numeric:tabular-nums}
+.vh{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;margin:-1px!important;padding:0!important;border:0!important}
+:focus-visible,.is-focus{outline:var(--focus-w,2px) solid var(--ring);outline-offset:var(--focus-off,2px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--c-h);padding:6px var(--c-px);border-radius:var(--c-radius);border:var(--btn-bw,1px) solid transparent;font-family:var(--t-ui-family);font-size:var(--t-ui-size);line-height:1.2;font-weight:var(--t-ui-weight);letter-spacing:var(--t-ui-track);cursor:pointer;text-decoration:none;text-align:center;transition:background-color var(--dur-1) var(--ease),border-color var(--dur-1) var(--ease),color var(--dur-1) var(--ease)}
+.btn-block{width:100%}
+.btn-primary{background:var(--primary);color:var(--primary-foreground)}
+.btn-secondary{background:var(--card);color:var(--foreground);border-color:var(--input)}
+.btn-ghost{background:transparent;color:var(--primary);text-decoration:underline;text-decoration-thickness:1px}
+.btn-destructive{background:var(--destructive);color:var(--destructive-foreground)}
+.btn:disabled{background:var(--muted);color:var(--muted-foreground);border-color:var(--border);cursor:not-allowed}
+.btn[aria-busy]{cursor:progress}
+.spinner{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.kbd{display:inline-flex;align-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:4px;font-family:var(--font-sans);font-size:12px;font-weight:500;line-height:1;border:1px solid currentColor;opacity:.85;white-space:nowrap}
+.field{display:grid;gap:6px;min-width:0}
+.label{font-family:var(--t-label-family);font-size:var(--t-label-size);line-height:var(--t-label-lh);font-weight:var(--t-label-weight)}
+.hint{color:var(--muted-foreground);font-size:var(--t-small-size);line-height:var(--t-small-lh)}
+.input{width:100%;min-height:var(--c-h);padding:0 12px;border:var(--input-bw,1px) solid var(--input);border-radius:var(--input-radius,var(--c-radius));background:var(--card);color:var(--foreground);font-family:var(--font-sans);font-size:var(--t-body-size)}
+.has-error .input[aria-invalid]{border-color:var(--destructive)}
+.error-msg{display:flex;gap:6px;align-items:flex-start;color:var(--destructive);font-weight:600;font-size:var(--t-small-size);line-height:var(--t-small-lh)}
+.error-msg .i{margin-top:2px}
+.date-group{display:flex;gap:12px;flex-wrap:wrap}
+.date-part{display:grid;gap:4px}
+.date-label{font-size:var(--t-small-size)}
+.input-date{width:4.2em}.input-year{width:5.6em}
+.error-summary{border:var(--es-bw,3px) solid var(--destructive);padding:16px 20px;border-radius:var(--card-radius);background:var(--card)}
+.es-title{display:flex;gap:8px;align-items:center;font-family:var(--t-h3-family);font-size:var(--t-h3-size);line-height:var(--t-h3-lh);font-weight:var(--t-h3-weight);margin-bottom:8px}
+.es-title .i{color:var(--destructive)}
+.es-list{display:grid;gap:6px}
+.es-list a{color:var(--destructive);font-weight:600}
+.qpage{display:grid;gap:16px}
+.qpage-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.back-link{display:inline-flex;align-items:center;gap:4px;min-height:44px;color:var(--foreground)}
+.qpage-step{color:var(--muted-foreground);font-size:var(--t-small-size)}
+.qpage-set{border:0;padding:0;display:grid;gap:12px;min-width:0}
+.qpage-q{font-family:var(--t-h1-family);font-size:var(--t-h1-size);line-height:var(--t-h1-lh);font-weight:var(--t-h1-weight);letter-spacing:var(--t-h1-track);font-stretch:var(--t-h1-stretch);padding:0;margin-bottom:4px}
+.qpage-or{color:var(--muted-foreground)}
+.why summary{cursor:pointer;color:var(--primary);text-decoration:underline;text-underline-offset:.2em;min-height:44px;display:flex;align-items:center}
+.why p{padding:4px 0 4px 16px;border-left:3px solid var(--border)}
+.check,.radio{display:flex;align-items:flex-start;gap:12px;min-height:var(--check-row,44px);cursor:pointer;position:relative}
+.check input,.radio input{position:absolute;opacity:0;width:1px;height:1px}
+.check-box{flex:none;width:var(--check-size,28px);height:var(--check-size,28px);border:var(--input-bw,2px) solid var(--input);border-radius:var(--check-radius,4px);display:grid;place-items:center;background:var(--card);color:transparent}
+.check input:checked+.check-box{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground)}
+.check input:focus-visible+.check-box,.radio input:focus-visible+.radio-dot{outline:var(--focus-w,2px) solid var(--ring);outline-offset:var(--focus-off,2px)}
+.check-label{padding-top:calc((var(--check-size,28px) - var(--t-body-lh)) / 2)}
+.radio-dot{flex:none;width:var(--check-size,28px);height:var(--check-size,28px);border-radius:50%;border:var(--input-bw,2px) solid var(--input);background:var(--card);display:grid;place-items:center}
+.radio input:checked+.radio-dot::after{content:"";width:50%;height:50%;border-radius:50%;background:var(--primary)}
+.cya{border-top:1px solid var(--border)}
+.cya-row{display:grid;grid-template-columns:1fr auto;gap:2px 16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.cya-q{font-weight:600;grid-column:1/-1}
+.cya-a{grid-column:1}
+.cya-act{grid-column:2;grid-row:2;align-self:start}
+.cya-act a,.cya-table a{color:var(--primary);font-weight:500}
+.cya-a.is-unknown,.cya-table .is-unknown{color:var(--caution-ink);font-weight:600}
+.cya-table{width:100%;border-collapse:collapse}
+.cya-table th,.cya-table td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.cya-table thead th{font-size:var(--t-small-size);color:var(--muted-foreground);font-weight:500}
+.cya-table tbody th{font-weight:600}
+.cya-src{color:var(--muted-foreground);font-size:var(--t-small-size)}
+.save-state{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-small-size);line-height:var(--t-small-lh);color:var(--muted-foreground);font-weight:500}
+.save-state[data-state="saving"] .i{animation:spin 1.2s linear infinite}
+.save-state[data-state="saved"]{color:var(--positive-ink)}
+.save-state[data-state="offline"]{color:var(--caution-ink)}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:var(--chip-h);padding:2px var(--chip-px);border-radius:var(--chip-radius);font-family:var(--t-label-family);font-size:var(--chip-fs);font-weight:600;line-height:1.25;color:var(--r-ink);background:var(--r-soft);border:1px solid var(--r);max-width:100%;vertical-align:middle;justify-self:start}
+.chip-sm{--chip-h:var(--chip-h-sm);--chip-fs:var(--chip-fs-sm);--chip-px:var(--chip-px-sm)}
+.chip svg{flex:none}
+.prov{display:flex;flex-wrap:wrap;gap:4px 20px;font-size:var(--t-small-size);line-height:var(--t-small-lh);color:var(--muted-foreground)}
+.prov-item{display:flex;gap:6px;flex-wrap:wrap}
+.prov dt{font-weight:600;color:var(--foreground)}
+.prov dd{margin:0}
+.signed{display:flex;gap:14px;align-items:flex-start;padding:var(--pad);border:1px solid var(--seal);border-radius:var(--card-radius);background:var(--seal-soft)}
+.signed-mark{color:var(--seal);flex:none}
+.signed-body{display:grid;gap:6px;min-width:0}
+.signed-meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:var(--t-small-size);line-height:var(--t-small-lh)}
+.signed-meta a{color:var(--seal-ink);font-weight:600;display:inline-flex;align-items:center;min-height:24px}
+.x-client .signed-meta a{min-height:32px}
+.id{font-variant-numeric:tabular-nums;white-space:nowrap}
+.draft-notice{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--c-radius);background:var(--caution-soft);color:var(--foreground);border:1px dashed var(--caution);font-size:var(--t-small-size);line-height:var(--t-small-lh)}
+.draft-notice svg{color:var(--caution);margin-top:1px;flex:none}
+.draft-notice.is-info{--caution:var(--progress);--caution-soft:var(--progress-soft);--caution-ink:var(--progress-ink)}
+.deadline{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;padding:14px;border:1px solid var(--border);border-radius:var(--card-radius);background:var(--card)}
+.dl-date{display:grid;justify-items:center;align-content:center;min-width:58px;min-height:64px;padding:6px 4px;border-radius:var(--c-radius);background:var(--muted);line-height:1.1}
+.dl-day{font-size:24px;font-weight:700}
+.dl-mon{font-size:14px;font-weight:600}
+.dl-year{font-size:12px;color:var(--muted-foreground)}
+.dl-unknown{color:var(--caution-ink)}
+.dl-title{font-weight:600}
+.dl-when{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:2px}
+.dl-meta{font-size:var(--t-small-size);line-height:var(--t-small-lh);color:var(--muted-foreground);margin-top:4px}
+.deadline-calm{font-size:var(--t-small-size);color:var(--muted-foreground)}
+.queue{border-top:1px solid var(--border)}
+.qrow{border-bottom:1px solid var(--border)}
+.q-link{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.5fr) minmax(0,1.2fr) minmax(0,.9fr) minmax(0,.6fr);gap:12px;align-items:start;padding:10px 12px;text-decoration:none;color:inherit}
+.q-main{display:grid;gap:2px;min-width:0}
+.q-name{font-weight:600;overflow-wrap:anywhere}
+.q-type{color:var(--muted-foreground);font-size:var(--t-small-size);line-height:var(--t-small-lh)}
+.q-state{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start}
+.q-date{display:grid;gap:4px;justify-items:start}
+.q-owner,.q-upd{font-size:var(--t-small-size);color:var(--muted-foreground)}
+.qrow.is-selected .q-link{background:var(--accent)}
+.q-unknown{display:inline-flex;gap:4px;align-items:center;color:var(--caution-ink);font-weight:600}
+.qrow-narrow .q-link{grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}
+.qrow-narrow .q-main{grid-column:1}
+.qrow-narrow .q-date{grid-column:2;grid-row:1;justify-items:end;text-align:right}
+.qrow-narrow .q-state{grid-column:1/-1}
+.qrow-narrow .q-owner{grid-column:1}
+.qrow-narrow .q-upd{grid-column:2;text-align:right}
+.review{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.review-col{display:grid;gap:12px;align-content:start;min-width:0}
+.review-h{font-family:var(--t-h3-family);font-size:var(--t-h3-size);line-height:var(--t-h3-lh);font-weight:var(--t-h3-weight)}
+.fact{padding:12px 14px;border:1px solid var(--border);border-radius:var(--card-radius);background:var(--card);display:grid;gap:6px}
+.fact.is-changed{border-color:var(--caution)}
+.fact-head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.fact-label{font-size:var(--t-small-size);color:var(--muted-foreground);font-weight:600}
+.fact-ev{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fact-doc{font-size:var(--t-small-size)}
+.fact-by{font-size:var(--t-small-size);line-height:var(--t-small-lh);color:var(--muted-foreground)}
+.finding{padding:14px;border:1px solid var(--border);border-radius:var(--card-radius);background:var(--card);display:grid;gap:8px}
+.finding-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.finding-program{font-family:var(--t-h3-family);font-size:var(--t-h3-size);font-weight:var(--t-h3-weight);line-height:var(--t-h3-lh)}
+.finding-missing{color:var(--caution-ink);font-weight:600;font-size:var(--t-small-size)}
+.finding-caveat{font-size:var(--t-small-size);color:var(--muted-foreground)}
+.stacked{display:grid;gap:16px}
+.stacked-h{font-weight:600;margin-bottom:8px}
+.empty{display:grid;justify-items:start;gap:8px;padding:24px;border:1px dashed var(--input);border-radius:var(--card-radius)}
+.empty-mark{color:var(--muted-foreground)}
+.empty-title{font-family:var(--t-h3-family);font-size:var(--t-h3-size);line-height:var(--t-h3-lh);font-weight:var(--t-h3-weight)}
+.empty-body{color:var(--muted-foreground);max-width:48ch}
+.toast{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-radius:var(--card-radius);background:var(--popover);color:var(--popover-foreground);border:1px solid var(--border);box-shadow:var(--shadow-overlay);max-width:560px}
+.toast>svg:first-child{color:var(--r)}
+.toast-text{flex:1;min-width:0}
+.toast-action{background:none;border:0;color:var(--primary);font-weight:600;text-decoration:underline;text-underline-offset:.2em;min-height:32px;cursor:pointer;padding:0 6px}
+.toast-close{background:none;border:0;min-width:32px;min-height:32px;display:grid;place-items:center;color:var(--muted-foreground);cursor:pointer;border-radius:var(--c-radius)}
+.dialog-stage{position:relative;padding:28px 16px;border-radius:var(--card-radius);overflow:hidden;display:grid;place-items:center}
+.dialog-scrim{position:absolute;inset:0;background:var(--scrim)}
+.dialog{position:relative;width:min(100%,500px);background:var(--popover);color:var(--popover-foreground);border-radius:var(--dialog-radius,var(--card-radius));padding:24px;box-shadow:var(--shadow-overlay);display:grid;gap:16px}
+.dialog-title{font-family:var(--t-h2-family);font-size:var(--t-h2-size);line-height:var(--t-h2-lh);font-weight:var(--t-h2-weight);letter-spacing:var(--t-h2-track);font-stretch:var(--t-h2-stretch)}
+.dialog-body{display:grid;gap:10px}
+.dialog-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.x-client .dialog-actions{flex-direction:column}
+.task{display:flex;align-items:center;gap:12px;padding:14px;min-height:64px;border:1px solid var(--border);border-radius:var(--card-radius);background:var(--card);color:inherit;text-decoration:none}
+.task-text{flex:1;display:grid;gap:6px;justify-items:start;min-width:0}
+.task-title{font-weight:600}
+.task-meta{font-size:var(--t-small-size);color:var(--muted-foreground)}
+.task-go{color:var(--muted-foreground)}
+.avatar{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--secondary);color:var(--secondary-foreground);font-size:13px;font-weight:600;flex:none;font-family:var(--font-sans)}
+.wordmark{display:inline-flex;align-items:baseline;gap:8px}
+.wm-name{font-family:var(--font-display);font-weight:700;font-size:20px;line-height:1}
+.wm-tag{font-size:12px;color:var(--muted-foreground);font-family:var(--font-sans);font-weight:500}
+.qcompose{display:grid;gap:14px}
+.qcompose-actions{display:flex;gap:8px;flex-wrap:wrap}
+.spec-grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.spec-aside{font-size:var(--t-small-size);color:var(--muted-foreground)}
+.chip-set{display:grid;gap:8px;margin-bottom:14px}
+.chip-set-title{font-size:var(--t-small-size);color:var(--muted-foreground);font-weight:600}
+.link{color:var(--primary);display:inline-flex;align-items:center;gap:4px}
+.phone{width:390px;height:844px;overflow:hidden;position:relative}
+.desk{width:1440px;min-height:900px;position:relative}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0s!important;animation-iteration-count:1!important;transition-duration:0s!important}}
+html,body{margin:0;padding:0;background:none}
+.pv{width:728px;padding:16px;border-radius:20px;background:var(--background);color:var(--foreground);font-family:var(--font-sans);overflow:hidden}
+.pv-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin:2px 4px 14px}
+.pv-name{font-family:var(--font-display);font-size:30px;line-height:1.05;font-weight:700}
+.pv-idea{font-size:13px;line-height:1.4;color:var(--muted-foreground);max-width:380px;text-align:right}
+.pv-main{display:grid;grid-template-columns:390px 290px;gap:16px;align-items:start}
+.pv-phone{width:390px;height:844px;border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px var(--border)}
+.pv-side{display:grid;gap:14px;align-content:start}
+.pv-block{border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--card);display:grid;gap:8px}
+.pv-label{font-size:12px;font-weight:600;color:var(--muted-foreground)}
+.pv-sw{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+.pv-sw i{display:block;height:22px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35)}
+.pv-sw-dark{padding:6px;border-radius:8px}
+.pv-fam{display:grid;gap:5px}
+.pv-fam p{font-size:11.5px;font-weight:600;color:var(--muted-foreground)}
+.pv-chips{display:flex;flex-wrap:wrap;gap:4px}
+.pv-desk{margin-top:16px;width:696px;height:435px;overflow:hidden;border-radius:12px;box-shadow:0 0 0 1px var(--border)}
+.pv-desk>.desk{transform:scale(0.48333);transform-origin:0 0}
+.pv-strip{display:grid;gap:8px}
+
+.doc-title,.pv-name{font-family:var(--font-display);font-weight:560;letter-spacing:-.01em}
+.doc-principles li{border-left:2px solid var(--foreground)}
+.btn{border-radius:var(--c-radius);letter-spacing:.005em}
+.btn-primary:hover{background:color-mix(in srgb,var(--primary) 88%,var(--background))}
+.btn-secondary{border-width:1.5px;border-color:var(--foreground);background:transparent}
+.btn-ghost{color:var(--foreground);text-decoration-color:var(--input);padding-inline:4px}
+.btn-destructive{background:transparent;color:var(--destructive);border:1.5px solid var(--destructive)}
+.input{border-radius:var(--c-radius);background:var(--card)}
+.has-error{border-left:4px solid var(--destructive);padding-left:14px}
+.error-summary{border:0;border-left:5px solid var(--destructive);border-radius:0 var(--card-radius) var(--card-radius) 0;background:var(--card);box-shadow:inset 0 0 0 1px var(--border)}
+.es-title{font-family:var(--font-display)}
+.chip{border:0;border-radius:0;padding:1px 4px 1px 2px;gap:6px;min-height:0;font-family:var(--font-sans);background:linear-gradient(to bottom,transparent 42%,var(--r-soft) 42%)}
+.chip svg{color:var(--r)}
+.chip[data-role="seal"]{box-shadow:inset 0 -2px 0 0 var(--seal)}
+.theme-dark .chip,.dark .chip{background:linear-gradient(to bottom,transparent 38%,var(--r-soft) 38%)}
+.chip[data-role="urgent"]{background:var(--urgent);color:var(--urgent-foreground);padding:3px 9px 3px 7px;box-shadow:none;border-radius:2px}
+.chip[data-role="urgent"] svg{color:currentColor}
+.chip[data-role="history"] .chip-label{text-decoration:line-through;text-decoration-thickness:1px}
+.save-state{font-family:var(--font-sans)}
+.prov{border-top:1px dotted var(--input);padding-top:8px;font-family:var(--font-sans)}
+.prov dt{font-weight:600}
+.signed{display:grid;gap:10px;padding:20px 22px;border:0;border-left:3px solid var(--seal);border-radius:0 var(--card-radius) var(--card-radius) 0;background:var(--card);box-shadow:inset 0 0 0 1px var(--border)}
+.signed-sig{display:grid;gap:4px;justify-items:start}
+.signed-name{font-family:var(--font-display);font-style:italic;font-size:28px;line-height:1.1;color:var(--seal-ink);font-weight:500}
+.signed-line{display:block;width:min(100%,260px);height:0;border-top:1.5px solid var(--seal)}
+.signed-text{font-family:var(--font-sans);font-size:var(--t-small-size);line-height:var(--t-small-lh)}
+.signed-meta a{color:var(--seal-ink)}
+.x-rep .signed-name{font-size:22px}
+.draft-notice{border:0;border-left:3px dashed var(--caution);border-radius:0;background:var(--caution-soft);font-family:var(--font-sans)}
+.deadline{background:transparent;border:0;border-top:1px solid var(--border);border-radius:0;padding:14px 0;grid-template-columns:72px 1fr}
+.dl-date{background:none;border-radius:0;border-right:3px solid var(--dl-c,var(--border));padding:0 12px 0 0;justify-items:end;min-height:56px;font-family:var(--font-display)}
+.dl-day{font-size:28px;font-weight:560}
+.dl-mon{font-family:var(--font-sans);font-size:13px}
+.dl-year{font-family:var(--font-sans)}
+.deadline[data-level="due-90"]{--dl-c:var(--urgent)}
+.deadline[data-level="due-180"],.deadline[data-level="date-unknown"]{--dl-c:var(--caution)}
+.dl-title{font-family:var(--font-display);font-weight:560}
+.x-rep .deadline{grid-template-columns:60px 1fr;padding:10px 0}
+.x-rep .dl-day{font-size:22px}
+.qrow .q-link{padding:12px 14px}
+.q-name{font-family:var(--font-display);font-weight:560;font-size:15px}
+.qrow.is-selected .q-link{background:var(--card);box-shadow:inset 3px 0 0 var(--primary)}
+.qrow.is-urgent .q-name::after{content:"";display:inline-block;width:8px;height:8px;margin-left:8px;background:var(--urgent);vertical-align:middle}
+.fact{background:transparent;border:0;border-top:1px solid var(--border);border-radius:0;padding:12px 0}
+.fact.is-changed{box-shadow:inset 3px 0 0 var(--caution);padding-left:12px}
+.fact-value{font-family:var(--font-reading)}
+.x-rep .fact-value{font-size:14.5px;line-height:21px}
+.finding{background:transparent;border:0;border-top:1px solid var(--border);border-radius:0;padding:16px 0}
+.finding-program{font-family:var(--font-display);font-weight:560}
+.finding-reason{font-family:var(--font-reading)}
+.x-rep .finding{grid-template-columns:118px minmax(0,1fr);column-gap:18px}
+.x-rep .finding-head{display:contents}
+.x-rep .finding>*{grid-column:2}
+.x-rep .finding .finding-program{grid-column:2;grid-row:1}
+.x-rep .finding .chip{grid-column:1;grid-row:1/span 5;align-self:start;margin-top:3px;max-width:118px}
+.x-rep .finding-reason{font-size:15px;line-height:23px}
+.empty{border:0;border-top:1px solid var(--border);border-radius:0;padding:28px 0}
+.empty-title{font-family:var(--font-display);font-weight:560}
+.toast{border-radius:4px;border-left:3px solid var(--r)}
+.dialog{border-radius:4px}
+.dialog-title{font-weight:560}
+.task{background:var(--card);border:0;border-left:3px solid var(--r-line,var(--border));border-radius:0 6px 6px 0;box-shadow:inset 0 0 0 1px var(--border)}
+.task-title{font-family:var(--font-display);font-weight:560}
+.cya-q{font-family:var(--font-sans)}
+.cya-a{font-family:var(--font-reading)}
+.check-box{border-radius:2px}
+.wm-name{font-family:var(--font-display);font-weight:600;font-style:italic;font-size:22px;letter-spacing:-.01em}
+.avatar{border-radius:50%;background:var(--secondary);font-family:var(--font-sans)}
+
+.m-phone{height:100%;display:flex;flex-direction:column}
+.m-top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 10px 20px;border-bottom:1px solid var(--border)}
+.m-iconbtn{width:44px;height:44px;display:grid;place-items:center;background:none;border:0;border-radius:4px;cursor:pointer}
+.m-scroll{flex:1;overflow:hidden;padding:20px 20px 96px}
+.m-practice{font-family:var(--font-sans);font-size:14px;color:var(--muted-foreground)}
+.m-hello{margin:2px 0 18px}
+.m-note{background:var(--card);padding:18px 18px 18px 16px;border-left:3px solid var(--negative);box-shadow:inset 0 0 0 1px var(--border);border-radius:0 6px 6px 0;display:grid;gap:10px}
+.m-note h2{font-family:var(--font-display);font-size:22px;line-height:28px;font-weight:560}
+.m-note .t-body{font-size:17px;line-height:26px}
+.m-meta{font-family:var(--font-sans);font-size:14px;color:var(--muted-foreground)}
+.m-sec{margin:26px 0 2px;font-family:var(--font-display);font-size:19px;font-weight:560}
+.m-plan{margin-top:6px;display:grid;gap:10px}
+.m-change{display:grid;gap:6px;padding:12px 0 0;font-family:var(--font-sans);font-size:15px;line-height:22px}
+.m-tabs{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-top:1px solid var(--border);padding:4px 6px 18px}
+.m-tab{display:grid;justify-items:center;gap:2px;min-height:52px;padding-top:6px;font-family:var(--font-sans);font-size:12.5px;font-weight:600;color:var(--muted-foreground);text-decoration:none;position:relative}
+.m-tab[aria-current]{color:var(--foreground)}
+.m-tab[aria-current]::before{content:"";position:absolute;top:-5px;left:30%;right:30%;height:2px;background:var(--foreground)}
+.m-badge{position:absolute;top:2px;right:calc(50% - 22px);min-width:18px;height:18px;border-radius:9px;background:var(--negative);color:var(--negative-foreground);font-size:11px;display:grid;place-items:center;padding:0 5px}
+
+.md{display:grid;grid-template-columns:216px 404px minmax(0,1fr);min-height:900px}
+.md-side{background:var(--sidebar);color:var(--sidebar-foreground);border-right:1px solid var(--sidebar-border);padding:18px 14px;display:flex;flex-direction:column;gap:22px}
+.md-practice{font-family:var(--font-sans);font-size:13px;color:var(--muted-foreground);margin-top:6px}
+.md-nav{display:grid;gap:2px}
+.md-nav a{display:flex;justify-content:space-between;align-items:center;min-height:32px;padding:0 10px;border-radius:4px;text-decoration:none;font-size:14px;font-weight:500}
+.md-nav a[aria-current]{background:var(--sidebar-primary);color:var(--sidebar-primary-foreground)}
+.md-nav .n{font-variant-numeric:tabular-nums;font-size:12.5px;opacity:.85}
+.md-user{margin-top:auto;display:flex;gap:10px;align-items:center;font-size:13px;line-height:1.3}
+.md-user strong{display:block;font-size:13.5px}
+.md-queue{border-right:1px solid var(--border);background:var(--background);display:flex;flex-direction:column;min-width:0}
+.md-qhead{padding:18px 16px 10px;display:grid;gap:12px;border-bottom:1px solid var(--border)}
+.md-qtitle{display:flex;justify-content:space-between;align-items:baseline}
+.md-qtitle h2{font-family:var(--font-display);font-size:22px;font-weight:560}
+.md-search{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;border:1px solid var(--input);border-radius:4px;background:var(--card);color:var(--muted-foreground);font-size:13.5px}
+.md-search .kbd{margin-left:auto}
+.md-views{display:flex;flex-wrap:wrap;gap:4px 14px}
+.md-views a{font-size:13.5px;font-weight:500;text-decoration:none;color:var(--muted-foreground);padding:4px 0;border-bottom:2px solid transparent;display:inline-flex;gap:6px;min-height:28px;align-items:center}
+.md-views a[aria-current]{color:var(--foreground);border-color:var(--foreground)}
+.md-views .n{font-variant-numeric:tabular-nums}
+.md-views a.is-urgent{color:var(--urgent-ink)}
+.md-queue .queue{border-top:0}
+.md-pane{padding:22px 28px 28px;display:grid;gap:18px;align-content:start;min-width:0;background:var(--card)}
+.md-case{display:grid;gap:8px}
+.md-case h1{font-family:var(--font-display);font-size:26px;line-height:32px;font-weight:560;overflow-wrap:anywhere}
+.md-caseline{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--muted-foreground)}
+.md-chips{display:flex;flex-wrap:wrap;gap:8px 18px}
+.md-actions{display:flex;gap:8px;flex-wrap:wrap}
+.md-cols{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px}
+.md-colh{font-family:var(--font-display);font-size:17px;font-weight:560;padding-bottom:8px}
+.md-history{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--muted-foreground);padding-top:12px;border-top:1px solid var(--border)}
+.theme-dark .md-pane{background:var(--card)}
+</style>
+</head>
+<body>
+<div class="pv theme-light">
+<div class="pv-head"><p class="pv-name">1. Margin</p><p class="pv-idea">Every plan is a record someone stands behind. Reading type, ink colours, and a margin of reviewer’s marks.</p></div>
+<div class="pv-main">
+<div class="pv-phone"><div class="phone x-client theme-light" id="screen-phone-light"><div class="m-phone">
+<header class="m-top"><span class="wordmark"><span class="wm-name">cadet</span><span class="wm-tag">working name</span></span><button class="m-iconbtn" type="button" aria-label="Menu"><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" /></svg></button></header>
+<div class="m-scroll">
+<p class="m-practice">Harbourline Immigration</p>
+<h1 class="t-h1 m-hello">Hello, Oluwaseun</h1>
+<section class="m-note" aria-label="Your next step">
+<span class="chip" data-role="negative" data-state="replace"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9.6 12.4l4.8 4.8M14.4 12.4l-4.8 4.8"/></svg><span class="chip-label">Replacement needed</span></span>
+<h2>Upload a new copy of your IELTS result</h2>
+<p class="t-body">The photo cuts off your scores. Priya needs all four scores to confirm your language level.</p>
+<p class="m-meta">Asked by Priya Raman on 15 Nov 2026</p>
+<button class="btn btn-primary btn-block"   type="button"><svg class="i" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12" /><path d="m17 8-5-5-5 5" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg><span class="btn-label">Upload new copy</span></button>
+</section>
+<h2 class="m-sec">Dates to watch</h2>
+<div class="deadline" data-level="due-180"><div class="dl-date" aria-hidden="true"><span class="dl-day">14</span><span class="dl-mon">Mar</span><span class="dl-year">2027</span></div><div class="dl-body"><p class="dl-title">Post-graduation work permit expires</p><p class="dl-when"><time>14 Mar 2027</time> <span class="chip" data-role="caution" data-state="due-180"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg><span class="chip-label">In 117 days</span></span></p><p class="dl-meta">From your permit, checked by Priya on 3 Nov 2026. Priya will advise on timing.</p></div></div><div class="deadline" data-level="date-unknown"><div class="dl-date" aria-hidden="true"><span class="dl-unknown"><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 2v4" /><path d="M21 11.75V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.25" /><path d="m22 22-1.875-1.875" /><path d="M3 10h18" /><path d="M8 2v4" /><circle cx="18" cy="18" r="3" /></svg></span></div><div class="dl-body"><p class="dl-title">IELTS result valid until</p><p class="dl-when"><time>Date unknown</time> <span class="chip" data-role="caution" data-state="date-unknown"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3.5v4M16 3.5v4"/><path d="M10.4 13.4a1.7 1.7 0 1 1 2.2 1.6c-.5.2-.6.5-.6 1"/><circle cx="12" cy="17.9" r=".8" fill="currentColor" stroke="none"/></svg><span class="chip-label">Date unknown</span></span></p><p class="dl-meta">Priya will confirm it from your new copy. Waiting on your upload.</p></div></div>
+<h2 class="m-sec">Your plan</h2>
+<div class="m-plan"><section class="signed" aria-label="Signature"><div class="signed-sig" aria-hidden="true"><span class="signed-name">Priya Raman</span><span class="signed-line"></span></div><p class="signed-text">Reviewed and signed by <strong>Priya Raman</strong>, RCIC, licence <span class="id">R123456</span>, on <time>3 Nov 2026</time>. Version 2.</p><p class="signed-meta"><a href="https://register.college-ic.ca/">Check this licence on the CICC register</a><span>Sources verified as of 1 Nov 2026.</span></p></section><div class="m-change"><span class="chip" data-role="caution" data-state="changed"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18l7-12 7 12"/></svg><span class="chip-label">Changed since review</span></span><p>You reported a new job on 14 Nov. Priya is checking whether version 2 needs to change. Until she decides, version 2 is still the plan she signed.</p></div></div>
+</div>
+<nav class="m-tabs" aria-label="Main"><a class="m-tab" href="#" aria-current="page"><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>Home</a><a class="m-tab" href="#"><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 5h8" /><path d="M13 12h8" /><path d="M13 19h8" /><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /></svg>Tasks<span class="m-badge">1<span class="vh"> task</span></span></a><a class="m-tab" href="#"><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" /></svg>Documents</a><a class="m-tab" href="#"><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /></svg>Messages</a></nav>
+</div></div></div>
+<div class="pv-side x-rep">
+<div class="pv-block"><p class="pv-label">Palette, light then dark</p><div class="pv-sw"><i title="--background" style="background:#F3F4F6"></i><i title="--card" style="background:#FFFFFF"></i><i title="--foreground" style="background:#161C28"></i><i title="--muted-foreground" style="background:#4D5666"></i><i title="--primary" style="background:#1F2B47"></i><i title="--border" style="background:#D3D8E0"></i><i title="--input" style="background:#7B8494"></i><i title="--ring" style="background:#2B4CC0"></i></div><div class="pv-sw"><i style="background:#1D6B40"></i><i style="background:#A3243B"></i><i style="background:#8A5800"></i><i style="background:#0D6175"></i><i style="background:#2B44A8"></i><i style="background:#6B3F9C"></i><i style="background:#6D5845"></i><i style="background:#B4410E"></i></div><div class="pv-sw-dark theme-dark"><div class="pv-sw"><i title="--background" style="background:#11151D"></i><i title="--card" style="background:#181D27"></i><i title="--foreground" style="background:#E6E9EF"></i><i title="--muted-foreground" style="background:#A2AAB8"></i><i title="--primary" style="background:#D5DCEC"></i><i title="--border" style="background:#2D3545"></i><i title="--input" style="background:#737D90"></i><i title="--ring" style="background:#8EA8FF"></i></div><div class="pv-sw"><i style="background:#74C996"></i><i style="background:#F28B9E"></i><i style="background:#E5B04C"></i><i style="background:#5FC0D3"></i><i style="background:#9FB2F7"></i><i style="background:#C6A6EE"></i><i style="background:#C9B49F"></i><i style="background:#FF9B6E"></i></div></div></div>
+<div class="pv-block x-client"><p class="pv-label">Type</p><p class="t-h2">Your plan, signed by Priya Raman</p><p class="t-small">Literata for what people read; Schibsted Grotesk for what they operate.</p></div>
+<div class="pv-block"><p class="pv-label">States</p><div class="pv-fam"><p>Assessment coverage</p><div class="pv-chips"><span class="chip chip-sm" data-role="positive" data-state="supported"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6"/></svg><span class="chip-label">Supported</span></span><span class="chip chip-sm" data-role="negative" data-state="blocked"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="chip-label">Blocked</span></span><span class="chip chip-sm" data-role="caution" data-state="unknown"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 8.5a3.5 3.5 0 1 1 5.2 3c-1.1.6-1.7 1.3-1.7 2.6v.4"/><circle cx="12" cy="18.6" r="1.2" fill="currentColor" stroke="none"/></svg><span class="chip-label">Unknown</span></span><span class="chip chip-sm" data-role="scope" data-state="out-of-scope"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H5v16h4"/><path d="M11 12h9M17 8.5l3.5 3.5-3.5 3.5"/></svg><span class="chip-label">Out of scope</span></span></div></div><div class="pv-fam"><p>Work status</p><div class="pv-chips"><span class="chip chip-sm" data-role="progress" data-state="intake"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.6" fill="currentColor" stroke="none" opacity=".35"/></svg><span class="chip-label">Intake underway</span></span><span class="chip chip-sm" data-role="progress" data-state="submitted"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v10M8 9.5l4 4 4-4"/><path d="M4 14.5V20h16v-5.5"/></svg><span class="chip-label">Submitted</span></span><span class="chip chip-sm" data-role="caution" data-state="clarification"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11h-9l-5 4v-4H4z"/><path d="M10.2 8.6a2 2 0 1 1 2.6 1.9c-.6.2-.8.6-.8 1.2"/><circle cx="12" cy="13.6" r=".9" fill="currentColor" stroke="none"/></svg><span class="chip-label">Clarification requested</span></span><span class="chip chip-sm" data-role="progress" data-state="reviewing"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><span class="chip-label">Representative reviewing</span></span><span class="chip chip-sm" data-role="seal" data-state="signed"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15.5c2.2-3.6 3.8-7.5 5.6-7.5 1.7 0-.6 7.5 1.2 7.5 1.4 0 2.6-4.4 4.3-4.4 1.4 0-.3 4.4 1.3 4.4 1.2 0 2.4-1.4 5.6-2"/><path d="M3 20h18"/></svg><span class="chip-label">Signed</span></span><span class="chip chip-sm" data-role="positive" data-state="delivered"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg><span class="chip-label">Delivered</span></span></div></div><div class="pv-fam"><p>Evidence status</p><div class="pv-chips"><span class="chip chip-sm" data-role="progress" data-state="supplied"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7.5c-1 .8-1.6 2-1.6 3.5H7v4.5H3.4V11M14 7.5c-1 .8-1.6 2-1.6 3.5H16v4.5h-3.6V11"/></svg><span class="chip-label">Supplied</span></span><span class="chip chip-sm" data-role="progress" data-state="uploaded"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M12 18v-6M9.5 14.5L12 12l2.5 2.5"/></svg><span class="chip-label">Uploaded</span></span><span class="chip chip-sm" data-role="progress" data-state="awaiting"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><circle cx="12" cy="14.5" r="3.2"/><path d="M12 13v1.6l1 .9"/></svg><span class="chip-label">Awaiting review</span></span><span class="chip chip-sm" data-role="positive" data-state="accepted"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 14.5l2.2 2.2 4-4.2"/></svg><span class="chip-label">Accepted</span></span><span class="chip chip-sm" data-role="negative" data-state="replace"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9.6 12.4l4.8 4.8M14.4 12.4l-4.8 4.8"/></svg><span class="chip-label">Replacement needed</span></span></div></div><div class="pv-fam"><p>Review validity</p><div class="pv-chips"><span class="chip chip-sm" data-role="caution" data-state="not-reviewed"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke-dasharray="2.6 3"/></svg><span class="chip-label">Not reviewed</span></span><span class="chip chip-sm" data-role="seal" data-state="signed-version"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15.5c2.2-3.6 3.8-7.5 5.6-7.5 1.7 0-.6 7.5 1.2 7.5 1.4 0 2.6-4.4 4.3-4.4 1.4 0-.3 4.4 1.3 4.4 1.2 0 2.4-1.4 5.6-2"/><path d="M3 20h18"/></svg><span class="chip-label">Signed version 2</span></span><span class="chip chip-sm" data-role="caution" data-state="changed"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18l7-12 7 12"/></svg><span class="chip-label">Changed since review</span></span><span class="chip chip-sm" data-role="history" data-state="superseded"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14M5 16h10" opacity=".45"/><path d="M3 12h18"/></svg><span class="chip-label">Superseded</span></span></div></div><div class="pv-fam"><p>Urgency and escalation</p><div class="pv-chips"><span class="chip chip-sm" data-role="urgent" data-state="escalate"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5v9.5"/><circle cx="12" cy="18.8" r="1.4" fill="currentColor" stroke="none"/></svg><span class="chip-label">Needs a professional now</span></span><span class="chip chip-sm" data-role="urgent" data-state="due-90"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14" /><path d="M5 2h14" /><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></svg><span class="chip-label">Expires in 40 days</span></span><span class="chip chip-sm" data-role="caution" data-state="due-180"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg><span class="chip-label">Expires in 117 days</span></span><span class="chip chip-sm" data-role="caution" data-state="date-unknown"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3.5v4M16 3.5v4"/><path d="M10.4 13.4a1.7 1.7 0 1 1 2.2 1.6c-.5.2-.6.5-.6 1"/><circle cx="12" cy="17.9" r=".8" fill="currentColor" stroke="none"/></svg><span class="chip-label">Expiry date unknown</span></span></div></div></div>
+<div class="pv-block pv-strip"><button class="btn btn-primary"   type="button"><span class="btn-label">Sign version 3</span> <kbd class="kbd" aria-hidden="true">⌘ Enter</kbd></button><button class="btn btn-secondary"   type="button"><span class="btn-label">Preview client edition</span></button><p class="save-state" data-state="saved" role="status"><svg class="i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 15-5.5 5.5L9 18" /><path d="M5.516 16.07A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 3.501 7.327" /></svg><span>Draft saved 2:41 pm</span></p></div>
+</div>
+</div>
+<div class="pv-desk"><div class="desk x-rep theme-light" id="screen-desktop-light"><div class="md">
+<aside class="md-side">
+<div><span class="wordmark"><span class="wm-name">cadet</span><span class="wm-tag">working name</span></span><p class="md-practice">Harbourline Immigration</p></div>
+<nav class="md-nav" aria-label="Main"><a href="#" aria-current="page"><span>Queue</span><span class="n">29</span></a><a href="#"><span>Clients</span><span class="n">142</span></a><a href="#"><span>Rule changes</span><span class="n">5</span></a><a href="#"><span>Exports</span></a><a href="#"><span>Settings</span></a></nav>
+<div class="md-user"><span class="avatar" aria-hidden="true">PR</span><span><strong>Priya Raman</strong>RCIC, licence R123456</span></div>
+</aside>
+<section class="md-queue" aria-label="Queue">
+<div class="md-qhead">
+<div class="md-qtitle"><h2>Ready to review</h2><span class="t-small">4 files</span></div>
+<div class="md-search"><svg class="i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></svg><span>Search clients, case IDs</span><kbd class="kbd">/</kbd></div>
+<nav class="md-views" aria-label="Views"><a href="#" class="is-urgent">Urgent<span class="n">2</span></a><a href="#">New intake<span class="n">3</span></a><a href="#" aria-current="page">Ready to review<span class="n">4</span></a><a href="#">Awaiting client<span class="n">6</span></a><a href="#">Changed rules<span class="n">5</span></a><a href="#">Mine<span class="n">9</span></a></nav>
+</div>
+<ul class="queue"><li class="qrow qrow-narrow is-urgent"><a class="q-link" href="#"><span class="q-main"><span class="q-name">Fatima Al-Zahraa Haddad</span><span class="q-type">Visitor record holder, status extension</span></span><span class="q-state"><span class="chip chip-sm" data-role="progress" data-state="submitted"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v10M8 9.5l4 4 4-4"/><path d="M4 14.5V20h16v-5.5"/></svg><span class="chip-label">Submitted</span></span></span><span class="q-date"><time>27 Dec 2026</time><span class="chip chip-sm" data-role="urgent" data-state="escalate"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5v9.5"/><circle cx="12" cy="18.8" r="1.4" fill="currentColor" stroke="none"/></svg><span class="chip-label">Needs a representative now</span></span></span><span class="q-owner">Unassigned</span><span class="q-upd">8 min ago</span></a></li><li class="qrow qrow-narrow is-selected"><a class="q-link" href="#" aria-current="true"><span class="q-main"><span class="q-name">Oluwaseun Adébáyọ̀-Fitzgerald</span><span class="q-type">Post-graduation work permit, PR options</span></span><span class="q-state"><span class="chip chip-sm" data-role="progress" data-state="reviewing"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><span class="chip-label">Representative reviewing</span></span><span class="chip chip-sm" data-role="caution" data-state="changed"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18l7-12 7 12"/></svg><span class="chip-label">Changed since review</span></span></span><span class="q-date"><time>14 Mar 2027</time></span><span class="q-owner">Priya Raman</span><span class="q-upd">2 h ago</span></a></li><li class="qrow qrow-narrow"><a class="q-link" href="#"><span class="q-main"><span class="q-name">Zhang Wei</span><span class="q-type">Spousal open work permit, PR options</span></span><span class="q-state"><span class="chip chip-sm" data-role="progress" data-state="reviewing"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><span class="chip-label">Representative reviewing</span></span></span><span class="q-date"><time>19 Jan 2027</time><span class="chip chip-sm" data-role="urgent" data-state="due-90"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14" /><path d="M5 2h14" /><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></svg><span class="chip-label">63 days</span></span></span><span class="q-owner">Priya Raman</span><span class="q-upd">3 h ago</span></a></li><li class="qrow qrow-narrow"><a class="q-link" href="#"><span class="q-main"><span class="q-name">Nguyễn Thị Minh Khai</span><span class="q-type">Study permit, post-graduation options</span></span><span class="q-state"><span class="chip chip-sm" data-role="caution" data-state="clarification"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11h-9l-5 4v-4H4z"/><path d="M10.2 8.6a2 2 0 1 1 2.6 1.9c-.6.2-.8.6-.8 1.2"/><circle cx="12" cy="13.6" r=".9" fill="currentColor" stroke="none"/></svg><span class="chip-label">Clarification requested</span></span></span><span class="q-date"><time>30 Jun 2027</time></span><span class="q-owner">Daniel Okafor</span><span class="q-upd">Yesterday</span></a></li><li class="qrow qrow-narrow"><a class="q-link" href="#"><span class="q-main"><span class="q-name">Mariana Fernández de la Cruz</span><span class="q-type">Skilled worker abroad, Express Entry readiness</span></span><span class="q-state"><span class="chip chip-sm" data-role="progress" data-state="intake"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.6" fill="currentColor" stroke="none" opacity=".35"/></svg><span class="chip-label">Intake underway</span></span></span><span class="q-date"><span class="q-unknown"><svg class="g" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v14H4zM4 10h16M8 3.5v4M16 3.5v4"/><path d="M10.4 13.4a1.7 1.7 0 1 1 2.2 1.6c-.5.2-.6.5-.6 1"/><circle cx="12" cy="17.9" r=".8" fill="currentColor" stroke="none"/></svg>Date unknown</span></span><span class="q-owner">Daniel Okafor</span><span class="q-upd">Yesterday</span></a></li><li class="qrow qrow-narrow"><a class="q-link" href="#"><span class="q-main"><span class="q-name">Siobhán Ní Bhriain</span><span class="q-type">Intends to settle in Quebec</span></span><span class="q-state"><span class="chip chip-sm" data-role="progress" data-state="submitted"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v10M8 9.5l4 4 4-4"/><path d="M4 14.5V20h16v-5.5"/></svg><span class="chip-label">Submitted</span></span><span class="chip chip-sm" data-role="scope" data-state="out-of-scope"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H5v16h4"/><path d="M11 12h9M17 8.5l3.5 3.5-3.5 3.5"/></svg><span class="chip-label">Out of scope</span></span></span><span class="q-date"><time>8 Oct 2027</time></span><span class="q-owner">Unassigned</span><span class="q-upd">14 Nov</span></a></li><li class="qrow qrow-narrow"><a class="q-link" href="#"><span class="q-main"><span class="q-name">Rahul Venkataraghavan</span><span class="q-type">Work permit holder, CEC readiness</span></span><span class="q-state"><span class="chip chip-sm" data-role="seal" data-state="signed"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15.5c2.2-3.6 3.8-7.5 5.6-7.5 1.7 0-.6 7.5 1.2 7.5 1.4 0 2.6-4.4 4.3-4.4 1.4 0-.3 4.4 1.3 4.4 1.2 0 2.4-1.4 5.6-2"/><path d="M3 20h18"/></svg><span class="chip-label">Signed</span></span></span><span class="q-date"><time>2 Sep 2027</time></span><span class="q-owner">Priya Raman</span><span class="q-upd">12 Nov</span></a></li></ul>
+</section>
+<section class="md-pane" aria-label="Review">
+<div class="md-case">
+<p class="md-caseline"><span>Post-graduation work permit, permanent residence options</span><span>Case <span class="id">HL-2026-0142</span></span><span>Matter <span class="id">MAT-2026-0388</span></span></p>
+<h1>Oluwaseun Adébáyọ̀-Fitzgerald</h1>
+<div class="md-chips"><span class="chip" data-role="progress" data-state="reviewing"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><span class="chip-label">Representative reviewing</span></span><span class="chip" data-role="caution" data-state="changed"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18l7-12 7 12"/></svg><span class="chip-label">Changed since review</span></span><span class="chip" data-role="caution" data-state="due-180"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg><span class="chip-label">Expires in 117 days</span></span></div>
+</div>
+<div class="md-actions"><button class="btn btn-secondary"   type="button"><span class="btn-label">Ask client</span> <kbd class="kbd" aria-hidden="true">C</kbd></button><button class="btn btn-secondary"   type="button"><span class="btn-label">Preview client edition</span> <kbd class="kbd" aria-hidden="true">P</kbd></button><button class="btn btn-primary"   type="button"><span class="btn-label">Sign version 3</span> <kbd class="kbd" aria-hidden="true">⌘ Enter</kbd></button></div>
+<div class="draft-notice" role="note"><svg class="g" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke-dasharray="2.6 3"/></svg><p><strong>Draft assessment, version 3.</strong> General information, not legal advice, until a representative signs it. Sources verified as of 1 Nov 2026.</p></div>
+<div class="md-cols">
+<div><h2 class="md-colh">Facts and evidence</h2><div class="fact"><div class="fact-head"><p class="fact-label">Canadian work experience</p></div><p class="fact-value">Software developer, NOC 21232 (TEER 1), full time, 14 months</p><p class="fact-ev"><span class="chip chip-sm" data-role="positive" data-state="accepted"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 14.5l2.2 2.2 4-4.2"/></svg><span class="chip-label">Accepted</span></span><span class="fact-doc">Employment letter</span></p><p class="fact-by">Supplied by client 2 Nov 2026. Checked by Daniel Okafor (Staff) 4 Nov 2026.</p></div><div class="fact is-changed"><div class="fact-head"><p class="fact-label">Current employer</p><span class="chip chip-sm" data-role="caution" data-state="changed"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 18l7-12 7 12"/></svg><span class="chip-label">Changed since v2</span></span></div><p class="fact-value">Northwind Analytics, from 10 Nov 2026</p><p class="fact-ev"><span class="chip chip-sm" data-role="progress" data-state="awaiting"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><circle cx="12" cy="14.5" r="3.2"/><path d="M12 13v1.6l1 .9"/></svg><span class="chip-label">Awaiting review</span></span><span class="fact-doc">Offer letter</span></p><p class="fact-by">Reported by client 14 Nov 2026.</p></div><div class="fact"><div class="fact-head"><p class="fact-label">Language test</p></div><p class="fact-value">IELTS General Training, client reports CLB 9</p><p class="fact-ev"><span class="chip chip-sm" data-role="negative" data-state="replace"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9.6 12.4l4.8 4.8M14.4 12.4l-4.8 4.8"/></svg><span class="chip-label">Replacement needed</span></span><span class="fact-doc">Test report</span></p><p class="fact-by">Photo cuts off the scores. Asked for a new copy 15 Nov 2026.</p></div><div class="fact"><div class="fact-head"><p class="fact-label">Education</p></div><p class="fact-value">Bachelor of Science, University of Lagos</p><p class="fact-ev"><span class="chip chip-sm" data-role="progress" data-state="supplied"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7.5c-1 .8-1.6 2-1.6 3.5H7v4.5H3.4V11M14 7.5c-1 .8-1.6 2-1.6 3.5H16v4.5h-3.6V11"/></svg><span class="chip-label">Supplied</span></span><span class="fact-doc">ECA report</span></p><p class="fact-by">Client says the ECA is in progress.</p></div><div class="fact"><div class="fact-head"><p class="fact-label">Current status</p></div><p class="fact-value">Post-graduation work permit, expires 14 Mar 2027</p><p class="fact-ev"><span class="chip chip-sm" data-role="positive" data-state="accepted"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 14.5l2.2 2.2 4-4.2"/></svg><span class="chip-label">Accepted</span></span><span class="fact-doc">Permit copy</span></p><p class="fact-by">Checked by Priya Raman 3 Nov 2026.</p></div></div>
+<div><h2 class="md-colh">Draft assessment</h2><article class="finding" data-state="supported"><header class="finding-head"><h4 class="finding-program">Canadian Experience Class</h4><span class="chip" data-role="positive" data-state="supported"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6"/></svg><span class="chip-label">Supported</span></span></header><p class="finding-reason">14 months of skilled Canadian work experience meets the 12-month minimum. The reported language level meets CLB 7 for TEER 1 work.</p><p class="finding-caveat">Relies on the replacement IELTS copy.</p><dl class="prov prov-compact"><div class="prov-item"><dt>Source</dt><dd><a href="#">Canadian Experience Class: who can apply</a>, canada.ca</dd></div><div class="prov-item"><dt>Effective</dt><dd>Not stated by source</dd></div><div class="prov-item"><dt>Verified as of</dt><dd><time>1 Nov 2026</time></dd></div></dl></article><article class="finding" data-state="unknown"><header class="finding-head"><h4 class="finding-program">Federal Skilled Worker</h4><span class="chip" data-role="caution" data-state="unknown"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 8.5a3.5 3.5 0 1 1 5.2 3c-1.1.6-1.7 1.3-1.7 2.6v.4"/><circle cx="12" cy="18.6" r="1.2" fill="currentColor" stroke="none"/></svg><span class="chip-label">Unknown</span></span></header><p class="finding-reason">Education points for a degree from outside Canada need an Educational Credential Assessment.</p><p class="finding-missing">Missing fact: ECA result</p><dl class="prov prov-compact"><div class="prov-item"><dt>Source</dt><dd><a href="#">Federal Skilled Worker: education requirements</a>, canada.ca</dd></div><div class="prov-item"><dt>Effective</dt><dd>Not stated by source</dd></div><div class="prov-item"><dt>Verified as of</dt><dd><time>1 Nov 2026</time></dd></div></dl></article><article class="finding" data-state="blocked"><header class="finding-head"><h4 class="finding-program">Federal Skilled Trades</h4><span class="chip" data-role="negative" data-state="blocked"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span class="chip-label">Blocked</span></span></header><p class="finding-reason">No work experience in an eligible skilled trade.</p><dl class="prov prov-compact"><div class="prov-item"><dt>Source</dt><dd><a href="#">Federal Skilled Trades: who can apply</a>, canada.ca</dd></div><div class="prov-item"><dt>Effective</dt><dd>Not stated by source</dd></div><div class="prov-item"><dt>Verified as of</dt><dd><time>1 Nov 2026</time></dd></div></dl></article><article class="finding" data-state="out-of-scope"><header class="finding-head"><h4 class="finding-program">Quebec-selected programs</h4><span class="chip" data-role="scope" data-state="out-of-scope"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H5v16h4"/><path d="M11 12h9M17 8.5l3.5 3.5-3.5 3.5"/></svg><span class="chip-label">Out of scope</span></span></header><p class="finding-reason">cadet does not assess Quebec selection. Refer for separate advice if the client plans to live in Quebec.</p></article></div>
+</div>
+<p class="md-history"><span class="chip chip-sm" data-role="seal" data-state="signed-version"><svg class="g" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15.5c2.2-3.6 3.8-7.5 5.6-7.5 1.7 0-.6 7.5 1.2 7.5 1.4 0 2.6-4.4 4.3-4.4 1.4 0-.3 4.4 1.3 4.4 1.2 0 2.4-1.4 5.6-2"/><path d="M3 20h18"/></svg><span class="chip-label">Signed version 2</span></span><span>Signed by Priya Raman on 3 Nov 2026. Becomes superseded when version 3 is signed.</span></p>
+</section>
+</div></div></div>
+</div>
+</body>
+</html>
