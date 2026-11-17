@@ -56,10 +56,14 @@ function licenseFindings(report) {
 function enforce(kind, findings, baseline) {
   const entries = baseline[kind] ?? {}
   for (const [key, entry] of Object.entries(entries)) {
+    const deadline = Date.parse(`${entry.expires}T00:00:00Z`)
     if (
-      !entry.reason ||
+      typeof entry.reason !== 'string' ||
+      !entry.reason.trim() ||
+      !Number.isFinite(deadline) ||
+      new Date(deadline).toISOString().slice(0, 10) !== entry.expires ||
       !/^\d{4}-\d{2}-\d{2}$/.test(entry.expires) ||
-      new Date(`${entry.expires}T00:00:00Z`) <= new Date()
+      deadline <= Date.now()
     )
       throw new Error(`${kind} allowance expired or invalid: ${key}`)
   }

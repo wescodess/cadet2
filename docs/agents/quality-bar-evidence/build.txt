@@ -1,0 +1,375 @@
+$ pnpm build
+
+> cadet2@ build /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> nuxt build
+
+┌  Building Nuxt for production...
+│
+●  Nuxt 4.3.1 (with Nitro 2.13.1, Vite 7.1.12 and Vue 3.5.28)
+[nuxt:hub] ℹ hub:db using postgresql database with pglite driver
+[nuxt-better-auth] ℹ Generated postgresql schema (.ts + .mjs)
+
+ WARN  Component directory does not exist: /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/components/ui
+
+
+[nuxt:convex]  WARN  Convex URL not configured. Set CONVEX_URL or NUXT_PUBLIC_CONVEX_URL
+
+│
+●  Nitro preset: node-server
+
+ WARN  Duplicated imports "toIsoString", the one from "/Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/server/utils/recommendations/lifecycle.ts" has been ignored and "/Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/server/utils/recommendations/reviewDateUtils.ts" is used
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAccordion:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/accordion/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/accordion/Accordion.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAlertDialog:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/alert-dialog/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/alert-dialog/AlertDialog.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAlert:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/alert/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/alert/Alert.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAspectRatio:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/aspect-ratio/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/aspect-ratio/AspectRatio.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAvatar:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/avatar/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/avatar/Avatar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiBadge:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/badge/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/badge/Badge.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiBreadcrumb:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/breadcrumb/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/breadcrumb/Breadcrumb.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiButtonGroup:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/button-group/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/button-group/ButtonGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiButton:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/button/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/button/Button.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCalendar:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/calendar/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/calendar/Calendar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCard:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/card/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/card/Card.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCarousel:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/carousel/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/carousel/Carousel.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCheckbox:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/checkbox/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/checkbox/Checkbox.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCollapsible:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/collapsible/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/collapsible/Collapsible.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCombobox:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/combobox/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/combobox/Combobox.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCommand:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/command/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/command/Command.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiContextMenu:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/context-menu/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/context-menu/ContextMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDialog:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/dialog/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/dialog/Dialog.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDrawer:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/drawer/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/drawer/Drawer.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDropdownMenu:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/dropdown-menu/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/dropdown-menu/DropdownMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiEmpty:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/empty/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/empty/Empty.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiField:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/field/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/field/Field.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiHoverCard:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/hover-card/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/hover-card/HoverCard.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiInputGroup:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/input-group/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/input-group/InputGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiInput:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/input/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/input/Input.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiItem:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/item/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/item/Item.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiKbd:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/kbd/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/kbd/Kbd.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiLabel:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/label/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/label/Label.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiMenubar:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/menubar/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/menubar/Menubar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNativeSelect:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/native-select/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/native-select/NativeSelect.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNavigationMenu:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/navigation-menu/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/navigation-menu/NavigationMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNumberField:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/number-field/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/number-field/NumberField.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPagination:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/pagination/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/pagination/Pagination.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPinInput:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/pin-input/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/pin-input/PinInput.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPopover:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/popover/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/popover/Popover.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiProgress:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/progress/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/progress/Progress.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiRadioGroup:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/radio-group/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/radio-group/RadioGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiRangeCalendar:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/range-calendar/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/range-calendar/RangeCalendar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiScrollArea:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/scroll-area/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/scroll-area/ScrollArea.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSelect:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/select/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/select/Select.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSeparator:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/separator/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/separator/Separator.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSheet:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/sheet/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/sheet/Sheet.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSidebar:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/sidebar/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/sidebar/Sidebar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSkeleton:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/skeleton/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/skeleton/Skeleton.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSlider:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/slider/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/slider/Slider.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSonner:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/sonner/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/sonner/Sonner.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSpinner:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/spinner/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/spinner/Spinner.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiStepper:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/stepper/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/stepper/Stepper.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSwitch:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/switch/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/switch/Switch.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTable:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/table/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/table/Table.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTabs:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/tabs/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/tabs/Tabs.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTagsInput:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/tags-input/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/tags-input/TagsInput.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTextarea:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/textarea/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/textarea/Textarea.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiToggleGroup:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/toggle-group/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/toggle-group/ToggleGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiToggle:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/toggle/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/toggle/Toggle.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTooltip:
+
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/tooltip/index.ts
+ - /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/components/ui/tooltip/Tooltip.vue
+
+
+ WARN  Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+ℹ Building client...
+ℹ vite v7.3.1 building client environment for production...
+ℹ transforming...
+ℹ ✓ 164 modules transformed.
+
+ ERROR  ✗ Build failed in 1.42s
+
+│
+■  Nuxt build error: RollupError: Could not resolve "./quality-deliberately-missing-module" from "app/plugins/quality-build-probe.ts"
+│  file: /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887/app/plugins/quality-build-probe.ts
+ ELIFECYCLE  Command failed with exit code 1.
+
+Exit: 1

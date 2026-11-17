@@ -1,0 +1,14 @@
+$ pnpm install --frozen-lockfile --ignore-scripts --package-import-method=hardlink
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +2 -2
+++--
+Progress: resolved 2, reused 2, downloaded 0, added 0, done
+
+devDependencies:
+- jschardet 3.1.4
+- lodash 4.17.20
+
+Done in 1.3s
+
+Exit: 0

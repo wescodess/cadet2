@@ -1,0 +1,4 @@
+$ node scripts/quality/baseline-policy.mjs
+Baseline count increased: scripts/quality/baselines/lint.json app/components/admin/CitationIntegrityCard.vue|@typescript-eslint/no-unused-vars
+
+Exit: 1

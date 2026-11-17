@@ -13,7 +13,14 @@ main(async () => {
   if (!selected.length) return
   const eslint = new ESLint()
   const results = await eslint.lintFiles(selected)
-  writeFileSync(`${outputDir}/lint.json`, JSON.stringify(results, null, 2))
+  writeFileSync(
+    `${outputDir}/lint.json`,
+    JSON.stringify(
+      results.map(({ filePath, messages }) => ({ filePath: localPath(filePath), messages })),
+      null,
+      2,
+    ),
+  )
   const counts = {}
   for (const result of results) {
     for (const message of result.messages) {
@@ -24,7 +31,7 @@ main(async () => {
   }
   for (const file of selected) {
     const text = readFileSync(file, 'utf8')
-    for (const match of text.matchAll(/^\s*(?:\/\/|\/\*|\*|<!--)\s*eslint-disable[^\n]*/gm)) {
+    for (const match of text.matchAll(/(?:\/\/|\/\*|<!--|\n\s*\*)\s*eslint-disable[^\n]*/g)) {
       if (!/--\s+.*(?:#\d+|https:\/\/github\.com\/[^\s]+\/issues\/\d+)/.test(match[0])) {
         throw new Error(`${file}: eslint-disable requires a description with a ticket (#23)`)
       }

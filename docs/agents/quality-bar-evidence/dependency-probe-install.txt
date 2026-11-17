@@ -1,0 +1,42 @@
+$ pnpm add -D --save-exact --ignore-scripts --package-import-method=hardlink lodash@4.17.20 jschardet@3.1.4
+Progress: resolved 0, reused 1, downloaded 0, added 0
+ WARN  deprecated @onmax/nuxt-better-auth@0.0.2-alpha.29: Package moved to @nuxtjs/better-auth. Replace @onmax/nuxt-better-auth with @nuxtjs/better-auth.
+ WARN  deprecated lucide-vue-next@0.575.0: Package deprecated. Please use @lucide/vue instead.
+Progress: resolved 1071, reused 1069, downloaded 1, added 0
+Progress: resolved 1472, reused 1221, downloaded 1, added 0
+Progress: resolved 1608, reused 1357, downloaded 1, added 0
+Progress: resolved 1622, reused 1372, downloaded 1, added 0
+ WARN  12 deprecated subdependencies found: @better-auth/cli@1.5.0-beta.13, @esbuild-kit/core-utils@3.3.2, @esbuild-kit/esm-loader@2.6.5, fstream@1.0.12, glob@10.5.0, glob@7.2.3, inflight@1.0.6, is-relative-path@1.0.2, lodash.isequal@4.5.0, rimraf@2.7.1, unplugin-vue-router@0.19.2, uuid@8.3.2
+Packages: +3 -4
++++----
+Progress: resolved 1622, reused 1372, downloaded 2, added 3, done
+
+devDependencies:
+- husky 9.1.7
++ jschardet 3.1.4 (4.1.0 is available)
++ lodash 4.17.20 (4.18.1 is available)
+
+ WARN  Issues with peer dependencies found
+.
+├─┬ @nuxthub/core 0.10.6
+│ └─┬ tsdown 0.18.4
+│   └─┬ rolldown-plugin-dts 0.20.0
+│     └── ✕ unmet peer vue-tsc@~3.2.0: found 3.3.14
+├─┬ nuxt 4.3.1
+│ └─┬ @nuxt/cli 3.33.1
+│   └─┬ @bomb.sh/tab 0.0.12
+│     └── ✕ unmet peer citty@^0.1.6: found 0.2.1
+├─┬ better-call 1.1.7
+│ └── ✕ unmet peer zod@^4.0.0: found 3.25.76
+├─┬ prisma 7.4.1
+│ └─┬ @prisma/config 7.4.1
+│   └─┬ c12 3.1.0
+│     └── ✕ unmet peer magicast@^0.3.5: found 0.5.2
+└─┬ @onmax/nuxt-better-auth 0.0.2-alpha.29
+  └─┬ @better-auth/cli 1.5.0-beta.13
+    └─┬ @better-auth/core 1.5.0-beta.13
+      └── ✕ unmet peer better-call@1.2.1: found 1.1.7
+
+Done in 5.5s
+
+Exit: 0

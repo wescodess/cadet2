@@ -1,0 +1,9 @@
+$ pnpm lint
+
+> cadet2@ lint /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> node scripts/quality/lint.mjs
+
+scripts/quality/quality-lint-probe.mjs: eslint-disable requires a description with a ticket (#23)
+ ELIFECYCLE  Command failed with exit code 1.
+
+Exit: 1

@@ -1,0 +1,11 @@
+$ pnpm lint
+
+> cadet2@ lint /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> node scripts/quality/lint.mjs
+
+lint regression:
+app/lib/utils.ts|@typescript-eslint/no-unused-vars: 1 > 0
+ ELIFECYCLE  Command failed with exit code 1.
+
+app/lib/utils.ts:9: @typescript-eslint/no-unused-vars: 'qualityLintRegression' is assigned a value but never used.
+Exit: 1

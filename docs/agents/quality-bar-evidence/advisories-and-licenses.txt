@@ -1,0 +1,13 @@
+$ pnpm dependencies:check
+
+> cadet2@ dependencies:check /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> node scripts/quality/dependencies.mjs
+
+advisories: new unallowlisted findings:
+GHSA-35jh-r3h4-6jhm|lodash@4.17.20
+GHSA-r5fr-rjxr-66jc|lodash@4.17.20
+licenses: new unallowlisted findings:
+jschardet@3.1.4|LGPL-2.1+
+ ELIFECYCLE  Command failed with exit code 1.
+
+Exit: 1

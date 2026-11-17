@@ -1,0 +1,12 @@
+$ pnpm typecheck
+
+> cadet2@ typecheck /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> node scripts/quality/types.mjs
+
+types regression:
+nuxt.config.ts|TS2322: 2 > 1
+ ELIFECYCLE  Command failed with exit code 1.
+
+nuxt.config.ts(81,15): error TS2322: Type 'Plugin<any>[]' is not assignable to type 'PluginOption'.
+nuxt.config.ts(85,7): error TS2322: Type 'string' is not assignable to type 'number'.
+Exit: 1
