@@ -1,0 +1,11 @@
+{
+  "file": "convex/auth.config.ts",
+  "parserOptions": {
+    "parser": "typescript-eslint/parser@8.73.0",
+    "project": "./convex/tsconfig.json",
+    "tsconfigRootDir": "/private/tmp/fix-pr55",
+    "extraFileExtensions": {
+      "0": ".vue"
+    }
+  }
+}

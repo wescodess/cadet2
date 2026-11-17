@@ -1,0 +1,4 @@
+node scripts/quality/baseline-policy.mjs
+QUALITY_BASE_REF=HEAD
+exit=1
+Baseline increased: scripts/quality/baselines/dependencies.json advisories GHSA-fc5q-39xc-vjpf|picomatch@4.0.7 paths

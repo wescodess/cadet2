@@ -1,0 +1,10 @@
+pnpm typecheck
+QUALITY_BASE_REF=HEAD
+exit=1
+
+> cadet2@ typecheck /private/tmp/fix-pr55
+> node scripts/quality/types.mjs
+
+types: PASS (47 current; 47 baseline)
+ ELIFECYCLE  Command failed with exit code 1.
+types-convex: new files must be clean: convex/qualityReview55.ts|TS2322

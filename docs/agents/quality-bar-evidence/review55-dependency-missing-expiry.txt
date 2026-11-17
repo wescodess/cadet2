@@ -1,0 +1,17 @@
+node scripts/quality/baseline-policy.mjs
+QUALITY_BASE_REF=HEAD
+exit=1
+Invalid baseline schema: scripts/quality/baselines/dependencies.json
+[
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "advisories",
+      "GHSA-22cc-p3c6-wpvm|h3@1.15.5",
+      "expires"
+    ],
+    "message": "Required"
+  }
+]

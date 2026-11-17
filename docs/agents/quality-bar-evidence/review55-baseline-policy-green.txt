@@ -1,0 +1,4 @@
+node scripts/quality/baseline-policy.mjs
+QUALITY_BASE_REF=HEAD
+exit=0
+baselines: PASS (valid schemas; no increases against integration merge-base)
