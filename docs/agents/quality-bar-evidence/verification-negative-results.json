@@ -1,0 +1,47 @@
+{
+  "source": "756267d71da748d4cabce877d998814127ce4a94",
+  "exit": 1,
+  "seconds": 142.81,
+  "results": [
+    {
+      "row": "typecheck",
+      "status": "FAIL",
+      "seconds": "16.5"
+    },
+    {
+      "row": "lint",
+      "status": "FAIL",
+      "seconds": "29.3"
+    },
+    {
+      "row": "format:check",
+      "status": "PASS",
+      "seconds": "4.2"
+    },
+    {
+      "row": "secrets:check",
+      "status": "PASS",
+      "seconds": "5.8"
+    },
+    {
+      "row": "dependencies:check",
+      "status": "PASS",
+      "seconds": "46.0"
+    },
+    {
+      "row": "test:policy",
+      "status": "PASS",
+      "seconds": "0.7"
+    },
+    {
+      "row": "test:components",
+      "status": "PASS",
+      "seconds": "11.3"
+    },
+    {
+      "row": "build",
+      "status": "PASS",
+      "seconds": "28.6"
+    }
+  ]
+}
