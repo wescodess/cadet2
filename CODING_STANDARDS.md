@@ -92,7 +92,7 @@ Example: [app/composables/useRecommendationRunHistory.ts:36](https://github.com/
 
 ### 15. Preserve evidence limits in recommendation claims
 
-Keep evidence and freshness attached to claims; do not upgrade missing or inferred support into source-backed certainty during shaping or presentation. Scores, rankings, percentages, confidence labels and "fastest" or "best" language need a substantiated basis the reviewer can trace; otherwise they are fabricated certainty.
+Keep evidence and freshness attached to claims; do not upgrade missing or inferred support into source-backed certainty during shaping or presentation. Never present fit or match scores, rankings of programs, success or approval percentages, confidence labels, or "fastest" and "best" route language. A value defined by an official rule, such as CRS points, may appear only with its inputs, missing facts and rule version beside it.
 Rationale: A polished recommendation must not imply stronger evidence than the system actually has, and a Client may act on it.
 Example: [server/utils/recommendations/classifyTrustBoundary.ts:18](https://github.com/wescodess/cadet2/blob/fe2b4a4e4f8b4b861fb5c92661b9e411a84ef0b3/server/utils/recommendations/classifyTrustBoundary.ts#L18) distinguishes inferred/withheld support; [server/utils/recommendations/buildRecommendationCitations.ts:63](https://github.com/wescodess/cadet2/blob/fe2b4a4e4f8b4b861fb5c92661b9e411a84ef0b3/server/utils/recommendations/buildRecommendationCitations.ts#L63) preserves unknown freshness.
 
