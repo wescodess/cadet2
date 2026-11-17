@@ -93,6 +93,8 @@ A final aggregate probe ran on 2026-11-17 at `756267d71da748d4cabce877d998814127
 
 ## Matrix
 
+CI launches the built `node .output/server/index.mjs` with `NITRO_HOST`/`NITRO_PORT` and creates the PGlite parent directory. Run 44031096812 exposed an existing invalid launch flag: `nuxt preview --host 127.0.0.1` treats the IP as its root directory and never starts the built server. The direct entrypoint returned HTTP 200 in a local production smoke check. Server logs are printed on a failed shard/burn-in step.
+
 This ticket retains the existing `chromium` Desktop Chrome and `api` Playwright projects and two CI shards. Playwright and burn-in jobs use `ubuntu-24.04`: run 44029938944 proved Verify green but the old `ubuntu-latest` runner had moved to Ubuntu 26.04, which the locked Playwright 1.58.2 rejects before browser installation. It does not establish an acceptance/regression/signoff matrix. The existing CI retry count remains 2; journey, accessibility and signoff policy belong to #27. No `qa/` files or existing Playwright suites are changed.
 
 ## Budgets

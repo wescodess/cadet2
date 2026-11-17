@@ -115,10 +115,15 @@ jobs:
           set -euo pipefail
 
           pnpm build
-          pnpm preview --host 127.0.0.1 --port 3000 > /tmp/cadet2-preview.log 2>&1 &
+          mkdir -p .data/db
+          NITRO_HOST=127.0.0.1 NITRO_PORT=3000 node .output/server/index.mjs > /tmp/cadet2-preview.log 2>&1 &
           SERVER_PID=$!
 
           cleanup() {
+            if [ "$?" -ne 0 ]; then
+              cat /tmp/cadet2-preview.log 2>/dev/null || true
+              cat /tmp/cadet2-burn-in-preview.log 2>/dev/null || true
+            fi
             kill "$SERVER_PID" 2>/dev/null || true
             wait "$SERVER_PID" 2>/dev/null || true
           }
@@ -267,10 +272,15 @@ jobs:
           set -euo pipefail
 
           pnpm build
-          pnpm preview --host 127.0.0.1 --port 3000 > /tmp/cadet2-burn-in-preview.log 2>&1 &
+          mkdir -p .data/db
+          NITRO_HOST=127.0.0.1 NITRO_PORT=3000 node .output/server/index.mjs > /tmp/cadet2-burn-in-preview.log 2>&1 &
           SERVER_PID=$!
 
           cleanup() {
+            if [ "$?" -ne 0 ]; then
+              cat /tmp/cadet2-preview.log 2>/dev/null || true
+              cat /tmp/cadet2-burn-in-preview.log 2>/dev/null || true
+            fi
             kill "$SERVER_PID" 2>/dev/null || true
             wait "$SERVER_PID" 2>/dev/null || true
           }
