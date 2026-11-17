@@ -1,0 +1,42 @@
+✔ /workspace is unavailable to every caller and method (4900.453375ms)
+✔ /workspace/intake is unavailable to every caller and method (45.301542ms)
+✔ /workspace/recommendations is unavailable to every caller and method (47.706042ms)
+✔ /workspace/recommendations/legacy-private-run is unavailable to every caller and method (47.181833ms)
+✔ /workspace/recommendations/legacy-private-run/pathways/private-pathway-canary is unavailable to every caller and method (45.978417ms)
+✔ /workspace/history is unavailable to every caller and method (46.346958ms)
+✔ /workspace/compare is unavailable to every caller and method (46.2595ms)
+✔ /workspace/settings is unavailable to every caller and method (47.173416ms)
+✔ /workspace/unknown is unavailable to every caller and method (47.920667ms)
+✔ /tasks is unavailable to every caller and method (45.282916ms)
+✔ /api/workspace is unavailable to every caller and method (50.821542ms)
+✔ /api/workspace/me is unavailable to every caller and method (46.408166ms)
+✔ /api/workspace/summary is unavailable to every caller and method (47.797708ms)
+✔ /api/workspace/recommendation-runs is unavailable to every caller and method (44.629083ms)
+✔ /api/workspace/runs is unavailable to every caller and method (45.032458ms)
+✔ /api/workspace/runs/legacy-private-run is unavailable to every caller and method (43.345708ms)
+✔ /api/workspace/runs/compare is unavailable to every caller and method (40.01075ms)
+✔ /api/workspace/unknown is unavailable to every caller and method (43.58425ms)
+✔ /api/intake is unavailable to every caller and method (42.296875ms)
+✔ /api/intake/draft is unavailable to every caller and method (39.967125ms)
+✔ /api/intake/submit is unavailable to every caller and method (41.065541ms)
+✔ /api/intake/unknown is unavailable to every caller and method (42.293791ms)
+✔ /api/recommendations/runs is unavailable to every caller and method (44.91675ms)
+✔ /api/recommendations/runs/legacy-private-run/status is unavailable to every caller and method (41.75325ms)
+✔ /api/recommendations/runs/legacy-private-run/pathways is unavailable to every caller and method (54.468167ms)
+✔ /api/recommendations/runs/legacy-private-run/results is unavailable to every caller and method (45.722833ms)
+✔ /api/recommendations/runs/legacy-private-run/start is unavailable to every caller and method (46.09575ms)
+✔ /api/recommendations/runs/legacy-private-run/refresh is unavailable to every caller and method (46.474ms)
+✔ /api/recommendations/runs/legacy-private-run/unknown is unavailable to every caller and method (50.774791ms)
+✔ SSR payloads, encoded paths and prefetches cannot reach a retired loader (144.619458ms)
+✔ JSON, malformed bodies and extension methods are rejected before reading input (66.95025ms)
+✔ the shipped browser chunks contain no legacy navigation, polling or automatic starts (69.714708ms)
+✔ public entry preserves authentication without advertising retired navigation (10.245ms)
+✔ real sign-in, session and backend admission still work after denied requests (22.865875ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11647.392209

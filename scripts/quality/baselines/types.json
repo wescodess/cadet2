@@ -17,10 +17,6 @@
     "convex/recommendationRuns.ts|TS2532": 2,
     "nuxt.config.ts|TS2322": 1,
     "server/api/admin/rag/sources/index.get.ts|TS7006": 1,
-    "server/api/recommendations/runs/[runId]/refresh.post.ts|TS2322": 2,
-    "server/api/recommendations/runs/[runId]/start.post.ts|TS18047": 4,
-    "server/api/recommendations/runs/[runId]/start.post.ts|TS2322": 7,
-    "server/api/recommendations/runs/[runId]/status.get.ts|TS2322": 2,
     "server/api/recommendations/testing/seed.post.ts|TS2345": 1,
     "server/utils/convex-admin-client.ts|TS2339": 2
   }

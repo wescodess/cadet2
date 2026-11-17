@@ -2,7 +2,6 @@
   "date": "2026-11-17",
   "commit": "fe2b4a4e4f8b4b861fb5c92661b9e411a84ef0b3",
   "counts": {
-    "convex/auth.config.ts|TS2580": 1,
     "convex/recommendationRuns.ts|TS18048": 7,
     "convex/recommendationRuns.ts|TS2532": 2
   }

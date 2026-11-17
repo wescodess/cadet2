@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test:components": "vitest run --maxWorkers=2",
+    "test:legacy-access": "node --test --test-concurrency=1 tests/security/*.test.mjs",
     "test:e2e": "playwright test --project=chromium",
     "test:api": "playwright test --project=api",
     "test:all": "playwright test --project=chromium --project=api",

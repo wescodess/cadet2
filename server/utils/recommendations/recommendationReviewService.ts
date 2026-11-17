@@ -1,9 +1,9 @@
 import type { H3Event } from 'h3'
-import { anyApi } from 'convex/server'
-
-import {
-  createConvexUserHttpClientForEvent,
-} from '../convex-admin-client'
+import { getFunctionName, makeFunctionReference } from 'convex/server'
+import type { FunctionArgs, FunctionReturnType } from 'convex/server'
+import { api, internal } from '../../../convex/_generated/api'
+import { createConvexAdminClient, createConvexUserHttpClientForEvent } from '../convex-admin-client'
+import { requireAdminSession } from '../auth/requireAdminSession'
 import { listPathwayDefinitions } from '../pathways/pathwayDefinitionService'
 import { toEvidenceSourceRecord, type EvidenceSourceRecord } from '../admin/evidenceSourceSchema'
 import {
@@ -23,6 +23,18 @@ import {
   type RecommendationReviewSupportStrength,
   type RecommendationReviewTrustScore,
 } from './recommendationReviewSchema'
+
+// The admin HTTP transport supports internal calls; its SDK types require public references.
+const listReviewRuns = makeFunctionReference<
+  'query',
+  FunctionArgs<typeof internal.recommendationRuns.listForAdmin>,
+  FunctionReturnType<typeof internal.recommendationRuns.listForAdmin>
+>(getFunctionName(internal.recommendationRuns.listForAdmin))
+const readReviewRun = makeFunctionReference<
+  'query',
+  FunctionArgs<typeof internal.recommendationRuns.readRankedRecommendationsForAdmin>,
+  FunctionReturnType<typeof internal.recommendationRuns.readRankedRecommendationsForAdmin>
+>(getFunctionName(internal.recommendationRuns.readRankedRecommendationsForAdmin))
 
 type ConvexRecommendationReviewCandidate = {
   pathwayId: string
@@ -112,7 +124,11 @@ type RecommendationReviewRunDetail = {
   citations: RecommendationReviewCitation[]
 }
 
-const reviewableStatuses = new Set<RecommendationReviewRunStatus>(['completed', 'degraded', 'failed'])
+const reviewableStatuses = new Set<RecommendationReviewRunStatus>([
+  'completed',
+  'degraded',
+  'failed',
+])
 
 const pathwayLabels: Record<string, string> = {
   'mvp-skilled-worker': 'Skilled Worker pathway',
@@ -120,11 +136,9 @@ const pathwayLabels: Record<string, string> = {
   'mvp-study-to-work': 'Study-to-Work pathway',
 }
 
-
-
 function normalizeRunStatus(value: string): RecommendationReviewRunStatus | null {
   return reviewableStatuses.has(value as RecommendationReviewRunStatus)
-    ? value as RecommendationReviewRunStatus
+    ? (value as RecommendationReviewRunStatus)
     : null
 }
 
@@ -149,12 +163,20 @@ function getPathwayLabel(pathwayId: string, pathwayLabelMap: Map<string, string>
 }
 
 function buildAnonymizedSubject(profileSnapshotId: string) {
-  const suffix = profileSnapshotId.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase()
+  const suffix = profileSnapshotId
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(-4)
+    .toUpperCase()
   return `Candidate ${suffix || 'ANON'}`
 }
 
 function normalizeCitationSourceType(value: unknown): RecommendationReviewCitation['sourceType'] {
-  if (value === 'regulation' || value === 'policy-bulletin' || value === 'knowledge-base' || value === 'assessment-guide') {
+  if (
+    value === 'regulation' ||
+    value === 'policy-bulletin' ||
+    value === 'knowledge-base' ||
+    value === 'assessment-guide'
+  ) {
     return value
   }
 
@@ -165,7 +187,9 @@ function toNonEmptyString(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
-function normalizeFreshnessLabelFromDate(value: string | null | undefined): RecommendationReviewFreshnessLabel {
+function normalizeFreshnessLabelFromDate(
+  value: string | null | undefined,
+): RecommendationReviewFreshnessLabel {
   if (!value) {
     return 'expired'
   }
@@ -187,7 +211,9 @@ function normalizeFreshnessLabelFromDate(value: string | null | undefined): Reco
   return 'expired'
 }
 
-function normalizeFreshnessLabelFromSource(source: EvidenceSourceRecord | null | undefined): RecommendationReviewFreshnessLabel {
+function normalizeFreshnessLabelFromSource(
+  source: EvidenceSourceRecord | null | undefined,
+): RecommendationReviewFreshnessLabel {
   if (!source) {
     return 'expired'
   }
@@ -212,16 +238,23 @@ function pickConfidence(candidates: ConvexRecommendationReviewCandidate[]) {
   }
 
   return candidates.reduce<'high' | 'medium' | 'low' | 'withheld'>((current, candidate) => {
-    const next = candidate.confidence === 'high' || candidate.confidence === 'medium' || candidate.confidence === 'low' || candidate.confidence === 'withheld'
-      ? candidate.confidence
-      : 'withheld'
+    const next =
+      candidate.confidence === 'high' ||
+      candidate.confidence === 'medium' ||
+      candidate.confidence === 'low' ||
+      candidate.confidence === 'withheld'
+        ? candidate.confidence
+        : 'withheld'
 
     return weight[next] > weight[current] ? next : current
   }, 'high')
 }
 
-function pickRunFreshness(citations: RecommendationReviewCitation[], candidates: ConvexRecommendationReviewCandidate[]) {
-  const explicitLabels = citations.map(citation => citation.freshness)
+function pickRunFreshness(
+  citations: RecommendationReviewCitation[],
+  candidates: ConvexRecommendationReviewCandidate[],
+) {
+  const explicitLabels = citations.map((citation) => citation.freshness)
   if (explicitLabels.includes('expired')) {
     return 'expired'
   }
@@ -234,7 +267,11 @@ function pickRunFreshness(citations: RecommendationReviewCitation[], candidates:
     return 'current'
   }
 
-  if (candidates.some(candidate => candidate.freshness === 'stale' || candidate.freshness === 'unknown')) {
+  if (
+    candidates.some(
+      (candidate) => candidate.freshness === 'stale' || candidate.freshness === 'unknown',
+    )
+  ) {
     return 'stale'
   }
 
@@ -249,20 +286,20 @@ function pickTrustScore(input: {
   weakCitationCount: number
 }) {
   if (
-    input.citationCount === 0
-    || input.confidence === 'withheld'
-    || input.confidence === 'low'
-    || input.freshness === 'expired'
-    || input.weakCitationCount > 1
+    input.citationCount === 0 ||
+    input.confidence === 'withheld' ||
+    input.confidence === 'low' ||
+    input.freshness === 'expired' ||
+    input.weakCitationCount > 1
   ) {
     return recommendationReviewTrustScoreSchema.parse('low')
   }
 
   if (
-    input.confidence === 'high'
-    && input.freshness === 'current'
-    && input.caveatCount <= 1
-    && input.weakCitationCount === 0
+    input.confidence === 'high' &&
+    input.freshness === 'current' &&
+    input.caveatCount <= 1 &&
+    input.weakCitationCount === 0
   ) {
     return recommendationReviewTrustScoreSchema.parse('high')
   }
@@ -275,15 +312,19 @@ function computeSupportStrength(input: {
   freshness: RecommendationReviewFreshnessLabel
   hasMappedSource: boolean
 }) {
-  if (!input.hasMappedSource || input.freshness === 'expired' || input.candidate.qualification === 'withheld') {
+  if (
+    !input.hasMappedSource ||
+    input.freshness === 'expired' ||
+    input.candidate.qualification === 'withheld'
+  ) {
     return recommendationReviewSupportStrengthSchema.parse('unsupported')
   }
 
   if (
-    input.freshness === 'stale'
-    || input.candidate.confidence === 'low'
-    || input.candidate.confidence === 'withheld'
-    || input.candidate.qualification === 'low-confidence'
+    input.freshness === 'stale' ||
+    input.candidate.confidence === 'low' ||
+    input.candidate.confidence === 'withheld' ||
+    input.candidate.qualification === 'low-confidence'
   ) {
     return recommendationReviewSupportStrengthSchema.parse('weak')
   }
@@ -298,18 +339,23 @@ function computeSupportStrength(input: {
 function resolveSourceUrl(source: EvidenceSourceRecord | null | undefined, fallbackUrl = '') {
   const crawlConfig = source?.crawlConfig || {}
   const seedUrls = Array.isArray(crawlConfig.seedUrls)
-    ? crawlConfig.seedUrls.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+    ? crawlConfig.seedUrls.filter(
+        (value): value is string => typeof value === 'string' && value.trim().length > 0,
+      )
     : []
   const youtubeUrl = typeof crawlConfig.channelUrl === 'string' ? crawlConfig.channelUrl.trim() : ''
 
   return fallbackUrl || seedUrls[0] || youtubeUrl || 'https://example.com'
 }
 
-function sourceMatchesCitation(source: EvidenceSourceRecord, input: {
-  pathwayId: string
-  sourceUrl: string
-  sourceName: string
-}) {
+function sourceMatchesCitation(
+  source: EvidenceSourceRecord,
+  input: {
+    pathwayId: string
+    sourceUrl: string
+    sourceName: string
+  },
+) {
   let score = 0
 
   if (source.linkedPathwayIds.includes(input.pathwayId)) {
@@ -322,9 +368,7 @@ function sourceMatchesCitation(source: EvidenceSourceRecord, input: {
       if (new URL(sourceUrl).hostname === new URL(input.sourceUrl).hostname) {
         score += 3
       }
-    }
-    catch {
-    }
+    } catch {}
   }
 
   if (input.sourceName && source.name.toLowerCase().includes(input.sourceName.toLowerCase())) {
@@ -357,7 +401,7 @@ function matchEvidenceSource(
     return bestSource
   }
 
-  return sources.find(source => source.linkedPathwayIds.includes(input.pathwayId)) || null
+  return sources.find((source) => source.linkedPathwayIds.includes(input.pathwayId)) || null
 }
 
 function normalizeStoredCitations(value: unknown) {
@@ -366,7 +410,10 @@ function normalizeStoredCitations(value: unknown) {
   }
 
   return value
-    .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
+    .filter(
+      (entry): entry is Record<string, unknown> =>
+        Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry),
+    )
     .map((entry, index) => ({
       citationId: toNonEmptyString(entry.citationId) || `citation-${index + 1}`,
       claimSnippet: toNonEmptyString(entry.claimText || entry.claim) || '',
@@ -376,7 +423,7 @@ function normalizeStoredCitations(value: unknown) {
       retrievalDate: toNonEmptyString(entry.retrievalDate),
       excerpt: toNonEmptyString(entry.excerpt),
     }))
-    .filter(entry => entry.claimSnippet.length > 0)
+    .filter((entry) => entry.claimSnippet.length > 0)
 }
 
 function buildCandidateFallbackCitation(
@@ -387,7 +434,10 @@ function buildCandidateFallbackCitation(
   pathwayLabel: string,
 ) {
   const citationId = `${run.runId}-${candidate.pathwayId}-${candidateIndex + 1}`
-  const claimSnippet = candidate.caveat?.trim() || candidate.rationale?.trim() || `${pathwayLabel} requires admin review because direct citation evidence was not persisted.`
+  const claimSnippet =
+    candidate.caveat?.trim() ||
+    candidate.rationale?.trim() ||
+    `${pathwayLabel} requires admin review because direct citation evidence was not persisted.`
   const sourceName = source?.name || `${pathwayLabel} governance reference`
 
   return {
@@ -395,7 +445,9 @@ function buildCandidateFallbackCitation(
     claimSnippet,
     sourceName,
     sourceUrl: resolveSourceUrl(source),
-    sourceType: normalizeCitationSourceType(source?.type === 'website' ? 'knowledge-base' : 'policy-bulletin'),
+    sourceType: normalizeCitationSourceType(
+      source?.type === 'website' ? 'knowledge-base' : 'policy-bulletin',
+    ),
     freshness: normalizeFreshnessLabelFromSource(source),
     sourceId: source?.id || `source-unmapped-${candidate.pathwayId}`,
     matchContext: `${pathwayLabel} ${candidate.type} recommendation matched against current governance and pathway context.`,
@@ -430,11 +482,14 @@ function buildProjectedCitations(input: {
   candidates: ConvexRecommendationReviewCandidate[]
   sources: EvidenceSourceRecord[]
   pathwayLabelMap: Map<string, string>
-  citationReviewStateMap: Map<string, {
-    reviewState: RecommendationReviewState
-    reason: string | null
-    updatedAt: string
-  }>
+  citationReviewStateMap: Map<
+    string,
+    {
+      reviewState: RecommendationReviewState
+      reason: string | null
+      updatedAt: string
+    }
+  >
 }) {
   return input.candidates.flatMap((candidate, candidateIndex) => {
     const pathwayLabel = getPathwayLabel(candidate.pathwayId, input.pathwayLabelMap)
@@ -463,7 +518,8 @@ function buildProjectedCitations(input: {
         return {
           citationId: citation.citationId,
           sourceId: matchedSource?.id || `source-unmapped-${candidate.pathwayId}`,
-          sourceName: matchedSource?.name || citation.sourceName || `${pathwayLabel} governance reference`,
+          sourceName:
+            matchedSource?.name || citation.sourceName || `${pathwayLabel} governance reference`,
           sourceUrl: citation.sourceUrl || resolveSourceUrl(matchedSource),
           sourceType: citation.sourceType,
           claimSnippet: citation.claimSnippet,
@@ -484,7 +540,13 @@ function buildProjectedCitations(input: {
       sourceUrl: '',
       sourceName: pathwayLabel,
     })
-    const fallbackCitation = buildCandidateFallbackCitation(input.run, candidate, candidateIndex, fallbackSource, pathwayLabel)
+    const fallbackCitation = buildCandidateFallbackCitation(
+      input.run,
+      candidate,
+      candidateIndex,
+      fallbackSource,
+      pathwayLabel,
+    )
     const reviewKey = `${input.run.runId}:${fallbackCitation.citationId}`
     const reviewState = input.citationReviewStateMap.get(reviewKey)
     const supportStrength = computeSupportStrength({
@@ -493,22 +555,24 @@ function buildProjectedCitations(input: {
       hasMappedSource: Boolean(fallbackSource),
     })
 
-    return [{
-      citationId: fallbackCitation.citationId,
-      sourceId: fallbackCitation.sourceId,
-      sourceName: fallbackCitation.sourceName,
-      sourceUrl: fallbackCitation.sourceUrl,
-      sourceType: fallbackCitation.sourceType,
-      claimSnippet: fallbackCitation.claimSnippet,
-      pathwayId: candidate.pathwayId,
-      pathwayLabel,
-      freshness: fallbackCitation.freshness,
-      supportStrength,
-      matchContext: fallbackCitation.matchContext,
-      reviewState: reviewState?.reviewState || recommendationReviewStateSchema.parse('pending'),
-      lastReviewedAt: reviewState?.updatedAt || null,
-      flagReason: reviewState?.reason || null,
-    } satisfies RecommendationReviewCitation]
+    return [
+      {
+        citationId: fallbackCitation.citationId,
+        sourceId: fallbackCitation.sourceId,
+        sourceName: fallbackCitation.sourceName,
+        sourceUrl: fallbackCitation.sourceUrl,
+        sourceType: fallbackCitation.sourceType,
+        claimSnippet: fallbackCitation.claimSnippet,
+        pathwayId: candidate.pathwayId,
+        pathwayLabel,
+        freshness: fallbackCitation.freshness,
+        supportStrength,
+        matchContext: fallbackCitation.matchContext,
+        reviewState: reviewState?.reviewState || recommendationReviewStateSchema.parse('pending'),
+        lastReviewedAt: reviewState?.updatedAt || null,
+        flagReason: reviewState?.reason || null,
+      } satisfies RecommendationReviewCitation,
+    ]
   })
 }
 
@@ -524,11 +588,13 @@ function buildRunSummary(input: {
   }
 
   const caveats = input.candidates
-    .map(candidate => candidate.caveat?.trim() || '')
+    .map((candidate) => candidate.caveat?.trim() || '')
     .filter(Boolean)
   const confidence = pickConfidence(input.candidates)
   const freshness = pickRunFreshness(input.citations, input.candidates)
-  const weakCitationCount = input.citations.filter(citation => citation.supportStrength === 'weak' || citation.supportStrength === 'unsupported').length
+  const weakCitationCount = input.citations.filter(
+    (citation) => citation.supportStrength === 'weak' || citation.supportStrength === 'unsupported',
+  ).length
 
   return {
     runId: input.run.runId,
@@ -546,7 +612,8 @@ function buildRunSummary(input: {
     freshness,
     citationCount: input.citations.length,
     reviewState: input.reviewState,
-    flaggedCitationCount: input.citations.filter(citation => citation.reviewState === 'flagged').length,
+    flaggedCitationCount: input.citations.filter((citation) => citation.reviewState === 'flagged')
+      .length,
     anonymizedSubject: buildAnonymizedSubject(input.run.profileSnapshotId),
     caveatCount: caveats.length,
   } satisfies RecommendationReviewRunSummary
@@ -556,20 +623,17 @@ async function loadReviewProjectionContext(event: H3Event) {
   const [pathwayDefinitions, sourceResult] = await Promise.all([
     listPathwayDefinitions(),
     createConvexUserHttpClientForEvent(event).then(async (convex) => {
-      return await convex.query(
-        (anyApi as any).ragSources.listSources,
-        {
-          includeAllForAdmin: true,
-        },
-      ) as {
-        items: unknown[]
-      }
+      return await convex.query(api.ragSources.listSources, {
+        includeAllForAdmin: true,
+      })
     }),
   ])
 
   return {
-    pathwayLabelMap: new Map(pathwayDefinitions.map(item => [item.pathwayId, item.displayName] as const)),
-    sources: sourceResult.items.map(item => toEvidenceSourceRecord(item as never)),
+    pathwayLabelMap: new Map(
+      pathwayDefinitions.map((item) => [item.pathwayId, item.displayName] as const),
+    ),
+    sources: sourceResult.items.map((item) => toEvidenceSourceRecord(item as never)),
   }
 }
 
@@ -586,13 +650,15 @@ function toFallbackCandidate(
     confidence: type === 'direct' ? 'medium' : 'low',
     qualification: type === 'direct' ? 'supported' : 'low-confidence',
     freshness: 'unknown',
-    rationale: type === 'direct'
-      ? `${pathwayLabels[pathwayId] || pathwayId} remained directly available in fallback recommendation evaluation.`
-      : `${pathwayLabels[pathwayId] || pathwayId} requires follow-up on ${unmetConditions.join(', ') || 'unresolved conditions'} before reuse.`,
-    caveat: type === 'direct'
-      ? 'Fallback evaluation used pathway-only evidence and should be checked against current trust support.'
-      : 'Fallback evaluation identified unresolved pathway conditions and should not be reused without review.',
-    fitSignals: unmetConditions.slice(0, 2).map(condition => ({
+    rationale:
+      type === 'direct'
+        ? `${pathwayLabels[pathwayId] || pathwayId} remained directly available in fallback recommendation evaluation.`
+        : `${pathwayLabels[pathwayId] || pathwayId} requires follow-up on ${unmetConditions.join(', ') || 'unresolved conditions'} before reuse.`,
+    caveat:
+      type === 'direct'
+        ? 'Fallback evaluation used pathway-only evidence and should be checked against current trust support.'
+        : 'Fallback evaluation identified unresolved pathway conditions and should not be reused without review.',
+    fitSignals: unmetConditions.slice(0, 2).map((condition) => ({
       label: condition,
       detail: `${condition} requires admin follow-up before continued reuse.`,
       state: 'gap' as const,
@@ -600,9 +666,20 @@ function toFallbackCandidate(
   }
 }
 
-function toFallbackReviewRunRecord(run: FallbackRecommendationReviewRun): ConvexRecommendationReviewRun {
-  const direct = (run.pathwayEvaluation?.direct || []).map((entry, index) => toFallbackCandidate(entry.pathwayId, 'direct', index + 1))
-  const blocked = (run.pathwayEvaluation?.blocked || []).map((entry, index) => toFallbackCandidate(entry.pathwayId, 'blocked', direct.length + index + 1, entry.unmetConditions))
+function toFallbackReviewRunRecord(
+  run: FallbackRecommendationReviewRun,
+): ConvexRecommendationReviewRun {
+  const direct = (run.pathwayEvaluation?.direct || []).map((entry, index) =>
+    toFallbackCandidate(entry.pathwayId, 'direct', index + 1),
+  )
+  const blocked = (run.pathwayEvaluation?.blocked || []).map((entry, index) =>
+    toFallbackCandidate(
+      entry.pathwayId,
+      'blocked',
+      direct.length + index + 1,
+      entry.unmetConditions,
+    ),
+  )
 
   return {
     runId: run.runId,
@@ -622,17 +699,16 @@ function toFallbackReviewRunRecord(run: FallbackRecommendationReviewRun): Convex
 }
 
 async function loadRecommendationRuns(event: H3Event) {
+  await requireAdminSession(event)
   let runs: ConvexRecommendationReviewRun[] = []
 
   try {
-    const convex = await createConvexUserHttpClientForEvent(event)
-    runs = await convex.query(
-      (anyApi as any).recommendationRuns.listForAdmin,
-      {},
-    ) as ConvexRecommendationReviewRun[]
-  }
-  catch {
-    runs = listFallbackRecommendationRuns().map(run => toFallbackReviewRunRecord(run as FallbackRecommendationReviewRun))
+    const convex = await createConvexAdminClient()
+    runs = await convex.query(listReviewRuns, {})
+  } catch {
+    runs = listFallbackRecommendationRuns().map((run) =>
+      toFallbackReviewRunRecord(run as FallbackRecommendationReviewRun),
+    )
   }
 
   return runs
@@ -648,32 +724,14 @@ async function loadRecommendationRuns(event: H3Event) {
 }
 
 async function loadRecommendationRunDetail(event: H3Event, runId: string) {
+  await requireAdminSession(event)
   try {
-    const convex = await createConvexUserHttpClientForEvent(event)
-    return await convex.query(
-      (anyApi as any).recommendationRuns.readRankedRecommendationsForAdmin,
-      {
-        runId,
-      },
-    ) as (
-        | {
-          runId: string
-          userId: string
-          profileSnapshotId: string
-          status: string
-          createdAt: number | string | Date
-          updatedAt: number | string | Date
-          results: {
-            direct: ConvexRecommendationReviewCandidate[]
-            blocked: ConvexRecommendationReviewCandidate[]
-            composed: ConvexRecommendationReviewCandidate[]
-          }
-        }
-        | null
-      )
-  }
-  catch {
-    const fallbackRun = listFallbackRecommendationRuns().find(run => run.runId === runId) || null
+    const convex = await createConvexAdminClient()
+    return await convex.query(readReviewRun, {
+      runId,
+    })
+  } catch {
+    const fallbackRun = listFallbackRecommendationRuns().find((run) => run.runId === runId) || null
     if (!fallbackRun) {
       return null
     }
@@ -698,35 +756,42 @@ async function loadRecommendationRunDetail(event: H3Event, runId: string) {
 
 export async function listRecommendationReviews(event: H3Event) {
   const runs = await loadRecommendationRuns(event)
-  const runIds = runs.map(run => run.runId)
+  const runIds = runs.map((run) => run.runId)
   const [runReviewStateMap, citationReviewStateMap, sourcesContext] = await Promise.all([
     loadRecommendationRunReviewStateMap(runIds),
     loadRecommendationCitationReviewStateMap(runIds),
     loadReviewProjectionContext(event),
   ])
 
-  const items = runs.map((run) => {
-    const candidates = flattenCandidates(run)
-    const citations = buildProjectedCitations({
-      run,
-      candidates,
-      sources: sourcesContext.sources,
-      pathwayLabelMap: sourcesContext.pathwayLabelMap,
-      citationReviewStateMap: citationReviewStateMap as Map<string, {
-        reviewState: RecommendationReviewState
-        reason: string | null
-        updatedAt: string
-      }>,
-    })
-    const reviewState = runReviewStateMap.get(run.runId)?.reviewState || recommendationReviewStateSchema.parse('pending')
+  const items = runs
+    .map((run) => {
+      const candidates = flattenCandidates(run)
+      const citations = buildProjectedCitations({
+        run,
+        candidates,
+        sources: sourcesContext.sources,
+        pathwayLabelMap: sourcesContext.pathwayLabelMap,
+        citationReviewStateMap: citationReviewStateMap as Map<
+          string,
+          {
+            reviewState: RecommendationReviewState
+            reason: string | null
+            updatedAt: string
+          }
+        >,
+      })
+      const reviewState =
+        runReviewStateMap.get(run.runId)?.reviewState ||
+        recommendationReviewStateSchema.parse('pending')
 
-    return buildRunSummary({
-      run,
-      candidates,
-      citations,
-      reviewState,
+      return buildRunSummary({
+        run,
+        candidates,
+        citations,
+        reviewState,
+      })
     })
-  }).filter((item): item is RecommendationReviewRunSummary => Boolean(item))
+    .filter((item): item is RecommendationReviewRunSummary => Boolean(item))
 
   return {
     ok: true as const,
@@ -779,13 +844,17 @@ export async function getRecommendationReviewDetail(
     candidates,
     sources: context.sources,
     pathwayLabelMap: context.pathwayLabelMap,
-    citationReviewStateMap: citationReviewStateMap as Map<string, {
-      reviewState: RecommendationReviewState
-      reason: string | null
-      updatedAt: string
-    }>,
+    citationReviewStateMap: citationReviewStateMap as Map<
+      string,
+      {
+        reviewState: RecommendationReviewState
+        reason: string | null
+        updatedAt: string
+      }
+    >,
   })
-  const reviewState = runReviewStateMap.get(runId)?.reviewState || recommendationReviewStateSchema.parse('pending')
+  const reviewState =
+    runReviewStateMap.get(runId)?.reviewState || recommendationReviewStateSchema.parse('pending')
   const summary = buildRunSummary({
     run,
     candidates,
@@ -797,9 +866,9 @@ export async function getRecommendationReviewDetail(
     return null
   }
 
-  const caveats = [...new Set(candidates
-    .map(candidate => candidate.caveat?.trim() || '')
-    .filter(Boolean))]
+  const caveats = [
+    ...new Set(candidates.map((candidate) => candidate.caveat?.trim() || '').filter(Boolean)),
+  ]
 
   return {
     ok: true,
@@ -810,16 +879,26 @@ export async function getRecommendationReviewDetail(
         profileSnapshotId: summary.profileSnapshotId,
       },
       trustSignals: {
-        strong: citations.filter(citation => citation.supportStrength === 'strong').length,
-        watch: citations.filter(citation => citation.supportStrength === 'adequate' || citation.supportStrength === 'weak').length,
-        gaps: citations.filter(citation => citation.supportStrength === 'unsupported').length,
+        strong: citations.filter((citation) => citation.supportStrength === 'strong').length,
+        watch: citations.filter(
+          (citation) =>
+            citation.supportStrength === 'adequate' || citation.supportStrength === 'weak',
+        ).length,
+        gaps: citations.filter((citation) => citation.supportStrength === 'unsupported').length,
       },
       caveats,
       citationBuckets: {
         all: citations.length,
-        weakSupport: citations.filter(citation => citation.supportStrength === 'weak' || citation.supportStrength === 'unsupported').length,
-        staleSources: citations.filter(citation => citation.freshness === 'stale' || citation.freshness === 'expired').length,
-        missingReferences: citations.filter(citation => citation.supportStrength === 'unsupported').length,
+        weakSupport: citations.filter(
+          (citation) =>
+            citation.supportStrength === 'weak' || citation.supportStrength === 'unsupported',
+        ).length,
+        staleSources: citations.filter(
+          (citation) => citation.freshness === 'stale' || citation.freshness === 'expired',
+        ).length,
+        missingReferences: citations.filter(
+          (citation) => citation.supportStrength === 'unsupported',
+        ).length,
       },
     },
     citations,

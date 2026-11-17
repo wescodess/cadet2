@@ -19,13 +19,12 @@ export default defineNuxtRouteMiddleware(async () => {
 
   try {
     await $fetch('/api/admin/access')
-  }
-  catch (error) {
-    const statusCode = (error as AdminAccessError).statusCode
-      ?? (error as AdminAccessError).response?.status
+  } catch (error) {
+    const statusCode =
+      (error as AdminAccessError).statusCode ?? (error as AdminAccessError).response?.status
 
     if (statusCode === 401 || statusCode === 403) {
-      return navigateTo('/workspace')
+      return navigateTo('/')
     }
 
     throw error
