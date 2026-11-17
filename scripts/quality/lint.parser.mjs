@@ -45,11 +45,23 @@ const message = z
       .optional(),
   })
   .strict()
+const suppressedMessage = message.extend({
+  suppressions: z
+    .array(
+      z
+        .object({
+          kind: z.literal('directive'),
+          justification: z.string().regex(/(?:#\d+|https:\/\/github\.com\/[^\s]+\/issues\/\d+)/),
+        })
+        .strict(),
+    )
+    .nonempty(),
+})
 const result = z
   .object({
     filePath: nonempty,
     messages: z.array(message),
-    suppressedMessages: z.array(z.never()),
+    suppressedMessages: z.array(suppressedMessage),
     usedDeprecatedRules: z.array(z.never()),
     errorCount: natural,
     warningCount: natural,

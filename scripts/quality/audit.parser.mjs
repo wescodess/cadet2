@@ -42,6 +42,22 @@ const resolve = z
     bundled: z.boolean(),
   })
   .strict()
+function validateAdvisoryReferences({ actions, advisories }, context) {
+  const resolved = new Set()
+  for (const action of actions) {
+    for (const resolve of action.resolves) {
+      const key = String(resolve.id)
+      if (!Object.hasOwn(advisories, key))
+        context.addIssue({ code: 'custom', message: `Unresolved advisory: ${key}` })
+      resolved.add(key)
+    }
+  }
+  for (const key of Object.keys(advisories)) {
+    if (!resolved.has(key))
+      context.addIssue({ code: 'custom', message: `Advisory has no action: ${key}` })
+  }
+}
+
 const report = z
   .object({
     actions: z.array(
@@ -90,6 +106,7 @@ const report = z
   .strict()
   .superRefine((audit, context) => {
     const totals = Object.fromEntries(severities.map((severity) => [severity, 0]))
+    validateAdvisoryReferences(audit, context)
     for (const [key, entry] of Object.entries(audit.advisories)) {
       if (String(entry.id) !== key || !entry.url.endsWith(`/${entry.github_advisory_id}`))
         context.addIssue({ code: 'custom', message: `Advisory identity mismatch: ${key}` })

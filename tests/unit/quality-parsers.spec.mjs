@@ -55,6 +55,13 @@ describe('quality tool parsers', () => {
       const fixture = JSON.parse(
         readFileSync(new URL(file.replace('.parser.mjs', '.json'), fixturesDirectory), 'utf8'),
       )
+      for (const fixtureCase of fixture.cases ?? []) {
+        it(fixtureCase.name, () => {
+          const check = expect(() => parse(fixtureCase.input))
+          if (fixtureCase.valid) check.not.toThrow()
+          else check.toThrow(/Invalid /)
+        })
+      }
       it('accepts valid tool output', () => {
         for (const valid of [fixture.valid, ...fixture.alsoValid])
           expect(() => parse(valid)).not.toThrow()

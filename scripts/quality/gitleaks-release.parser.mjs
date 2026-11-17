@@ -91,5 +91,20 @@ const release = z
     (entry) => new Set(entry.assets.map((asset) => asset.name)).size === entry.assets.length,
     'Duplicate release assets',
   )
+  .refine((entry) => {
+    const api = 'https://api.github.com/repos/gitleaks/gitleaks/releases'
+    const web = 'https://github.com/gitleaks/gitleaks/releases'
+    return (
+      entry.url === `${api}/${entry.id}` &&
+      entry.assets_url === `${entry.url}/assets` &&
+      entry.html_url === `${web}/tag/${entry.tag_name}` &&
+      new Set(entry.assets.map((asset) => asset.id)).size === entry.assets.length &&
+      entry.assets.every(
+        (asset) =>
+          asset.url === `${api}/assets/${asset.id}` &&
+          asset.browser_download_url === `${web}/download/${entry.tag_name}/${asset.name}`,
+      )
+    )
+  }, 'Release and asset references do not match their identities')
 export const schema = jsonOutput(release)
 export const parse = parser('GitHub gitleaks release metadata', schema)

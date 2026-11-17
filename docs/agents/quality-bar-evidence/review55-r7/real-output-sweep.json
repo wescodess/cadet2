@@ -1,0 +1,13 @@
+{
+  "audit": "PASS",
+  "licenses": "PASS",
+  "lint": "PASS",
+  "gitleaks-release": "PASS",
+  "frozen-install": "PASS",
+  "gitleaks-version": "PASS",
+  "gitleaks": "PASS",
+  "prettier-info": "PASS",
+  "prettier-config": "PASS",
+  "prettier-check": "PASS",
+  "types": "PASS"
+}

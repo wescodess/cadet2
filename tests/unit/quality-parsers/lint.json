@@ -207,5 +207,353 @@
         }
       ]
     }
+  ],
+  "cases": [
+    {
+      "name": "ticketed directive with real ESLint suppression metadata",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "#23 review probe"
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "unticketed suppression justification",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "review probe"
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "empty suppression justification",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": ""
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "issue URL suppression justification",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "https://github.com/wescodess/cadet2/issues/23 review probe"
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing suppression entries",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": []
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "malformed suppression entries",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": 23
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown suppression metadata",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "#23",
+                    "unknown": true
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    }
   ]
 }
