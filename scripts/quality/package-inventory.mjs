@@ -13,9 +13,11 @@ function directories(path) {
 }
 
 function packageDirectories(modules) {
-  return directories(modules).flatMap((directory) =>
-    basename(directory).startsWith('@') ? directories(directory) : [directory],
-  )
+  return directories(modules)
+    .filter((directory) => !basename(directory).startsWith('.'))
+    .flatMap((directory) =>
+      basename(directory).startsWith('@') ? directories(directory) : [directory],
+    )
 }
 
 export function packageInventory() {

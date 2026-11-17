@@ -1,0 +1,13 @@
+{
+  "cleanFrozenInstallExit": 0,
+  "verifyExit": 0,
+  "verifyRowsPassed": 8,
+  "testFilesPassed": 20,
+  "testsPassed": 97,
+  "sharedParserTestsPassed": 54,
+  "inventoryRegressionTestsPassed": 3,
+  "baselineFilesUnchanged": 7,
+  "firstCiRun": "https://github.com/wescodess/cadet2/actions/runs/44201893943",
+  "firstCiResult": "failed: generated Prisma dot directory mistaken for a registry package",
+  "correction": "exclude generated dot directories; keep missing-manifest and unknown-package failures"
+}

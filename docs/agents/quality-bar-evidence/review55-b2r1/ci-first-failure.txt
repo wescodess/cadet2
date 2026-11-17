@@ -1,0 +1,3 @@
+Verify	Verify static rows, Vitest and production build	2026-11-17T23:46:16.9583612Z ENOENT: no such file or directory, open '/home/runner/work/cadet2/cadet2/node_modules/.pnpm/@prisma+client@5.22.0_prisma@7.4.1_@types+react@19.2.14_magicast@0.5.2_react-dom@19.2.4_react_nq2yyvervlxtpyfgsmijvdiq5e/node_modules/.prisma/package.json'
+Verify	Verify static rows, Vitest and production build	2026-11-17T23:47:14.2373997Z Verification summary
+Verify	Verify static rows, Vitest and production build	2026-11-17T23:47:14.2380677Z FAIL dependencies:check (1.4s)

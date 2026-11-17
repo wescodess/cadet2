@@ -1,0 +1,94 @@
+
+ RUN  v4.0.18 /private/tmp/fix-pr55-b2r1
+
+ ❯ tests/unit/quality-inventory.spec.mjs (3 tests | 2 failed) 584ms
+     × excludes generated Prisma dot directories while retaining installed packages 349ms
+     ✓ fails when a real package directory has no manifest 111ms
+     × fails when an installed identity is outside the frozen lockfile 123ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-inventory.spec.mjs > installed package inventory > excludes generated Prisma dot directories while retaining installed packages
+AssertionError: node:fs:484
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '/private/var/folders/xt/h8ndt65x0zgbydh0q57vd2tr0000gn/T/quality-inventory-5k44T0/node_modules/.pnpm/fixture@1.0.0/node_modules/.prisma/package.json'
+    at readFileSync (node:fs:484:20)
+    at packageInventory (file:///private/tmp/fix-pr55-b2r1/scripts/quality/package-inventory.mjs:29:35)
+    at file:///private/var/folders/xt/h8ndt65x0zgbydh0q57vd2tr0000gn/T/quality-inventory-5k44T0/[eval1]:1:140
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:223:26
+    at async ModuleLoader.executeModuleJob (node:internal/modules/esm/loader:220:20)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/private/var/folders/xt/h8ndt65x0zgbydh0q57vd2tr0000gn/T/quality-inventory-5k44T0/node_modules/.pnpm/fixture@1.0.0/node_modules/.prisma/package.json'
+}
+
+Node.js v24.20.0
+: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ packageInventory scripts/quality/package-inventory.mjs:29:35
+ ❯ ../../var/folders/xt/h8ndt65x0zgbydh0q57vd2tr0000gn/T/quality-inventory-5k44T0/[eval1]:1:140
+ ❯ tests/unit/quality-inventory.spec.mjs:38:42
+     36|   it('excludes generated Prisma dot directories while retaining instal…
+     37|     const result = fixture({ name: 'fixture', version: '1.0.0' })
+     38|     expect(result.status, result.stderr).toBe(0)
+       |                                          ^
+     39|     expect(JSON.parse(result.stdout)).toEqual(['fixture@1.0.0'])
+     40|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/unit/quality-inventory.spec.mjs > installed package inventory > fails when an installed identity is outside the frozen lockfile
+AssertionError: expected 'node:fs:484\n    return binding.readF…' to contain 'Installed package absent from frozen …'
+
+- Expected
++ Received
+
+- Installed package absent from frozen lockfile: fixture@2.0.0
++ node:fs:484
++     return binding.readFileUtf8(path, stringToFlags(options.flag));
++                    ^
++
++ Error: ENOENT: no such file or directory, open '/private/var/folders/xt/h8ndt65x0zgbydh0q57vd2tr0000gn/T/quality-inventory-wJKQ2J/node_modules/.pnpm/fixture@1.0.0/node_modules/.prisma/package.json'
++     at readFileSync (node:fs:484:20)
++     at packageInventory (file:///private/tmp/fix-pr55-b2r1/scripts/quality/package-inventory.mjs:29:35)
++     at file:///private/var/folders/xt/h8ndt65x0zgbydh0q57vd2tr0000gn/T/quality-inventory-wJKQ2J/[eval1]:1:140
++     at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
++     at async node:internal/modules/esm/loader:223:26
++     at async ModuleLoader.executeModuleJob (node:internal/modules/esm/loader:220:20)
++     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
++   errno: -2,
++   code: 'ENOENT',
++   syscall: 'open',
++   path: '/private/var/folders/xt/h8ndt65x0zgbydh0q57vd2tr0000gn/T/quality-inventory-wJKQ2J/node_modules/.pnpm/fixture@1.0.0/node_modules/.prisma/package.json'
++ }
++
++ Node.js v24.20.0
++
+
+ ❯ tests/unit/quality-inventory.spec.mjs:51:27
+     49|     const result = fixture({ name: 'fixture', version: '2.0.0' })
+     50|     expect(result.status).toBe(1)
+     51|     expect(result.stderr).toContain('Installed package absent from fro…
+       |                           ^
+     52|   })
+     53| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  18:48:53
+   Duration  943ms (transform 17ms, setup 0ms, import 30ms, tests 584ms, environment 0ms)
+
