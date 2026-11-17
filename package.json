@@ -79,7 +79,8 @@
     "typescript-eslint": "8.73.0",
     "vitest": "4.0.18",
     "vue-eslint-parser": "10.4.2",
-    "vue-tsc": "3.3.14"
+    "vue-tsc": "3.3.14",
+    "yaml": "2.9.1"
   },
   "packageManager": "pnpm@9.12.3"
 }

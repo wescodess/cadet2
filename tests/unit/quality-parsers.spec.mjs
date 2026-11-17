@@ -10,6 +10,22 @@ const modules = readdirSync(directory)
 const fixtures = readdirSync(fixturesDirectory)
   .filter((file) => file.endsWith('.json'))
   .sort()
+const completeness = {
+  'audit.parser.mjs': true,
+  'licenses.parser.mjs': true,
+  'lint.parser.mjs': true,
+  'frozen-install.parser.mjs':
+    'No independent event inventory; final event and lock digest establish completion.',
+  'gitleaks.parser.mjs': 'Finding-only output; no independent inventory of secrets.',
+  'gitleaks-release.parser.mjs':
+    'Upstream release is the asset authority; only the selected asset has a local pin.',
+  'gitleaks-version.parser.mjs': 'Single scalar result, checked against the pin by the installer.',
+  'prettier-check.parser.mjs': 'Single boolean result for one independently invoked file.',
+  'prettier-config.parser.mjs':
+    'Single configuration value; no independent configuration authority.',
+  'prettier-info.parser.mjs': 'Single file result; no independent parser-inference authority.',
+  'types.parser.mjs': 'Diagnostic-only output; successful files have no report entries.',
+}
 const malformed = [
   null,
   42,
@@ -46,6 +62,7 @@ function malformedInputs(valid) {
 describe('quality tool parsers', () => {
   it('registers a fixture for every parser module and no stale fixtures', () => {
     expect(modules.length).toBeGreaterThan(0)
+    expect(Object.keys(completeness).sort()).toEqual(modules)
     expect(modules.map((file) => file.replace('.parser.mjs', '.json'))).toEqual(fixtures)
   })
 
@@ -62,6 +79,15 @@ describe('quality tool parsers', () => {
           else check.toThrow(/Invalid /)
         })
       }
+      it('declares and checks independent completeness coverage', () => {
+        if (completeness[file] === true) {
+          expect(fixture.incomplete).toBeDefined()
+          expect(() => parse(fixture.incomplete)).toThrow(/Invalid /)
+        } else {
+          expect(completeness[file]).toEqual(expect.any(String))
+          expect(completeness[file].length).toBeGreaterThan(20)
+        }
+      })
       it('accepts valid tool output', () => {
         for (const valid of [fixture.valid, ...fixture.alsoValid])
           expect(() => parse(valid)).not.toThrow()

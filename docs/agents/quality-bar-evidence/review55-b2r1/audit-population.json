@@ -1,0 +1,5 @@
+{
+  "expectedNodes": 1620,
+  "uniquePackages": 1617,
+  "source": "Frozen lockfile traversed using pinned pnpm 9.12.3 audit-tree semantics; independent request capture had 1620 nodes and 1617 identities."
+}

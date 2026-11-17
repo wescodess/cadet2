@@ -1,0 +1,88 @@
+
+ RUN  v4.0.18 /private/tmp/fix-pr55-b2r1
+
+ ❯ tests/unit/quality-parsers.spec.mjs (54 tests | 3 failed | 43 skipped) 6ms
+     ↓ registers a fixture for every parser module and no stale fixtures
+       ↓ action references a missing advisory
+       ↓ advisory has no referencing action
+       ↓ severity total disagrees with parsed advisory findings
+       ↓ action paths may differ from finding paths
+       × declares and checks independent completeness coverage 4ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ✓ declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ↓ asset ID disagrees with its API URL
+       ↓ asset name disagrees with its download URL
+       ↓ release ID disagrees with its API URL
+       ↓ asset listing references a different release
+       ↓ release page references a different tag
+       ↓ duplicate asset identity with distinct names
+       ✓ declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ✓ declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ✓ declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ↓ rejects duplicate package across license categories
+       ↓ rejects unknown package
+       ↓ rejects repeated versions in one package
+       × declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ↓ ticketed directive with real ESLint suppression metadata
+       ↓ unticketed suppression justification
+       ↓ empty suppression justification
+       ↓ issue URL suppression justification
+       ↓ missing suppression entries
+       ↓ malformed suppression entries
+       ↓ unknown suppression metadata
+       × declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ✓ declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ✓ declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ✓ declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+       ✓ declares and checks independent completeness coverage 0ms
+       ↓ accepts valid tool output
+       ↓ rejects the shared malformed corpus and tool-specific inconsistencies
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > audit.parser.mjs > declares and checks independent completeness coverage
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > licenses.parser.mjs > declares and checks independent completeness coverage
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > lint.parser.mjs > declares and checks independent completeness coverage
+AssertionError: expected [Function] to throw an error
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ ❯ tests/unit/quality-parsers.spec.mjs:82:51
+     80|         if (completeness[file] === true) {
+     81|           expect(fixture.incomplete).toBeDefined()
+     82|           expect(() => parse(fixture.incomplete)).toThrow(/Invalid /)
+       |                                                   ^
+     83|         } else {
+     84|           expect(completeness[file]).toEqual(expect.any(String))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 8 passed | 43 skipped (54)
+   Start at  18:34:29
+   Duration  298ms (transform 60ms, setup 0ms, import 126ms, tests 6ms, environment 0ms)
+

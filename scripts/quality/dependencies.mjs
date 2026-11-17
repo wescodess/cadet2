@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { parse as parseAudit } from './audit.parser.mjs'
 import { parse as parseLicenses } from './licenses.parser.mjs'
 import { parse as parseFrozenInstall } from './frozen-install.parser.mjs'
 import { json, main, outputDir, run, writeJSON, writingBaseline } from './common.mjs'
+
+import { auditPackages, licenseScanDirectory, packageInventory } from './package-inventory.mjs'
 
 const expiry = '2027-01-16'
 const reason =
@@ -96,19 +98,37 @@ main(() => {
     lockBefore,
     lockAfter: lockDigest(),
   })
+  const inventory = packageInventory()
+  const packages = auditPackages(inventory.lock)
+  writeJSON(`${outputDir}/package-inventory.json`, {
+    installed: [...inventory.installed.keys()].sort(),
+    audit: packages,
+  })
   const auditResult = run('pnpm', ['audit', '--audit-level', 'high', '--json'])
   writeFileSync(`${outputDir}/audit.json`, auditResult.stdout)
   const audit = parseAudit({
+    packages,
     status: auditResult.status,
     stdout: auditResult.stdout,
     stderr: auditResult.stderr,
   }).stdout
-  const licenseResult = run('pnpm', ['licenses', 'list', '--json'])
-  if (licenseResult.status !== 0) throw new Error(licenseResult.stdout + licenseResult.stderr)
-  writeFileSync(`${outputDir}/licenses.json`, licenseResult.stdout)
+  const directory = licenseScanDirectory(inventory, outputDir)
+  let licenses
+  try {
+    const licenseResult = run('pnpm', ['--dir', directory, 'licenses', 'list', '--json'])
+    if (licenseResult.status !== 0 || licenseResult.stderr)
+      throw new Error(licenseResult.stdout + licenseResult.stderr)
+    writeFileSync(`${outputDir}/licenses.json`, licenseResult.stdout)
+    licenses = parseLicenses({
+      stdout: licenseResult.stdout,
+      packages: [...inventory.installed.keys()],
+    })
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
   const findings = {
     advisories: auditFindings(audit),
-    licenses: licenseFindings(parseLicenses(licenseResult.stdout)),
+    licenses: licenseFindings(licenses),
   }
   if (writingBaseline) {
     const baseline = {}

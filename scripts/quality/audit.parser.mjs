@@ -132,13 +132,26 @@ const report = z
   })
 export const schema = z
   .object({
+    packages: z.array(nonempty).nonempty(),
     status: z.union([z.literal(0), z.literal(1)]),
     stdout: jsonOutput(report),
     stderr: z.literal(''),
   })
   .strict()
   .transform((result, context) => {
-    const { status, stdout } = result
+    const { status, stdout, packages } = result
+    const expected = new Set(packages)
+    if (stdout.metadata.totalDependencies !== packages.length)
+      context.addIssue({
+        code: 'custom',
+        message: 'Audit population does not match frozen lockfile',
+      })
+    for (const advisory of Object.values(stdout.advisories)) {
+      for (const finding of advisory.findings) {
+        if (!expected.has(`${advisory.module_name}@${finding.version}`))
+          context.addIssue({ code: 'custom', message: 'Audit finding outside frozen lockfile' })
+      }
+    }
     if (
       (status === 1) !==
       stdout.metadata.vulnerabilities.high + stdout.metadata.vulnerabilities.critical > 0

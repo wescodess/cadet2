@@ -1,0 +1,25 @@
+[
+  {
+    "name": "fresh-download-positive",
+    "path": "/private/tmp/fix-pr55-b2r1/.quality-output/installer-sandbox/.cache/gitleaks/8.30.1/gitleaks",
+    "bytes": 21324882,
+    "seconds": 1.73
+  },
+  {
+    "name": "real-tar-interrupted",
+    "status": 0,
+    "stdout": "{\"sizeAtKill\": 97792, \"exit\": -9}\n",
+    "stderr": "",
+    "remainingBytes": 97792
+  },
+  {
+    "name": "retry-1",
+    "passed": false,
+    "error": "spawnSync /private/tmp/fix-pr55-b2r1/.quality-output/installer-sandbox/.cache/gitleaks/8.30.1/gitleaks Unknown system error -88"
+  },
+  {
+    "name": "retry-2",
+    "passed": false,
+    "error": "spawnSync /private/tmp/fix-pr55-b2r1/.quality-output/installer-sandbox/.cache/gitleaks/8.30.1/gitleaks Unknown system error -88"
+  }
+]

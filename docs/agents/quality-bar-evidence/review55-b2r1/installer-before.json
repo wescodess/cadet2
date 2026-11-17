@@ -1,0 +1,29 @@
+[
+  {
+    "probe": "download",
+    "publishedBytesAtKill": 0,
+    "retryExit": 0,
+    "publishedMatchesOfficialBinary": true,
+    "passed": true
+  },
+  {
+    "probe": "extraction",
+    "publishedBytesAtKill": 97792,
+    "retryExit": 1,
+    "publishedMatchesOfficialBinary": false,
+    "passed": false
+  },
+  {
+    "probe": "corrupt-cache",
+    "retryExit": 1,
+    "publishedMatchesOfficialBinary": false,
+    "passed": false
+  },
+  {
+    "probe": "same-version-impostor",
+    "retryExit": 0,
+    "publishedMatchesOfficialBinary": false,
+    "impostorExecuted": true,
+    "passed": false
+  }
+]

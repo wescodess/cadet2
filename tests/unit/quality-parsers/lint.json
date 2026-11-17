@@ -555,5 +555,21 @@
         ]
       }
     }
-  ]
+  ],
+  "incomplete": {
+    "files": ["/quality-fixture.js", "/fixture/omitted.ts"],
+    "results": [
+      {
+        "filePath": "/quality-fixture.js",
+        "messages": [],
+        "suppressedMessages": [],
+        "errorCount": 0,
+        "fatalErrorCount": 0,
+        "warningCount": 0,
+        "fixableErrorCount": 0,
+        "fixableWarningCount": 0,
+        "usedDeprecatedRules": []
+      }
+    ]
+  }
 }
