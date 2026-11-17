@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { commandTimeout, run } from './common.mjs'
+import { run } from './common.mjs'
 
 export const version = '8.30.1'
 const archives = {
@@ -32,7 +32,7 @@ export async function gitleaks() {
   const name = `gitleaks_${version}_${archive[0]}.tar.gz`
   const response = await fetch(
     `https://github.com/gitleaks/gitleaks/releases/download/v${version}/${name}`,
-    { signal: AbortSignal.timeout(Math.min(commandTimeout, 60_000)) },
+    { signal: AbortSignal.timeout(60_000) },
   )
   if (!response.ok) throw new Error(`gitleaks download failed: ${response.status}`)
   const bytes = Buffer.from(await response.arrayBuffer())

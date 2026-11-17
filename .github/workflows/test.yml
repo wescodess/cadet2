@@ -53,6 +53,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Scan all branch history
+        timeout-minutes: 8
         run: pnpm secrets:all
 
       - name: Upload sanitized secret findings
@@ -92,6 +93,7 @@ jobs:
         run: echo "BETTER_AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
 
       - name: Verify static rows, Vitest and production build
+        timeout-minutes: 15
         run: pnpm verify
 
       - name: Upload verification output
