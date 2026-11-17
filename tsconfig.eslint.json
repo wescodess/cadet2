@@ -10,7 +10,6 @@
     "app/**/*.vue",
     "server/**/*.ts",
     "shared/**/*.ts",
-    "convex/**/*.ts",
     "tests/**/*.ts",
     "*.ts",
     ".nuxt/**/*.d.ts"

@@ -40,6 +40,12 @@ export default [
     },
   },
   {
+    files: ['convex/**/*.ts'],
+    languageOptions: {
+      parserOptions: { project: './convex/tsconfig.json' },
+    },
+  },
+  {
     plugins: { sonarjs },
     rules: { 'sonarjs/cognitive-complexity': ['error', 15] },
     linterOptions: { reportUnusedDisableDirectives: 'error' },
