@@ -23,10 +23,10 @@ Relay is **Console as the system**, with Companion's **"whose turn is it?"** col
 
 | Actor or outcome | Token | Role it points at | Light | Dark |
 |---|---|---|---|---|
-| Client | `--turn-client` | `--caution` (amber) | #9A5B00 | #F0B04A |
-| Representative | `--turn-representative` | `--progress` (lake blue) | #1F6496 | #5FB3E3 |
-| Done | `--turn-done` | `--positive` (green) | #1A7F45 | #4CC98A |
-| Signed | `--turn-signed` | `--seal` (violet) | #5B47D6 | #A99BFF |
+| Client | `--color-turn-client` | `--caution` (amber) | #9A5B00 | #F0B04A |
+| Representative | `--color-turn-representative` | `--progress` (lake blue) | #1F6496 | #5FB3E3 |
+| Done | `--color-turn-done` | `--positive` (green) | #1A7F45 | #4CC98A |
+| Signed | `--color-turn-signed` | `--seal` (violet) | #5B47D6 | #A99BFF |
 
 ### Carried from Console (round 1, option 3)
 
@@ -118,12 +118,13 @@ These are outside what a static specimen can prove. Every UI ticket that builds 
 Found while recording; none changes the approved design. Implementers follow the specimen and raise these at the first UI gate.
 
 1. **Fonts.** The specimen loads IBM Plex from Google Fonts by URL; the critiques require self-hosting. Expected for a specimen; the build must self-host.
-2. **Text below the 13 px floor.** The round-1 Console critique held 13 px as the floor ("nothing goes smaller"). The Relay specimen sets the holder word at 12 px in both portals (the client's own small size is 15 px), client tab labels, representative queue group labels and the date-tile year at 12 px, keyboard hints at 11.5 to 12 px, and avatar initials and the client task badge at 10.5 px. The Relay critique reports no rendered text below its minimum, so it measured against a lower floor. Owner decision needed before the queue and client list surfaces are built.
+2. **Text below the 13 px floor.** The round-1 Console critique held 13 px as the floor ("nothing goes smaller"). The Relay specimen renders smaller text in both portals (the client's own small size is 15 px): the holder word at 12 px, representative state chips at 12.5 px (12 px small), desk row metadata and the date-tile month at 12.5 px, tab, group and sidebar labels and the date-tile year at 12 px, keyboard hints at 11.5 px, avatar initials and the client task badge at 10.5 px, turn-disc initials at 8 to 9.6 px and Mono IDs at about 12 px. `DESIGN.md` section 4 lists each one. The Relay critique reports no rendered text below its minimum, so it measured against a lower floor. Owner decision needed before the queue and client list surfaces are built.
 3. **Sticky bars.** The specimen's turn bar is not sticky and no screen demonstrates `scroll-padding`, so focus-not-obscured is unproven. Requirement 3 applies.
 4. **Turn bar reach.** "Every client screen" is rendered on Home and Documents only; the one-question intake page has no specimen with the turn bar.
-5. **Turn alias names.** The presentation names `--turn-client` and friends; the specimen's token block defines only `--color-turn-*` inside `@theme inline`, and its own CSS maps turns through `data-turn` attributes. `tokens.css` declares both, with the same mapping.
+5. **Turn alias names.** The presentation names `--turn-client` and friends; the specimen's token block defines only `--color-turn-*` inside `@theme inline`, and its own CSS maps turns through `data-turn` attributes. `tokens.css` follows the specimen: `--color-turn-*` in `@theme inline`, pointing straight at the roles, and no `--turn-*` variables.
 6. **Icon stroke.** The specimen says "Lucide at 1.75 px stroke for everything"; the state glyphs inside chips render at 2 px. `DESIGN.md` records both as rendered: 1.75 px for interface icons, 2 px for state glyphs.
 7. **Blue outside its meaning.** Relay's rule is that lake blue is always the representative's turn and ultramarine is only focus. Two places in the specimen, inherited from Console, bend it: the client "General information, not legal advice" notice uses the progress (lake blue) tint, and the selected queue row marks its left edge with the focus-ring colour. Neither was flagged by the critique. Owner decision needed at the first gate that shows either surface.
+8. **Desk examples inherit client rules.** Every representative panel in `approved.html` (53 of them) sits inside the page's `.doc.x-client` wrapper, so the specimen's `.x-client …` rules and the client's `--input-radius` also reach the desk examples. As rendered, desk state chips are tinted (all 156), desk dialog actions stack, desk avatars are 32 px, the desk CICC register link is 32 px tall and desk inputs have 10 px corners. The specimen's own text ("Representatives get a neutral chip so rows stay quiet") and its rules scoped to the client describe the opposite, so `DESIGN.md` records the values the stylesheet gives a standalone `data-expression="representative"` layout: neutral chips, actions in a row, 24 px avatars, a 24 px link, 6 px input corners. Owner decision needed at the first desk gate.
 
 ## Files in this record
 
@@ -131,7 +132,7 @@ Found while recording; none changes the approved design. Implementers follow the
 |---|---|
 | `approved.html` | Relay's full specimen (round 2, `2-relay/index.html`), unchanged except the approval line in its header. |
 | `rejected-round1-margin.html`, `-signal`, `-companion`, `-almanac` | Round-1 options the owner saw and did not choose, unchanged. |
-| `rejected-round1-console.html` | Round-1 Console, with a header note: base of the approved Relay system, superseded by it. |
+| `rejected-round1-console.html` | Round-1 Console, unchanged. It is the base of the approved Relay system and is superseded by it; the file itself carries no note. |
 | `rejected-round2-turn-line.html`, `rejected-round2-two-voices.html` | Round-2 variations the owner saw and did not choose, unchanged. |
 | `tokens.css`, `tokens.json` | The approved values for Tailwind 4 and shadcn-vue, and the same values as data. |
 

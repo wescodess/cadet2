@@ -35,7 +35,7 @@ Set the expression on a container with `data-expression="client"` or `data-expre
 | Control height | 48 px | 30 px |
 | Body text | 17 on 26 | 14 on 20 |
 | State chips | Tinted with the state colour, so meaning reads at arm’s length | Neutral (card fill, hairline), glyph in role colour, word in role ink, so dense rows stay quiet |
-| Corners | 10 to 14 px | 5 to 8 px |
+| Corners | 6 to 14 px (checkbox 6, chip 7, controls 10, cards 8 to 12, grouped lists 14) | 4 to 12 px (checkbox 4, chip 5, controls 6, cards 8 to 10, dialogs 12) |
 | Whose turn | Turn bar on every screen, holder at the end of every row | Holder column in the queue, turn line in the case header, views named by turn |
 
 ## 3. Token architecture
@@ -45,7 +45,7 @@ Four layers, all CSS custom properties. Tailwind 4 reads them through `@theme in
 1. **shadcn-vue base:** the standard variables (`--background`, `--foreground`, `--card`, `--popover`, `--primary`, `--secondary`, `--muted`, `--accent`, `--destructive`, `--border`, `--input`, `--ring`, the `--sidebar-*` set, and their `-foreground` pairs), plus `--radius`, `--scrim` and `--shadow-overlay`.
 2. **Eight state roles**, each with four tokens: the role itself (glyphs, fills, edges), `-foreground` (text on the solid fill), `-soft` (tint) and `-ink` (state text on page, card and tint).
 3. **Four turn aliases**, each with the same four suffixes. They are not new colours; each points at a role that already means the same thing.
-4. **Expression tokens** for density, targets and the type scale, set per `data-expression`.
+4. **Expression tokens** for density and the type scale, set per `data-expression`.
 
 ### 3.1 Base colours
 
@@ -59,9 +59,9 @@ Four layers, all CSS custom properties. Tailwind 4 reads them through `@theme in
 | `--popover-foreground` | #16181D | #E8EAEE | Text in overlays |
 | `--primary` | #1F2329 | #E8EAEE | The one primary button per screen; links |
 | `--primary-foreground` | #FFFFFF | #17191E | Label on primary |
-| `--secondary` | #F1F2F4 | #262A31 | Secondary fills, neutral avatars |
+| `--secondary` | #F1F2F4 | #262A31 | Neutral avatars |
 | `--secondary-foreground` | #16181D | #E8EAEE | |
-| `--muted` | #F5F6F8 | #1F2228 | Quiet surfaces, disabled fills, date tiles |
+| `--muted` | #F5F6F8 | #1F2228 | Client screen background behind grouped lists, disabled fills, desk queue group headers, keyboard hints |
 | `--muted-foreground` | #5A606C | #9EA5B1 | Hints, metadata |
 | `--accent` | #EEF0F3 | #2A2E36 | Hover, selected row |
 | `--accent-foreground` | #16181D | #E8EAEE | |
@@ -72,14 +72,14 @@ Four layers, all CSS custom properties. Tailwind 4 reads them through `@theme in
 | `--ring` | #2F6BFF | #7AA2FF | Focus only |
 | `--sidebar` | #F7F8FA | #141619 | Desk sidebar |
 | `--sidebar-foreground` | #16181D | #E8EAEE | |
-| `--sidebar-primary` | #1F2329 | #E8EAEE | Active view |
+| `--sidebar-primary` | #1F2329 | #E8EAEE | Defined for shadcn-vue; the specimen’s desk does not use it |
 | `--sidebar-primary-foreground` | #FFFFFF | #141619 | |
-| `--sidebar-accent` | #E9EBEF | #262A31 | Hovered view |
+| `--sidebar-accent` | #E9EBEF | #262A31 | Active view (`aria-current`) |
 | `--sidebar-accent-foreground` | #16181D | #E8EAEE | |
 | `--sidebar-border` | #E2E4E9 | #2A2E35 | |
 | `--sidebar-ring` | #2F6BFF | #7AA2FF | |
 | `--scrim` | rgba(15,17,21,.4) | rgba(0,0,0,.6) | Behind dialogs |
-| `--shadow-overlay` | `0 12px 32px -8px rgba(15,17,21,.22), 0 0 0 1px rgba(15,17,21,.06)` | `0 12px 32px -8px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.07)` | The only shadow |
+| `--shadow-overlay` | `0 12px 32px -8px rgba(15,17,21,.22), 0 0 0 1px rgba(15,17,21,.06)` | `0 12px 32px -8px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.07)` | The only elevation shadow (see [Elevation](#7-elevation)) |
 
 ### 3.2 State roles
 
@@ -107,12 +107,12 @@ Lake blue (`--progress`) and focus ultramarine (`--ring`) are deliberately diffe
 
 | Alias | Points at | Client sees | Representative sees | Meaning |
 |---|---|---|---|---|
-| `--turn-client` | `--caution` | Your turn | Client’s turn | The client owes something: an answer, a document, a decision. |
-| `--turn-representative` | `--progress` | Priya’s turn (the representative’s first name) | Your turn | The representative or practice has the file and is working on it. |
-| `--turn-done` | `--positive` | Done | Done | Finished and checked. Nobody needs to act. |
-| `--turn-signed` | `--seal` | Signed | Signed | A representative signed this version. It is their advice. |
+| `--color-turn-client` | `--caution` | Your turn | Client’s turn | The client owes something: an answer, a document, a decision. |
+| `--color-turn-representative` | `--progress` | Priya’s turn (the representative’s first name) | Your turn | The representative or practice has the file and is working on it. |
+| `--color-turn-done` | `--positive` | Done | Done | Finished and checked. Nobody needs to act. |
+| `--color-turn-signed` | `--seal` | Signed | Signed | A representative signed this version. It is their advice. |
 
-Each alias also has `-foreground`, `-soft` and `-ink` (for example `--turn-client-ink`). Tailwind utilities: `bg-turn-client-soft`, `text-turn-representative-ink`, `border-turn-done`.
+Each alias also has `-foreground`, `-soft` and `-ink` (for example `--color-turn-client-ink`). As in the specimen, the aliases exist only inside `@theme inline` in `tokens.css`; there are no separate `--turn-*` variables. Tailwind utilities: `bg-turn-client-soft`, `text-turn-representative-ink`, `border-turn-done`. In plain CSS use the role an alias points at, as the specimen does through `data-turn`.
 
 Rules:
 
@@ -131,24 +131,24 @@ Rules:
 | `--c-h` | 48px | 30px | Control height (buttons, inputs, selects) |
 | `--c-px` | 18px | 10px | Control horizontal padding |
 | `--c-radius` | 10px | 6px | Control corners |
-| `--input-radius` | 10px | 6px | Input corners |
-| `--card-radius` | 12px | 8px | Cards, notices, findings |
+| `--input-radius` | 10px | not set (inputs fall back to `--c-radius`, 6px) | Input corners |
+| `--card-radius` | 12px | 8px | Expression card radius. After the specimen’s final overrides no component reads it; cards use the fixed radii in [Radii](#6-radii) |
 | `--chip-h` / `--chip-px` / `--chip-radius` / `--chip-fs` | 28 / 10 / 7 / 14.5 px | 22 / 7 / 5 / 12.5 px | State chip |
 | `--chip-h-sm` / `--chip-px-sm` / `--chip-fs-sm` | 24 / 8 / 13.5 px | 20 / 6 / 12 px | Small chip in rows |
 | `--pad` | 16px | 12px | Card and cell padding |
 | `--input-bw` | 1px | 1px | Input border width |
 | `--focus-w` / `--focus-off` | 2 / 2 px | 2 / 1 px | Focus outline width and offset |
 | `--check-size` / `--check-radius` | 24 / 6 px | 16 / 4 px | Checkbox and radio box |
-| `--check-row` | 44px | 24px | Clickable height of a checkbox or radio row |
-| `--target-min` | 24px | 24px | Minimum target for anything interactive |
-| `--target-primary` | 44px | 24px | Minimum for primary client targets |
-| `--t-*` | see [Typography](#4-typography) | | Type scale |
+| `--check-row` | not set (rows fall back to 44px) | 24px | Clickable height of a checkbox or radio row |
+| `--t-{style}-size` / `-lh` / `-weight` / `-family` / `-track` / `-stretch` | see [Typography](#4-typography) | | Type scale, one set per style |
 
-Tailwind utilities from `tokens.css`: `h-control`, `min-h-control`, `h-chip`, `min-h-target`, `min-h-target-primary`, `rounded-control`, `rounded-input`, `rounded-card`, `rounded-chip`, `text-display`, `text-h1`, `text-h2`, `text-h3`, `text-body`, `text-ui`, `text-small`, `text-label` (each sets size, line height, weight and tracking for the current expression), `ease-standard`, and every colour above as `bg-*`, `text-*`, `border-*`. The overlay shadow is `shadow-(--shadow-overlay)`.
+The minimum targets in [hard rule 8](#13-hard-rules) are rules, not tokens; the specimen defines no target tokens.
+
+Tailwind utilities from `tokens.css`: `h-control`, `min-h-control`, `h-chip`, `rounded-control`, `rounded-input` (falls back to `--c-radius` where `--input-radius` is not set), `rounded-card`, `rounded-chip`, `text-display`, `text-h1`, `text-h2`, `text-h3`, `text-body`, `text-ui`, `text-small`, `text-label` (each sets size, line height, weight and tracking for the current expression), `ease-standard`, and every colour above as `bg-*`, `text-*`, `border-*`. The overlay shadow is `shadow-(--shadow-overlay)`.
 
 ## 4. Typography
 
-**IBM Plex Sans** for everything, with tabular figures on times, dates and numbers (`font-variant-numeric: tabular-nums`). **IBM Plex Mono** only for identifiers people copy: case IDs (`HL-2026-0142`), matter numbers and licence numbers. Weights used: Sans 400, 500, 600, 700 and 400 italic; Mono 400 and 500. Both families are SIL Open Font License and must be **self-hosted** (see [Applying the system](#16-applying-the-system)).
+**IBM Plex Sans** for everything, with tabular figures on times, dates and numbers (`font-variant-numeric: tabular-nums`). **IBM Plex Mono** only for identifiers people copy: case IDs (`HL-2026-0142`), matter numbers and licence numbers. The specimen loads Sans 400, 500, 600, 700 and 400 italic and Mono 400 and 500. Its components render Sans 400, 500 and 600, with 700 only on `<strong>` lead-ins in draft notices, toasts and the sign dialog; no text is italic, and Mono renders at 400 (the licence number inside the sign dialog’s `<strong>` is synthesised bold). Every type style resolves to Plex Sans at 100% stretch: display, H1 and H2 through `--font-display`, the rest through `--font-sans`. `--font-reading`, `--font-desk` (turn-disc initials) and `--font-doc` (the specimen’s own page) are further Plex Sans aliases. Both families are SIL Open Font License and must be **self-hosted** (see [Applying the system](#16-applying-the-system)).
 
 | Style | Client (size on line height, weight) | Representative | Example |
 |---|---|---|---|
@@ -161,7 +161,7 @@ Tailwind utilities from `tokens.css`: `h-control`, `min-h-control`, `h-chip`, `m
 | Small | 15 on 22, 400 | 13 on 18, 400 | Sources verified as of 1 Nov 2026. |
 | Label | 15 on 20, 500 | 13 on 18, 500 | Passport number |
 
-13 px is the floor for representative secondary text; test it at 200% zoom. The specimen sets a few labels smaller (holder word, client tab labels, queue group labels and the date-tile year at 12 px, keyboard hints at 11.5 to 12 px, avatar initials and the task badge at 10.5 px). Build those at the specimen sizes and raise them at the first gate that shows them; this is open in `decision.md`.
+13 px is the floor for representative secondary text; test it at 200% zoom. The specimen renders this text smaller. Client: holder word, tab labels, wordmark tag and date-tile year at 12 px, date-tile month at 12.5 px, task badge at 10.5 px, turn-disc initials at 9.6 px (24 px disc). Desk: state chips at 12.5 px (12 px small), holder word, sidebar group labels and counts, queue group labels and date-tile year at 12 px, queue row metadata and dates, column headings, footer, sidebar user line and date-tile month at 12.5 px, keyboard hints at 11.5 px, avatar initials at 10.5 px, turn-disc initials at 9.6 px (24 px disc) and 8 px (20 px disc), and Mono IDs at 0.92em (about 12 to 12.9 px). Build those at the specimen sizes and raise them at the first gate that shows them; this is open in `decision.md`.
 
 ## 5. Spacing
 
@@ -184,17 +184,21 @@ A 4 px base with 2 px steps for dense rows: **2, 4, 6, 8, 12, 16, 20, 24, 32**. 
 |---|---|---|
 | Chip | 7 px | 5 px |
 | Control and input | 10 px | 6 px |
-| Card, notice, finding | 12 px | 8 px |
+| Fact card, finding, notice, error summary, date tile | 8 px | 8 px |
+| Deadline item, task card, signed-plan header, toast, empty state | 10 px | 10 px |
+| Dialog | 12 px | 12 px |
 | Checkbox | 6 px | 4 px |
 | Grouped list (`c-group`) | 14 px | n/a |
 | Icon well | 9 px | n/a |
-| Dialog | 12 px | 12 px |
-| Toast, empty state, signed-plan header | 10 px | 10 px |
 | Discs and avatars | round | round (workspace mark 6 px) |
 
 ## 7. Elevation
 
-Flat surfaces separated by 1 px hairlines (`--border`). Exactly one shadow, `--shadow-overlay`, for anything that floats: popovers, menus, dialogs and toasts. Dialogs sit on `--scrim`. Never add shadows to cards, rows or buttons.
+Flat surfaces separated by 1 px hairlines (`--border`). One elevation shadow, `--shadow-overlay`, for anything that floats: popovers, menus, dialogs and toasts. Dialogs also carry a 1 px `--border` and sit on `--scrim`. Cards and rows never get a drop shadow. The specimen uses `box-shadow` for exactly these other things:
+
+- Buttons: a 1 px base line, `0 1px 0 rgba(0,0,0,.04)`.
+- Inputs: `inset 0 1px 1px rgba(0,0,0,.03)`; an invalid input instead gets a 3 px halo of `--destructive` at 18%.
+- Edge rules, drawn as inset shadows: 3 px on the left for the signed-plan header (`--seal`), deadline items (`--urgent` within 90 days, `--caution` within 180 days or date unknown) and changed facts (`--caution`); 3 px at the bottom of turn-bar segments (turn colour); 2 px on the left of the selected queue row (`--ring`).
 
 ## 8. Focus
 
@@ -207,7 +211,7 @@ Motion confirms an action and stops. Nothing animates on its own.
 | Use | Duration | Easing |
 |---|---|---|
 | Hover and selection tint | `--dur-1` 120 ms | `--ease` cubic-bezier(.25,.1,.25,1) |
-| Detail pane slide and fade | `--dur-2` 160 ms | `--ease` |
+| Detail pane slide and fade | 160 ms (stated by the specimen, which defines no token for it) | `--ease` |
 | List selection | Instant; no animated reorder | |
 | Spinners (loading, saving) | 0.8 s and 1.2 s linear rotation | |
 
@@ -255,22 +259,24 @@ Escalation triggers for “Needs a licensed professional now”: refusal, remova
 
 Choose in this order: an existing higher-level app component, then the shadcn-vue primitive in `app/components/ui/*` restyled through tokens, then a new component composed from those primitives. Composed components live outside `app/components/ui`, which stays shadcn-vue output.
 
+Values below are the specimen’s final computed styles. Representative values are those its stylesheet gives a standalone desk layout; as rendered in `approved.html`, the desk examples also inherit some client rules (`decision.md`, discrepancy 8).
+
 ### 12.1 Primitives (shadcn-vue on reka-ui)
 
 | Need | Primitive | Relay rules |
 |---|---|---|
-| Button | `ui/button` | Variants: primary (`--primary`, one per screen), secondary (card fill, `--input` border), ghost (underlined link style), destructive. Height `--c-h`. Loading shows `ui/spinner` and the action word (“Uploading”, “Signing”) with `aria-busy`. Disabled uses `--muted` with a reason nearby (“Staff prepare; only a representative can sign.”). |
-| Keyboard hint | `ui/kbd` | Inside the button, full-strength `--muted-foreground`, never dimmed with opacity. |
-| Field, label, hint, error | `ui/field`, `ui/label`, `ui/input`, `ui/textarea` | Label and hint above the control. Error below the label, `--destructive`, 600, with an icon, saying what to do (“Enter the expiry date as day, month and year”). `aria-invalid` and `aria-describedby` on the control. |
+| Button | `ui/button` | Variants: primary (`--primary`, one per screen; hover mixes 86% `--primary` into `--background`), secondary (card fill, `--border` hairline), ghost (`--foreground` text, no underline, no border), destructive (card fill, `--destructive` text, `--border` hairline). Secondary and ghost hover to `--accent`. Label 500 with −0.005em tracking; height `--c-h`. Loading shows `ui/spinner` and the action word (“Uploading”, “Signing”) with `aria-busy`. Disabled uses `--muted` with a reason nearby (“Staff prepare; only a representative can sign.”). |
+| Keyboard hint | `ui/kbd` | Inside the button: 18 px tall, 11.5 px at 500, `--muted` fill, `--border` hairline, full-strength `--muted-foreground`, never dimmed with opacity. On the primary button it is transparent, takes the label colour and has a `--primary-foreground` border at 45%. |
+| Field, label, hint, error | `ui/field`, `ui/label`, `ui/input`, `ui/textarea` | Label and hint above the control. Error after the hint and above the control, `--destructive`, 500, with an icon; the invalid control gets a `--destructive` border and halo (section 7), saying what to do (“Enter the expiry date as day, month and year”). `aria-invalid` and `aria-describedby` on the control. |
 | Date | three `ui/input`s in a `fieldset` | Day, Month, Year with their own labels; `inputmode="numeric"`. |
 | Checkbox, radio | `ui/checkbox`, `ui/radio-group` | Box `--check-size`; row height `--check-row`; focus ring on the drawn box. |
 | Select | `ui/select`, `ui/native-select` | Native select on phones. |
 | Status chip | `ui/badge`, composed as `StatusChip` | See 12.2. |
-| Avatar | `ui/avatar` | Neutral `--secondary` fill. Presence only; never coloured by turn. |
-| Dialog | `ui/alert-dialog` for consequential actions, `ui/dialog` otherwise | Title says the action and its object; body says exactly what will be recorded; destructive or signing action is explicit (“Remove document”, “Sign version 3”), cancel is “Keep it” or “Cancel”. Client actions stack full width. Focus trapped and returned. |
+| Avatar | `ui/avatar` | Neutral `--secondary` fill; 32 px with 13 px initials for clients, 24 px with 10.5 px initials on the desk (the workspace mark is a 24 px `--primary` square with 6 px corners). Presence only; never coloured by turn. |
+| Dialog | `ui/alert-dialog` for consequential actions, `ui/dialog` otherwise | Title says the action and its object; body says exactly what will be recorded; destructive or signing action is explicit (“Remove document”, “Sign version 3”), cancel is “Keep it” or “Cancel”. 12 px corners, 1 px `--border`, `--shadow-overlay`, 24 px padding. Client actions stack full width. Focus trapped and returned. |
 | Toast | `ui/sonner` | Names the real event (“Uploaded. Priya will review your IELTS result.”, “Signed version 3. Not delivered yet.”). `role="status"`. |
-| Empty state | `ui/empty` | Dashed border, says what empty means and offers the next useful action. |
-| Notice | `ui/alert` | Draft notice: caution tint, dashed caution border. Client general-information notice: progress tint (see `decision.md`, discrepancy 7). |
+| Empty state | `ui/empty` | 1 px dashed `--border`, 10 px corners, centred content; says what empty means and offers the next useful action. |
+| Notice | `ui/alert` | Draft notice: `--caution-soft` tint, 1 px solid border mixing 45% `--caution` into `--border`, 8 px corners, `--caution` icon, body in `--foreground`. Client general-information notice: the same with progress in place of caution (see `decision.md`, discrepancy 7). |
 | Desk navigation | `ui/sidebar` | Views with counts: Urgent, New intake, Your turn to review, Client’s turn, Changed rules, Mine. |
 | Command bar | `ui/command` | ⌘K, labelled “Search” with the hint. |
 | Dense tables | `ui/table` | Representative check-answers table. |
@@ -279,13 +285,13 @@ Choose in this order: an existing higher-level app component, then the shadcn-vu
 
 ### 12.2 Composed components
 
-**StatusChip.** Glyph (role colour) and word (role ink) for one of the 23 states. Client: `--r-soft` fill, no border. Representative: card fill, `--border` hairline. Urgent: solid `--urgent` with `--urgent-foreground`. Sizes: default and small (`--chip-h-sm`). Never truncate the word; let it wrap. Glyph `aria-hidden`.
+**StatusChip.** Glyph (role colour) and word (role ink) for one of the 23 states. Word at 500 in the chip size (`--chip-fs`), glyph 16 px, padding 0 8 px 0 6 px, 5 px gap. Client: `--r-soft` fill, transparent border. Representative: card fill, `--border` hairline. Urgent: solid `--urgent` with `--urgent-foreground`. Sizes: default and small (`--chip-h-sm`). Never truncate the word; let it wrap. Glyph `aria-hidden`.
 
-**TurnDisc.** A round disc in the turn colour with `-foreground` initials (OA, PR) or a glyph: `check` for done, `pen-line` for signed, `user-round` for unassigned. Sizes 16, 20, 24 (default), 32 and 36 px. Always `aria-hidden`; always next to a word.
+**TurnDisc.** A round disc in the turn colour with `-foreground` initials (OA, PR) or a glyph: `check` for done, `pen-line` for signed, `user-round` for unassigned. Sizes 16, 20, 24 (default), 32 and 36 px; initials at 0.4 × the disc size, 600, in `--font-desk`. Always `aria-hidden`; always next to a word.
 
 **TurnBar** (client). A `nav` labelled “Whose turn” directly under the client top bar on every client screen, with two equal links: the client segment (“Your turn” and a count, “1 thing to do”) and the representative segment (“Priya’s turn”, “2 things in progress”). Each segment: turn tint, 3 px inset bottom rule in the turn colour, 32 px disc, label 15 on 20 at 600 in turn ink, count 14 on 19 in `--foreground`, at least 64 px tall; a hairline between segments. When the client owes nothing the left segment is done green: “Nothing for you”, “Priya has it”. Each segment opens the matching filtered list. Long translations wrap (about 110 px at 320 px in French); nothing truncates. If it is made sticky, reserve its height and add it to `scroll-padding-top`.
 
-**Holder.** Ends every list row in both portals, right-aligned in its own column (56 to 72 px wide). A 24 px TurnDisc over the word (12 px, 600, turn ink, breaking only at spaces). A visually hidden prefix makes it read as a sentence: “Whose turn: You”, “Whose turn: Priya”, “Status: Done”, “Status: Signed”. Client words: You, “You, later”, Priya (the representative’s first name), Done, Signed. Desk words: You, Client, Unassigned, Signed.
+**Holder.** Ends every list row in both portals, right-aligned in its own column (56 to 72 px wide). A 24 px TurnDisc over the word (12 px, 600, turn ink, breaking only at spaces). A visually hidden prefix makes it read as a sentence: “Whose turn: You”, “Whose turn: Priya”, “Status: Done”, “Status: Signed”. Client words: You, “You, later”, Priya (the representative’s first name), Done, Checked, Signed. Desk words: You, Client, Unassigned, Signed.
 
 **CaseTurnLine** (desk). In the case header under the client name: a 20 px disc and “Your turn: review and sign version 3” in turn ink at 13 px, followed by a muted explanation (“The client is waiting on you. Asking a question passes the turn to them.”).
 
@@ -293,21 +299,21 @@ Choose in this order: an existing higher-level app component, then the shadcn-vu
 
 **TaskRow** (client). The client counterpart of the queue row: tinted icon well (36 px, role tint, role glyph), what is needed, who asked and when (“Asked by Priya on 15 Nov 2026”), state chip and Holder.
 
-**ProvenanceRow.** A `dl` under every conclusion: Source (linked title and domain), Effective (or “Not stated by source”), Verified as of (date). Small text, muted, labels at 600 in `--foreground`. Unknown dates stay unknown.
+**ProvenanceRow.** A `dl` under every conclusion: Source (linked title and domain), Effective (or “Not stated by source”), Verified as of (date). Small text; labels at 500 in `--muted-foreground`, values in `--foreground`. Unknown dates stay unknown.
 
-**SignedPlanHeader.** Comes first on a signed plan and is shown only for a signed version. Card fill, hairline, 3 px inset `--seal` rule on the left, 24 px `badge-check` in `--seal`. Text: “Reviewed and signed by **{name}**, {designation}, licence {number in Plex Mono}, on {date}. Version {n}.” Below: a link “Check this licence on the CICC register” in `--seal-ink` (600, at least 24 px tall on the desk and 32 px for clients) and “Sources verified as of {date}.” It is never labelled “not legal advice”. The export carries the same header.
+**SignedPlanHeader.** Comes first on a signed plan and is shown only for a signed version. Card fill, hairline, 10 px corners, 3 px inset `--seal` rule on the left, 24 px `badge-check` in `--seal`. Text: “Reviewed and signed by **{name}**, {designation}, licence {number in Plex Mono}, on {date}. Version {n}.” Below: a link “Check this licence on the CICC register” in `--seal-ink` (600, at least 24 px tall on the desk and 32 px for clients) and “Sources verified as of {date}.” It is never labelled “not legal advice”. The export carries the same header.
 
 **DraftNotice.** On every draft or general result: “Draft assessment, version {n}. General information, not legal advice, until a representative signs it. Sources verified as of {date}.” The client variant for program information read without a representative: “General information, not legal advice. This describes {program}, not your situation. A licensed representative must review your situation before you rely on a plan. Sources verified as of {date}.” Never placed on a signed plan.
 
 **SaveState.** `role="status"`, small, 500. Saving (spinning loader, muted), “Saved at 2:41 pm” (positive ink, check), offline (caution ink: “Not saved. You’re offline. We’ll try again when you reconnect.”). Desk wording: “Saving draft”, “Draft saved 2:41 pm”, “Not saved. Connection lost, retrying.” Never shows saved when it is not.
 
-**ErrorSummary.** At the top of the form on submit, `role="alert"`, `tabindex="-1"`, takes focus. 3 px `--destructive` border, title “There is a problem” (client) or what is blocked (“Version 3 can’t be signed yet”), and a list of links to each field or exact item. On the desk it blocks signing until each item is resolved or disclosed.
+**ErrorSummary.** At the top of the form on submit, `role="alert"`, `tabindex="-1"`, takes focus. 1 px `--destructive` border with a 3 px left edge, 8 px corners, title “There is a problem” (client) or what is blocked (“Version 3 can’t be signed yet”), and a list of links to each field or exact item. On the desk it blocks signing until each item is resolved or disclosed.
 
 **QuestionPage** (client intake). One question per page: back link (44 px), SaveState, “Question 4 of 9”, the question as the fieldset legend (H1), hint, the control, an honest “I don’t know” option, “Why we ask” as a disclosure, and one primary “Continue”. The desk counterpart, **ClientQuestionComposer**, writes one plain-language question plus “Why you’re asking (shown to the client)” and sends with ⌘ Enter; sending passes the turn to the client.
 
 **CheckAnswersRow.** Client: a `dl` row with the question (600), the answer, and a “Change {thing}” link; “I don’t know” answers stay visible in caution ink. Desk: a dense `ui/table` with Fact, Answer, From and Action; changed answers carry a “Changed since v{n}” chip and unknown answers say “Not known”.
 
-**DeadlineItem.** A date tile (day 24 px at 700, month 14 px, year 12 px, on `--muted`) or “Date unknown” in caution ink, the title, the date and a plain “In 40 days” chip by urgency, and the source line (“From your permit, checked by Priya on 3 Nov 2026. Priya will advise on timing.”). A date with nothing to do is positive green, never blue. No guessed countdowns.
+**DeadlineItem.** A card with 10 px corners: within 90 days it gets a `--urgent` border and a 3 px inset `--urgent` left edge; within 180 days or with the date unknown, a 3 px inset `--caution` left edge. A date tile (no fill, 1 px `--border`, 8 px corners, at least 52 × 56 px; day 20 px at 600, month 12.5 px at 500 and year 12 px, both `--muted-foreground`) or “Date unknown” in caution ink, the title, the date and a plain “In 40 days” chip by urgency, and the source line (“From your permit, checked by Priya on 3 Nov 2026. Priya will advise on timing.”). A date with nothing to do is positive green, never blue. No guessed countdowns.
 
 **ReviewSideBySide** (desk). Facts and evidence on the left, the draft assessment on the right (1 : 1.15). Each fact card shows the stated fact, the evidence chip and who supplied and checked it; a changed fact gets a 3 px inset caution rule and a “Changed since v{n}” chip. Each finding shows the program, its coverage chip, the reasoning, what it relies on and its ProvenanceRow. At 200% zoom and on phones it becomes **FactsAndConclusion**, the stacked layout (“What Priya used”, then “What it means for you”).
 
