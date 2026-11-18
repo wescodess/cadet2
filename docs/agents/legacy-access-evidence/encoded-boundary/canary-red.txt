@@ -1,0 +1,25 @@
+$ node raw-boundary-canary.mjs
+{"path":"/workspace%41","status":200,"cacheControl":null,"body":"RETIRED_CANARY","canaryReached":true}
+{"path":"/workspace%32","status":200,"cacheControl":null,"body":"RETIRED_CANARY","canaryReached":true}
+{"path":"/workspace%2dhelp","status":200,"cacheControl":null,"body":"RETIRED_CANARY","canaryReached":true}
+{"path":"/workspace%5farchive","status":200,"cacheControl":null,"body":"RETIRED_CANARY","canaryReached":true}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: raw percent boundary must stop prefix-mounted effects
+
+4 !== 0
+
+    at file:///<repo>/.scratch/scripts/raw-boundary-canary.mjs:29:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 4,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.20.0
+exit 1

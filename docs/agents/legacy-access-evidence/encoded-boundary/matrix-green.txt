@@ -1,0 +1,7 @@
+$ node path-matrix.mjs (with fix)
+{
+  "passed": 225,
+  "failed": 0,
+  "failures": []
+}
+exit 0

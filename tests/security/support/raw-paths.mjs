@@ -21,6 +21,28 @@ export const retiredDotPaths = [
   '/workspace%00/..',
 ]
 
+export const retiredEncodedBoundaryPaths = [
+  '/workspace',
+  '/tasks',
+  '/api/workspace',
+  '/api/intake',
+  '/api/recommendations/runs',
+].flatMap((root) =>
+  [
+    '%41',
+    '%61',
+    '%30',
+    '%2d',
+    '%2Dhelp',
+    '%5f',
+    '%5Farchive',
+    '%2541',
+    '%2530',
+    '%252d',
+    '%255f',
+  ].map((suffix) => `${root}${suffix}`),
+)
+
 export function rawRequest(origin, path, headers = {}) {
   return new Promise((resolve, reject) => {
     const req = request(new URL(origin), { path, headers }, (response) => {

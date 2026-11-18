@@ -12,8 +12,8 @@ function normalizePath(path: string) {
 }
 
 export default defineEventHandler((event) => {
-  const paths = [event.path.split('?', 1)[0] || '/', getRequestURL(event).pathname].map(
-    normalizePath,
+  const paths = [event.path.split('?', 1)[0] || '/', getRequestURL(event).pathname].flatMap(
+    (path) => [path.toLowerCase(), normalizePath(path)],
   )
   if (!paths.some((path) => retiredPath.test(path))) return
 

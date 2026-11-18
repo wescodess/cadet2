@@ -4,7 +4,7 @@ import { request } from 'node:http'
 import { join } from 'node:path'
 import { after, before, test } from 'node:test'
 import { createStack } from './support/stack.mjs'
-import { rawRequest, retiredDotPaths } from './support/raw-paths.mjs'
+import { rawRequest, retiredDotPaths, retiredEncodedBoundaryPaths } from './support/raw-paths.mjs'
 
 let stack
 before(
@@ -265,9 +265,9 @@ test('review boundaries consistently require a stored grant before reads or acti
   }
 })
 
-test('raw dot-segment requests stop before routing, including encoded and mixed-case forms', async () => {
+test('raw dot-segment and encoded-boundary requests stop before routing, including mixed-case forms', async () => {
   const before = await stack.observations()
-  for (const path of retiredDotPaths) {
+  for (const path of [...retiredDotPaths, ...retiredEncodedBoundaryPaths]) {
     for (const actor of stack.actors) {
       const response = await rawRequest(stack.origin, path, { cookie: actor.cookie })
       assert.equal(response.status, 404, `${actor.role} ${path}`)

@@ -1,0 +1,6 @@
+$ node raw-boundary-canary.mjs (with fix)
+{"path":"/workspace%41","status":404,"cacheControl":"private, no-store","body":"{\"statusCode\":404,\"statusMessage\":\"Not Found\"}","canaryReached":false}
+{"path":"/workspace%32","status":404,"cacheControl":"private, no-store","body":"{\"statusCode\":404,\"statusMessage\":\"Not Found\"}","canaryReached":false}
+{"path":"/workspace%2dhelp","status":404,"cacheControl":"private, no-store","body":"{\"statusCode\":404,\"statusMessage\":\"Not Found\"}","canaryReached":false}
+{"path":"/workspace%5farchive","status":404,"cacheControl":"private, no-store","body":"{\"statusCode\":404,\"statusMessage\":\"Not Found\"}","canaryReached":false}
+exit 0

@@ -5,7 +5,7 @@ import { createRequire } from 'node:module'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { test } from 'node:test'
 import ts from 'typescript'
-import { rawRequest, retiredDotPaths } from './support/raw-paths.mjs'
+import { rawRequest, retiredDotPaths, retiredEncodedBoundaryPaths } from './support/raw-paths.mjs'
 
 const require = createRequire(import.meta.url)
 const h3Path = require.resolve('h3', { paths: [fileURLToPath(import.meta.resolve('nuxt'))] })
@@ -21,7 +21,7 @@ const { default: retirementGate } = await import(
   `data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`
 )
 
-test('test-only raw router canaries cannot be reached through dot segments', async (context) => {
+test('test-only raw router canaries cannot be reached through dot segments or encoded boundaries', async (context) => {
   let effects = 0
   const canary = defineEventHandler(() => {
     effects += 1
@@ -48,7 +48,7 @@ test('test-only raw router canaries cannot be reached through dot segments', asy
     const [origin, controlOrigin] = servers.map(
       (server) => `http://127.0.0.1:${server.address().port}`,
     )
-    for (const path of retiredDotPaths) {
+    for (const path of [...retiredDotPaths, ...retiredEncodedBoundaryPaths]) {
       await context.test(path, async () => {
         const before = effects
         const response = await rawRequest(origin, path)
@@ -102,6 +102,9 @@ test('non-retired paths that share a retired prefix pass the gate', async () => 
       '/tasks2',
       '/api/intake-status',
       '/api/recommendations/runs-summary',
+      '/workspaces%2dhelp',
+      '/tasks2%41',
+      '/api/intake-status%2541',
     ]) {
       const response = await rawRequest(origin, path)
       assert.equal(response.status, 200, path)
