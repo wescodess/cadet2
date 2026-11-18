@@ -6,6 +6,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
@@ -46,16 +47,19 @@ function environment(root) {
 }
 
 describe('public quality processes', () => {
-  it.each([null, ...rows])(
-    'invokes all eight rows and propagates the failing row %s',
-    (failure) => {
+  it.each([
+    { failure: null, code: 0 },
+    ...rows.flatMap((failure) => [1, 2, 127].map((code) => ({ failure, code }))),
+  ])(
+    'invokes all eight rows and propagates $failure exit $code',
+    ({ failure, code }) => {
       const root = sandbox()
       writeFileSync(join(root, 'scripts/quality/baseline-policy.mjs'), 'process.exit(0)\n')
       writeFileSync(
         join(root, 'package.json'),
         JSON.stringify({
           scripts: Object.fromEntries(
-            rows.map((row) => [row, `node -e "process.exit(${row === failure ? 1 : 0})"`]),
+            rows.map((row) => [row, `node -e "process.exit(${row === failure ? code : 0})"`]),
           ),
         }),
       )
@@ -99,34 +103,31 @@ describe('public quality processes', () => {
 })
 
 describe('aggregate failure and interruption evidence', () => {
-  it.each(['baseline failure', 'missing row', 'blank row', 'launch failure'])(
-    'fails closed on %s',
-    (kind) => {
-      const root = sandbox()
-      const env = environment(root)
-      writeFileSync(
-        join(root, 'scripts/quality/baseline-policy.mjs'),
-        `process.exit(${kind === 'baseline failure' ? 1 : 0})\n`,
-      )
-      const scripts = Object.fromEntries(rows.map((row) => [row, 'node -e "process.exit(0)"']))
-      if (kind === 'missing row') delete scripts.typecheck
-      if (kind === 'blank row') scripts.typecheck = '  '
-      if (kind === 'launch failure') env.PATH = ''
-      writeFileSync(join(root, 'package.json'), JSON.stringify({ scripts }))
-      const result = spawnSync(process.execPath, ['scripts/quality/verify.mjs'], {
-        cwd: root,
-        env,
-        encoding: 'utf8',
-      })
-      expect(result.status).toBe(1)
-      const record = JSON.parse(readFileSync(join(root, 'verification.json'), 'utf8'))
-      expect(record.status).toBe('fail')
-      expect(record.rows).toEqual(rows.map((row) => ({ row, status: 'not_run' })))
-      expect(record.baselinePolicy.status).toBe(
-        ['baseline failure', 'launch failure'].includes(kind) ? 'fail' : 'pass',
-      )
-    },
-  )
+  it.each([
+    ...[1, 2, 127].map((code) => ({ kind: 'baseline failure', code })),
+    ...['missing row', 'blank row', 'launch failure'].map((kind) => ({ kind, code: 0 })),
+  ])('fails closed on $kind exit $code', ({ kind, code }) => {
+    const root = sandbox()
+    const env = environment(root)
+    writeFileSync(join(root, 'scripts/quality/baseline-policy.mjs'), `process.exit(${code})\n`)
+    const scripts = Object.fromEntries(rows.map((row) => [row, 'node -e "process.exit(0)"']))
+    if (kind === 'missing row') delete scripts.typecheck
+    if (kind === 'blank row') scripts.typecheck = '  '
+    if (kind === 'launch failure') env.PATH = ''
+    writeFileSync(join(root, 'package.json'), JSON.stringify({ scripts }))
+    const result = spawnSync(process.execPath, ['scripts/quality/verify.mjs'], {
+      cwd: root,
+      env,
+      encoding: 'utf8',
+    })
+    expect(result.status).toBe(1)
+    const record = JSON.parse(readFileSync(join(root, 'verification.json'), 'utf8'))
+    expect(record.status).toBe('fail')
+    expect(record.rows).toEqual(rows.map((row) => ({ row, status: 'not_run' })))
+    expect(record.baselinePolicy.status).toBe(
+      ['baseline failure', 'launch failure'].includes(kind) ? 'fail' : 'pass',
+    )
+  })
   it.each([
     ['SIGHUP', 129],
     ['SIGINT', 130],
@@ -243,6 +244,40 @@ describe('local baseline measurement and CI flag boundaries', () => {
         { cwd: root, env: { ...environment(root), CI: '' }, encoding: 'utf8' },
       )
       expect(result.status).toBe(1)
+    },
+  )
+})
+
+function retainedOutput(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const file = join(directory, entry.name)
+    return entry.isDirectory() ? retainedOutput(file) : [readFileSync(file, 'utf8')]
+  })
+}
+
+describe('native secrets row token validation', () => {
+  it.each(['\n', '\r', '\t', '\u007f', '\u0100'])(
+    'rejects malformed token separator %j without disclosing either part',
+    (separator) => {
+      const root = sandbox()
+      const parts = ['fixture-native-prefix', 'fixture-native-suffix']
+      const token = parts.join(separator)
+      const env = { ...environment(root), GITHUB_TOKEN: token }
+      expect(spawnSync('git', ['init', '--quiet'], { cwd: root, env }).status).toBe(0)
+      const result = spawnSync(process.execPath, [resolve('scripts/quality/secrets.mjs')], {
+        cwd: root,
+        env,
+        encoding: 'utf8',
+      })
+      expect(result.status).toBe(1)
+      expect(result.stdout).toBe('')
+      expect(result.stderr).toBe('Invalid GITHUB_TOKEN characters\n')
+      const retained = retainedOutput(root).join(' ')
+      for (const secret of [token, ...parts]) {
+        expect(result.stdout).not.toContain(secret)
+        expect(result.stderr).not.toContain(secret)
+        expect(retained).not.toContain(secret)
+      }
     },
   )
 })

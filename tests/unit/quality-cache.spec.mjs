@@ -25,7 +25,23 @@ const pins = {
     '88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509',
   ],
 }
-let root, cache, pin, run, fetcher, metadata, response, binary, platform, arch
+const metadataURL = 'https://api.github.com/repos/gitleaks/gitleaks/releases/tags/v8.30.1'
+let root, cache, pin, run, fetcher, metadata, response, binary, platform, arch, output
+function retainedOutput(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const file = path.join(directory, entry.name)
+    return entry.isDirectory() ? retainedOutput(file) : [readFileSync(file, 'utf8')]
+  })
+}
+function checkURL(url) {
+  if (
+    url !== metadataURL &&
+    url !==
+      metadata.assets.find((asset) => asset.name === `gitleaks_8.30.1_${pin[0]}.tar.gz`)
+        ?.browser_download_url
+  )
+    throw new Error('Unexpected fetch URL')
+}
 beforeEach(() => {
   vi.resetModules()
   vi.stubEnv('GITHUB_TOKEN', undefined)
@@ -48,11 +64,19 @@ beforeEach(() => {
     digest: `sha256:${pin[1]}`,
   }
   response = 'archive'
-  fetcher = vi.fn(async (url) =>
-    url.includes('api.github.com')
+  output = [
+    ...['log', 'error', 'warn', 'info', 'debug'].map((method) =>
+      vi.spyOn(console, method).mockImplementation(() => {}),
+    ),
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true),
+    vi.spyOn(process.stderr, 'write').mockImplementation(() => true),
+  ]
+  fetcher = vi.fn(async (url) => {
+    checkURL(url)
+    return url === metadataURL
       ? { ok: true, text: async () => JSON.stringify(metadata) }
-      : { ok: true, arrayBuffer: async () => Buffer.from(response) },
-  )
+      : { ok: true, arrayBuffer: async () => Buffer.from(response) }
+  })
   vi.stubGlobal('fetch', fetcher)
   vi.doMock('node:path', () => ({
     ...path,
@@ -88,6 +112,12 @@ beforeEach(() => {
   vi.doMock('../../scripts/quality/common.mjs', () => ({ outputDir: root, run }))
 })
 afterEach(() => {
+  const token = process.env.GITHUB_TOKEN
+  const captured = output
+    .flatMap((logger) => logger.mock.calls)
+    .flat()
+    .join(' ')
+  const retained = retainedOutput(root).join(' ')
   Object.defineProperty(process, 'platform', { value: platform })
   Object.defineProperty(process, 'arch', { value: arch })
   vi.doUnmock('node:fs')
@@ -97,6 +127,11 @@ afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
   rmSync(root, { recursive: true, force: true })
+  if (token)
+    for (const secret of [token, ...token.split(/\s+/).filter(Boolean)]) {
+      expect(captured).not.toContain(secret)
+      expect(retained).not.toContain(secret)
+    }
 })
 async function install() {
   return (await import('../../scripts/quality/install-gitleaks.mjs')).gitleaks()
@@ -124,6 +159,11 @@ describe('verified gitleaks cache', () => {
       const result = await install()
       expect(readFileSync(result, 'utf8')).toBe('binary')
       expect(fetcher).toHaveBeenCalledTimes(2)
+      expect(fetcher.mock.calls[0][0]).toBe(metadataURL)
+      const endpoint = new URL(fetcher.mock.calls[0][0])
+      expect(endpoint.origin).toBe('https://api.github.com')
+      expect(endpoint.pathname).toBe('/repos/gitleaks/gitleaks/releases/tags/v8.30.1')
+      expect(endpoint.search).toBe('')
       expect(fetcher.mock.calls[1][0]).toBe(metadata.assets[0].browser_download_url)
       expect(fetcher.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal)
       expect(fetcher.mock.calls[1][1].signal).toBe(fetcher.mock.calls[0][1].signal)
@@ -173,17 +213,18 @@ describe('verified gitleaks cache', () => {
     expect(readdirSync(cache)).toEqual([])
   })
   it.each(['metadata', 'download'])('rejects failed %s HTTP response', async (stage) => {
-    fetcher.mockImplementation(async (url) =>
-      stage === 'metadata' || !url.includes('api.github.com')
+    fetcher.mockImplementation(async (url) => {
+      checkURL(url)
+      return stage === 'metadata' || url !== metadataURL
         ? { ok: false, status: 503 }
-        : { ok: true, text: async () => JSON.stringify(metadata) },
-    )
+        : { ok: true, text: async () => JSON.stringify(metadata) }
+    })
     await expect(install()).rejects.toThrow(/failed: 503/)
     expect(readdirSync(cache)).toEqual([])
   })
-  it('rejects failed extraction', async () => {
+  it.each([1, 2, 127])('rejects extraction exit %i', async (status) => {
     cached('archive')
-    run.mockReturnValue({ status: 1, stdout: '', stderr: 'invalid archive' })
+    run.mockReturnValue({ status, stdout: '', stderr: 'invalid archive' })
     await expect(install()).rejects.toThrow(/invalid archive/)
   })
   it('rejects a changed extracted binary', async () => {
@@ -219,8 +260,9 @@ describe('concurrent cache publication', () => {
   it('does not replace a cache entry published and verified by a concurrent downloader', async () => {
     const rename = vi.fn()
     vi.doMock('node:fs', async (original) => ({ ...(await original()), renameSync: rename }))
-    fetcher.mockImplementation(async (url) =>
-      url.includes('api.github.com')
+    fetcher.mockImplementation(async (url) => {
+      checkURL(url)
+      return url === metadataURL
         ? { ok: true, text: async () => JSON.stringify(metadata) }
         : {
             ok: true,
@@ -228,8 +270,8 @@ describe('concurrent cache publication', () => {
               cached('archive')
               return Buffer.from('archive')
             },
-          },
-    )
+          }
+    })
     await install()
     expect(rename).not.toHaveBeenCalled()
   })
@@ -276,25 +318,64 @@ describe('GitHub release metadata authentication', () => {
   ])('sends only the expected metadata headers: $headers', async ({ token, headers }) => {
     vi.stubEnv('GITHUB_TOKEN', token)
     await install()
+    expect(fetcher.mock.calls[0][0]).toBe(metadataURL)
     expect(fetcher.mock.calls[0][1].headers).toEqual(headers)
     expect(fetcher.mock.calls[1][1]).toEqual({ signal: fetcher.mock.calls[0][1].signal })
   })
   it('fails closed on authenticated 403 without retrying or logging the token', async () => {
     vi.stubEnv('GITHUB_TOKEN', 'fixture-ci-token')
-    const output = ['log', 'error', 'warn', 'info'].map((method) =>
-      vi.spyOn(console, method).mockImplementation(() => {}),
-    )
-    fetcher.mockResolvedValue({ ok: false, status: 403 })
+    fetcher.mockImplementation(async (url) => {
+      expect(url).toBe(metadataURL)
+      return { ok: false, status: 403 }
+    })
     await expect(install()).rejects.toThrow('gitleaks release metadata failed: 403')
     expect(fetcher).toHaveBeenCalledTimes(1)
     expect(fetcher.mock.calls[0][1].headers).toEqual({ Authorization: 'Bearer fixture-ci-token' })
-    expect(
-      output
-        .flatMap((logger) => logger.mock.calls)
-        .flat()
-        .join(' '),
-    ).not.toContain('fixture-ci-token')
   })
+  it.each(['metadata request', 'metadata body', 'archive request', 'archive body'])(
+    'sanitizes authenticated transport errors from the %s',
+    async (stage) => {
+      const token = 'fixture-transport-token'
+      vi.stubEnv('GITHUB_TOKEN', token)
+      const failure = () => {
+        throw new Error(`Transport included Bearer ${token}`)
+      }
+      fetcher.mockImplementation(async (url) => {
+        checkURL(url)
+        if (url === metadataURL) {
+          if (stage === 'metadata request') failure()
+          return {
+            ok: true,
+            text: async () => (stage === 'metadata body' ? failure() : JSON.stringify(metadata)),
+          }
+        }
+        if (stage === 'archive request') failure()
+        return { ok: true, arrayBuffer: async () => failure() }
+      })
+      await expect(install()).rejects.toThrow('gitleaks transport failed')
+      expect(readdirSync(cache)).toEqual([])
+    },
+  )
+  it.each(['\n', '\r', '\t', '\u007f', '\u0100'])(
+    'rejects malformed token separator %j before fetch',
+    async (separator) => {
+      vi.stubEnv('GITHUB_TOKEN', `fixture-prefix${separator}fixture-suffix`)
+      await expect(install()).rejects.toThrow('Invalid GITHUB_TOKEN characters')
+      expect(fetcher).not.toHaveBeenCalled()
+      expect(readdirSync(cache)).toEqual([])
+    },
+  )
+  it.each([1, 2, 127])(
+    'rejects version command exit %i with the pinned version text',
+    async (status) => {
+      cached('archive')
+      const extract = run.getMockImplementation()
+      run.mockImplementation((command, args) =>
+        command === 'tar' ? extract(command, args) : { status, stdout: '8.30.1\n', stderr: '' },
+      )
+      await expect(install()).rejects.toThrow(/Invalid gitleaks version/)
+    },
+  )
   it('grants the workflow token only to secrets-running steps with read-only permissions', async () => {
     const { parse } = await import('yaml')
     const workflow = parse(

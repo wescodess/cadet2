@@ -43,26 +43,37 @@ function verifiedArchive(path, checksum) {
   }
 }
 
+async function transport(request) {
+  try {
+    return await request()
+  } catch {
+    throw new Error('gitleaks transport failed')
+  }
+}
+
 async function downloadArchive(archive, destination) {
   const directory = mkdtempSync(join(resolve('.cache', 'gitleaks'), '.download-'))
   try {
     const name = `gitleaks_${version}_${archive[0]}.tar.gz`
     const signal = AbortSignal.timeout(60_000)
     const token = process.env.GITHUB_TOKEN
-    const metadata = await fetch(
-      `https://api.github.com/repos/gitleaks/gitleaks/releases/tags/v${version}`,
-      { signal, ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}) },
+    if (token && /[^\x21-\x7e]/.test(token)) throw new Error('Invalid GITHUB_TOKEN characters')
+    const metadata = await transport(() =>
+      fetch(`https://api.github.com/repos/gitleaks/gitleaks/releases/tags/v${version}`, {
+        signal,
+        ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
+      }),
     )
     if (!metadata.ok) throw new Error(`gitleaks release metadata failed: ${metadata.status}`)
-    const release = parseRelease(await metadata.text())
+    const release = parseRelease(await transport(() => metadata.text()))
     const url = `https://github.com/gitleaks/gitleaks/releases/download/v${version}/${name}`
     const asset = release.assets.find((entry) => entry.name === name)
     if (!asset || asset.browser_download_url !== url || asset.digest !== `sha256:${archive[1]}`)
       throw new Error('gitleaks release asset does not match pinned archive')
-    const response = await fetch(url, { signal })
+    const response = await transport(() => fetch(url, { signal }))
     if (!response.ok) throw new Error(`gitleaks download failed: ${response.status}`)
     const temporary = join(directory, name)
-    writeFileSync(temporary, Buffer.from(await response.arrayBuffer()))
+    writeFileSync(temporary, Buffer.from(await transport(() => response.arrayBuffer())))
     if (!verifiedArchive(temporary, archive[1])) throw new Error('gitleaks checksum mismatch')
     if (!verifiedArchive(destination, archive[1])) renameSync(temporary, destination)
   } finally {

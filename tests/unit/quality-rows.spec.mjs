@@ -50,17 +50,39 @@ async function row(name) {
   return completion
 }
 
-function inventory(packages) {
+const installedPackages = ['minimatch@1.0.0', 'installed-alias@npm:fixture@2.0.0']
+const lockPackages = ['minimatch@1.0.0', '@esbuild/linux-x64@0.25.0', 'synthetic-importer@0.0.0']
+
+function inventory(installed = installedPackages, lock = lockPackages) {
   vi.doMock('../../scripts/quality/package-inventory.mjs', () => ({
-    packageInventory: () => ({ installed: new Map(packages.map((id) => [id, {}])), lock: {} }),
-    auditPackages: () => packages,
+    packageInventory: () => ({
+      installed: new Map(installed.map((id) => [id, {}])),
+      lock: {},
+    }),
+    auditPackages: () => [...lock],
     licenseScanDirectory: () => mkdtempSync(join(directory, 'licenses-')),
   }))
 }
 
-function dependencyOutput({ audit, licenses, install }) {
-  const packages = audit.packages
-  inventory(packages)
+function dependencyOutput({
+  audit,
+  licenses,
+  install,
+  installed = installedPackages,
+  lock = lockPackages,
+}) {
+  inventory(installed, lock)
+  const report = JSON.parse(audit.stdout)
+  report.metadata.dependencies = lock.length - 2
+  report.metadata.devDependencies = 1
+  report.metadata.optionalDependencies = 1
+  report.metadata.totalDependencies = lock.length
+  audit = { ...audit, stdout: JSON.stringify(report) }
+  const licensePopulation = JSON.parse(licenses)
+  if (licensePopulation.MIT)
+    licensePopulation.MIT.push({ name: 'installed-alias', versions: ['npm:fixture@2.0.0'] })
+  else licensePopulation.MIT = [{ name: 'installed-alias', versions: ['npm:fixture@2.0.0'] }]
+  licenses = JSON.stringify(licensePopulation)
   run.mockImplementation((command, args) => {
     if (args[0] === 'install') return install
     if (args[0] === 'audit') return audit
@@ -226,7 +248,7 @@ describe('quality gate regression boundaries', () => {
     },
   )
 
-  it.each([1, 2])(
+  it.each([1, 2, 127])(
     'rejects Nuxt preparation exit %i before invoking either compiler',
     async (status) => {
       run.mockReturnValueOnce({ status, stdout: '', stderr: 'prepare unavailable' })
@@ -267,24 +289,25 @@ describe('quality gate regression boundaries', () => {
     await expect(row('dependencies')).rejects.toThrow(/allowance expired or invalid/)
   })
 
-  it.each(['discovery unavailable', 'Error: .only is not allowed with --forbid-only'])(
-    'rejects failed Playwright discovery: %s',
-    async (stderr) => {
-      run.mockReturnValue({ status: 1, stdout: '', stderr })
-      const { runPlaywright } = await import('../../scripts/quality/test-results.mjs')
-      expect(() => runPlaywright(['/repo/tests/e2e/example.spec.ts'])).toThrow(
-        /Playwright discovery failed/,
-      )
-      expect(run.mock.calls[0][1]).toEqual([
-        'exec',
-        'playwright',
-        'test',
-        '--list',
-        '--forbid-only',
-        '--reporter=json',
-      ])
-    },
-  )
+  it.each(
+    ['discovery unavailable', 'Error: .only is not allowed with --forbid-only'].flatMap((stderr) =>
+      [1, 2, 127].map((status) => ({ stderr, status })),
+    ),
+  )('rejects failed Playwright discovery exit $status: $stderr', async ({ stderr, status }) => {
+    run.mockReturnValue({ status, stdout: '', stderr })
+    const { runPlaywright } = await import('../../scripts/quality/test-results.mjs')
+    expect(() => runPlaywright(['/repo/tests/e2e/example.spec.ts'])).toThrow(
+      /Playwright discovery failed/,
+    )
+    expect(run.mock.calls[0][1]).toEqual([
+      'exec',
+      'playwright',
+      'test',
+      '--list',
+      '--forbid-only',
+      '--reporter=json',
+    ])
+  })
 })
 
 function cleanAudit() {
@@ -340,10 +363,46 @@ describe('dependency command and allowance contracts', () => {
       ['pnpm', ['--dir', expect.any(String), 'licenses', 'list', '--json']],
     ])
     expect(JSON.parse(readFileSync(join(directory, 'package-inventory.json'), 'utf8'))).toEqual({
-      installed: ['minimatch@1.0.0'],
-      audit: ['minimatch@1.0.0'],
+      installed: ['installed-alias@npm:fixture@2.0.0', 'minimatch@1.0.0'],
+      audit: ['minimatch@1.0.0', '@esbuild/linux-x64@0.25.0', 'synthetic-importer@0.0.0'],
     })
     expect(existsSync(run.mock.calls[2][1][1])).toBe(false)
+  })
+  it.each(['audit', 'licenses'])(
+    'rejects the %s report with the other population',
+    async (kind) => {
+      allow()
+      dependencyOutput({
+        audit: cleanAudit(),
+        licenses: licenseReport('MIT'),
+        install: fixture('frozen-install').valid,
+      })
+      vi.doMock('../../scripts/quality/package-inventory.mjs', () => ({
+        packageInventory: () => ({
+          installed: new Map(
+            (kind === 'licenses' ? lockPackages : installedPackages).map((id) => [id, {}]),
+          ),
+          lock: {},
+        }),
+        auditPackages: () => (kind === 'audit' ? [...installedPackages] : [...lockPackages]),
+        licenseScanDirectory: () => mkdtempSync(join(directory, 'licenses-')),
+      }))
+      await expect(row('dependencies')).rejects.toThrow(
+        kind === 'audit'
+          ? /Audit population does not match frozen lockfile/
+          : /Invalid pnpm licenses report/,
+      )
+    },
+  )
+  it.each([1, 2, 127])('rejects frozen install exit %i with a complete report', async (status) => {
+    allow()
+    dependencyOutput({
+      audit: cleanAudit(),
+      licenses: licenseReport('MIT'),
+      install: { ...fixture('frozen-install').valid, status },
+    })
+    await expect(row('dependencies')).rejects.toThrow(/Invalid frozen-lockfile install/)
+    expect(run).toHaveBeenCalledTimes(1)
   })
   it('rejects an unallowlisted restricted license', async () => {
     allow()
@@ -433,7 +492,7 @@ describe('dependency command and allowance contracts', () => {
     await expect(row('dependencies')).resolves.toBeUndefined()
   })
   it.each([
-    { status: 1, stderr: '' },
+    ...[1, 2, 127].map((status) => ({ status, stderr: '' })),
     { status: 0, stderr: 'license command warning' },
   ])('refuses license command exit $status and stderr "$stderr"', async (failure) => {
     allow()
@@ -720,12 +779,12 @@ describe('secret scan enforcement', () => {
     await expect(row('secrets')).rejects.toThrow(/full checkout/)
     expect(run).not.toHaveBeenCalled()
   })
-  it('rejects scanner infrastructure exits', async () => {
+  it.each([1, 2, 127])('rejects scanner infrastructure exit %i', async (status) => {
     options.git = (...args) => (args[0] === 'rev-parse' ? 'false' : 'base')
     vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
       gitleaks: async () => 'scanner',
     }))
-    run.mockReturnValue({ ...success, status: 1 })
+    run.mockReturnValue({ ...success, status })
     await expect(row('secrets')).rejects.toThrow(/gitleaks history failed/)
   })
   it('writes a deduplicated digest baseline locally', async () => {
@@ -749,8 +808,8 @@ describe('secret scan enforcement', () => {
 })
 
 describe('runtime discovery command contracts', () => {
-  it('rejects failed Vitest discovery before running tests', async () => {
-    run.mockReturnValue({ ...success, status: 1, stderr: 'discovery unavailable' })
+  it.each([1, 2, 127])('rejects Vitest discovery exit %i before running tests', async (status) => {
+    run.mockReturnValue({ ...success, status, stderr: 'discovery unavailable' })
     const { runVitest } = await import('../../scripts/quality/test-results.mjs')
     expect(() => runVitest()).toThrow(/Vitest discovery failed/)
     expect(run.mock.calls).toEqual([['pnpm', ['exec', 'vitest', 'list', '--filesOnly', '--json']]])
@@ -862,12 +921,18 @@ describe('deterministic dependency evidence', () => {
     report.metadata.dependencies = 2
     report.metadata.totalDependencies = 2
     audit.stdout = JSON.stringify(report)
-    audit.packages = ['minimatch@2.0.0', 'minimatch@1.0.0']
     options.writingBaseline = true
     options.writeJSON = vi.fn()
     dependencyOutput({
       audit,
       licenses: '{"GPL-3.0":[{"name":"minimatch","versions":["2.0.0","1.0.0"]}]}',
+      installed: ['minimatch@2.0.0', 'minimatch@1.0.0', 'installed-alias@npm:fixture@2.0.0'],
+      lock: [
+        'minimatch@2.0.0',
+        'minimatch@1.0.0',
+        '@esbuild/linux-x64@0.25.0',
+        'synthetic-importer@0.0.0',
+      ],
       install: fixture('frozen-install').valid,
     })
     await row('dependencies')
@@ -887,8 +952,13 @@ describe('deterministic dependency evidence', () => {
       'z > minimatch@1.0.0',
     ])
     expect(options.writeJSON).toHaveBeenCalledWith(`${directory}/package-inventory.json`, {
-      installed: ['minimatch@1.0.0', 'minimatch@2.0.0'],
-      audit: ['minimatch@2.0.0', 'minimatch@1.0.0'],
+      installed: ['installed-alias@npm:fixture@2.0.0', 'minimatch@1.0.0', 'minimatch@2.0.0'],
+      audit: [
+        'minimatch@2.0.0',
+        'minimatch@1.0.0',
+        '@esbuild/linux-x64@0.25.0',
+        'synthetic-importer@0.0.0',
+      ],
     })
   })
   it('rejects arbitrary unknown licence text with no exception', async () => {
@@ -987,5 +1057,36 @@ describe('idempotent private-directory cleanup', () => {
       return success
     })
     await expect(row('secrets')).resolves.toBeUndefined()
+  })
+})
+
+describe('child exit status boundaries', () => {
+  it.each(
+    ['vue-tsc', 'tsc'].flatMap((compiler) => [1, 2, 127].map((status) => ({ compiler, status }))),
+  )('rejects $compiler exit $status without diagnostics', async ({ compiler, status }) => {
+    run.mockImplementation((command, args) =>
+      args.includes(compiler) ? { ...success, status } : success,
+    )
+    await expect(row('types')).rejects.toThrow(/Invalid TypeScript diagnostics/)
+  })
+  it.each([1, 2, 127])('rejects audit exit %i with a clean report', async (status) => {
+    allow()
+    dependencyOutput({
+      audit: { ...cleanAudit(), status },
+      licenses: licenseReport('MIT'),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).rejects.toThrow(/Invalid pnpm audit report/)
+  })
+  it.each([1, 2, 127])('rejects Vitest exit %i despite a successful report', async (status) => {
+    const input = fixture('vitest-results').valid
+    run.mockImplementation((command, args) => {
+      const output = args.find((arg) => arg.startsWith('--outputFile='))
+      if (!output) return { ...success, stdout: input.files }
+      writeFileSync(output.slice('--outputFile='.length), input.stdout)
+      return { ...success, status }
+    })
+    const { runVitest } = await import('../../scripts/quality/test-results.mjs')
+    expect(() => runVitest()).toThrow(/Invalid Vitest results/)
   })
 })

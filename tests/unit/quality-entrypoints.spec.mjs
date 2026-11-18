@@ -58,11 +58,11 @@ describe('hook installation', () => {
     await expect(row('install-hooks')).resolves.toBeUndefined()
     expect(run).toHaveBeenCalledTimes(1)
   })
-  it('propagates failed git configuration', async () => {
+  it.each([1, 2, 127])('propagates git configuration exit %i', async (status) => {
     vi.stubEnv('CI', '')
     run
       .mockReturnValueOnce({ status: 0, stdout: '.git', stderr: '' })
-      .mockReturnValue({ status: 1, stdout: '', stderr: 'config failed' })
+      .mockReturnValue({ status, stdout: '', stderr: 'config failed' })
     await expect(row('install-hooks')).rejects.toThrow(/config failed/)
   })
 })

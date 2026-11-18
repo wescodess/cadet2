@@ -36,10 +36,10 @@ describe('shared quality command boundary', () => {
     spawnSync.mockReturnValue({ status: null, signal: 'SIGTERM' })
     expect(() => common.run('compiler', [])).toThrow(/SIGTERM/)
   })
-  it('trims successful git output and rejects nonzero git exits', () => {
+  it.each([1, 2, 127])('trims successful git output and rejects git exit %i', (status) => {
     spawnSync
       .mockReturnValueOnce({ status: 0, stdout: '  value\n', stderr: '' })
-      .mockReturnValueOnce({ status: 1, stdout: '', stderr: 'git failed' })
+      .mockReturnValueOnce({ status, stdout: '', stderr: 'git failed' })
     expect(common.git('rev-parse', 'HEAD')).toBe('value')
     expect(() => common.git('show', 'missing')).toThrow(/git failed/)
   })
