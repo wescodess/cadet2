@@ -1,12 +1,7 @@
 import { defineEventHandler, getRequestURL, setResponseHeader, setResponseStatus } from 'h3'
 
-const retiredRoots = [
-  '/workspace',
-  '/tasks',
-  '/api/workspace',
-  '/api/intake',
-  '/api/recommendations/runs',
-]
+const retiredPath =
+  /^\/(?:workspace|tasks|api\/workspace|api\/intake|api\/recommendations\/runs)(?![a-z0-9_-])/
 
 function normalizePath(path: string) {
   try {
@@ -20,10 +15,7 @@ export default defineEventHandler((event) => {
   const paths = [event.path.split('?', 1)[0] || '/', getRequestURL(event).pathname].map(
     normalizePath,
   )
-  if (
-    !paths.some((path) => retiredRoots.some((root) => path === root || path.startsWith(`${root}/`)))
-  )
-    return
+  if (!paths.some((path) => retiredPath.test(path))) return
 
   setResponseHeader(event, 'cache-control', 'private, no-store')
   setResponseStatus(event, 404)

@@ -12,6 +12,13 @@ export const retiredDotPaths = [
   '/workspace/./history',
   '/api/intake/%2E',
   '/tasks/..',
+  '/workspace\\..',
+  '/workspace\\..\\..',
+  '/api/workspace\\..',
+  '/tasks\\..',
+  '/workspace%5c..',
+  '/workspace;x/..',
+  '/workspace%00/..',
 ]
 
 export function rawRequest(origin, path, headers = {}) {

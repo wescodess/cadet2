@@ -63,6 +63,10 @@ test('test-only raw router canaries cannot be reached through dot segments', asy
       '/workspace/.%2E',
       '/api/workspace/..',
       '/api/recommendations/runs/%2e%2e?runId=legacy-private-run',
+      '/workspace\\..',
+      '/workspace%5c..',
+      '/workspace;x/..',
+      '/workspace%00/..',
     ]) {
       const before = effects
       const response = await rawRequest(controlOrigin, path)
@@ -79,6 +83,33 @@ test('test-only raw router canaries cannot be reached through dot segments', asy
             server.close((error) => (error ? reject(error) : resolve())),
           ),
       ),
+    )
+  }
+})
+
+test('non-retired paths that share a retired prefix pass the gate', async () => {
+  const app = createApp()
+    .use(retirementGate)
+    .use(defineEventHandler(() => 'public-entry'))
+  const server = createServer(toNodeListener(app))
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+  try {
+    const origin = `http://127.0.0.1:${server.address().port}`
+    for (const path of [
+      '/workspaces-help',
+      '/workspace-help',
+      '/Workspace_Archive',
+      '/tasks2',
+      '/api/intake-status',
+      '/api/recommendations/runs-summary',
+    ]) {
+      const response = await rawRequest(origin, path)
+      assert.equal(response.status, 200, path)
+      assert.equal(response.body, 'public-entry', path)
+    }
+  } finally {
+    await new Promise((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
     )
   }
 })
