@@ -37,6 +37,7 @@ beforeEach(() => {
 afterEach(() => {
   process.argv = originalArgv
   vi.doUnmock('prettier')
+  vi.doUnmock('node:fs')
   for (const module of ['common', 'install-gitleaks', 'package-inventory'])
     vi.doUnmock(`../../scripts/quality/${module}.mjs`)
   vi.doUnmock('eslint')
@@ -940,5 +941,51 @@ describe('writer-only selection and ordinary failures', () => {
         ],
       }),
     ).toEqual({ 'tests/unit/ordinary.spec.mjs': { skipped: 0, todo: 0, focused: 0 } })
+  })
+})
+
+describe('idempotent private-directory cleanup', () => {
+  it('accepts a completed license scan whose temporary directory was already removed', async () => {
+    allow()
+    dependencyOutput({
+      audit: cleanAudit(),
+      licenses: licenseReport('MIT'),
+      install: fixture('frozen-install').valid,
+    })
+    const execute = run.getMockImplementation()
+    run.mockImplementation((command, args) => {
+      const result = execute(command, args)
+      if (args.includes('licenses')) rmSync(args[1], { recursive: true, force: true })
+      return result
+    })
+    await expect(row('dependencies')).resolves.toBeUndefined()
+  })
+  it('accepts clean secret reports after their private directory has already been removed', async () => {
+    options.git = (...args) => (args[0] === 'rev-parse' ? 'false' : 'base')
+    options.files = () => []
+    options.json = () => []
+    vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
+      gitleaks: async () => 'scanner',
+    }))
+    vi.doMock('node:fs', async (original) => {
+      const fs = await original()
+      return {
+        ...fs,
+        readFileSync: (file, encoding) => {
+          const value = fs.readFileSync(file, encoding)
+          if (String(file).endsWith('/working.json'))
+            fs.rmSync(String(file).slice(0, -'/working.json'.length), {
+              recursive: true,
+              force: true,
+            })
+          return value
+        },
+      }
+    })
+    run.mockImplementation((command, args) => {
+      writeFileSync(args.at(-1).slice('--report-path='.length), '[]')
+      return success
+    })
+    await expect(row('secrets')).resolves.toBeUndefined()
   })
 })

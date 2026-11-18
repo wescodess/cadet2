@@ -247,3 +247,20 @@ describe('release asset selection', () => {
     expect(fetcher.mock.calls[1][0]).toBe(metadata.assets[1].browser_download_url)
   })
 })
+
+describe('idempotent download cleanup', () => {
+  it('accepts a verified publication whose private download directory was already removed', async () => {
+    vi.doMock('node:fs', async (original) => {
+      const fs = await original()
+      return {
+        ...fs,
+        renameSync: (from, to) => {
+          fs.renameSync(from, to)
+          fs.rmSync(path.dirname(from), { recursive: true, force: true })
+        },
+      }
+    })
+    await expect(install()).resolves.toEqual(expect.any(String))
+    expect(readFileSync(path.join(cache, `${pin[1]}.tar.gz`), 'utf8')).toBe('archive')
+  })
+})
