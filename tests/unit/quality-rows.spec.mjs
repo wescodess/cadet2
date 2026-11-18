@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as common from '../../scripts/quality/common.mjs'
@@ -11,9 +11,12 @@ let directory
 let completion
 let run
 let source
+let options
+const originalArgv = process.argv
 
 beforeEach(() => {
   vi.resetModules()
+  options = {}
   directory = mkdtempSync(resolve(common.outputDir, 'row-fixture-'))
   source = join(directory, 'fixture.ts')
   writeFileSync(source, 'export const fixture = 1\n')
@@ -27,10 +30,13 @@ beforeEach(() => {
     main: (fn) => {
       completion = Promise.resolve().then(fn)
     },
+    ...options,
   }))
 })
 
 afterEach(() => {
+  process.argv = originalArgv
+  vi.doUnmock('prettier')
   for (const module of ['common', 'install-gitleaks', 'package-inventory'])
     vi.doUnmock(`../../scripts/quality/${module}.mjs`)
   vi.doUnmock('eslint')
@@ -170,5 +176,769 @@ describe('public quality row entry points preserve parser decisions', () => {
     expect(runPlaywright(input.files)).toStrictEqual({
       [common.localPath(input.files[0])]: 1,
     })
+  })
+})
+
+describe('quality gate regression boundaries', () => {
+  it.each([1, 2])(
+    'types enforce the literal existing-file allowance at %i diagnostics',
+    async (amount) => {
+      run.mockImplementation((command, args) => {
+        if (args.includes('prepare') || args.includes('tsc')) return success
+        return {
+          status: 1,
+          stderr: '',
+          stdout:
+            Array.from(
+              { length: amount },
+              (_, index) =>
+                `nuxt.config.ts(${index + 1},1): error TS2322: Type 'string' is not assignable to type 'number'.`,
+            ).join('\n') + '\n',
+        }
+      })
+      if (amount === 1) await expect(row('types')).resolves.toBeUndefined()
+      else await expect(row('types')).rejects.toThrow(/types regression/)
+    },
+  )
+
+  it.each([1, 2])(
+    'lint enforces the literal existing-file allowance at %i findings',
+    async (amount) => {
+      const report = fixture('lint').alsoValid[0].results
+      report[0].filePath = resolve('app/components/admin/CitationIntegrityCard.vue')
+      report[0].messages = Array.from({ length: amount }, () => ({
+        ...report[0].messages[0],
+        ruleId: '@typescript-eslint/no-unused-vars',
+      }))
+      report[0].warningCount = 0
+      report[0].errorCount = amount
+      source = report[0].filePath
+      vi.doMock('eslint', () => ({
+        ESLint: class {
+          async lintFiles() {
+            return report
+          }
+        },
+      }))
+      if (amount === 1) await expect(row('lint')).resolves.toBeUndefined()
+      else await expect(row('lint')).rejects.toThrow(/lint regression/)
+    },
+  )
+
+  it.each([1, 2])(
+    'rejects Nuxt preparation exit %i before invoking either compiler',
+    async (status) => {
+      run.mockReturnValueOnce({ status, stdout: '', stderr: 'prepare unavailable' })
+      await expect(row('types')).rejects.toThrow(/prepare unavailable/)
+      expect(run.mock.calls).toEqual([['pnpm', ['exec', 'nuxt', 'prepare']]])
+    },
+  )
+
+  it.each(['high', 'critical'])('rejects an unallowlisted %s advisory', async (severity) => {
+    const audit = fixture('audit').valid
+    const report = JSON.parse(audit.stdout)
+    report.advisories['1113540'].severity = severity
+    report.metadata.vulnerabilities.high = severity === 'high' ? 1 : 0
+    report.metadata.vulnerabilities.critical = severity === 'critical' ? 1 : 0
+    audit.stdout = JSON.stringify(report)
+    dependencyOutput({
+      audit,
+      licenses: '{"MIT":[{"name":"minimatch","versions":["1.0.0"]}]}',
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).rejects.toThrow(/advisories: new unallowlisted findings/)
+  })
+
+  it('rejects an expired allowance even when the audit has no findings', async () => {
+    const audit = fixture('audit').valid
+    const report = JSON.parse(audit.stdout)
+    report.actions = []
+    report.advisories = {}
+    report.metadata.vulnerabilities.high = 0
+    audit.stdout = JSON.stringify(report)
+    audit.status = 0
+    vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2027-01-16T00:00:00Z'))
+    dependencyOutput({
+      audit,
+      licenses: '{"MIT":[{"name":"minimatch","versions":["1.0.0"]}]}',
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).rejects.toThrow(/allowance expired or invalid/)
+  })
+
+  it.each(['discovery unavailable', 'Error: .only is not allowed with --forbid-only'])(
+    'rejects failed Playwright discovery: %s',
+    async (stderr) => {
+      run.mockReturnValue({ status: 1, stdout: '', stderr })
+      const { runPlaywright } = await import('../../scripts/quality/test-results.mjs')
+      expect(() => runPlaywright(['/repo/tests/e2e/example.spec.ts'])).toThrow(
+        /Playwright discovery failed/,
+      )
+      expect(run.mock.calls[0][1]).toEqual([
+        'exec',
+        'playwright',
+        'test',
+        '--list',
+        '--forbid-only',
+        '--reporter=json',
+      ])
+    },
+  )
+})
+
+function cleanAudit() {
+  const audit = fixture('audit').valid
+  const report = JSON.parse(audit.stdout)
+  report.actions = []
+  report.advisories = {}
+  report.metadata.vulnerabilities.high = 0
+  return { ...audit, status: 0, stdout: JSON.stringify(report) }
+}
+function allow(entries = {}) {
+  options.json = () => ({ advisories: {}, licenses: {}, ...entries })
+}
+const licenseReport = (license) =>
+  JSON.stringify({ [license]: [{ name: 'minimatch', versions: ['1.0.0'] }] })
+
+describe('dependency command and allowance contracts', () => {
+  it.each([
+    'MIT',
+    'ISC',
+    'Apache-2.0',
+    'BSD-2-Clause',
+    'BSD-3-Clause',
+    '0BSD',
+    'CC0-1.0',
+    'Unlicense',
+    'Python-2.0',
+    'BlueOak-1.0.0',
+    '(MIT OR Apache-2.0)',
+    '(Apache-2.0 OR MIT)',
+    '(MIT AND Zlib)',
+    '(MIT OR CC0-1.0)',
+  ])('accepts the documented permitted license %s', async (license) => {
+    allow()
+    dependencyOutput({
+      audit: cleanAudit(),
+      licenses: licenseReport(license),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).resolves.toBeUndefined()
+    expect(run.mock.calls.map(([command, args]) => [command, args])).toEqual([
+      [
+        'pnpm',
+        [
+          'install',
+          '--frozen-lockfile',
+          '--lockfile-only',
+          '--ignore-scripts',
+          '--reporter=ndjson',
+        ],
+      ],
+      ['pnpm', ['audit', '--audit-level', 'high', '--json']],
+      ['pnpm', ['--dir', expect.any(String), 'licenses', 'list', '--json']],
+    ])
+    expect(JSON.parse(readFileSync(join(directory, 'package-inventory.json'), 'utf8'))).toEqual({
+      installed: ['minimatch@1.0.0'],
+      audit: ['minimatch@1.0.0'],
+    })
+    expect(existsSync(run.mock.calls[2][1][1])).toBe(false)
+  })
+  it('rejects an unallowlisted restricted license', async () => {
+    allow()
+    dependencyOutput({
+      audit: cleanAudit(),
+      licenses: licenseReport('GPL-3.0'),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).rejects.toThrow(/licenses: new unallowlisted findings/)
+  })
+  it('accepts an exact advisory and license allowance but rejects one new path', async () => {
+    allow({
+      advisories: {
+        'GHSA-7r86-cg39-jmmj|minimatch@1.0.0': {
+          reason: 'fixture',
+          expires: '2027-01-16',
+          paths: ['. > minimatch@1.0.0'],
+        },
+      },
+      licenses: {
+        'minimatch@1.0.0|GPL-3.0': { reason: 'fixture', expires: '2027-01-16', paths: ['GPL-3.0'] },
+      },
+    })
+    dependencyOutput({
+      audit: fixture('audit').valid,
+      licenses: licenseReport('GPL-3.0'),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).resolves.toBeUndefined()
+  })
+  it('rejects one new advisory path alongside an allowed path', async () => {
+    allow({
+      advisories: {
+        'GHSA-7r86-cg39-jmmj|minimatch@1.0.0': {
+          reason: 'fixture',
+          expires: '2027-01-16',
+          paths: ['. > minimatch@1.0.0'],
+        },
+      },
+    })
+    const audit = fixture('audit').valid
+    const report = JSON.parse(audit.stdout)
+    report.advisories['1113540'].findings[0].paths.push('. > new > minimatch@1.0.0')
+    audit.stdout = JSON.stringify(report)
+    dependencyOutput({
+      audit,
+      licenses: licenseReport('MIT'),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).rejects.toThrow(/advisories: new unallowlisted findings/)
+  })
+  it.each([
+    { reason: '' },
+    { reason: ' ' },
+    { reason: 42 },
+    { expires: 'invalid' },
+    { expires: '2027-02-30' },
+    { expires: '2027-1-16' },
+    { expires: '2026-01-01' },
+  ])('rejects invalid allowance $reason $expires', async (change) => {
+    allow({
+      advisories: {
+        fixture: { reason: 'fixture', expires: '2027-01-16', paths: ['fixture'], ...change },
+      },
+    })
+    dependencyOutput({
+      audit: cleanAudit(),
+      licenses: licenseReport('MIT'),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).rejects.toThrow(/allowance expired or invalid/)
+  })
+  it.each(['low', 'moderate'])('reports but does not fail %s advisory debt', async (severity) => {
+    allow()
+    const audit = fixture('audit').valid
+    const report = JSON.parse(audit.stdout)
+    report.advisories['1113540'].severity = severity
+    report.metadata.vulnerabilities.high = 0
+    report.metadata.vulnerabilities[severity] = 1
+    audit.status = 0
+    audit.stdout = JSON.stringify(report)
+    dependencyOutput({
+      audit,
+      licenses: licenseReport('MIT'),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).resolves.toBeUndefined()
+  })
+  it.each([
+    { status: 1, stderr: '' },
+    { status: 0, stderr: 'license command warning' },
+  ])('refuses license command exit $status and stderr "$stderr"', async (failure) => {
+    allow()
+    dependencyOutput({
+      audit: cleanAudit(),
+      licenses: licenseReport('MIT'),
+      install: fixture('frozen-install').valid,
+    })
+    const execute = run.getMockImplementation()
+    run.mockImplementation((command, args) =>
+      args.includes('licenses')
+        ? { ...failure, stdout: licenseReport('MIT') }
+        : execute(command, args),
+    )
+    await expect(row('dependencies')).rejects.toThrow()
+  })
+  it('writes independently specified advisory and license identities locally', async () => {
+    options.writingBaseline = true
+    options.writeJSON = vi.fn()
+    dependencyOutput({
+      audit: fixture('audit').valid,
+      licenses: licenseReport('GPL-3.0'),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).resolves.toBeUndefined()
+    expect(options.writeJSON).toHaveBeenCalledWith('scripts/quality/baselines/dependencies.json', {
+      advisories: {
+        'GHSA-7r86-cg39-jmmj|minimatch@1.0.0': {
+          paths: ['. > minimatch@1.0.0'],
+          expires: '2027-01-16',
+          reason:
+            'Existing dependency debt at adoption; ratchet under #23, remediation under #22. No new package/version/path allowance.',
+        },
+      },
+      licenses: {
+        'minimatch@1.0.0|GPL-3.0': {
+          paths: ['GPL-3.0'],
+          expires: '2027-01-16',
+          reason:
+            'Existing dependency debt at adoption; ratchet under #23, remediation under #22. No new package/version/path allowance.',
+        },
+      },
+    })
+  })
+})
+
+describe('compiler and linter invocation contracts', () => {
+  it('checks Nuxt and Convex separately and deduplicates repeated compiler diagnostics', async () => {
+    const diagnostic = 'nuxt.config.ts(1,1): error TS2322: fixture diagnostic\n'
+    run.mockImplementation((command, args) =>
+      args.includes('vue-tsc')
+        ? { status: 1, stdout: diagnostic + diagnostic, stderr: '' }
+        : success,
+    )
+    await expect(row('types')).resolves.toBeUndefined()
+    expect(run.mock.calls).toEqual([
+      ['pnpm', ['exec', 'nuxt', 'prepare']],
+      ['pnpm', ['exec', 'vue-tsc', '--build', '--noEmit', '--pretty', 'false']],
+      [
+        'pnpm',
+        ['exec', 'tsc', '--noEmit', '--project', 'convex/tsconfig.json', '--pretty', 'false'],
+      ],
+    ])
+    expect(readFileSync(join(directory, 'types.txt'), 'utf8')).toBe(diagnostic + diagnostic)
+    expect(readFileSync(join(directory, 'types-convex.txt'), 'utf8')).toBe('')
+  })
+  it.each([
+    { fatal: true, ruleId: 'fixture-rule' },
+    { fatal: false, ruleId: null },
+  ])('rejects fatal or ruleless ESLint diagnostics: $fatal $ruleId', async (change) => {
+    const report = fixture('lint').alsoValid[0].results
+    report[0].filePath = source
+    Object.assign(report[0].messages[0], change)
+    report[0].fatalErrorCount = change.fatal ? 1 : 0
+    vi.doMock('eslint', () => ({
+      ESLint: class {
+        async lintFiles() {
+          return report
+        }
+      },
+    }))
+    await expect(row('lint')).rejects.toThrow(/Fixture diagnostic/)
+  })
+  it.each(
+    JSON.parse(
+      readFileSync(new URL('./quality-policy/lint-suppressions.json', import.meta.url), 'utf8'),
+    ),
+  )('enforces suppression tickets in %s', async (text, accepted) => {
+    writeFileSync(source, text + '\n')
+    const report = fixture('lint').valid.results
+    report[0].filePath = source
+    vi.doMock('eslint', () => ({
+      ESLint: class {
+        async lintFiles() {
+          return report
+        }
+      },
+    }))
+    if (accepted) await expect(row('lint')).resolves.toBeUndefined()
+    else await expect(row('lint')).rejects.toThrow(/eslint-disable requires/)
+  })
+  it('selects only explicitly supplied lint files and removes the writer flag from selection', async () => {
+    const local = common.localPath(source)
+    const lintFiles = vi.fn(async () => {
+      const report = fixture('lint').valid.results
+      report[0].filePath = source
+      return report
+    })
+    options.sourceFiles = () => [local, 'app/other.ts']
+    process.argv = [process.execPath, 'lint.mjs', source, '--write-baseline']
+    vi.doMock('eslint', () => ({
+      ESLint: class {
+        lintFiles = lintFiles
+      },
+    }))
+    await expect(row('lint')).resolves.toBeUndefined()
+    expect(lintFiles).toHaveBeenCalledWith([local])
+    expect(JSON.parse(readFileSync(join(directory, 'lint.json'), 'utf8'))).toEqual([
+      { filePath: local, messages: [] },
+    ])
+  })
+  it('does not invoke ESLint when supplied files are outside the source inventory', async () => {
+    process.argv = [process.execPath, 'lint.mjs', 'README.md']
+    const lintFiles = vi.fn()
+    vi.doMock('eslint', () => ({
+      ESLint: class {
+        lintFiles = lintFiles
+      },
+    }))
+    await expect(row('lint')).resolves.toBeUndefined()
+    expect(lintFiles).not.toHaveBeenCalled()
+  })
+})
+
+describe('formatter decisions', () => {
+  it.each([
+    'ignored',
+    'unknown parser',
+    'formatted',
+    'unformatted',
+    'legacy unchanged',
+    'legacy changed',
+    'new writer',
+    'legacy writer',
+  ])('preserves %s handling', async (kind) => {
+    const { createHash } = await import('node:crypto')
+    const hash = 'sha256:' + createHash('sha256').update(readFileSync(source)).digest('hex')
+    const info = vi.fn(async () => ({
+      ignored: kind === 'ignored',
+      inferredParser: kind === 'unknown parser' ? null : 'typescript',
+    }))
+    const check = vi.fn(async () => kind === 'formatted')
+    const resolveConfig = vi.fn(async () => ({
+      semi: false,
+      singleQuote: true,
+      trailingComma: 'all',
+      printWidth: 96,
+    }))
+    vi.doMock('prettier', () => ({ getFileInfo: info, check, resolveConfig }))
+    options.json = () =>
+      kind === 'legacy unchanged'
+        ? { [source]: hash }
+        : kind === 'legacy changed'
+          ? { [source]: 'sha256:' + '0'.repeat(64) }
+          : {}
+    options.git = () => (kind === 'legacy writer' ? source : '')
+    options.writeJSON = vi.fn()
+    options.writingBaseline = kind.endsWith('writer')
+    const accepted = [
+      'ignored',
+      'unknown parser',
+      'formatted',
+      'legacy unchanged',
+      'legacy writer',
+    ].includes(kind)
+    if (accepted) await expect(row('format')).resolves.toBeUndefined()
+    else
+      await expect(row('format')).rejects.toThrow(
+        /(?:Format regression|New files must be formatted)/,
+      )
+    if (kind === 'legacy unchanged') expect(info).not.toHaveBeenCalled()
+    else expect(info).toHaveBeenCalledWith(source, { ignorePath: '.prettierignore' })
+    if (kind === 'legacy writer')
+      expect(options.writeJSON).toHaveBeenCalledWith('scripts/quality/baselines/format.json', {
+        [source]: hash,
+      })
+    if (kind === 'formatted')
+      expect(check).toHaveBeenCalledWith('export const fixture = 1\n', {
+        semi: false,
+        singleQuote: true,
+        trailingComma: 'all',
+        printWidth: 96,
+        filepath: source,
+      })
+  })
+  it('selects only requested formatting paths and drops the writer flag', async () => {
+    const local = common.localPath(source)
+    options.files = () => [local, 'app/other.ts']
+    options.git = () => ''
+    options.json = () => ({})
+    process.argv = [process.execPath, 'format.mjs', source, '--write-baseline']
+    const getFileInfo = vi.fn(async () => ({ ignored: true, inferredParser: null }))
+    vi.doMock('prettier', () => ({ getFileInfo }))
+    await expect(row('format')).resolves.toBeUndefined()
+    expect(getFileInfo.mock.calls).toEqual([[local, { ignorePath: '.prettierignore' }]])
+  })
+})
+
+describe('secret scan enforcement', () => {
+  it.each(['history', 'diff', 'working', 'all-branches'])(
+    'scans and rejects a fresh finding in %s',
+    async (stage) => {
+      options.git = (...args) => (args[0] === 'rev-parse' ? 'false' : 'base')
+      options.files = () => []
+      options.json = () => []
+      if (stage === 'all-branches')
+        process.argv = [process.execPath, 'secrets.mjs', '--all-branches']
+      vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
+        gitleaks: async () => 'scanner',
+      }))
+      run.mockImplementation((command, args) => {
+        const file = args
+          .find((arg) => arg.startsWith('--report-path='))
+          .slice('--report-path='.length)
+        const selected = file.endsWith(`/${stage}.json`)
+        writeFileSync(file, selected ? fixture('gitleaks').valid.stdout : '[]')
+        return { ...success, status: selected ? 42 : 0 }
+      })
+      await expect(row('secrets')).rejects.toThrow(new RegExp(`secrets ${stage}: 1 new findings`))
+      const reports = run.mock.calls.map(([, args]) =>
+        args.find((arg) => arg.startsWith('--report-path=')).slice('--report-path='.length),
+      )
+      for (const file of reports) expect(() => readFileSync(file)).toThrow()
+      expect(run.mock.calls[0][1].slice(0, 3)).toEqual([
+        'git',
+        stage === 'all-branches' ? '--log-opts=--all' : '--log-opts=HEAD',
+        '.',
+      ])
+      if (stage === 'all-branches') {
+        expect(run).toHaveBeenCalledTimes(1)
+        expect(
+          JSON.parse(readFileSync(join(directory, 'secrets-all-branches.json'), 'utf8')),
+        ).toHaveProperty('all-branches')
+      } else {
+        expect(run).toHaveBeenCalledTimes(3)
+        expect(run.mock.calls[2][1][0]).toBe('dir')
+        expect(run.mock.calls[2][1][1]).toMatch(/\/tree$/)
+        expect(run.mock.calls[1][1].slice(0, 3)).toEqual(['git', '--log-opts=base..HEAD', '.'])
+      }
+    },
+  )
+  it('scans every working file and retains only digests for exact existing exceptions', async () => {
+    options.git = (...args) => (args[0] === 'rev-parse' ? 'false' : 'base')
+    options.files = () => [common.localPath(source)]
+    options.json = () => [
+      'fixture|fixture|f16d05ec6b29248d2c61adb1e9263f78e4f7bace1b955014a2d17872cfe4064d',
+    ]
+    vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
+      gitleaks: async () => 'scanner',
+    }))
+    run.mockImplementation((command, args) => {
+      expect(command).toBe('scanner')
+      expect(args.slice(-4, -1)).toEqual(['--no-banner', '--report-format=json', '--exit-code=42'])
+      const file = args.at(-1).slice('--report-path='.length)
+      if (args[0] === 'dir') {
+        expect(readFileSync(join(args[1], common.localPath(source)), 'utf8')).toBe(
+          'export const fixture = 1\n',
+        )
+        const findings = JSON.parse(fixture('gitleaks').valid.stdout)
+        findings[0].File = join(args[1], 'fixture')
+        writeFileSync(file, JSON.stringify(findings))
+      } else writeFileSync(file, fixture('gitleaks').valid.stdout)
+      return { ...success, status: 42 }
+    })
+    await expect(row('secrets')).resolves.toBeUndefined()
+    expect(JSON.parse(readFileSync(join(directory, 'secrets.json'), 'utf8'))).toEqual({
+      history: ['fixture|fixture|f16d05ec6b29248d2c61adb1e9263f78e4f7bace1b955014a2d17872cfe4064d'],
+      diff: ['fixture|fixture|f16d05ec6b29248d2c61adb1e9263f78e4f7bace1b955014a2d17872cfe4064d'],
+      working: ['fixture|fixture|f16d05ec6b29248d2c61adb1e9263f78e4f7bace1b955014a2d17872cfe4064d'],
+    })
+  })
+  it('rejects shallow history before invoking a scanner', async () => {
+    options.git = () => 'true'
+    await expect(row('secrets')).rejects.toThrow(/full checkout/)
+    expect(run).not.toHaveBeenCalled()
+  })
+  it('rejects scanner infrastructure exits', async () => {
+    options.git = (...args) => (args[0] === 'rev-parse' ? 'false' : 'base')
+    vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
+      gitleaks: async () => 'scanner',
+    }))
+    run.mockReturnValue({ ...success, status: 1 })
+    await expect(row('secrets')).rejects.toThrow(/gitleaks history failed/)
+  })
+  it('writes a deduplicated digest baseline locally', async () => {
+    options.writingBaseline = true
+    options.writeJSON = vi.fn()
+    options.git = (...args) => (args[0] === 'rev-parse' ? 'false' : 'base')
+    options.files = () => []
+    options.json = () => ['fixture']
+    vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
+      gitleaks: async () => 'scanner',
+    }))
+    run.mockImplementation((command, args) => {
+      writeFileSync(args.at(-1).slice('--report-path='.length), fixture('gitleaks').valid.stdout)
+      return { ...success, status: 42 }
+    })
+    await expect(row('secrets')).resolves.toBeUndefined()
+    expect(options.writeJSON).toHaveBeenCalledWith('scripts/quality/baselines/secrets.json', [
+      'fixture|fixture|f16d05ec6b29248d2c61adb1e9263f78e4f7bace1b955014a2d17872cfe4064d',
+    ])
+  })
+})
+
+describe('runtime discovery command contracts', () => {
+  it('rejects failed Vitest discovery before running tests', async () => {
+    run.mockReturnValue({ ...success, status: 1, stderr: 'discovery unavailable' })
+    const { runVitest } = await import('../../scripts/quality/test-results.mjs')
+    expect(() => runVitest()).toThrow(/Vitest discovery failed/)
+    expect(run.mock.calls).toEqual([['pnpm', ['exec', 'vitest', 'list', '--filesOnly', '--json']]])
+  })
+  it.each(['failed', 'focused', 'file-focused', 'pending', 'passed'])(
+    'preserves the %s Vitest outcome',
+    async (kind) => {
+      const input = fixture('vitest-results').valid
+      const report = JSON.parse(input.stdout)
+      report.testResults[0].assertionResults[1].status = 'passed'
+      report.numPassedTests = 2
+      report.numPendingTests = 0
+      if (kind === 'pending') {
+        report.testResults[0].assertionResults[0].status = 'pending'
+        report.numPassedTests = 1
+        report.numPendingTests = 1
+      }
+      if (kind === 'focused')
+        report.testResults[0].assertionResults[0].failureMessages = [
+          '[Vitest] Unexpected .only modifier',
+        ]
+      if (kind === 'file-focused')
+        report.testResults[0].message = '[Vitest] Unexpected .only modifier'
+      if (kind === 'failed') {
+        report.success = false
+        report.numPassedTests = 1
+        report.numFailedTests = 1
+        report.numPassedTestSuites = 0
+        report.numFailedTestSuites = 1
+        report.testResults[0].status = 'failed'
+        report.testResults[0].assertionResults[0].status = 'failed'
+      }
+      run.mockImplementation((command, args) => {
+        if (args.includes('list')) return { ...success, stdout: input.files }
+        writeFileSync(args.at(-1).slice('--outputFile='.length), JSON.stringify(report))
+        return { ...success, status: kind === 'failed' ? 1 : 0 }
+      })
+      const { runVitest } = await import('../../scripts/quality/test-results.mjs')
+      if (['failed', 'focused', 'file-focused'].includes(kind))
+        expect(() => runVitest()).toThrow(/focused tests are forbidden/)
+      else
+        expect(runVitest()).toEqual(
+          kind === 'pending' ? { [common.localPath('/repo/tests/unit/example.spec.ts')]: 1 } : {},
+        )
+      expect(run.mock.calls[0]).toEqual([
+        'pnpm',
+        ['exec', 'vitest', 'list', '--filesOnly', '--json'],
+      ])
+      expect(run.mock.calls[1]).toEqual([
+        'pnpm',
+        [
+          'exec',
+          'vitest',
+          'run',
+          '--maxWorkers=2',
+          '--allowOnly=false',
+          '--reporter=json',
+          `--outputFile=${resolve(directory, 'vitest-results.json')}`,
+        ],
+      ])
+    },
+  )
+  it.each(['passed', 'mixed'])(
+    'retains Playwright %s expected statuses with one skip per declaration',
+    async (kind) => {
+      const input = fixture('playwright-list').valid
+      const report = JSON.parse(input.stdout)
+      if (kind === 'mixed') {
+        report.suites[0].specs[0].tests.push({
+          ...report.suites[0].specs[0].tests[0],
+          expectedStatus: 'skipped',
+        })
+        report.stats.skipped += 1
+      }
+      run.mockImplementation((command, args, config) => {
+        expect(command).toBe('pnpm')
+        expect(args).toEqual([
+          'exec',
+          'playwright',
+          'test',
+          '--list',
+          '--forbid-only',
+          '--reporter=json',
+        ])
+        expect(config.env.PLAYWRIGHT_JSON_OUTPUT_FILE).toBe(
+          resolve(directory, 'playwright-list.json'),
+        )
+        expect(config.env.PATH).toBe(process.env.PATH)
+        writeFileSync(config.env.PLAYWRIGHT_JSON_OUTPUT_FILE, JSON.stringify(report))
+        return success
+      })
+      const { runPlaywright } = await import('../../scripts/quality/test-results.mjs')
+      expect(runPlaywright(input.files)).toEqual(
+        kind === 'mixed' ? { [common.localPath(input.files[0])]: 1 } : {},
+      )
+    },
+  )
+})
+
+describe('deterministic dependency evidence', () => {
+  it('sorts independent installed identities, allowance keys and accumulated advisory paths', async () => {
+    const audit = fixture('audit').valid
+    const report = JSON.parse(audit.stdout)
+    report.advisories['1113540'].findings = [
+      { version: '2.0.0', paths: ['. > minimatch@2.0.0'] },
+      { version: '1.0.0', paths: ['z > minimatch@1.0.0', 'a > minimatch@1.0.0'] },
+    ]
+    report.metadata.vulnerabilities.high = 2
+    report.metadata.dependencies = 2
+    report.metadata.totalDependencies = 2
+    audit.stdout = JSON.stringify(report)
+    audit.packages = ['minimatch@2.0.0', 'minimatch@1.0.0']
+    options.writingBaseline = true
+    options.writeJSON = vi.fn()
+    dependencyOutput({
+      audit,
+      licenses: '{"GPL-3.0":[{"name":"minimatch","versions":["2.0.0","1.0.0"]}]}',
+      install: fixture('frozen-install').valid,
+    })
+    await row('dependencies')
+    const baseline = options.writeJSON.mock.calls.find(
+      ([path]) => path === 'scripts/quality/baselines/dependencies.json',
+    )[1]
+    expect(Object.keys(baseline.advisories)).toEqual([
+      'GHSA-7r86-cg39-jmmj|minimatch@1.0.0',
+      'GHSA-7r86-cg39-jmmj|minimatch@2.0.0',
+    ])
+    expect(Object.keys(baseline.licenses)).toEqual([
+      'minimatch@1.0.0|GPL-3.0',
+      'minimatch@2.0.0|GPL-3.0',
+    ])
+    expect(baseline.advisories['GHSA-7r86-cg39-jmmj|minimatch@1.0.0'].paths).toEqual([
+      'a > minimatch@1.0.0',
+      'z > minimatch@1.0.0',
+    ])
+    expect(options.writeJSON).toHaveBeenCalledWith(`${directory}/package-inventory.json`, {
+      installed: ['minimatch@1.0.0', 'minimatch@2.0.0'],
+      audit: ['minimatch@2.0.0', 'minimatch@1.0.0'],
+    })
+  })
+  it('rejects arbitrary unknown licence text with no exception', async () => {
+    allow()
+    dependencyOutput({
+      audit: cleanAudit(),
+      licenses: licenseReport('Stryker was here'),
+      install: fixture('frozen-install').valid,
+    })
+    await expect(row('dependencies')).rejects.toThrow(/licenses: new unallowlisted findings/)
+  })
+})
+
+describe('writer-only selection and ordinary failures', () => {
+  it('keeps the full lint inventory when the only argument is the writer flag', async () => {
+    process.argv = [process.execPath, 'lint.mjs', '--write-baseline']
+    const lintFiles = vi.fn(async () => {
+      const report = fixture('lint').valid.results
+      report[0].filePath = source
+      return report
+    })
+    vi.doMock('eslint', () => ({
+      ESLint: class {
+        lintFiles = lintFiles
+      },
+    }))
+    await row('lint')
+    expect(lintFiles).toHaveBeenCalledWith([source])
+  })
+  it('keeps the full formatter inventory when the only argument is the writer flag', async () => {
+    process.argv = [process.execPath, 'format.mjs', '--write-baseline']
+    options.writingBaseline = true
+    options.writeJSON = vi.fn()
+    options.git = () => source
+    const getFileInfo = vi.fn(async () => ({ ignored: true, inferredParser: null }))
+    vi.doMock('prettier', () => ({ getFileInfo }))
+    await row('format')
+    expect(getFileInfo).toHaveBeenCalledWith(source, { ignorePath: '.prettierignore' })
+  })
+  it('does not label ordinary assertion failures as focused tests', async () => {
+    const { vitestFindings } = await import('../../scripts/quality/test-results.mjs')
+    expect(
+      vitestFindings({
+        testResults: [
+          {
+            name: resolve('tests/unit/ordinary.spec.mjs'),
+            message: '',
+            assertionResults: [{ status: 'failed', failureMessages: ['expected 1 to equal 2'] }],
+          },
+        ],
+      }),
+    ).toEqual({ 'tests/unit/ordinary.spec.mjs': { skipped: 0, todo: 0, focused: 0 } })
   })
 })

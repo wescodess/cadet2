@@ -1,0 +1,11 @@
+[
+  ["//eslint-disable-next-line rule", false],
+  ["/* eslint-disable rule */", false],
+  ["<!-- eslint-disable rule -->", false],
+  ["/**\n  *eslint-disable rule\n */", false],
+  ["// eslint-disable rule -- ", false],
+  ["// eslint-disable rule --\t  description #123", true],
+  ["// eslint-disable rule -- x https://github.com/owner/repo/issues/123", true],
+  ["// eslint-disable rule -- #abc", false],
+  ["// eslint-disable rule --x #23", false]
+]

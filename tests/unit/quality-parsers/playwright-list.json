@@ -347,6 +347,499 @@
           }
         }
       }
+    },
+    {
+      "name": "nested valid",
+      "valid": true,
+      "input": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [], \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}]}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 1, \"unexpected\": 0, \"flaky\": 0}}"
+      },
+      "expected": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": {
+          "config": {
+            "configFile": "/private/tmp/fix-pr55-b2r2/playwright.config.ts",
+            "rootDir": "/private/tmp/fix-pr55-b2r2/tests",
+            "forbidOnly": true,
+            "fullyParallel": true,
+            "globalSetup": null,
+            "globalTeardown": null,
+            "globalTimeout": 0,
+            "grep": {},
+            "grepInvert": null,
+            "maxFailures": 0,
+            "metadata": {},
+            "preserveOutput": "always",
+            "projects": [
+              {
+                "outputDir": "/private/tmp/fix-pr55-b2r2/test-results/artifacts",
+                "repeatEach": 1,
+                "retries": 0,
+                "metadata": {},
+                "id": "chromium",
+                "name": "chromium",
+                "testDir": "/private/tmp/fix-pr55-b2r2/tests",
+                "testIgnore": [],
+                "testMatch": ["e2e/**/*.spec.ts"],
+                "timeout": 60000
+              },
+              {
+                "outputDir": "/private/tmp/fix-pr55-b2r2/test-results/artifacts",
+                "repeatEach": 1,
+                "retries": 0,
+                "metadata": {},
+                "id": "api",
+                "name": "api",
+                "testDir": "/private/tmp/fix-pr55-b2r2/tests",
+                "testIgnore": [],
+                "testMatch": ["api/**/*.spec.ts", "integration/**/*.spec.ts"],
+                "timeout": 60000
+              }
+            ],
+            "quiet": false,
+            "reporter": [["json"]],
+            "reportSlowTests": {
+              "max": 5,
+              "threshold": 300000
+            },
+            "runAgents": "none",
+            "shard": null,
+            "tags": [],
+            "updateSnapshots": "missing",
+            "updateSourceMethod": "patch",
+            "version": "1.58.2",
+            "workers": 5,
+            "webServer": {
+              "command": "BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100",
+              "url": "http://127.0.0.1:3100",
+              "reuseExistingServer": false,
+              "timeout": 120000
+            }
+          },
+          "suites": [
+            {
+              "title": "e2e/admin-audit-trail.red.atdd.spec.ts",
+              "file": "e2e/admin-audit-trail.red.atdd.spec.ts",
+              "column": 0,
+              "line": 0,
+              "specs": [],
+              "suites": [
+                {
+                  "title": "e2e/admin-audit-trail.red.atdd.spec.ts",
+                  "file": "e2e/admin-audit-trail.red.atdd.spec.ts",
+                  "column": 0,
+                  "line": 0,
+                  "specs": [
+                    {
+                      "title": "[P0][AC3] guest users are redirected to auth when opening the admin audit trail route",
+                      "ok": true,
+                      "tags": [],
+                      "tests": [
+                        {
+                          "timeout": 60000,
+                          "annotations": [],
+                          "expectedStatus": "passed",
+                          "projectId": "chromium",
+                          "projectName": "chromium",
+                          "results": [],
+                          "status": "skipped"
+                        }
+                      ],
+                      "id": "ea4c0a8acf6741031397-c80903ee7da69e367c23",
+                      "file": "e2e/admin-audit-trail.red.atdd.spec.ts",
+                      "line": 154,
+                      "column": 3
+                    }
+                  ],
+                  "suites": []
+                }
+              ]
+            }
+          ],
+          "errors": [],
+          "stats": {
+            "startTime": "2026-11-18T00:08:52.670Z",
+            "duration": 870.8689999999999,
+            "expected": 0,
+            "skipped": 1,
+            "unexpected": 0,
+            "flaky": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "missing suites property",
+      "valid": true,
+      "input": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}]}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 1, \"unexpected\": 0, \"flaky\": 0}}"
+      },
+      "expected": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": {
+          "config": {
+            "configFile": "/private/tmp/fix-pr55-b2r2/playwright.config.ts",
+            "rootDir": "/private/tmp/fix-pr55-b2r2/tests",
+            "forbidOnly": true,
+            "fullyParallel": true,
+            "globalSetup": null,
+            "globalTeardown": null,
+            "globalTimeout": 0,
+            "grep": {},
+            "grepInvert": null,
+            "maxFailures": 0,
+            "metadata": {},
+            "preserveOutput": "always",
+            "projects": [
+              {
+                "outputDir": "/private/tmp/fix-pr55-b2r2/test-results/artifacts",
+                "repeatEach": 1,
+                "retries": 0,
+                "metadata": {},
+                "id": "chromium",
+                "name": "chromium",
+                "testDir": "/private/tmp/fix-pr55-b2r2/tests",
+                "testIgnore": [],
+                "testMatch": ["e2e/**/*.spec.ts"],
+                "timeout": 60000
+              },
+              {
+                "outputDir": "/private/tmp/fix-pr55-b2r2/test-results/artifacts",
+                "repeatEach": 1,
+                "retries": 0,
+                "metadata": {},
+                "id": "api",
+                "name": "api",
+                "testDir": "/private/tmp/fix-pr55-b2r2/tests",
+                "testIgnore": [],
+                "testMatch": ["api/**/*.spec.ts", "integration/**/*.spec.ts"],
+                "timeout": 60000
+              }
+            ],
+            "quiet": false,
+            "reporter": [["json"]],
+            "reportSlowTests": {
+              "max": 5,
+              "threshold": 300000
+            },
+            "runAgents": "none",
+            "shard": null,
+            "tags": [],
+            "updateSnapshots": "missing",
+            "updateSourceMethod": "patch",
+            "version": "1.58.2",
+            "workers": 5,
+            "webServer": {
+              "command": "BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100",
+              "url": "http://127.0.0.1:3100",
+              "reuseExistingServer": false,
+              "timeout": 120000
+            }
+          },
+          "suites": [
+            {
+              "title": "e2e/admin-audit-trail.red.atdd.spec.ts",
+              "file": "e2e/admin-audit-trail.red.atdd.spec.ts",
+              "column": 0,
+              "line": 0,
+              "specs": [
+                {
+                  "title": "[P0][AC3] guest users are redirected to auth when opening the admin audit trail route",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "ea4c0a8acf6741031397-c80903ee7da69e367c23",
+                  "file": "e2e/admin-audit-trail.red.atdd.spec.ts",
+                  "line": 154,
+                  "column": 3
+                }
+              ]
+            }
+          ],
+          "errors": [],
+          "stats": {
+            "startTime": "2026-11-18T00:08:52.670Z",
+            "duration": 870.8689999999999,
+            "expected": 0,
+            "skipped": 1,
+            "unexpected": 0,
+            "flaky": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "nested file mismatch",
+      "valid": false,
+      "input": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"other.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [], \"suites\": []}]}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 1, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "spec file mismatch",
+      "valid": false,
+      "input": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"other.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 1, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "duplicate spec ID",
+      "valid": false,
+      "input": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}, {\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 2, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "mixed project identity",
+      "valid": false,
+      "input": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}, {\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"unknown\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 2, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "project name mismatch",
+      "valid": false,
+      "input": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"unknown\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 1, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "mixed file population",
+      "valid": false,
+      "input": {
+        "files": [
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+          "/repo/second.spec.ts"
+        ],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}, {\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"other.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 1, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "duplicate files",
+      "valid": false,
+      "input": {
+        "files": [
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"
+        ],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 1, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "missing suite",
+      "valid": false,
+      "input": {
+        "files": [
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+          "/repo/second.spec.ts"
+        ],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 1, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "duplicate suite",
+      "valid": false,
+      "input": {
+        "files": [
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+          "/repo/second.spec.ts"
+        ],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}, {\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 2, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "two distinct files",
+      "valid": true,
+      "input": {
+        "files": [
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+          "/private/tmp/fix-pr55-b2r2/tests/other.spec.ts"
+        ],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}, {\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"other.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"second-spec-id\", \"file\": \"other.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 2, \"unexpected\": 0, \"flaky\": 0}}"
+      },
+      "expected": {
+        "files": [
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+          "/private/tmp/fix-pr55-b2r2/tests/other.spec.ts"
+        ],
+        "stdout": {
+          "config": {
+            "configFile": "/private/tmp/fix-pr55-b2r2/playwright.config.ts",
+            "rootDir": "/private/tmp/fix-pr55-b2r2/tests",
+            "forbidOnly": true,
+            "fullyParallel": true,
+            "globalSetup": null,
+            "globalTeardown": null,
+            "globalTimeout": 0,
+            "grep": {},
+            "grepInvert": null,
+            "maxFailures": 0,
+            "metadata": {},
+            "preserveOutput": "always",
+            "projects": [
+              {
+                "outputDir": "/private/tmp/fix-pr55-b2r2/test-results/artifacts",
+                "repeatEach": 1,
+                "retries": 0,
+                "metadata": {},
+                "id": "chromium",
+                "name": "chromium",
+                "testDir": "/private/tmp/fix-pr55-b2r2/tests",
+                "testIgnore": [],
+                "testMatch": ["e2e/**/*.spec.ts"],
+                "timeout": 60000
+              },
+              {
+                "outputDir": "/private/tmp/fix-pr55-b2r2/test-results/artifacts",
+                "repeatEach": 1,
+                "retries": 0,
+                "metadata": {},
+                "id": "api",
+                "name": "api",
+                "testDir": "/private/tmp/fix-pr55-b2r2/tests",
+                "testIgnore": [],
+                "testMatch": ["api/**/*.spec.ts", "integration/**/*.spec.ts"],
+                "timeout": 60000
+              }
+            ],
+            "quiet": false,
+            "reporter": [["json"]],
+            "reportSlowTests": {
+              "max": 5,
+              "threshold": 300000
+            },
+            "runAgents": "none",
+            "shard": null,
+            "tags": [],
+            "updateSnapshots": "missing",
+            "updateSourceMethod": "patch",
+            "version": "1.58.2",
+            "workers": 5,
+            "webServer": {
+              "command": "BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100",
+              "url": "http://127.0.0.1:3100",
+              "reuseExistingServer": false,
+              "timeout": 120000
+            }
+          },
+          "suites": [
+            {
+              "title": "e2e/admin-audit-trail.red.atdd.spec.ts",
+              "file": "e2e/admin-audit-trail.red.atdd.spec.ts",
+              "column": 0,
+              "line": 0,
+              "specs": [
+                {
+                  "title": "[P0][AC3] guest users are redirected to auth when opening the admin audit trail route",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "ea4c0a8acf6741031397-c80903ee7da69e367c23",
+                  "file": "e2e/admin-audit-trail.red.atdd.spec.ts",
+                  "line": 154,
+                  "column": 3
+                }
+              ],
+              "suites": []
+            },
+            {
+              "title": "e2e/admin-audit-trail.red.atdd.spec.ts",
+              "file": "other.spec.ts",
+              "column": 0,
+              "line": 0,
+              "specs": [
+                {
+                  "title": "[P0][AC3] guest users are redirected to auth when opening the admin audit trail route",
+                  "ok": true,
+                  "tags": [],
+                  "tests": [
+                    {
+                      "timeout": 60000,
+                      "annotations": [],
+                      "expectedStatus": "passed",
+                      "projectId": "chromium",
+                      "projectName": "chromium",
+                      "results": [],
+                      "status": "skipped"
+                    }
+                  ],
+                  "id": "second-spec-id",
+                  "file": "other.spec.ts",
+                  "line": 154,
+                  "column": 3
+                }
+              ],
+              "suites": []
+            }
+          ],
+          "errors": [],
+          "stats": {
+            "startTime": "2026-11-18T00:08:52.670Z",
+            "duration": 870.8689999999999,
+            "expected": 0,
+            "skipped": 2,
+            "unexpected": 0,
+            "flaky": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "extra duplicate result",
+      "valid": false,
+      "input": {
+        "files": ["/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts"],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}, {\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"second-spec-id\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 2, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "duplicated file identity",
+      "valid": false,
+      "input": {
+        "files": [
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+          "/repo/other.spec.ts"
+        ],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}, {\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"second-spec-id\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 2, \"unexpected\": 0, \"flaky\": 0}}"
+      }
+    },
+    {
+      "name": "mixed suite file violation",
+      "valid": false,
+      "input": {
+        "files": [
+          "/private/tmp/fix-pr55-b2r2/tests/e2e/admin-audit-trail.red.atdd.spec.ts",
+          "/private/tmp/fix-pr55-b2r2/tests/other.spec.ts"
+        ],
+        "stdout": "{\"config\": {\"configFile\": \"/private/tmp/fix-pr55-b2r2/playwright.config.ts\", \"rootDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"forbidOnly\": true, \"fullyParallel\": true, \"globalSetup\": null, \"globalTeardown\": null, \"globalTimeout\": 0, \"grep\": {}, \"grepInvert\": null, \"maxFailures\": 0, \"metadata\": {}, \"preserveOutput\": \"always\", \"projects\": [{\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"chromium\", \"name\": \"chromium\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"e2e/**/*.spec.ts\"], \"timeout\": 60000}, {\"outputDir\": \"/private/tmp/fix-pr55-b2r2/test-results/artifacts\", \"repeatEach\": 1, \"retries\": 0, \"metadata\": {}, \"id\": \"api\", \"name\": \"api\", \"testDir\": \"/private/tmp/fix-pr55-b2r2/tests\", \"testIgnore\": [], \"testMatch\": [\"api/**/*.spec.ts\", \"integration/**/*.spec.ts\"], \"timeout\": 60000}], \"quiet\": false, \"reporter\": [[\"json\"]], \"reportSlowTests\": {\"max\": 5, \"threshold\": 300000}, \"runAgents\": \"none\", \"shard\": null, \"tags\": [], \"updateSnapshots\": \"missing\", \"updateSourceMethod\": \"patch\", \"version\": \"1.58.2\", \"workers\": 5, \"webServer\": {\"command\": \"BASE_URL=http://127.0.0.1:3100 NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3100 CONVEX_SITE_URL=http://127.0.0.1:3100 NUXT_HUB_DIR=.data/pw-60094-1794960532667 NUXT_HUB_DB_DATA_DIR=.data/pw-60094-1794960532667/db/pglite pnpm dev --host 127.0.0.1 --port 3100\", \"url\": \"http://127.0.0.1:3100\", \"reuseExistingServer\": false, \"timeout\": 120000}}, \"suites\": [{\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"ea4c0a8acf6741031397-c80903ee7da69e367c23\", \"file\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}, {\"title\": \"e2e/admin-audit-trail.red.atdd.spec.ts\", \"file\": \"other.spec.ts\", \"column\": 0, \"line\": 0, \"specs\": [{\"title\": \"[P0][AC3] guest users are redirected to auth when opening the admin audit trail route\", \"ok\": true, \"tags\": [], \"tests\": [{\"timeout\": 60000, \"annotations\": [], \"expectedStatus\": \"passed\", \"projectId\": \"chromium\", \"projectName\": \"chromium\", \"results\": [], \"status\": \"skipped\"}], \"id\": \"second-spec-id\", \"file\": \"mismatch.spec.ts\", \"line\": 154, \"column\": 3}], \"suites\": []}], \"errors\": [], \"stats\": {\"startTime\": \"2026-11-18T00:08:52.670Z\", \"duration\": 870.8689999999999, \"expected\": 0, \"skipped\": 2, \"unexpected\": 0, \"flaky\": 0}}"
+      }
     }
   ],
   "expected": {

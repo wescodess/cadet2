@@ -70,5 +70,15 @@
       "status": 0,
       "stdout": []
     }
+  ],
+  "cases": [
+    {
+      "name": "reversed finding line interval",
+      "valid": false,
+      "input": {
+        "status": 42,
+        "stdout": "[{\"RuleID\": \"fixture\", \"Description\": \"fixture\", \"StartLine\": 3, \"EndLine\": 2, \"StartColumn\": 51, \"EndColumn\": 132, \"Match\": \"fixture\", \"Secret\": \"fixture\", \"File\": \"fixture\", \"SymlinkFile\": \"\", \"Commit\": \"fixture\", \"Link\": \"fixture\", \"Entropy\": 3.7858343, \"Author\": \"fixture\", \"Email\": \"fixture\", \"Date\": \"fixture\", \"Message\": \"fixture\", \"Tags\": [], \"Fingerprint\": \"fixture\"}]"
+      }
+    }
   ]
 }

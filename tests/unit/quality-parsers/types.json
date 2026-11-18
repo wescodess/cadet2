@@ -65,5 +65,86 @@
       "stdout": [],
       "stderr": ""
     }
+  ],
+  "cases": [
+    {
+      "name": "leading spaces",
+      "valid": false,
+      "input": {
+        "status": 1,
+        "stdout": "  file.ts(11,22): error TS2322: diagnostic\n",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "multi digit positions",
+      "valid": true,
+      "input": {
+        "status": 1,
+        "stdout": "file.ts(11,22): error TS2322: diagnostic\n",
+        "stderr": ""
+      },
+      "expected": {
+        "status": 1,
+        "stdout": [
+          {
+            "line": "file.ts(11,22): error TS2322: diagnostic",
+            "file": "file.ts",
+            "code": "TS2322"
+          }
+        ],
+        "stderr": ""
+      }
+    },
+    {
+      "name": "white blank line",
+      "valid": true,
+      "input": {
+        "status": 0,
+        "stdout": "  \n",
+        "stderr": ""
+      },
+      "expected": {
+        "status": 0,
+        "stdout": [],
+        "stderr": ""
+      }
+    },
+    {
+      "name": "continuation without preceding diagnostic",
+      "valid": false,
+      "input": {
+        "status": 1,
+        "stdout": "  continuation\n",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "bad continuation after diagnostic",
+      "valid": false,
+      "input": {
+        "status": 1,
+        "stdout": "file.ts(1,1): error TS2322: diagnostic\nnot a continuation\n",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "embedded continuation",
+      "valid": false,
+      "input": {
+        "status": 1,
+        "stdout": "file.ts(1,1): error TS2322: diagnostic\nx  continuation\n",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "rejects a Unicode line separator inside a continuation",
+      "valid": false,
+      "input": {
+        "status": 1,
+        "stdout": "file.ts(1,1): error TS2322: fixture\n  continuation\u2028trailing\n",
+        "stderr": ""
+      }
+    }
   ]
 }

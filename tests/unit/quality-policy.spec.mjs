@@ -84,3 +84,62 @@ describe('runtime test policy', () => {
     expect(Object.values(vitestCounts(parsed))).toEqual([2])
   }, 30_000)
 })
+
+describe('source policy declaration boundaries', () => {
+  it.each([
+    ['it todo', "it.todo('fixture')", 1],
+    ['suite todo', "suite.todo('fixture')", 1],
+    ['curried skip', "test.skip.each([1])('fixture', () => {})", 1],
+    ['computed argument', "object[test.skip('fixture', () => {})]()", 1],
+    ['wrapped skip', "wrapper(test.skip('fixture', () => {}))", 1],
+    ['context reason ticket', "context.skip('reason #23')", 0],
+    ['it modifier', "it.skip('fixture', () => {})", 1],
+    ['describe modifier', "describe.skip('fixture', () => {})", 1],
+    ['suite modifier', "suite.skip('fixture', () => {})", 1],
+    ['Playwright fixme', "test.fixme('fixture', () => {})", 1],
+    ['todo option', "test('fixture', { todo:true, timeout:100 }, () => {})", 1],
+    ['option method', "test('fixture', { method() {}, timeout:100 }, () => {})", 0],
+    ['bracket modifier', "test['skip']('fixture', () => {})", 1],
+    ['curried modifier', "test.skipIf(true)('fixture', () => {})", 1],
+    ['bracket chain', "test.skipIf(true)['each']([1])('fixture', () => {})", 1],
+    ['named import alias', "import { test as check } from 'vitest'; check.todo('fixture')", 1],
+    ['ordinary named import', "import { expect as check } from 'vitest'; check.todo('fixture')", 0],
+    ['namespace Vitest import', "import * as V from 'vitest'; V.test.todo('fixture')", 1],
+    [
+      'namespace Playwright import',
+      "import * as P from '@playwright/test'; P.test.fixme('fixture')",
+      1,
+    ],
+    ['unrelated namespace', "import * as other from 'other'; other.todo('fixture')", 0],
+    ['side effect import', "import 'vitest'; test('fixture', () => {})", 0],
+    ['noncall computed property', "const value=object[expression]; test('fixture', () => {})", 0],
+    ['call through arrow expression', "(() => test)().todo('fixture')", 0],
+    ['parent test ticket', "describe('suite #23', () => { test.skip('fixture', () => {}) })", 0],
+    [
+      'unrelated parent ticket',
+      "wrapper('suite #23', () => { test.skip('fixture', () => {}) })",
+      1,
+    ],
+    [
+      'ticket in next declaration',
+      "test.skip('first', () => {}); test.skip('second #23', () => {})",
+      1,
+    ],
+    ['ticket in previous unrelated text', "const issue='#23'; test.skip('fixture', () => {})", 1],
+    ['preceding ticket', "// #23\ntest.skip('fixture', () => {})", 0],
+    ['URL ticket', "test.skip('fixture https://github.com/owner/repo/issues/123', () => {})", 0],
+    ['titleless call', 'test.skip(true)', 1],
+    ['dynamic context chain', 'context.nested.skip()', 1],
+  ])('%s has %i unticketed declarations', (_name, text, expected) => {
+    const directory = mkdtempSync(resolve(outputDir, 'source-fixture-'))
+    const file = resolve(directory, 'fixture.spec.mjs')
+    try {
+      writeFileSync(file, text)
+      const counts = {}
+      scanFile(file, counts)
+      expect(counts).toEqual(expected ? { [file]: expected } : {})
+    } finally {
+      rmSync(directory, { recursive: true, force: true })
+    }
+  })
+})

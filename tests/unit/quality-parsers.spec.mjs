@@ -106,3 +106,14 @@ describe('quality tool parsers', () => {
     })
   }
 })
+
+describe('shared JSON boundary', () => {
+  it('rejects malformed JSON even when the downstream value schema accepts unknown values', async () => {
+    const { z } = await import('zod')
+    const { parser, jsonOutput } = await import('../../scripts/quality/parser.mjs')
+    const parse = parser('JSON boundary', jsonOutput(z.unknown()))
+    expect(() => parse('{"truncated":')).toThrow(/Invalid /)
+    expect(parse('null')).toBeNull()
+    expect(parse('42')).toBe(42)
+  })
+})

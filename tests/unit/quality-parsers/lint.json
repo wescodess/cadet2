@@ -646,6 +646,443 @@
           }
         ]
       }
+    },
+    {
+      "name": "fatal fixable warning and zero-width fix",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 1,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fatal": true,
+                "fix": {
+                  "range": [1, 1],
+                  "text": ""
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 1,
+            "warningCount": 1,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 1,
+            "usedDeprecatedRules": []
+          }
+        ]
+      },
+      "expected": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 1,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fatal": true,
+                "fix": {
+                  "range": [1, 1],
+                  "text": ""
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 1,
+            "warningCount": 1,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 1,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "reversed fix range",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 1,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fatal": true,
+                "fix": {
+                  "range": [2, 1],
+                  "text": ""
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 1,
+            "warningCount": 1,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 1,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "fixable error",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 2,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fix": {
+                  "range": [0, 1],
+                  "text": "x"
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 1,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 1,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      },
+      "expected": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 2,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fix": {
+                  "range": [0, 1],
+                  "text": "x"
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 1,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 1,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate files",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing result",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate result",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "mixed result population",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/unknown.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "two distinct files",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/second.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      },
+      "expected": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/second.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "extra duplicate result",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicated file identity",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
     }
   ],
   "incomplete": {
