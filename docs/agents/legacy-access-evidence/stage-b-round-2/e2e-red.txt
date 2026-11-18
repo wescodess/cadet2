@@ -1,0 +1,47 @@
+SSR landing <main> at http://127.0.0.1:49765:
+<main class="mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-6 px-6 py-16"><h1 class="text-3xl font-semibold">cadet2</h1><p>Client and Representative portals are currently unavailable.</p><a href="/auth" class="underline">Sign in or create an account</a></main>
+
+[dotenv@17.3.1] injecting env (0) from node_modules/.pnpm/@seontechnologies+playwright-utils@3.14.0_@playwright+test@1.58.2_typescript@5.9.3_zod@3.25.76/node_modules/@seontechnologies/playwright-utils/dist/esm/.env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+
+Running 1 test using 1 worker
+
+[dotenv@17.3.1] injecting env (0) from node_modules/.pnpm/@seontechnologies+playwright-utils@3.14.0_@playwright+test@1.58.2_typescript@5.9.3_zod@3.25.76/node_modules/@seontechnologies/playwright-utils/dist/esm/.env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[02:27:07] ℹ Auth session disabled - skipping token application to browser context
+  ✘  1 [chromium] › tests/e2e/example.spec.ts:3:1 › guest can reach the public authentication entry (10.3s)
+
+
+  1) [chromium] › tests/e2e/example.spec.ts:3:1 › guest can reach the public authentication entry ──
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('home-hero')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 10000ms
+      - waiting for getByTestId('home-hero')
+
+
+      3 | test('guest can reach the public authentication entry', async ({ page, appBaseUrl }) => {
+      4 |   await page.goto(appBaseUrl)
+    > 5 |   await expect(page.getByTestId('home-hero')).toBeVisible()
+        |                                               ^
+      6 |   await expect(page.getByTestId('home-open-auth-link')).toHaveAttribute('href', '/auth')
+      7 | })
+      8 |
+        at <repo>/tests/e2e/example.spec.ts:5:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../..<work>/pw-out/e2e-example-guest-can-reach-the-public-authentication-entry-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../..<work>/pw-out/e2e-example-guest-can-reach-the-public-authentication-entry-chromium/error-context.md
+
+  1 failed
+    [chromium] › tests/e2e/example.spec.ts:3:1 › guest can reach the public authentication entry ───
+
+
+playwright exit=1
+exit=0

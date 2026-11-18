@@ -1,0 +1,58 @@
+✔ /workspace is unavailable to every caller and method (7223.4325ms)
+✔ /workspace/intake is unavailable to every caller and method (59.210167ms)
+✔ /workspace/recommendations is unavailable to every caller and method (55.695292ms)
+✔ /workspace/recommendations/legacy-private-run is unavailable to every caller and method (57.27325ms)
+✔ /workspace/recommendations/legacy-private-run/pathways/private-pathway-canary is unavailable to every caller and method (56.005792ms)
+✔ /workspace/history is unavailable to every caller and method (56.8375ms)
+✔ /workspace/compare is unavailable to every caller and method (53.586458ms)
+✔ /workspace/settings is unavailable to every caller and method (56.166584ms)
+✔ /workspace/unknown is unavailable to every caller and method (54.866958ms)
+✔ /tasks is unavailable to every caller and method (51.998291ms)
+✔ /api/workspace is unavailable to every caller and method (54.666417ms)
+✔ /api/workspace/me is unavailable to every caller and method (55.293417ms)
+✔ /api/workspace/summary is unavailable to every caller and method (55.471416ms)
+✔ /api/workspace/recommendation-runs is unavailable to every caller and method (54.985166ms)
+✔ /api/workspace/runs is unavailable to every caller and method (57.134ms)
+✔ /api/workspace/runs/legacy-private-run is unavailable to every caller and method (50.633625ms)
+✔ /api/workspace/runs/compare is unavailable to every caller and method (50.540791ms)
+✔ /api/workspace/unknown is unavailable to every caller and method (50.274542ms)
+✔ /api/intake is unavailable to every caller and method (48.721792ms)
+✔ /api/intake/draft is unavailable to every caller and method (49.594292ms)
+✔ /api/intake/submit is unavailable to every caller and method (53.946833ms)
+✔ /api/intake/unknown is unavailable to every caller and method (51.247667ms)
+✔ /api/recommendations/runs is unavailable to every caller and method (52.058167ms)
+✔ /api/recommendations/runs/legacy-private-run/status is unavailable to every caller and method (52.729292ms)
+✔ /api/recommendations/runs/legacy-private-run/pathways is unavailable to every caller and method (48.643542ms)
+✔ /api/recommendations/runs/legacy-private-run/results is unavailable to every caller and method (54.988709ms)
+✔ /api/recommendations/runs/legacy-private-run/start is unavailable to every caller and method (48.526042ms)
+✔ /api/recommendations/runs/legacy-private-run/refresh is unavailable to every caller and method (50.274375ms)
+✔ /api/recommendations/runs/legacy-private-run/unknown is unavailable to every caller and method (46.333083ms)
+✔ SSR payloads, encoded paths and prefetches cannot reach a retired loader (157.302625ms)
+✔ JSON, malformed bodies and extension methods are rejected before reading input (84.042083ms)
+✔ the shipped browser chunks contain no legacy navigation, polling or automatic starts (16.971375ms)
+✔ public entry preserves authentication without advertising retired navigation (303.48ms)
+✔ real sign-in, session and backend admission still work after denied requests (35.201417ms)
+▶ missing operator credentials return 503 for both review readers
+  ✔ list (85.815583ms)
+  ✔ /legacy-private-run (45.054208ms)
+✔ missing operator credentials return 503 for both review readers (3327.838416ms)
+▶ review boundaries consistently require a stored grant before reads or actions
+  ✔ GET /api/admin/access (50.480458ms)
+  ✔ GET /api/admin/recommendation-reviews (77.33325ms)
+  ✔ GET /api/admin/recommendation-reviews/legacy-private-run (73.269667ms)
+  ✔ GET /api/admin/recommendation-reviews/legacy-private-run/citations (76.490875ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/citations/legacy-private-run-private-pathway-canary-1/flag (83.632625ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/flag (107.819708ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/dismiss (63.322292ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/resolve (75.33625ms)
+✔ review boundaries consistently require a stored grant before reads or actions (666.148916ms)
+✔ raw dot-segment requests stop before routing, including encoded and mixed-case forms (74.99825ms)
+ℹ tests 47
+ℹ suites 0
+ℹ pass 47
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18531.688125
+exit=0

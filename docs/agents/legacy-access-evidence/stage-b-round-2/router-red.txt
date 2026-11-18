@@ -1,0 +1,172 @@
+▶ test-only raw router canaries cannot be reached through dot segments
+  ✔ /workspace/.. (8.872834ms)
+  ✔ /workspace/%2e%2e (1.403208ms)
+  ✔ /workspace/.%2E (1.3395ms)
+  ✔ /api/workspace/.. (1.061292ms)
+  ✔ /api/recommendations/runs/%2e%2e?runId=legacy-private-run (1.131791ms)
+  ✔ /WORKSPACE/%2E. (0.847875ms)
+  ✔ /%77orkspace/%2e%2e (0.837417ms)
+  ✔ /workspace%2f%2e%2e (1.043875ms)
+  ✔ /workspace/./history (0.906916ms)
+  ✔ /api/intake/%2E (0.962875ms)
+  ✔ /tasks/.. (0.622375ms)
+  ✖ /workspace\.. (1.387584ms)
+  ✖ /workspace\..\.. (2.266584ms)
+  ✖ /api/workspace\.. (0.790709ms)
+  ✖ /tasks\.. (1.027625ms)
+  ✖ /workspace%5c.. (0.85025ms)
+  ✖ /workspace;x/.. (0.783958ms)
+  ✖ /workspace%00/.. (0.696583ms)
+✖ test-only raw router canaries cannot be reached through dot segments (43.033583ms)
+✔ non-retired paths that share a retired prefix pass the gate (2.828458ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 12
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 426.395083
+
+✖ failing tests:
+
+test at tests/security/retired-router.test.mjs:52:21
+✖ /workspace\.. (1.387584ms)
+  AssertionError [ERR_ASSERTION]: /workspace\..
+
+  200 !== 404
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:55:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:52:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/retired-router.test.mjs:52:21
+✖ /workspace\..\.. (2.266584ms)
+  AssertionError [ERR_ASSERTION]: /workspace\..\..
+
+  200 !== 404
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:55:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:52:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/retired-router.test.mjs:52:21
+✖ /api/workspace\.. (0.790709ms)
+  AssertionError [ERR_ASSERTION]: /api/workspace\..
+
+  200 !== 404
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:55:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:52:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/retired-router.test.mjs:52:21
+✖ /tasks\.. (1.027625ms)
+  AssertionError [ERR_ASSERTION]: /tasks\..
+
+  200 !== 404
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:55:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:52:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/retired-router.test.mjs:52:21
+✖ /workspace%5c.. (0.85025ms)
+  AssertionError [ERR_ASSERTION]: /workspace%5c..
+
+  200 !== 404
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:55:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:52:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/retired-router.test.mjs:52:21
+✖ /workspace;x/.. (0.783958ms)
+  AssertionError [ERR_ASSERTION]: /workspace;x/..
+
+  200 !== 404
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:55:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:52:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/retired-router.test.mjs:52:21
+✖ /workspace%00/.. (0.696583ms)
+  AssertionError [ERR_ASSERTION]: /workspace%00/..
+
+  200 !== 404
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:55:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/retired-router.test.mjs:52:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 404,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+exit=1
