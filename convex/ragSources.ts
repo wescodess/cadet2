@@ -523,7 +523,7 @@ export const removeSource = mutation({
     sourceId: v.id('sources'),
   },
   handler: async (ctx, args) => {
-    await requireRagAdmin(ctx)
+    const actor = await requireRagAdmin(ctx)
     const source = await ctx.db.get(args.sourceId)
     if (!source) {
       throw new Error('Source not found')
@@ -531,15 +531,6 @@ export const removeSource = mutation({
 
     if (source.type === 'youtube_channel')
       throw new Error('YouTube history is restricted pending retention review')
-
-    const auditRows = await ctx.db
-      .query('approval_audit_log')
-      .withIndex('by_sourceId', (q) => q.eq('sourceId', args.sourceId))
-      .collect()
-
-    for (const auditRow of auditRows) {
-      await ctx.db.delete(auditRow._id)
-    }
 
     const sourceItems = await ctx.db
       .query('source_items')
@@ -551,6 +542,13 @@ export const removeSource = mutation({
     }
 
     await ctx.db.delete(args.sourceId)
+    await ctx.db.insert('rag_source_deletions', {
+      sourceId: args.sourceId,
+      source,
+      actorId: actor.userId,
+      actorEmail: actor.email,
+      timestamp: Date.now(),
+    })
 
     return {
       ok: true,

@@ -1,10 +1,11 @@
+import { loadSourceDeletionEvents } from '../../../utils/audit/sourceDeletionEvents'
 import { getRouterParam } from 'h3'
 
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 import { getAuditTrailEvent } from '../../../utils/audit/auditTrailService'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event)
+  const { convex } = await requireAdminSession(event)
 
   const eventId = getRouterParam(event, 'eventId')?.trim() || ''
   if (!eventId) {
@@ -14,7 +15,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const detail = await getAuditTrailEvent(eventId)
+  const detail = await getAuditTrailEvent(eventId, await loadSourceDeletionEvents(convex))
   if (!detail) {
     throw createError({
       statusCode: 404,

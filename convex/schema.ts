@@ -295,6 +295,16 @@ export default defineSchema({
     .index('by_status_tenantId', ['status', 'tenantId'])
     .index('by_createdByUserId', ['createdByUserId']),
 
+  rag_source_deletions: defineTable({
+    sourceId: v.id('sources'),
+    source: v.any(),
+    actorId: v.string(),
+    actorEmail: v.optional(v.string()),
+    timestamp: v.number(),
+  })
+    .index('by_sourceId', ['sourceId'])
+    .index('by_timestamp', ['timestamp']),
+
   approval_audit_log: defineTable({
     sourceId: v.id('sources'),
     actorUserId: v.string(),

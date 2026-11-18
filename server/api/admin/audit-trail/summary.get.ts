@@ -1,8 +1,9 @@
+import { loadSourceDeletionEvents } from '../../../utils/audit/sourceDeletionEvents'
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 import { getAuditTrailSummary } from '../../../utils/audit/auditTrailService'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event)
+  const { convex } = await requireAdminSession(event)
 
-  return await getAuditTrailSummary()
+  return await getAuditTrailSummary(await loadSourceDeletionEvents(convex))
 })

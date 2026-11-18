@@ -272,18 +272,50 @@ export async function insertAuditLogEvent(input: Omit<StoredAuditEvent, 'eventId
   return { ok: true as const, eventId }
 }
 
-export async function listStoredAuditEvents(filters: {
-  actionType?: AuditActionType
-  entityType?: AuditEntityType
-  actorId?: string
-  entityId?: string
-  search?: string
-  dateFrom?: string
-  dateTo?: string
-  cursor?: string
-  pageSize?: number
-}): Promise<StoredAuditEventListResult> {
+function auditEventSource(deletions: StoredAuditEvent[]) {
+  const rows = deletions.map((event) => ({
+    event_id: event.eventId,
+    actor_id: event.actorId,
+    actor_email: event.actorEmail ?? null,
+    actor_role: event.actorRole ?? null,
+    action_type: event.actionType,
+    entity_type: event.entityType,
+    entity_id: event.entityId,
+    entity_label: event.entityLabel,
+    change_context_before: event.changeContext.before,
+    change_context_after: event.changeContext.after,
+    reason: event.reason ?? null,
+    timestamp_ms: event.timestamp,
+  }))
+  return sql`(
+    SELECT event_id, actor_id, actor_email, actor_role, action_type, entity_type,
+      entity_id, entity_label, change_context_before, change_context_after, reason, timestamp_ms
+    FROM "governance_audit_log"
+    UNION ALL
+    SELECT * FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) AS deletions(
+      event_id text, actor_id text, actor_email text, actor_role text,
+      action_type text, entity_type text, entity_id text, entity_label text,
+      change_context_before jsonb, change_context_after jsonb, reason text, timestamp_ms bigint
+    )
+  ) AS audit_events`
+}
+
+export async function listStoredAuditEvents(
+  filters: {
+    actionType?: AuditActionType
+    entityType?: AuditEntityType
+    actorId?: string
+    entityId?: string
+    search?: string
+    dateFrom?: string
+    dateTo?: string
+    cursor?: string
+    pageSize?: number
+  },
+  deletions: StoredAuditEvent[],
+): Promise<StoredAuditEventListResult> {
   await requireAuditLogTable()
+  const source = auditEventSource(deletions)
 
   const whereClause = buildWhereClause(filters)
   const offset = parseCursor(filters.cursor)
@@ -291,7 +323,7 @@ export async function listStoredAuditEvents(filters: {
 
   const countResult = await db.execute(sql`
     SELECT COUNT(*)::int AS "count"
-    FROM "governance_audit_log"
+    FROM ${source}
     ${whereClause};
   `)
 
@@ -309,7 +341,7 @@ export async function listStoredAuditEvents(filters: {
       "change_context_after" AS "changeContextAfter",
       "reason" AS "reason",
       "timestamp_ms" AS "timestamp"
-    FROM "governance_audit_log"
+    FROM ${source}
     ${whereClause}
     ORDER BY "timestamp_ms" DESC, "event_id" DESC
     LIMIT ${pageSize}
@@ -327,8 +359,9 @@ export async function listStoredAuditEvents(filters: {
   }
 }
 
-export async function getStoredAuditEvent(eventId: string) {
+export async function getStoredAuditEvent(eventId: string, deletions: StoredAuditEvent[]) {
   await requireAuditLogTable()
+  const source = auditEventSource(deletions)
 
   const result = await db.execute(sql`
     SELECT
@@ -344,7 +377,7 @@ export async function getStoredAuditEvent(eventId: string) {
       "change_context_after" AS "changeContextAfter",
       "reason" AS "reason",
       "timestamp_ms" AS "timestamp"
-    FROM "governance_audit_log"
+    FROM ${source}
     WHERE "event_id" = ${eventId} AND ${publicGovernancePredicate}
     LIMIT 1;
   `)
@@ -353,8 +386,11 @@ export async function getStoredAuditEvent(eventId: string) {
   return row ? toStoredAuditEvent(row) : null
 }
 
-export async function getStoredAuditSummary(): Promise<StoredAuditSummaryResult> {
+export async function getStoredAuditSummary(
+  deletions: StoredAuditEvent[],
+): Promise<StoredAuditSummaryResult> {
   await requireAuditLogTable()
+  const source = auditEventSource(deletions)
 
   const now = Date.now()
   const todayFloor = now - 24 * 60 * 60 * 1000
@@ -364,7 +400,7 @@ export async function getStoredAuditSummary(): Promise<StoredAuditSummaryResult>
     SELECT
       COUNT(*) FILTER (WHERE "timestamp_ms" >= ${todayFloor})::int AS "eventsToday",
       COUNT(*) FILTER (WHERE "timestamp_ms" >= ${weekFloor})::int AS "eventsThisWeek"
-    FROM "governance_audit_log"
+    FROM ${source}
     WHERE ${publicGovernancePredicate};
   `)
 
@@ -373,7 +409,7 @@ export async function getStoredAuditSummary(): Promise<StoredAuditSummaryResult>
       "actor_id" AS "userId",
       COALESCE(MAX("actor_email"), "actor_id") AS "email",
       COUNT(*)::int AS "eventCount"
-    FROM "governance_audit_log"
+    FROM ${source}
     WHERE ${publicGovernancePredicate}
     GROUP BY "actor_id"
     ORDER BY COUNT(*) DESC, "actor_id" ASC
@@ -383,7 +419,7 @@ export async function getStoredAuditSummary(): Promise<StoredAuditSummaryResult>
   const entityResult = await db.execute(sql`
     SELECT
       "entity_type" AS "entityType"
-    FROM "governance_audit_log"
+    FROM ${source}
     WHERE ${publicGovernancePredicate}
     GROUP BY "entity_type"
     ORDER BY COUNT(*) DESC, "entity_type" ASC

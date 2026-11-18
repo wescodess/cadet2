@@ -179,6 +179,17 @@ before(
       },
     )
     await cp(join(root, 'convex'), join(directory, 'backend/convex'), { recursive: true })
+    const sourceModule = join(directory, 'backend/convex/ragSources.ts')
+    const sourceCode = await readFile(sourceModule, 'utf8')
+    const deletion = 'await ctx.db.delete(args.sourceId)'
+    assert.equal(sourceCode.split(deletion).length, 2)
+    await writeFile(
+      sourceModule,
+      sourceCode.replace(
+        deletion,
+        `${deletion}\n    if (source.name === 'Rollback deletion probe') throw new Error('Injected deletion audit failure')`,
+      ),
+    )
     await run(
       process.execPath,
       [
@@ -804,6 +815,181 @@ test('explicit isolated operator migrations preserve every enabled admin operati
     (await request('/api/ai-search/query', admin, 'POST', { query: 'Synthetic', enabled: true }))
       .status,
     503,
+  )
+})
+
+async function approvalHistory(sourceId) {
+  const result = await run(
+    process.execPath,
+    [
+      join(root, 'node_modules/convex/bin/main.js'),
+      'data',
+      'approval_audit_log',
+      '--format',
+      'json',
+      '--env-file',
+      join(directory, 'operator.env'),
+    ],
+    { cwd: join(directory, 'backend'), env: cliEnv },
+  )
+  return JSON.parse(result.stdout)
+    .filter((row) => row.sourceId === sourceId)
+    .sort((a, b) => a._id.localeCompare(b._id))
+}
+
+async function reviewedSource(name) {
+  const { sourceId } = await successful('/api/admin/rag/sources', 'POST', {
+    ...websiteSubmission,
+    name,
+  })
+  await admin.client.mutation(anyApi.ragSources.approveSource, { sourceId })
+  return { sourceId, history: await approvalHistory(sourceId) }
+}
+
+async function deletionEvents(sourceId) {
+  return successful(`/api/admin/audit-trail?search=${sourceId}&actionType=EVIDENCE_SOURCE_DELETED`)
+}
+
+async function assertRecordedDeletion(sourceId, history, since) {
+  assert.equal(await admin.client.query(anyApi.ragSources.getSource, { sourceId }), null)
+  const remaining = await approvalHistory(sourceId)
+  const events = await deletionEvents(sourceId)
+  assert.deepEqual(
+    { history: remaining, deletionCount: events.totalCount },
+    { history, deletionCount: 1 },
+    'deletion must preserve approval history and record exactly one governance event',
+  )
+  const event = events.items[0]
+  assert.equal(event.actorUserId, admin.userId)
+  assert.equal(event.actorEmail, admin.email)
+  assert.equal(event.actorRole, 'admin')
+  assert.equal(event.entityId, sourceId)
+  assert.equal(event.entityType, 'EVIDENCE_SOURCE')
+  assert.ok(Date.parse(event.timestamp) >= since && Date.parse(event.timestamp) <= Date.now())
+  const detail = await successful(`/api/admin/audit-trail/${event.eventId}`)
+  assert.equal(detail.event.changeContext.before._id, sourceId)
+  assert.equal(detail.event.changeContext.before.name, event.entityLabel)
+  assert.equal(detail.event.changeContext.after, null)
+  const filtered = await successful(
+    `/api/admin/audit-trail?search=${sourceId}&actorId=${admin.userId}&actionType=EVIDENCE_SOURCE_DELETED&pageSize=1`,
+  )
+  assert.equal(filtered.items[0].eventId, event.eventId)
+  assert.equal(filtered.nextCursor, null)
+  const retained = await successful(`/api/admin/audit-trail?search=${sourceId}`)
+  assert.equal(retained.totalCount, 2)
+  assert.equal(
+    retained.items.filter((item) => item.actionType === 'EVIDENCE_SOURCE_CREATED').length,
+    1,
+  )
+  const first = await successful(`/api/admin/audit-trail?search=${sourceId}&pageSize=1`)
+  assert.equal(first.items[0].eventId, event.eventId)
+  assert.equal(first.nextCursor, '1')
+  const second = await successful(
+    `/api/admin/audit-trail?search=${sourceId}&pageSize=1&cursor=${first.nextCursor}`,
+  )
+  assert.equal(second.items[0].actionType, 'EVIDENCE_SOURCE_CREATED')
+  assert.equal(second.nextCursor, null)
+  const unfiltered = await successful('/api/admin/audit-trail?pageSize=100')
+  assert.equal(unfiltered.items.filter((item) => item.eventId === event.eventId).length, 1)
+  const summary = await successful('/api/admin/audit-trail/summary')
+  assert.equal(summary.eventsToday, unfiltered.totalCount)
+}
+
+test('direct source deletion preserves approval history and records one actor-bound event', async () => {
+  const { sourceId, history } = await reviewedSource('Direct deletion audit probe')
+  assert.equal(history.length, 2)
+  const since = Date.now()
+  assert.equal((await admin.client.mutation(anyApi.ragSources.removeSource, { sourceId })).ok, true)
+  await assertRecordedDeletion(sourceId, history, since)
+  await assert.rejects(
+    admin.client.mutation(anyApi.ragSources.removeSource, { sourceId }),
+    /Source not found/,
+  )
+  assert.equal((await deletionEvents(sourceId)).totalCount, 1)
+})
+
+test('HTTP source deletion ignores forged actor fields and records the same single event', async () => {
+  const { sourceId, history } = await reviewedSource('HTTP deletion audit probe')
+  const since = Date.now()
+  await successful(`/api/admin/rag/sources/${sourceId}`, 'DELETE', {
+    actorUserId: ordinary.userId,
+    actorId: ordinary.userId,
+    actorEmail: ordinary.email,
+    timestamp: 1,
+  })
+  await assertRecordedDeletion(sourceId, history, since)
+})
+
+test('actor arguments cannot grant deletion authority or change the recorded actor', async () => {
+  const { sourceId, history } = await reviewedSource('Denied deletion probe')
+  for (const actor of [anonymous, ordinary, emailMatch]) {
+    await assert.rejects(
+      actor.client.query(anyApi.ragSourceAudit.listDeletionEvents, {
+        paginationOpts: { cursor: null, numItems: 100 },
+      }),
+      /Authentication required|Admin access required/,
+    )
+  }
+  await assert.rejects(
+    admin.client.mutation(anyApi.ragSources.removeSource, {
+      sourceId,
+      actorUserId: ordinary.userId,
+    }),
+    /ArgumentValidationError|extra field/,
+  )
+  await assert.rejects(
+    ordinary.client.mutation(anyApi.ragSources.removeSource, { sourceId }),
+    /Admin access required/,
+  )
+  assert.equal(
+    (
+      await request(`/api/admin/rag/sources/${sourceId}`, ordinary, 'DELETE', {
+        actorUserId: admin.userId,
+      })
+    ).status,
+    403,
+  )
+  assert.ok(await admin.client.query(anyApi.ragSources.getSource, { sourceId }))
+  assert.deepEqual(await approvalHistory(sourceId), history)
+  assert.equal((await deletionEvents(sourceId)).totalCount, 0)
+})
+
+test('a fault after source deletion rolls back the deletion and its audit transaction', async () => {
+  const { sourceId, history } = await reviewedSource('Rollback deletion probe')
+  const before = await admin.client.query(anyApi.ragSources.getSource, { sourceId })
+  await assert.rejects(
+    admin.client.mutation(anyApi.ragSources.removeSource, { sourceId }),
+    /Injected deletion audit failure/,
+  )
+  assert.deepEqual(await admin.client.query(anyApi.ragSources.getSource, { sourceId }), before)
+  assert.deepEqual(await approvalHistory(sourceId), history)
+  assert.equal((await deletionEvents(sourceId)).totalCount, 0)
+  assert.equal((await request(`/api/admin/rag/sources/${sourceId}`, admin, 'DELETE')).status, 500)
+  assert.deepEqual(await admin.client.query(anyApi.ragSources.getSource, { sourceId }), before)
+  assert.deepEqual(await approvalHistory(sourceId), history)
+  assert.equal((await deletionEvents(sourceId)).totalCount, 0)
+})
+
+test('configuration and review transitions append history without rewriting earlier decisions', async () => {
+  const { sourceId, history } = await reviewedSource('Retained review history probe')
+  for (const [name, args] of [
+    ['updateSourceConfig', { name: 'Updated review history probe' }],
+    ['rejectSource', { reason: 'Retained rejection' }],
+    ['approveSource', {}],
+    ['pauseSource', { note: 'Retained pause' }],
+    ['resumeSource', {}],
+  ]) {
+    await admin.client.mutation(anyApi.ragSources[name], { sourceId, ...args })
+  }
+  const remaining = await approvalHistory(sourceId)
+  assert.equal(remaining.length, 7)
+  assert.deepEqual(
+    remaining.filter((row) => history.some((previous) => previous._id === row._id)),
+    history,
+  )
+  assert.deepEqual(
+    remaining.map((row) => row.action).sort(),
+    ['submit', 'approve', 'edit', 'reject', 'approve', 'pause', 'resume'].sort(),
   )
 })
 

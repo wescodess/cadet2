@@ -1,3 +1,4 @@
+import { loadSourceDeletionEvents } from '../../../utils/audit/sourceDeletionEvents'
 import { getQuery } from 'h3'
 
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
@@ -31,7 +32,7 @@ function toOptionalNumber(value: unknown) {
 }
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event)
+  const { convex } = await requireAdminSession(event)
 
   const query = getQuery(event)
   const actionType = isAuditActionType(query.actionType) ? query.actionType : undefined
@@ -48,5 +49,5 @@ export default defineEventHandler(async (event) => {
     pageSize: toOptionalNumber(query.pageSize),
   }
 
-  return await listAuditTrailEvents(filters)
+  return await listAuditTrailEvents(await loadSourceDeletionEvents(convex), filters)
 })

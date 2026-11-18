@@ -1,0 +1,289 @@
+TAP version 13
+# Subtest: RAG status discloses no admin count to anonymous, ordinary or email-only accounts
+ok 1 - RAG status discloses no admin count to anonymous, ordinary or email-only accounts
+  ---
+  duration_ms: 7074.277542
+  type: 'test'
+  ...
+# Subtest: an unreviewed legacy self-synced grant cannot supply current admin authority
+ok 2 - an unreviewed legacy self-synced grant cannot supply current admin authority
+  ---
+  duration_ms: 34.275959
+  type: 'test'
+  ...
+# Subtest: the deployed Convex registration manifest matches the reviewed classifications
+ok 3 - the deployed Convex registration manifest matches the reviewed classifications
+  ---
+  duration_ms: 1.053708
+  type: 'test'
+  ...
+# Subtest: every source operation requires admin and preserves official-source administration
+ok 4 - every source operation requires admin and preserves official-source administration
+  ---
+  duration_ms: 225.418083
+  type: 'test'
+  ...
+# Subtest: allowlisted ordinary accounts cannot enter admin HTTP routes
+ok 5 - allowlisted ordinary accounts cannot enter admin HTTP routes
+  ---
+  duration_ms: 26.128
+  type: 'test'
+  ...
+# Subtest: YouTube submissions and every activation transition stay frozen for admins
+ok 6 - YouTube submissions and every activation transition stay frozen for admins
+  ---
+  duration_ms: 28.001166
+  type: 'test'
+  ...
+# Subtest: manual and force preparation cannot select or reuse frozen YouTube jobs
+ok 7 - manual and force preparation cannot select or reuse frozen YouTube jobs
+  ---
+  duration_ms: 19.056709
+  type: 'test'
+  ...
+# Subtest: scheduled preparation excludes YouTube and keeps website preparation working
+ok 8 - scheduled preparation excludes YouTube and keeps website preparation working
+  ---
+  duration_ms: 32.471167
+  type: 'test'
+  ...
+# Subtest: website completion cannot inject a YouTube item through a different source type
+ok 9 - website completion cannot inject a YouTube item through a different source type
+  ---
+  duration_ms: 0.976208
+  type: 'test'
+  ...
+# Subtest: already-prepared YouTube work cannot claim, execute, finalize, retry or sync
+ok 10 - already-prepared YouTube work cannot claim, execute, finalize, retry or sync
+  ---
+  duration_ms: 24.521625
+  type: 'test'
+  ...
+# Subtest: AI Search API and SSR page deny non-admins and remain off for admins
+ok 11 - AI Search API and SSR page deny non-admins and remain off for admins
+  ---
+  duration_ms: 166.725166
+  type: 'test'
+  ...
+# Subtest: bootstrap and allowlist-sync registrations are absent
+ok 12 - bootstrap and allowlist-sync registrations are absent
+  ---
+  duration_ms: 29.378208
+  type: 'test'
+  ...
+# Subtest: built server and browser artifacts contain no transcript proxy or embedded-key caller
+ok 13 - built server and browser artifacts contain no transcript proxy or embedded-key caller
+  ---
+  duration_ms: 969.030708
+  type: 'test'
+  ...
+# Subtest: admin pathway reads cannot initialize missing tables or return demo inventory
+ok 14 - admin pathway reads cannot initialize missing tables or return demo inventory
+  ---
+  duration_ms: 16.219167
+  type: 'test'
+  ...
+# Subtest: phase-0 diagnostics disclose configuration presence without configured values
+ok 15 - phase-0 diagnostics disclose configuration presence without configured values
+  ---
+  duration_ms: 13.808791
+  type: 'test'
+  ...
+# Subtest: every admin HTTP operation rejects anonymous and ordinary accounts before validation
+ok 16 - every admin HTTP operation rejects anonymous and ordinary accounts before validation
+  ---
+  duration_ms: 1100.003542
+  type: 'test'
+  ...
+# Subtest: explicit isolated operator migrations preserve every enabled admin operation
+ok 17 - explicit isolated operator migrations preserve every enabled admin operation
+  ---
+  duration_ms: 3137.073541
+  type: 'test'
+  ...
+# Subtest: direct source deletion preserves approval history and records one actor-bound event
+not ok 18 - direct source deletion preserves approval history and records one actor-bound event
+  ---
+  duration_ms: 544.547458
+  type: 'test'
+  location: '/private/tmp/fix-pr159/tests/security/admin-rag.test.mjs:892:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    deletion must preserve approval history and record exactly one governance event
+    + actual - expected
+
+      {
+    +   deletionCount: 0,
+    +   history: []
+    -   deletionCount: 1,
+    -   history: [
+    -     {
+    -       _creationTime: 1794964844630.4963,
+    -       _id: 'j975rysm5dwh3z1gbtjn9sh6sn8jex0e',
+    -       action: 'submit',
+    -       actorEmail: 'admin@example.test',
+    -       actorUserId: 'zi9U0YiQQVtBNMoNaxxE5o9MvrifZi4m',
+    -       note: 'Initial source submission',
+    -       sourceId: 'k5739k2ex99j4495h9yb964a1s8jeb4t',
+    -       timestamp: 1794964844630
+    -     },
+    -     {
+    -       _creationTime: 1794964844643.331,
+    -       _id: 'j97bh3vqe38w11psnsze5g25r58jejkw',
+    -       action: 'approve',
+    -       actorEmail: 'admin@example.test',
+    -       actorUserId: 'zi9U0YiQQVtBNMoNaxxE5o9MvrifZi4m',
+    -       sourceId: 'k5739k2ex99j4495h9yb964a1s8jeb4t',
+    -       timestamp: 1794964844643
+    -     }
+    -   ]
+      }
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    history:
+      0:
+        _creationTime: 1794964844630.4963
+        _id: 'j975rysm5dwh3z1gbtjn9sh6sn8jex0e'
+        action: 'submit'
+        actorEmail: 'admin@example.test'
+        actorUserId: 'zi9U0YiQQVtBNMoNaxxE5o9MvrifZi4m'
+        note: 'Initial source submission'
+        sourceId: 'k5739k2ex99j4495h9yb964a1s8jeb4t'
+        timestamp: 1794964844630
+      1:
+        _creationTime: 1794964844643.331
+        _id: 'j97bh3vqe38w11psnsze5g25r58jejkw'
+        action: 'approve'
+        actorEmail: 'admin@example.test'
+        actorUserId: 'zi9U0YiQQVtBNMoNaxxE5o9MvrifZi4m'
+        sourceId: 'k5739k2ex99j4495h9yb964a1s8jeb4t'
+        timestamp: 1794964844643
+    deletionCount: 1
+  actual:
+    history:
+    deletionCount: 0
+  operator: 'deepStrictEqual'
+  stack: |-
+    assertRecordedDeletion (file:///private/tmp/fix-pr159/tests/security/admin-rag.test.mjs:859:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async TestContext.<anonymous> (file:///private/tmp/fix-pr159/tests/security/admin-rag.test.mjs:897:3)
+    async Test.run (node:internal/test_runner/test:1404:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+  ...
+# Subtest: HTTP source deletion ignores forged actor fields and records the same single event
+not ok 19 - HTTP source deletion ignores forged actor fields and records the same single event
+  ---
+  duration_ms: 523.832125
+  type: 'test'
+  location: '/private/tmp/fix-pr159/tests/security/admin-rag.test.mjs:905:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    deletion must preserve approval history and record exactly one governance event
+    + actual - expected
+
+      {
+        deletionCount: 1,
+    +   history: []
+    -   history: [
+    -     {
+    -       _creationTime: 1794964845174.4473,
+    -       _id: 'j976x2ax2hbbfsm1t7xewxv01s8jfmmn',
+    -       action: 'submit',
+    -       actorEmail: 'admin@example.test',
+    -       actorUserId: 'zi9U0YiQQVtBNMoNaxxE5o9MvrifZi4m',
+    -       note: 'Initial source submission',
+    -       sourceId: 'k57dg1dpr3y8bnctn8k9tv4bq58jffzp',
+    -       timestamp: 1794964845174
+    -     },
+    -     {
+    -       _creationTime: 1794964845186.531,
+    -       _id: 'j9776agg9b0dn4kns5d84tjzqs8je724',
+    -       action: 'approve',
+    -       actorEmail: 'admin@example.test',
+    -       actorUserId: 'zi9U0YiQQVtBNMoNaxxE5o9MvrifZi4m',
+    -       sourceId: 'k57dg1dpr3y8bnctn8k9tv4bq58jffzp',
+    -       timestamp: 1794964845186
+    -     }
+    -   ]
+      }
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    history:
+      0:
+        _creationTime: 1794964845174.4473
+        _id: 'j976x2ax2hbbfsm1t7xewxv01s8jfmmn'
+        action: 'submit'
+        actorEmail: 'admin@example.test'
+        actorUserId: 'zi9U0YiQQVtBNMoNaxxE5o9MvrifZi4m'
+        note: 'Initial source submission'
+        sourceId: 'k57dg1dpr3y8bnctn8k9tv4bq58jffzp'
+        timestamp: 1794964845174
+      1:
+        _creationTime: 1794964845186.531
+        _id: 'j9776agg9b0dn4kns5d84tjzqs8je724'
+        action: 'approve'
+        actorEmail: 'admin@example.test'
+        actorUserId: 'zi9U0YiQQVtBNMoNaxxE5o9MvrifZi4m'
+        sourceId: 'k57dg1dpr3y8bnctn8k9tv4bq58jffzp'
+        timestamp: 1794964845186
+    deletionCount: 1
+  actual:
+    history:
+    deletionCount: 1
+  operator: 'deepStrictEqual'
+  stack: |-
+    assertRecordedDeletion (file:///private/tmp/fix-pr159/tests/security/admin-rag.test.mjs:859:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async TestContext.<anonymous> (file:///private/tmp/fix-pr159/tests/security/admin-rag.test.mjs:914:3)
+    async Test.run (node:internal/test_runner/test:1404:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+  ...
+# Subtest: actor arguments cannot grant deletion authority or change the recorded actor
+ok 20 - actor arguments cannot grant deletion authority or change the recorded actor
+  ---
+  duration_ms: 534.142666
+  type: 'test'
+  ...
+# Subtest: a fault after source deletion rolls back the deletion and its audit transaction
+ok 21 - a fault after source deletion rolls back the deletion and its audit transaction
+  ---
+  duration_ms: 769.761708
+  type: 'test'
+  ...
+# Subtest: configuration and review transitions append history without rewriting earlier decisions
+ok 22 - configuration and review transitions append history without rewriting earlier decisions
+  ---
+  duration_ms: 527.761125
+  type: 'test'
+  ...
+# Subtest: a foreign origin cannot use an admitted admin session for source mutations
+ok 23 - a foreign origin cannot use an admitted admin session for source mutations
+  ---
+  duration_ms: 23.987292
+  type: 'test'
+  ...
+# Subtest: a removed current admin grant immediately denies the same real session and JWT
+ok 24 - a removed current admin grant immediately denies the same real session and JWT
+  ---
+  duration_ms: 313.432792
+  type: 'test'
+  ...
+# Subtest: an unavailable authority backend cannot fall back to allowlists or deployment credentials
+ok 25 - an unavailable authority backend cannot fall back to allowlists or deployment credentials
+  ---
+  duration_ms: 1081.54625
+  type: 'test'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 23
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 17525.11775

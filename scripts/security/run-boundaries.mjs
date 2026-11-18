@@ -95,7 +95,7 @@ child.once('exit', async (code) => {
     await cp(resultFile, join(evidence, 'admin-boundary-results.json'))
     await cp(`${resultFile}.tap`, join(evidence, 'admin-boundaries.tap'))
     readBoundaryResult(resultFile)
-    console.log('Admin boundary result: PASS (20 passed; zero failures, skips or cancellations)')
+    console.log('Admin boundary result: PASS (25 passed; zero failures, skips or cancellations)')
   } catch (error) {
     console.error(error)
     process.exitCode = 1

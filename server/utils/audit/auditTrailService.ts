@@ -1,8 +1,5 @@
-import {
-  getStoredAuditEvent,
-  getStoredAuditSummary,
-  listStoredAuditEvents,
-} from './auditLogStore'
+import type { StoredAuditEvent } from './auditLogStore'
+import { getStoredAuditEvent, getStoredAuditSummary, listStoredAuditEvents } from './auditLogStore'
 import type {
   AuditChangeContext,
   AuditEntityType,
@@ -73,8 +70,7 @@ function toDisplayValue(value: unknown) {
 
   try {
     return JSON.stringify(value)
-  }
-  catch {
+  } catch {
     return '[unserializable]'
   }
 }
@@ -82,16 +78,12 @@ function toDisplayValue(value: unknown) {
 function buildChangeSummary(changeContext: AuditChangeContext) {
   if (!changeContext.before && changeContext.after) {
     const keys = Object.keys(changeContext.after)
-    return keys.length > 0
-      ? `created ${keys.slice(0, 3).join(', ')}`
-      : 'created record'
+    return keys.length > 0 ? `created ${keys.slice(0, 3).join(', ')}` : 'created record'
   }
 
   if (changeContext.before && !changeContext.after) {
     const keys = Object.keys(changeContext.before)
-    return keys.length > 0
-      ? `deleted ${keys.slice(0, 3).join(', ')}`
-      : 'deleted record'
+    return keys.length > 0 ? `deleted ${keys.slice(0, 3).join(', ')}` : 'deleted record'
   }
 
   if (!changeContext.before || !changeContext.after) {
@@ -102,9 +94,15 @@ function buildChangeSummary(changeContext: AuditChangeContext) {
   const afterKeys = Object.keys(changeContext.after)
   const allKeys = [...new Set([...beforeKeys, ...afterKeys])]
   const differences = allKeys
-    .filter((key) => JSON.stringify(changeContext.before?.[key]) !== JSON.stringify(changeContext.after?.[key]))
+    .filter(
+      (key) =>
+        JSON.stringify(changeContext.before?.[key]) !== JSON.stringify(changeContext.after?.[key]),
+    )
     .slice(0, 3)
-    .map((key) => `${key} ${toDisplayValue(changeContext.before?.[key])} -> ${toDisplayValue(changeContext.after?.[key])}`)
+    .map(
+      (key) =>
+        `${key} ${toDisplayValue(changeContext.before?.[key])} -> ${toDisplayValue(changeContext.after?.[key])}`,
+    )
 
   return differences.length > 0 ? differences.join('; ') : 'no field-level changes captured'
 }
@@ -136,22 +134,28 @@ function toRelatedEvent(event: RawAuditEvent): AuditTrailRelatedEvent {
   }
 }
 
-async function queryAuditEvents(filters: AuditTrailFilters) {
-  return await listStoredAuditEvents({
-    actionType: filters.actionType,
-    entityType: filters.entityType,
-    actorId: filters.actorId,
-    entityId: filters.entityId,
-    search: filters.search?.trim() || undefined,
-    dateFrom: filters.dateFrom,
-    dateTo: filters.dateTo,
-    cursor: filters.cursor?.trim() || undefined,
-    pageSize: filters.pageSize,
-  }) as RawAuditEventListResult
+async function queryAuditEvents(filters: AuditTrailFilters, deletions: StoredAuditEvent[]) {
+  return (await listStoredAuditEvents(
+    {
+      actionType: filters.actionType,
+      entityType: filters.entityType,
+      actorId: filters.actorId,
+      entityId: filters.entityId,
+      search: filters.search?.trim() || undefined,
+      dateFrom: filters.dateFrom,
+      dateTo: filters.dateTo,
+      cursor: filters.cursor?.trim() || undefined,
+      pageSize: filters.pageSize,
+    },
+    deletions,
+  )) as RawAuditEventListResult
 }
 
-export async function listAuditTrailEvents(filters: AuditTrailFilters = {}): Promise<AuditTrailListResponse> {
-  const result = await queryAuditEvents(filters)
+export async function listAuditTrailEvents(
+  deletions: StoredAuditEvent[],
+  filters: AuditTrailFilters = {},
+): Promise<AuditTrailListResponse> {
+  const result = await queryAuditEvents(filters, deletions)
 
   return {
     ok: true,
@@ -161,23 +165,29 @@ export async function listAuditTrailEvents(filters: AuditTrailFilters = {}): Pro
   }
 }
 
-export async function getAuditTrailEvent(eventId: string): Promise<AuditTrailDetailResponse | null> {
-  const event = await getStoredAuditEvent(eventId) as RawAuditEvent | null
+export async function getAuditTrailEvent(
+  eventId: string,
+  deletions: StoredAuditEvent[],
+): Promise<AuditTrailDetailResponse | null> {
+  const event = (await getStoredAuditEvent(eventId, deletions)) as RawAuditEvent | null
 
   if (!event) {
     return null
   }
 
-  const related = await queryAuditEvents({
-    entityId: event.entityId,
-    pageSize: 6,
-  })
+  const related = await queryAuditEvents(
+    {
+      entityId: event.entityId,
+      pageSize: 6,
+    },
+    deletions,
+  )
 
   const detail: AuditTrailDetailItem = {
     ...toListItem(event),
     changeContext: event.changeContext,
     relatedEvents: related.items
-      .filter(item => item.eventId !== eventId)
+      .filter((item) => item.eventId !== eventId)
       .slice(0, 5)
       .map(toRelatedEvent),
   }
@@ -188,8 +198,10 @@ export async function getAuditTrailEvent(eventId: string): Promise<AuditTrailDet
   }
 }
 
-export async function getAuditTrailSummary(): Promise<AuditTrailSummaryResponse> {
-  const summary = await getStoredAuditSummary() as RawAuditSummaryResult
+export async function getAuditTrailSummary(
+  deletions: StoredAuditEvent[],
+): Promise<AuditTrailSummaryResponse> {
+  const summary = (await getStoredAuditSummary(deletions)) as RawAuditSummaryResult
 
   return {
     ok: true,

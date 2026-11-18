@@ -20,10 +20,10 @@ export async function requireRagAdmin(ctx: Pick<QueryCtx, 'auth' | 'db'>) {
     .query('rag_admins')
     .withIndex('by_userId', (q) => q.eq('userId', identity.subject))
     .unique()
-  if (!isReviewedRagAdminGrant(grant, identity.issuer))
+  if (!grant || !isReviewedRagAdminGrant(grant, identity.issuer))
     throw new ConvexError('Admin access required')
   return {
-    userId: identity.subject,
+    userId: grant.userId,
     email: identity.email?.trim().toLowerCase(),
     issuer: identity.issuer,
   }
