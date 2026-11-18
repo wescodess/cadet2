@@ -1,7 +1,7 @@
 import type { ConvexHttpClient } from 'convex/browser'
 import { makeFunctionReference } from 'convex/server'
 import { z } from 'zod'
-import type { StoredAuditEvent } from './auditLogStore'
+import { normalizeJsonRecord, type StoredAuditEvent } from './auditLogStore'
 
 const listDeletionEvents = makeFunctionReference<
   'query',
@@ -14,7 +14,7 @@ const deletionPage = z.object({
     z.object({
       _id: z.string(),
       sourceId: z.string(),
-      source: z.object({ name: z.string() }).passthrough(),
+      source: z.unknown(),
       actorId: z.string(),
       actorEmail: z.string().optional(),
       timestamp: z.number(),
@@ -35,6 +35,8 @@ export async function loadSourceDeletionEvents(convex: ConvexHttpClient) {
       }),
     )
     for (const row of result.page) {
+      const source = normalizeJsonRecord(row.source) ?? normalizeJsonRecord({ value: row.source })
+      const name = source?.name
       events.push({
         eventId: `rag-deletion:${row._id}`,
         actorId: row.actorId,
@@ -43,8 +45,8 @@ export async function loadSourceDeletionEvents(convex: ConvexHttpClient) {
         actionType: 'EVIDENCE_SOURCE_DELETED',
         entityType: 'EVIDENCE_SOURCE',
         entityId: row.sourceId,
-        entityLabel: row.source.name,
-        changeContext: { before: row.source, after: null },
+        entityLabel: typeof name === 'string' && name.trim() ? name : row.sourceId,
+        changeContext: { before: source, after: null },
         timestamp: row.timestamp,
       })
     }

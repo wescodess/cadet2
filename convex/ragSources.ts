@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { isReviewedRagAdminGrant, requireRagAdmin } from './lib/ragAdmin'
+import { hasControlCharacters } from './lib/sourceText'
 
 function toSafeString(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
@@ -215,6 +216,9 @@ export const createSourceSubmission = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await requireRagAdmin(ctx)
+    if (hasControlCharacters([args.name, args.websiteConfig, args.youtubeConfig])) {
+      throw new Error('Source names and config must not contain control characters')
+    }
     const now = Date.now()
     const name = toSafeString(args.name)
 
@@ -284,6 +288,9 @@ export const updateSourceConfig = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await requireRagAdmin(ctx)
+    if (hasControlCharacters([args.name, args.websiteConfig, args.youtubeConfig])) {
+      throw new Error('Source names and config must not contain control characters')
+    }
     const source = await ctx.db.get(args.sourceId)
 
     if (!source) {

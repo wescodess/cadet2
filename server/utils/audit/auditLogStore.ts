@@ -1,3 +1,4 @@
+import { convexToJson } from 'convex/values'
 import { sql } from 'drizzle-orm'
 
 import type { AuditActionType, AuditChangeContext, AuditEntityType } from './types'
@@ -72,12 +73,35 @@ function createEventId() {
   return `audit-${seed}`
 }
 
+function normalizePostgresText(value: string) {
+  return value.replaceAll('\0', '�').replace(/\p{Cs}/gu, '�')
+}
+
+function stringifyPostgresJson(value: unknown) {
+  return JSON.stringify(value, (_key, item: unknown) => {
+    if (typeof item === 'string') return normalizePostgresText(item)
+    if (
+      typeof item === 'bigint' ||
+      item instanceof ArrayBuffer ||
+      (typeof item === 'number' && (!Number.isFinite(item) || Object.is(item, -0)))
+    ) {
+      return convexToJson(item)
+    }
+    if (item && typeof item === 'object' && !Array.isArray(item)) {
+      return Object.fromEntries(
+        Object.entries(item).map(([key, entry]) => [normalizePostgresText(key), entry]),
+      )
+    }
+    return item
+  })
+}
+
 export function normalizeOptionalString(value: unknown) {
   if (typeof value !== 'string') {
     return null
   }
 
-  const trimmed = value.trim()
+  const trimmed = normalizePostgresText(value).trim()
   return trimmed.length > 0 ? trimmed : null
 }
 
@@ -86,7 +110,7 @@ export function normalizeJsonRecord(value: unknown): Record<string, unknown> | n
     return null
   }
 
-  return JSON.parse(JSON.stringify(value)) as Record<string, unknown>
+  return JSON.parse(stringifyPostgresJson(value)) as Record<string, unknown>
 }
 
 function toJsonbFragment(value: Record<string, unknown> | null) {
@@ -94,7 +118,7 @@ function toJsonbFragment(value: Record<string, unknown> | null) {
     return sql`NULL`
   }
 
-  return sql`${JSON.stringify(value)}::jsonb`
+  return sql`${stringifyPostgresJson(value)}::jsonb`
 }
 
 function toNumber(value: number | string | null | undefined) {
@@ -195,11 +219,11 @@ function buildWhereClause(filters: {
   }
 
   if (filters.actorId?.trim()) {
-    conditions.push(sql`"actor_id" = ${filters.actorId.trim()}`)
+    conditions.push(sql`"actor_id" = ${normalizePostgresText(filters.actorId.trim())}`)
   }
 
   if (filters.entityId?.trim()) {
-    conditions.push(sql`"entity_id" = ${filters.entityId.trim()}`)
+    conditions.push(sql`"entity_id" = ${normalizePostgresText(filters.entityId.trim())}`)
   }
 
   if (filters.dateFrom) {
@@ -217,7 +241,7 @@ function buildWhereClause(filters: {
   }
 
   if (filters.search?.trim()) {
-    const query = `%${filters.search.trim()}%`
+    const query = `%${normalizePostgresText(filters.search.trim())}%`
     conditions.push(sql`(
       "event_id" ILIKE ${query}
       OR "entity_id" ILIKE ${query}
@@ -255,13 +279,13 @@ export async function insertAuditLogEvent(input: Omit<StoredAuditEvent, 'eventId
     )
     VALUES (
       ${eventId},
-      ${input.actorId},
+      ${normalizePostgresText(input.actorId)},
       ${normalizeOptionalString(input.actorEmail)},
       ${normalizeOptionalString(input.actorRole)},
       ${input.actionType},
       ${input.entityType},
-      ${input.entityId},
-      ${input.entityLabel},
+      ${normalizePostgresText(input.entityId)},
+      ${normalizePostgresText(input.entityLabel)},
       ${toJsonbFragment(before)},
       ${toJsonbFragment(after)},
       ${normalizeOptionalString(input.reason)},
@@ -292,7 +316,7 @@ function auditEventSource(deletions: StoredAuditEvent[]) {
       entity_id, entity_label, change_context_before, change_context_after, reason, timestamp_ms
     FROM "governance_audit_log"
     UNION ALL
-    SELECT * FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) AS deletions(
+    SELECT * FROM jsonb_to_recordset(${stringifyPostgresJson(rows)}::jsonb) AS deletions(
       event_id text, actor_id text, actor_email text, actor_role text,
       action_type text, entity_type text, entity_id text, entity_label text,
       change_context_before jsonb, change_context_after jsonb, reason text, timestamp_ms bigint
@@ -378,7 +402,7 @@ export async function getStoredAuditEvent(eventId: string, deletions: StoredAudi
       "reason" AS "reason",
       "timestamp_ms" AS "timestamp"
     FROM ${source}
-    WHERE "event_id" = ${eventId} AND ${publicGovernancePredicate}
+    WHERE "event_id" = ${normalizePostgresText(eventId)} AND ${publicGovernancePredicate}
     LIMIT 1;
   `)
 

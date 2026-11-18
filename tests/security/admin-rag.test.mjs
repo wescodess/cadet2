@@ -101,7 +101,7 @@ async function request(path, actor, method = 'GET', body) {
   })
 }
 
-async function fixture(table, rows) {
+async function fixture(table, rows, replace = false) {
   const file = join(directory, `${table}.json`)
   await writeFile(file, JSON.stringify(rows))
   await run(
@@ -111,7 +111,7 @@ async function fixture(table, rows) {
       'import',
       '--env-file',
       join(directory, 'operator.env'),
-      '--append',
+      ...(replace ? ['--replace', '--yes'] : ['--append']),
       '--table',
       table,
       file,
@@ -990,6 +990,234 @@ test('configuration and review transitions append history without rewriting earl
   assert.deepEqual(
     remaining.map((row) => row.action).sort(),
     ['submit', 'approve', 'edit', 'reject', 'approve', 'pause', 'resume'].sort(),
+  )
+})
+
+async function deletionPage() {
+  return admin.client.query(anyApi.ragSourceAudit.listDeletionEvents, {
+    paginationOpts: { cursor: null, numItems: 100 },
+  })
+}
+
+async function assertAuditAvailability(label, eventId) {
+  const paths = [
+    '/api/admin/audit-trail',
+    '/api/admin/audit-trail/summary',
+    `/api/admin/audit-trail/${eventId}`,
+    '/api/admin/audit-trail?entityType=PATHWAY',
+  ]
+  const observations = []
+  for (const path of paths) {
+    const response = await request(path, admin)
+    observations.push({ path, status: response.status, body: await response.json() })
+  }
+  await writeFile(
+    join(process.env.QUALITY_OUTPUT_DIR, `${label}.json`),
+    JSON.stringify(observations, null, 2),
+  )
+  assert.deepEqual(
+    observations.map(({ status }) => status),
+    [200, 200, 200, 200],
+    `${label}: every audit endpoint must remain readable`,
+  )
+  assert.equal(observations[1].body.eventsToday, observations[0].body.totalCount)
+  assert.equal(observations[2].body.event.eventId, eventId)
+  assert.ok(observations[3].body.items.every((item) => item.entityType === 'PATHWAY'))
+}
+
+test('retained NUL snapshots cannot disable any governance audit endpoint', async () => {
+  const before = await deletionPage()
+  const known = before.page[0]
+  assert.ok(known)
+  const source = {
+    ...known.source,
+    name: 'Retained \u0000 source',
+    crawlConfig: {
+      nested: [{ key: 'nested\u0000value', literal: String.raw`\u0000`, emoji: '😀' }],
+    },
+  }
+  try {
+    await fixture('rag_source_deletions', [
+      {
+        sourceId: known.sourceId,
+        source,
+        actorId: admin.userId,
+        timestamp: Date.now(),
+      },
+    ])
+    const stored = (await deletionPage()).page.find((row) => row.source.name === source.name)
+    assert.ok(stored)
+    await assertAuditAvailability('nul-snapshot', `rag-deletion:${known._id}`)
+    const detail = await successful(`/api/admin/audit-trail/rag-deletion:${stored._id}`)
+    assert.equal(detail.event.entityLabel, 'Retained � source')
+    assert.deepEqual(detail.event.changeContext.before.crawlConfig.nested, [
+      { key: 'nested�value', literal: String.raw`\u0000`, emoji: '😀' },
+    ])
+    assert.deepEqual(
+      (await deletionPage()).page.find((row) => row._id === stored._id),
+      stored,
+    )
+  } finally {
+    await fixture('rag_source_deletions', before.page, true)
+  }
+})
+
+test('nameless deletion snapshots fall back to the source ID without disabling audits', async () => {
+  const before = await deletionPage()
+  const known = before.page[0]
+  assert.ok(known)
+  const snapshots = [
+    {},
+    { name: null },
+    { name: 42 },
+    { name: '' },
+    { name: '   ' },
+    null,
+    ['retained snapshot'],
+  ]
+  const expected = [
+    {},
+    { name: null },
+    { name: 42 },
+    { name: '' },
+    { name: '   ' },
+    { value: null },
+    { value: ['retained snapshot'] },
+  ]
+  try {
+    await fixture(
+      'rag_source_deletions',
+      snapshots.map((source, index) => ({
+        sourceId: known.sourceId,
+        source,
+        actorId: admin.userId,
+        timestamp: Date.now() + index,
+      })),
+    )
+    const current = await deletionPage()
+    const stored = current.page
+      .filter((row) => !before.page.some((previous) => previous._id === row._id))
+      .sort((left, right) => left.timestamp - right.timestamp)
+    assert.equal(stored.length, snapshots.length)
+    await assertAuditAvailability('nameless-snapshot', `rag-deletion:${known._id}`)
+    for (let index = 0; index < stored.length; index++) {
+      assert.deepEqual(stored[index].source, snapshots[index])
+      const detail = await successful(`/api/admin/audit-trail/rag-deletion:${stored[index]._id}`)
+      assert.equal(detail.event.entityLabel, known.sourceId)
+      assert.deepEqual(detail.event.changeContext, { before: expected[index], after: null })
+    }
+    assert.deepEqual((await deletionPage()).page, current.page)
+  } finally {
+    await fixture('rag_source_deletions', before.page, true)
+  }
+})
+
+test('public source actions project NUL snapshots and audit text safely into SQL', async () => {
+  const { sourceId } = await admin.client.mutation(anyApi.ragSources.createSourceSubmission, {
+    ...websiteSubmission,
+    name: 'Public NUL snapshot probe',
+    description: 'retained\u0000description',
+    tags: ['tag\u0000value'],
+  })
+  await successful(`/api/admin/rag/sources/${sourceId}/reject`, 'POST', {
+    reason: 'audit\u0000reason',
+  })
+  const canonical = await admin.client.query(anyApi.ragSources.getSource, { sourceId })
+  assert.equal(canonical.source.description, 'retained\u0000description')
+  assert.equal(canonical.source.rejectionReason, 'audit\u0000reason')
+  const listed = await successful(`/api/admin/audit-trail?search=${sourceId}`)
+  assert.equal(listed.totalCount, 1)
+  const event = listed.items[0]
+  assert.equal(event.reason, 'audit�reason')
+  const detail = await successful(`/api/admin/audit-trail/${event.eventId}`)
+  assert.equal(detail.event.changeContext.before.description, 'retained�description')
+  assert.equal(detail.event.changeContext.after.rejectionReason, 'audit�reason')
+  assert.deepEqual(detail.event.changeContext.after.tags, ['tag�value'])
+  const search = await successful(
+    `/api/admin/audit-trail?search=${encodeURIComponent('audit\u0000reason')}`,
+  )
+  assert.equal(search.items[0].eventId, event.eventId)
+  await successful(`/api/admin/audit-trail?actorId=${encodeURIComponent('unmatched\u0000value')}`)
+  assert.equal((await request(`/api/admin/audit-trail/${event.eventId}%00`, admin)).status, 404)
+  await admin.client.mutation(anyApi.ragSources.removeSource, { sourceId })
+  await assertAuditAvailability('public-nul-snapshot', event.eventId)
+  const stored = (await deletionPage()).page.find((row) => row.sourceId === sourceId)
+  assert.ok(stored)
+  assert.equal(stored.source.description, canonical.source.description)
+  assert.equal(stored.source.rejectionReason, canonical.source.rejectionReason)
+  const deletion = await successful(`/api/admin/audit-trail/rag-deletion:${stored._id}`)
+  assert.equal(deletion.event.changeContext.before.description, 'retained�description')
+
+  const legacy = Object.fromEntries(
+    Object.entries(canonical.source).filter(([key]) => !['_id', '_creationTime'].includes(key)),
+  )
+  legacy.name = 'Legacy\u0000SQL label'
+  await fixture('sources', [legacy])
+  const legacySource = (
+    await admin.client.query(anyApi.ragSources.listSources, { includeAllForAdmin: true })
+  ).items.find((item) => item.name === legacy.name)
+  assert.ok(legacySource)
+  await successful(`/api/admin/rag/sources/${legacySource._id}/pause`, 'POST', {})
+  const legacyEvents = await successful(`/api/admin/audit-trail?search=${legacySource._id}`)
+  assert.equal(legacyEvents.items[0].entityLabel, 'Legacy�SQL label')
+  const legacyDetail = await successful(`/api/admin/audit-trail/${legacyEvents.items[0].eventId}`)
+  assert.equal(legacyDetail.event.changeContext.before.name, 'Legacy�SQL label')
+  assert.equal(
+    (await admin.client.query(anyApi.ragSources.getSource, { sourceId: legacySource._id })).source
+      .name,
+    legacy.name,
+  )
+})
+
+test('source creation and update reject control characters in names and config at both public seams', async () => {
+  const { sourceId } = await admin.client.mutation(
+    anyApi.ragSources.createSourceSubmission,
+    websiteSubmission,
+  )
+  const invalid = [
+    ...['\u0000', '\t', '\n', '\u001f', '\u007f', '\u0085'].map((control) => ({
+      name: `${control}invalid source`,
+    })),
+    ...['seedUrls', 'allowedDomains', 'includePatterns', 'excludePatterns'].map((key) => ({
+      websiteConfig: { ...websiteSubmission.websiteConfig, [key]: ['\tinvalid config'] },
+    })),
+    {
+      websiteConfig: {
+        ...websiteSubmission.websiteConfig,
+        requestHeadersRef: 'invalid\u0000config',
+      },
+    },
+  ]
+  for (const patch of invalid) {
+    await assert.rejects(
+      admin.client.mutation(anyApi.ragSources.createSourceSubmission, {
+        ...websiteSubmission,
+        ...patch,
+      }),
+      /control characters/i,
+    )
+    await assert.rejects(
+      admin.client.mutation(anyApi.ragSources.updateSourceConfig, { sourceId, ...patch }),
+      /control characters/i,
+    )
+    assert.equal(
+      (await request('/api/admin/rag/sources', admin, 'POST', { ...websiteSubmission, ...patch }))
+        .status,
+      400,
+    )
+    assert.equal(
+      (await request(`/api/admin/rag/sources/${sourceId}`, admin, 'PATCH', patch)).status,
+      400,
+    )
+  }
+  const name = String.raw`Public 😀 literal \u0000`
+  await successful(`/api/admin/rag/sources/${sourceId}`, 'PATCH', {
+    name,
+    websiteConfig: { ...websiteSubmission.websiteConfig, includePatterns: [String.raw`\u0000`] },
+  })
+  assert.equal(
+    (await admin.client.query(anyApi.ragSources.getSource, { sourceId })).source.name,
+    name,
   )
 })
 

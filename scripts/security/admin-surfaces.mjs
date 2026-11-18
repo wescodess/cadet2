@@ -1,4 +1,5 @@
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
+import { readFile, readdir } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import ts from 'typescript'
 import { z } from 'zod'
@@ -34,11 +35,20 @@ function readManifest(root) {
   )
 }
 
-export function sourceFiles(directory) {
-  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(directory, entry.name)
-    return entry.isDirectory() ? sourceFiles(path) : [path]
-  })
+export async function sourceFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true, recursive: true })
+  return entries
+    .filter((entry) => !entry.isDirectory())
+    .map((entry) => join(entry.parentPath, entry.name))
+    .sort()
+}
+
+async function readSources(root) {
+  const directories = await Promise.all(
+    ['app', 'server', 'convex'].map((directory) => sourceFiles(join(root, directory))),
+  )
+  const files = directories.flat().filter((path) => /\.(ts|vue)$/.test(path))
+  return new Map(await Promise.all(files.map(async (path) => [path, await readFile(path, 'utf8')])))
 }
 
 function exported(node) {
@@ -107,14 +117,17 @@ function checkRegistration(name, row, expected) {
   }
 }
 
-function inspectConvex(root, manifest) {
+function inspectConvex(root, manifest, sources) {
   const actual = new Map()
-  const files = sourceFiles(join(root, 'convex')).filter(
-    (path) => path.endsWith('.ts') && !path.includes('/_generated/'),
+  const files = [...sources.keys()].filter(
+    (path) =>
+      path.startsWith(`${join(root, 'convex')}/`) &&
+      path.endsWith('.ts') &&
+      !path.includes('/_generated/'),
   )
   for (const path of files) {
     const module = relative(join(root, 'convex'), path).replaceAll('\\', '/').replace(/\.ts$/, '')
-    for (const row of registrations(path, readFileSync(path, 'utf8'))) {
+    for (const row of registrations(path, sources.get(path))) {
       const name = `${module}:${row.name}`
       checkRegistration(name, row, manifest.convex[name])
       actual.set(name, row)
@@ -140,8 +153,10 @@ function checkHttpAdmission(path, name, source) {
     throw new Error(`Privileged admin transport: ${name}`)
 }
 
-function inspectHttp(root, manifest) {
-  const handlers = sourceFiles(join(root, 'server/api')).filter((path) => path.endsWith('.ts'))
+function inspectHttp(root, manifest, sources) {
+  const handlers = [...sources.keys()].filter(
+    (path) => path.startsWith(`${join(root, 'server/api')}/`) && path.endsWith('.ts'),
+  )
   for (const path of handlers) {
     const name = relative(root, path).replaceAll('\\', '/')
     if (!manifest.http[name]) throw new Error(`Unclassified HTTP registration: ${name}`)
@@ -150,14 +165,12 @@ function inspectHttp(root, manifest) {
       manifest.http[name].owner !== '74'
     )
       throw new Error(`Changed admin authority classification: ${name}`)
-    if (manifest.http[name].owner === '74')
-      checkHttpAdmission(path, name, readFileSync(path, 'utf8'))
+    if (manifest.http[name].owner === '74') checkHttpAdmission(path, name, sources.get(path))
   }
   return handlers
 }
 
-function rejectSourceReference(root, path) {
-  const source = readFileSync(path, 'utf8')
+function rejectSourceReference(root, path, source) {
   if (
     !path.endsWith('/server/utils/cloudflare-ai-search.ts') &&
     /cloudflare-ai-search|queryCloudflareAiSearch/.test(source)
@@ -171,35 +184,33 @@ function rejectSourceReference(root, path) {
     throw new Error(`Removed execution or bootstrap reference: ${relative(root, path)}`)
 }
 
-function rejectExecutionImports(root) {
-  for (const directory of ['server', 'app', 'convex']) {
-    const files = sourceFiles(join(root, directory)).filter(
-      (path) => /\.(ts|vue)$/.test(path) && !path.includes('/_generated/'),
-    )
-    for (const path of files) {
-      rejectSourceReference(root, path)
-    }
+function rejectExecutionImports(root, sources) {
+  for (const [path, source] of sources) {
+    if (!path.includes('/_generated/')) rejectSourceReference(root, path, source)
   }
 }
 
-function rejectRequestInitialization(root) {
+function rejectRequestInitialization(root, sources) {
   for (const name of ['pathwayDefinitionService', 'pathwayRuleService']) {
-    const source = readFileSync(join(root, `server/utils/pathways/${name}.ts`), 'utf8')
+    const path = join(root, `server/utils/pathways/${name}.ts`)
+    const source = sources.get(path)
+    if (source === undefined) throw new Error(`Missing pathway service: ${name}`)
     if (/CREATE\s+(TABLE|INDEX)|ensureSeeded|MVP_PATHWAY_INVENTORY_SEEDS/.test(source))
       throw new Error(`Request-time initialization: ${name}`)
   }
 }
 
-export function inspectAdminSources(root) {
+export async function inspectAdminSources(root) {
   const manifest = readManifest(root)
-  const actual = inspectConvex(root, manifest)
-  const handlers = inspectHttp(root, manifest)
+  const sources = await readSources(root)
+  const actual = inspectConvex(root, manifest, sources)
+  const handlers = inspectHttp(root, manifest, sources)
   const names = new Set([...actual.keys(), ...handlers.map((path) => relative(root, path))])
   for (const name of manifest.removed) {
     if (names.has(name)) throw new Error(`Removed admin entry returned: ${name}`)
   }
-  rejectExecutionImports(root)
-  rejectRequestInitialization(root)
+  rejectExecutionImports(root, sources)
+  rejectRequestInitialization(root, sources)
   return { convex: actual.size, http: handlers.length }
 }
 

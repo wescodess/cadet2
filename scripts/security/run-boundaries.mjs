@@ -7,7 +7,7 @@ import { inspectAdminSources, inspectBuiltAdminRoutes } from './admin-surfaces.m
 import { readBoundaryResult } from './boundary-results.mjs'
 
 const root = resolve(import.meta.dirname, '../..')
-const sources = inspectAdminSources(root)
+const sources = await inspectAdminSources(root)
 const routes = inspectBuiltAdminRoutes(root)
 console.log(
   `Admin surface guard: PASS (${sources.convex} Convex registrations, ${sources.http} HTTP files, ${routes.length} built routes)`,
@@ -95,7 +95,7 @@ child.once('exit', async (code) => {
     await cp(resultFile, join(evidence, 'admin-boundary-results.json'))
     await cp(`${resultFile}.tap`, join(evidence, 'admin-boundaries.tap'))
     readBoundaryResult(resultFile)
-    console.log('Admin boundary result: PASS (25 passed; zero failures, skips or cancellations)')
+    console.log('Admin boundary result: PASS (29 passed; zero failures, skips or cancellations)')
   } catch (error) {
     console.error(error)
     process.exitCode = 1
