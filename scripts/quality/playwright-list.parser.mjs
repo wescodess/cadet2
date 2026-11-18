@@ -51,6 +51,7 @@ const config = z
         timeout: positive,
       })
       .strict()
+      .nullable()
       .optional(),
   })
   .strict()

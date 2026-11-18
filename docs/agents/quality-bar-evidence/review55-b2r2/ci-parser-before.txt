@@ -1,0 +1,93 @@
+
+ RUN  v4.0.18 /private/tmp/fix-pr55-b2r2
+
+ ❯ tests/unit/quality-parsers.spec.mjs (61 tests | 1 failed) 39ms
+     ✓ registers a fixture for every parser module and no stale fixtures 1ms
+       ✓ action references a missing advisory 2ms
+       ✓ advisory has no referencing action 1ms
+       ✓ severity total disagrees with parsed advisory findings 0ms
+       ✓ action paths may differ from finding paths 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 3ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 1ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 5ms
+       ✓ asset ID disagrees with its API URL 2ms
+       ✓ asset name disagrees with its download URL 0ms
+       ✓ release ID disagrees with its API URL 0ms
+       ✓ asset listing references a different release 0ms
+       ✓ release page references a different tag 0ms
+       ✓ duplicate asset identity with distinct names 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ rejects duplicate package across license categories 2ms
+       ✓ rejects unknown package 0ms
+       ✓ rejects repeated versions in one package 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ ticketed directive with real ESLint suppression metadata 0ms
+       ✓ unticketed suppression justification 0ms
+       ✓ empty suppression justification 0ms
+       ✓ issue URL suppression justification 0ms
+       ✓ missing suppression entries 0ms
+       ✓ malformed suppression entries 0ms
+       ✓ unknown suppression metadata 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 2ms
+       × accepts disabled CI web server serialized as null 3ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 2ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ declares and checks independent completeness coverage 2ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > playwright-list.parser.mjs > accepts disabled CI web server serialized as null
+AssertionError: expected [Function] to not throw an error but 'Error: Invalid Playwright list: stdou…' was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+"Error: Invalid Playwright list: stdout.config.webServer: Expected object, received null"
+
+ ❯ tests/unit/quality-parsers.spec.mjs:80:44
+     78|         it(fixtureCase.name, () => {
+     79|           const check = expect(() => parse(fixtureCase.input))
+     80|           if (fixtureCase.valid) check.not.toThrow()
+       |                                            ^
+     81|           else check.toThrow(/Invalid /)
+     82|         })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 60 passed (61)
+   Start at  19:31:12
+   Duration  348ms (transform 68ms, setup 0ms, import 141ms, tests 39ms, environment 0ms)
+

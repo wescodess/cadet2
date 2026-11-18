@@ -1,0 +1,434 @@
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1371
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1371, reused 264, downloaded 0, added 0
+Progress: resolved 1371, reused 905, downloaded 0, added 0
+Progress: resolved 1371, reused 1214, downloaded 0, added 0
+Progress: resolved 1371, reused 1368, downloaded 0, added 91
+Progress: resolved 1371, reused 1368, downloaded 0, added 328
+Progress: resolved 1371, reused 1368, downloaded 0, added 551
+Progress: resolved 1371, reused 1368, downloaded 0, added 716
+Progress: resolved 1371, reused 1368, downloaded 0, added 822
+Progress: resolved 1371, reused 1368, downloaded 0, added 1198
+Progress: resolved 1371, reused 1368, downloaded 0, added 1370
+Progress: resolved 1371, reused 1368, downloaded 0, added 1371, done
+
+dependencies:
++ @better-auth/core 1.4.9
++ @better-auth/utils 0.3.0
++ @convex-dev/better-auth 0.10.11
++ @convex-vue/core 0.0.4
++ @electric-sql/pglite 0.3.15
++ @internationalized/date 3.12.4
++ @nuxthub/core 0.10.6
++ @onmax/nuxt-better-auth 0.0.2-alpha.29
++ @tanstack/vue-table 8.21.3
++ @unovis/vue 1.8.1
++ @vee-validate/zod 4.15.1
++ @vueuse/core 14.2.1
++ better-auth 1.4.9
++ better-call 1.1.7
++ class-variance-authority 0.7.1
++ clsx 2.1.1
++ convex 1.32.0
++ drizzle-orm 0.45.1
++ embla-carousel-vue 8.6.0
++ lucide-vue-next 0.575.0
++ nuxt 4.3.1
++ nuxt-convex 0.0.6
++ reka-ui 2.8.2
++ tailwind-merge 3.5.0
++ vaul-vue 0.4.1
++ vee-validate 4.15.1
++ vue 3.5.28
++ vue-input-otp 0.3.2
++ vue-router 4.6.4
++ vue-sonner 2.0.9
++ zod 3.25.76
+
+devDependencies:
++ @eslint/js 10.0.1
++ @faker-js/faker 10.3.0
++ @playwright/test 1.58.2
++ @seontechnologies/playwright-utils 3.14.0
++ @tailwindcss/vite 4.2.0
++ @vitejs/plugin-vue 6.0.4
++ @vue/test-utils 2.4.6
++ drizzle-kit 0.31.9
++ eslint 10.15.0
++ eslint-plugin-sonarjs 4.2.2
++ eslint-plugin-vue 10.12.1
++ jsdom 28.1.0
++ lint-staged 17.6.1
++ prettier 3.10.1
++ shadcn-nuxt 2.4.3
++ tailwindcss 4.2.0
++ tw-animate-css 1.4.0
++ typescript 5.9.3
++ typescript-eslint 8.73.0
++ vitest 4.0.18
++ vue-eslint-parser 10.4.2
++ vue-tsc 3.3.14
++ yaml 2.9.1
+
+
+> cadet2@ postinstall /private/tmp/fix-pr55-b2r2
+> nuxt prepare
+
+[nuxt-better-auth] ℹ Generated postgresql schema (.ts + .mjs)
+
+ WARN  Component directory does not exist: /private/tmp/fix-pr55-b2r2/components/ui
+
+
+[nuxt:convex]  WARN  Convex URL not configured. Set CONVEX_URL or NUXT_PUBLIC_CONVEX_URL
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAccordion:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/accordion/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/accordion/Accordion.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAlertDialog:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/alert-dialog/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/alert-dialog/AlertDialog.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAlert:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/alert/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/alert/Alert.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAspectRatio:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/aspect-ratio/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/aspect-ratio/AspectRatio.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAvatar:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/avatar/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/avatar/Avatar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiBadge:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/badge/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/badge/Badge.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiBreadcrumb:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/breadcrumb/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/breadcrumb/Breadcrumb.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiButtonGroup:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/button-group/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/button-group/ButtonGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiButton:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/button/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/button/Button.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCalendar:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/calendar/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/calendar/Calendar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCard:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/card/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/card/Card.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCarousel:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/carousel/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/carousel/Carousel.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCheckbox:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/checkbox/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/checkbox/Checkbox.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCollapsible:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/collapsible/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/collapsible/Collapsible.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCombobox:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/combobox/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/combobox/Combobox.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCommand:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/command/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/command/Command.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiContextMenu:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/context-menu/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/context-menu/ContextMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDialog:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/dialog/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/dialog/Dialog.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDrawer:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/drawer/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/drawer/Drawer.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDropdownMenu:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/dropdown-menu/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/dropdown-menu/DropdownMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiEmpty:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/empty/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/empty/Empty.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiField:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/field/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/field/Field.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiHoverCard:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/hover-card/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/hover-card/HoverCard.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiInputGroup:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/input-group/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/input-group/InputGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiInput:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/input/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/input/Input.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiItem:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/item/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/item/Item.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiKbd:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/kbd/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/kbd/Kbd.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiLabel:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/label/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/label/Label.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiMenubar:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/menubar/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/menubar/Menubar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNativeSelect:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/native-select/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/native-select/NativeSelect.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNavigationMenu:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/navigation-menu/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/navigation-menu/NavigationMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNumberField:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/number-field/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/number-field/NumberField.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPagination:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/pagination/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/pagination/Pagination.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPinInput:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/pin-input/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/pin-input/PinInput.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPopover:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/popover/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/popover/Popover.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiProgress:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/progress/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/progress/Progress.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiRadioGroup:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/radio-group/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/radio-group/RadioGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiRangeCalendar:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/range-calendar/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/range-calendar/RangeCalendar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiScrollArea:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/scroll-area/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/scroll-area/ScrollArea.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSelect:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/select/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/select/Select.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSeparator:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/separator/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/separator/Separator.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSheet:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/sheet/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/sheet/Sheet.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSidebar:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/sidebar/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/sidebar/Sidebar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSkeleton:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/skeleton/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/skeleton/Skeleton.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSlider:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/slider/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/slider/Slider.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSonner:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/sonner/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/sonner/Sonner.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSpinner:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/spinner/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/spinner/Spinner.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiStepper:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/stepper/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/stepper/Stepper.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSwitch:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/switch/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/switch/Switch.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTable:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/table/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/table/Table.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTabs:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/tabs/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/tabs/Tabs.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTagsInput:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/tags-input/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/tags-input/TagsInput.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTextarea:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/textarea/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/textarea/Textarea.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiToggleGroup:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/toggle-group/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/toggle-group/ToggleGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiToggle:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/toggle/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/toggle/Toggle.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTooltip:
+
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/tooltip/index.ts
+ - /private/tmp/fix-pr55-b2r2/app/components/ui/tooltip/Tooltip.vue
+
+
+ WARN  Duplicated imports "toIsoString", the one from "/private/tmp/fix-pr55-b2r2/server/utils/recommendations/lifecycle.ts" has been ignored and "/private/tmp/fix-pr55-b2r2/server/utils/recommendations/reviewDateUtils.ts" is used
+
+
+ WARN  Duplicated imports "toIsoString", the one from "/private/tmp/fix-pr55-b2r2/server/utils/recommendations/lifecycle.ts" has been ignored and "/private/tmp/fix-pr55-b2r2/server/utils/recommendations/reviewDateUtils.ts" is used
+
+│
+◆  Types generated in .nuxt.
+
+> cadet2@ prepare /private/tmp/fix-pr55-b2r2
+> node scripts/quality/install-hooks.mjs
+
+Done in 37.8s
