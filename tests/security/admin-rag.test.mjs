@@ -197,11 +197,12 @@ before(
         env: cliEnv,
       },
     )
-    const specification = await run(
+    await run(
       process.execPath,
       [
         join(root, 'node_modules/convex/bin/main.js'),
         'function-spec',
+        '--file',
         '--env-file',
         join(directory, 'operator.env'),
       ],
@@ -210,7 +211,17 @@ before(
         env: cliEnv,
       },
     )
-    deployedFunctions = JSON.parse(specification.stdout).functions
+    const specifications = (await readdir(join(directory, 'backend'))).filter((name) =>
+      /^function_spec_\d+\.json$/.test(name),
+    )
+    assert.equal(
+      specifications.length,
+      1,
+      'one complete deployed function specification is required',
+    )
+    deployedFunctions = JSON.parse(
+      await readFile(join(directory, 'backend', specifications[0]), 'utf8'),
+    ).functions
     assert.ok(Array.isArray(deployedFunctions) && deployedFunctions.length > 0)
     const evidence =
       process.env.QUALITY_OUTPUT_DIR ?? join(root, '.quality-output/admin-boundaries')

@@ -1,0 +1,46 @@
+{
+  "candidateParent": "fe672308845897ca293bfc75aa3ac81c83437cdd",
+  "state": "Uncommitted harness fix before commit; application containment unchanged.",
+  "command": "pnpm security:admin",
+  "positive": {
+    "commandExit": 0,
+    "nativeNodeReport": {
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "counts": {
+        "planned": 20,
+        "tests": 20,
+        "suites": 0,
+        "passed": 20,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      }
+    }
+  },
+  "mandatorySkipProbe": {
+    "mutation": "Temporarily skip the first mandatory case; restored in finally.",
+    "commandExit": 1,
+    "nativeNodeReport": {
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "counts": {
+        "planned": 20,
+        "tests": 20,
+        "suites": 0,
+        "passed": 19,
+        "failed": 0,
+        "cancelled": 0,
+        "skipped": 1,
+        "todo": 0
+      }
+    }
+  },
+  "focusedRegressionTests": {
+    "passed": 5,
+    "failed": 0
+  }
+}

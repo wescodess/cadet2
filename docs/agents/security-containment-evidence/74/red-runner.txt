@@ -1,0 +1,7 @@
+Observed on fe672308845897ca293bfc75aa3ac81c83437cdd. Rejected as failed despite outer exit 0.
+The Convex CLI masked a failing Node child after truncating piped function-spec JSON.
+ℹ tests 20
+ℹ pass 0
+ℹ fail 20
+  SyntaxError: Expected property name or '}' in JSON at position 65536 (line 2437 column 15)
+PASS security:admin (5.1s)

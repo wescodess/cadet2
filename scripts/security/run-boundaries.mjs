@@ -1,9 +1,10 @@
 import { spawn } from 'node:child_process'
-import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { inspectAdminSources, inspectBuiltAdminRoutes } from './admin-surfaces.mjs'
+import { readBoundaryResult } from './boundary-results.mjs'
 
 const root = resolve(import.meta.dirname, '../..')
 const sources = inspectAdminSources(root)
@@ -26,6 +27,7 @@ const evidence = process.env.QUALITY_OUTPUT_DIR
   ? resolve(root, process.env.QUALITY_OUTPUT_DIR)
   : await mkdtemp(join(root, '.quality-output/run-admin-'))
 const directory = await mkdtemp(join(tmpdir(), 'cadet2-containment-'))
+const resultFile = join(directory, 'boundary-results.json')
 console.log(`Isolated boundary workspace: ${directory}`)
 await mkdir(join(directory, 'backend/convex'), { recursive: true })
 await writeFile(
@@ -69,7 +71,7 @@ const child = spawn(
     '--local-site-port',
     String(ports[1]),
     '--run-sh',
-    `${quote(process.execPath)} --test ${quote(join(root, 'tests/security/admin-rag.test.mjs'))}`,
+    `${quote(process.execPath)} ${quote(join(root, 'scripts/security/execute-boundaries.mjs'))}`,
   ],
   {
     cwd: join(directory, 'backend'),
@@ -79,6 +81,7 @@ const child = spawn(
       CONVEX_AGENT_MODE: 'anonymous',
       CONTAINMENT_DIRECTORY: directory,
       CONTAINMENT_ORIGIN: `http://127.0.0.1:${ports[2]}`,
+      CONTAINMENT_RESULTS: resultFile,
       QUALITY_OUTPUT_DIR: evidence,
     },
   },
@@ -87,7 +90,17 @@ child.once('error', (error) => {
   throw error
 })
 child.once('exit', async (code) => {
-  process.exitCode = code ?? 1
-  if (process.env.CONTAINMENT_RETAIN === '1') return
-  await rm(directory, { recursive: true, force: true })
+  try {
+    if (code !== 0) throw new Error(`Convex boundary launcher exited ${code}`)
+    await cp(resultFile, join(evidence, 'admin-boundary-results.json'))
+    await cp(`${resultFile}.tap`, join(evidence, 'admin-boundaries.tap'))
+    readBoundaryResult(resultFile)
+    console.log('Admin boundary result: PASS (20 passed; zero failures, skips or cancellations)')
+  } catch (error) {
+    console.error(error)
+    process.exitCode = 1
+  } finally {
+    if (process.env.CONTAINMENT_RETAIN !== '1')
+      await rm(directory, { recursive: true, force: true })
+  }
 })

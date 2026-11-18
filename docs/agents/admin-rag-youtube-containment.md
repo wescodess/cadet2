@@ -49,6 +49,8 @@ The [green command summary](security-containment-evidence/74/green-verification.
 
 The [first Linux CI run](https://github.com/wescodess/cadet2/actions/runs/44207832423) passed all 20 real boundary cases but rejected two additional static diagnostics for the untyped `process.env` access in `convex/auth.config.ts`. Its runtime environment now has an explicit module-local type, so a clean runner does not depend on ambient Node types. No baseline exception was added.
 
+A subsequent local run exposed a [false-green launcher result](security-containment-evidence/74/red-runner.txt): piped Convex function-spec JSON was truncated at 65,536 bytes and all 20 Node cases failed during setup, while Convex returned exit 0. That run is rejected as failed. Function-spec capture now uses the CLI's complete file output. The launcher independently validates the actual Node exit status and TAP completion record, requiring exactly 20 passing cases with zero failures, skips, cancellations or todos. Both raw records are retained in the quality-output artifact. The [runner ledger](security-containment-evidence/74/runner-probes.json) records a real 20-case positive run and a temporary skipped-case probe that makes the actual outer command exit 1, even though Node itself exits 0. Five focused real-child regression cases cover success, failure, skip, incomplete population and absent completion evidence.
+
 ## Remaining gates
 
 - The owner must review and revoke/rotate affected controlled credentials through #22's access process. Code removal is **not revocation evidence**; no key was tested or copied into fixtures/configuration.
