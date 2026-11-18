@@ -1,0 +1,26 @@
+types: PASS (46 current; 47 baseline)
+types-convex: PASS (9 current; 10 baseline)
+lint: PASS (1192 current; 1692 baseline)
+format: PASS (615 unchanged legacy files)
+secrets history: PASS (8 existing findings; zero new)
+secrets diff: PASS (0 existing findings; zero new)
+secrets working: PASS (7 existing findings; zero new)
+advisories: PASS (140 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (20 existing exceptions, zero new; expire 2027-01-16)
+test-policy: PASS (52 current; 52 baseline)
+ Test Files  22 passed (22)
+      Tests  108 passed (108)
+Admin surface guard: PASS (45 Convex registrations, 53 HTTP files, 57 built routes)
+ℹ tests 20
+ℹ pass 20
+ℹ fail 0
+ℹ skipped 0
+PASS typecheck (47.4s)
+PASS lint (40.8s)
+PASS format:check (3.7s)
+PASS secrets:check (6.8s)
+PASS dependencies:check (53.9s)
+PASS test:policy (1.5s)
+PASS test:components (15.3s)
+PASS build (37.9s)
+PASS security:admin (17.8s)

@@ -1,0 +1,17 @@
+{
+  "implementationHead": "2fc7d4b24daad6439a13066f16ba935c2e43228b",
+  "qualityBarBase": "124f6e78eddd664931b8485fbb96af0752e568a9",
+  "recordedAtUtc": "2026-11-18T00:10:40.356997+00:00",
+  "command": "BETTER_AUTH_SECRET=$(openssl rand -hex 32) NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3000 CONVEX_SITE_URL=http://127.0.0.1:3000 pnpm verify",
+  "exit": 0,
+  "runner": "Darwin arm64",
+  "node": "v24.20.0",
+  "pnpm": "9.12.3",
+  "backendVersion": "precompiled-2026-11-16-80befbc",
+  "builtTreeSha256": "3d8199b180498e084a9e293593e32dd92d56d85f2b4be26e126a5407cb757710",
+  "deployedFunctionSpecSha256": "7ce94c37cbb64f40ae405d550d62d0600fcf35768fab5a84a5e645bb44d2cedd",
+  "fullLogSha256": "29d660901c487e5fa7cd3e2f691758ef300a0f75be096fc5fb8ca87640558c14",
+  "boundaryCases": 20,
+  "guardRejectedMutations": 10,
+  "scope": "Local production artifact, real isolated Better Auth/Nitro/Convex. No managed staging, provider, credential-revocation, browser QA or independent review proof."
+}

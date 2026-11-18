@@ -45,7 +45,7 @@ The retained pre-fix logs are local TDD diagnostics on incremental uncommitted s
 
 The additional [legacy-grant red](security-containment-evidence/74/red-legacy-grant.txt), [YouTube item injection red](security-containment-evidence/74/red-youtube-item.txt), [foreign-origin red](security-containment-evidence/74/red-admin-origin.txt) and [provider guard red](security-containment-evidence/74/red-provider-guard.txt) cover the subsequent containment fixes. The [guard ledger](security-containment-evidence/74/guard-mutations.json) records ten rejected mutations plus clean/restored controls.
 
-Final green execution, verification manifest and deliberate guard-mutation evidence are retained alongside these logs and in the PR's exact-head CI artifact. Failed setup attempts and fixture-expectation corrections are not counted as behavioral red proof. Baselines and allowances are not raised.
+The [green command summary](security-containment-evidence/74/green-verification.txt), [complete verification manifest](security-containment-evidence/74/verification.json) and [candidate metadata](security-containment-evidence/74/metadata.json) record all nine commands passing, including 20 real boundary cases, on the pinned implementation head. The PR also links its final exact-head CI run; evidence-only commits change no application source. Failed setup attempts and fixture-expectation corrections are not counted as behavioral red proof. Baselines and allowances are not raised.
 
 ## Remaining gates
 
