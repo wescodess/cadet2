@@ -54,6 +54,8 @@ jobs:
 
       - name: Scan all branch history
         timeout-minutes: 8
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm secrets:all
 
       - name: Upload sanitized secret findings
@@ -94,6 +96,8 @@ jobs:
 
       - name: Verify static rows, Vitest and production build
         timeout-minutes: 15
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm verify
 
       - name: Upload verification output

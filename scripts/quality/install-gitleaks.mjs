@@ -48,9 +48,10 @@ async function downloadArchive(archive, destination) {
   try {
     const name = `gitleaks_${version}_${archive[0]}.tar.gz`
     const signal = AbortSignal.timeout(60_000)
+    const token = process.env.GITHUB_TOKEN
     const metadata = await fetch(
       `https://api.github.com/repos/gitleaks/gitleaks/releases/tags/v${version}`,
-      { signal },
+      { signal, ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}) },
     )
     if (!metadata.ok) throw new Error(`gitleaks release metadata failed: ${metadata.status}`)
     const release = parseRelease(await metadata.text())

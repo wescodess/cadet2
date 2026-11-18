@@ -28,6 +28,7 @@ const pins = {
 let root, cache, pin, run, fetcher, metadata, response, binary, platform, arch
 beforeEach(() => {
   vi.resetModules()
+  vi.stubEnv('GITHUB_TOKEN', undefined)
   root = mkdtempSync(path.join(tmpdir(), 'quality-cache-'))
   cache = path.join(root, 'cache')
   pin = pins[`${process.platform}-${process.arch}`]
@@ -92,6 +93,8 @@ afterEach(() => {
   vi.doUnmock('node:fs')
   for (const name of ['node:path', 'node:crypto', '../../scripts/quality/common.mjs'])
     vi.doUnmock(name)
+  vi.unstubAllEnvs()
+  vi.restoreAllMocks()
   vi.unstubAllGlobals()
   rmSync(root, { recursive: true, force: true })
 })
@@ -262,5 +265,59 @@ describe('idempotent download cleanup', () => {
     })
     await expect(install()).resolves.toEqual(expect.any(String))
     expect(readFileSync(path.join(cache, `${pin[1]}.tar.gz`), 'utf8')).toBe('archive')
+  })
+})
+
+describe('GitHub release metadata authentication', () => {
+  it.each([
+    { token: undefined, headers: undefined },
+    { token: '', headers: undefined },
+    { token: 'fixture-ci-token', headers: { Authorization: 'Bearer fixture-ci-token' } },
+  ])('sends only the expected metadata headers: $headers', async ({ token, headers }) => {
+    vi.stubEnv('GITHUB_TOKEN', token)
+    await install()
+    expect(fetcher.mock.calls[0][1].headers).toEqual(headers)
+    expect(fetcher.mock.calls[1][1]).toEqual({ signal: fetcher.mock.calls[0][1].signal })
+  })
+  it('fails closed on authenticated 403 without retrying or logging the token', async () => {
+    vi.stubEnv('GITHUB_TOKEN', 'fixture-ci-token')
+    const output = ['log', 'error', 'warn', 'info'].map((method) =>
+      vi.spyOn(console, method).mockImplementation(() => {}),
+    )
+    fetcher.mockResolvedValue({ ok: false, status: 403 })
+    await expect(install()).rejects.toThrow('gitleaks release metadata failed: 403')
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(fetcher.mock.calls[0][1].headers).toEqual({ Authorization: 'Bearer fixture-ci-token' })
+    expect(
+      output
+        .flatMap((logger) => logger.mock.calls)
+        .flat()
+        .join(' '),
+    ).not.toContain('fixture-ci-token')
+  })
+  it('grants the workflow token only to secrets-running steps with read-only permissions', async () => {
+    const { parse } = await import('yaml')
+    const workflow = parse(
+      readFileSync(new URL('../../.github/workflows/test.yml', import.meta.url), 'utf8'),
+    )
+    expect(workflow.permissions).toEqual({ contents: 'read' })
+    expect(workflow.env).not.toHaveProperty('GITHUB_TOKEN')
+    const recipients = []
+    for (const [jobName, job] of Object.entries(workflow.jobs)) {
+      expect(job.env ?? {}).not.toHaveProperty('GITHUB_TOKEN')
+      if (job.permissions)
+        expect(
+          Object.values(job.permissions).every(
+            (permission) => permission === 'read' || permission === 'none',
+          ),
+        ).toBe(true)
+      for (const step of job.steps)
+        if (Object.hasOwn(step.env ?? {}, 'GITHUB_TOKEN'))
+          recipients.push([jobName, step.run, step.env.GITHUB_TOKEN])
+    }
+    expect(recipients).toEqual([
+      ['secrets_all', 'pnpm secrets:all', '${{ github.token }}'],
+      ['verify', 'pnpm verify', '${{ github.token }}'],
+    ])
   })
 })
