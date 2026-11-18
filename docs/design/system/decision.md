@@ -143,7 +143,7 @@ These are outside what a static specimen can prove. Every UI ticket that builds 
 
 ## Discrepancies between the approved specimen and the critiques
 
-Found while recording; none changes the approved design. Implementers follow the specimen and raise these at the first UI gate.
+Found while recording; none changes the approved design. Implementers follow the specimen, except where a dated amendment (2026-11-18, below and in `DESIGN.md`) changes it, and raise these at the first UI gate.
 
 1. **Fonts.** The specimen loads IBM Plex from Google Fonts by URL; the critiques require self-hosting. Expected for a specimen; the build must self-host.
 2. **Text below the 13 px floor.** The round-1 Console critique held 13 px as the floor ("nothing goes smaller"). The Relay specimen renders smaller text in both portals (the client's own small size is 15 px): the holder word at 12 px, representative state chips at 12.5 px (12 px small), desk row metadata and the date-tile month at 12.5 px, tab, group and sidebar labels and the date-tile year at 12 px, keyboard hints at 11.5 px, avatar initials and the client task badge at 10.5 px, turn-disc initials at 8 to 9.6 px and Mono IDs at about 12 px. `DESIGN.md` section 4 lists each one. The Relay critique reports no rendered text below its minimum, so it measured against a lower floor. Owner decision needed before the queue and client list surfaces are built.

@@ -4,7 +4,7 @@
 
 | Read | What it gives you |
 |---|---|
-| [`docs/design/system/approved.html`](docs/design/system/approved.html) | The approved specimen: every token, state and component in both themes and both expressions, the phone and desk screens, and the full computed contrast table. It wins over this file if they ever disagree. |
+| [`docs/design/system/approved.html`](docs/design/system/approved.html) | The approved specimen: every token, state and component in both themes and both expressions, the phone and desk screens, and the full computed contrast table. It wins over this file if they ever disagree, except where a dated amendment in this file changes it. |
 | [`docs/design/system/decision.md`](docs/design/system/decision.md) | What was chosen and rejected, the owner's words, the build requirements from the critiques and the known discrepancies. |
 | [`docs/design/system/tokens.css`](docs/design/system/tokens.css) | Tailwind 4 and shadcn-vue CSS variables, light and dark, with the semantic and expression tokens. |
 | [`docs/design/system/tokens.json`](docs/design/system/tokens.json) | The same values as data, plus the 23 states. |
@@ -18,7 +18,7 @@ Every new surface still goes through the UI design gate (`~/.agents/skills/ui-de
 ## 1. Principles
 
 1. **Whose turn is it?** A case moves like a relay baton between the client and the representative. Every screen answers who has it now. Amber is always the client, blue is always the representative, green is done, violet is signed, in both portals.
-2. **Colour carries meaning, nothing else.** Graphite and white everywhere; colour appears only on states, links, focus and whose turn it is. No decorative colour, and no state shown in plain grey.
+2. **Colour carries meaning, nothing else.** Graphite and white everywhere; colour appears only on states, links, focus and whose turn it is. No decorative colour, and no state shown in plain grey, except the no-turn style ([Whose turn](#33-whose-turn)), which always pairs its neutral colour with a glyph and words.
 3. **Never colour alone.** Every state and every turn is a glyph or disc, a word and a colour together.
 4. **One system, two expressions.** The client portal is phone first, calm and plain; the representative desk is dense and keyboard first. They share components and tokens; only density and type size change.
 5. **Honest records.** Unknown is never a no. Uploaded is not accepted. Offline is never shown as saved. A new draft never inherits an old signature. Dates are never guessed.
@@ -330,7 +330,7 @@ Values below are the specimen’s final computed styles. Representative values a
 
 **CheckAnswersRow.** Client: a `dl` row with the question (600), the answer, and a “Change {thing}” link; “I don’t know” answers stay visible in caution ink. Desk: a dense `ui/table` with Fact, Answer, From and Action; changed answers carry a “Changed since v{n}” chip and unknown answers say “Not known”.
 
-**DeadlineItem.** A card with 10 px corners: within 90 days it gets a `--urgent` border and a 3 px inset `--urgent` left edge; within 180 days or with the date unknown, a 3 px inset `--caution` left edge. A date tile (no fill, 1 px `--border`, 8 px corners, at least 52 × 56 px; day 20 px at 600, month 12.5 px at 500 and year 12 px, both `--muted-foreground`) or “Date unknown” in caution ink, the title, the date and a plain “In 40 days” chip by urgency, and the source line (“From your permit, checked by Priya on 3 Nov 2026. Priya will advise on timing.”). A date with nothing to do is positive green, never blue. No guessed countdowns.
+**DeadlineItem.** A card with 10 px corners: within 90 days it gets a `--urgent` border and a 3 px inset `--urgent` left edge; within 180 days or with the date unknown, a 3 px inset `--caution` left edge. A date tile (no fill, 1 px `--border`, 8 px corners, at least 52 × 56 px; day 20 px at 600; month and year in `--muted-foreground`, on the desk month 12.5 px at 500 and year 12 px, in the client portal both at the client Label size, see [Typography](#4-typography)) or “Date unknown” in caution ink, the title, the date and a plain “In 40 days” chip by urgency, and the source line (“From your permit, checked by Priya on 3 Nov 2026. Priya will advise on timing.”). A date with nothing to do is positive green, never blue. No guessed countdowns.
 
 **ReviewSideBySide** (desk). Facts and evidence on the left, the draft assessment on the right (1 : 1.15). Each fact card shows the stated fact, the evidence chip and who supplied and checked it; a changed fact gets a 3 px inset caution rule and a “Changed since v{n}” chip. Each finding shows the program, its coverage chip, the reasoning, what it relies on and its ProvenanceRow. At 200% zoom and on phones it becomes **FactsAndConclusion**, the stacked layout (“What Priya used”, then “What it means for you”).
 
