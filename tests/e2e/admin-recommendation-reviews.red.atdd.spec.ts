@@ -66,7 +66,9 @@ async function ensureAuthenticatedPage(page: Page, appBaseUrl: string, label: st
 
   const storageState = await page.request.storageState()
   if (storageState.cookies.length === 0) {
-    throw new Error('Authenticated browser session did not return Better Auth cookies for Story 5.3 recommendation review red-phase E2E tests.')
+    throw new Error(
+      'Authenticated browser session did not return Better Auth cookies for Story 5.3 recommendation review red-phase E2E tests.',
+    )
   }
 
   await page.context().addCookies(storageState.cookies)
@@ -82,11 +84,14 @@ async function mockAdminRecommendationReviewUi(
 ) {
   const routeProbe = createRecommendationReviewRouteProbe(appBaseUrl)
   const runs = input.runs || createRecommendationReviewListResponse().items
-  const selectedRun = runs.find(run => run.runId === input.selectedRunId) || runs[0] || createRecommendationReviewRunSummary()
+  const selectedRun =
+    runs.find((run) => run.runId === input.selectedRunId) ||
+    runs[0] ||
+    createRecommendationReviewRunSummary()
   const detail = createRecommendationReviewRunDetail(selectedRun)
 
-  let latestRunAction: { type: 'flag' | 'resolve' | 'dismiss', body: unknown } | null = null
-  let latestCitationAction: { runId: string, citationId: string, body: unknown } | null = null
+  let latestRunAction: { type: 'flag' | 'resolve' | 'dismiss'; body: unknown } | null = null
+  let latestCitationAction: { runId: string; citationId: string; body: unknown } | null = null
   let latestPauseSourceId: string | null = null
 
   await page.route('**/api/admin/access', async (route) => {
@@ -238,12 +243,7 @@ test.describe('Story 5.3 Admin Recommendation Reviews E2E RED ATDD', () => {
 
     await expect(page).not.toHaveURL(/\/admin\/recommendation-reviews$/)
 
-    if (/\/workspace$/.test(page.url())) {
-      await expect(page.getByRole('navigation', { name: 'Workspace navigation' }).first()).toBeVisible()
-    }
-    else {
-      await expect(page).toHaveURL(/\/auth/)
-    }
+    await expect(page).toHaveURL(`${appBaseUrl}/`)
   })
 
   test('[P0][AC1][AC3] admin users see the run queue, trust indicators, and citation integrity inspector tabs', async ({
@@ -259,9 +259,15 @@ test.describe('Story 5.3 Admin Recommendation Reviews E2E RED ATDD', () => {
     await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.panel)).toBeVisible()
     await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.runList)).toBeVisible()
     await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.runItem)).toHaveCount(2)
-    await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.trustScore)).toContainText(/high|medium|low/i)
-    await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.reviewStateBadge)).toContainText(/pending|flagged|resolved|dismissed/i)
-    await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.citationCard)).toHaveCount(detail.citations.length)
+    await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.trustScore)).toContainText(
+      /high|medium|low/i,
+    )
+    await expect(
+      page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.reviewStateBadge),
+    ).toContainText(/pending|flagged|resolved|dismissed/i)
+    await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.citationCard)).toHaveCount(
+      detail.citations.length,
+    )
 
     const filterBar = page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.citationFilters)
     await expect(filterBar).toBeVisible()
@@ -276,13 +282,20 @@ test.describe('Story 5.3 Admin Recommendation Reviews E2E RED ATDD', () => {
     appBaseUrl,
   }) => {
     await ensureAuthenticatedPage(page, appBaseUrl, 'admin-recommendation-review-admin-actions-red')
-    const { routeProbe, detail, latestRunAction, latestCitationAction, latestPauseSourceId } = await mockAdminRecommendationReviewUi(page, appBaseUrl)
-    const weakCitation = detail.citations.find(citation => citation.supportStrength === 'weak' || citation.supportStrength === 'unsupported') || detail.citations[0]!
+    const { routeProbe, detail, latestRunAction, latestCitationAction, latestPauseSourceId } =
+      await mockAdminRecommendationReviewUi(page, appBaseUrl)
+    const weakCitation =
+      detail.citations.find(
+        (citation) =>
+          citation.supportStrength === 'weak' || citation.supportStrength === 'unsupported',
+      ) || detail.citations[0]!
 
     await page.goto(routeProbe.adminPath, { waitUntil: 'domcontentloaded' })
 
     await page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.runFlagButton).click()
-    await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.confirmationDialog)).toBeVisible()
+    await expect(
+      page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.confirmationDialog),
+    ).toBeVisible()
     await page.getByRole('button', { name: 'Confirm flag run' }).click()
     expect(latestRunAction()?.type).toBe('flag')
     expect(latestRunAction()?.body).toEqual(createRecommendationReviewRunActionInput())
@@ -309,8 +322,12 @@ test.describe('Story 5.3 Admin Recommendation Reviews E2E RED ATDD', () => {
 
     await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.mobileTabs)).toBeVisible()
     await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.mobileRunTab)).toBeVisible()
-    await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.mobileCitationTab)).toBeVisible()
-    await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.mobileActionBar)).toBeVisible()
+    await expect(
+      page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.mobileCitationTab),
+    ).toBeVisible()
+    await expect(
+      page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.mobileActionBar),
+    ).toBeVisible()
     await expect(page.getByTestId(RECOMMENDATION_REVIEW_ATDD_TEST_IDS.runItem)).toHaveCount(2)
   })
 })

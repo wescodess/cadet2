@@ -4,7 +4,6 @@ import { test, expect } from '../support/fixtures'
 import {
   createPathwayDefinitionCreateInput,
   createPathwayDefinitionUpdateInput,
-  createPathwayInventoryEvaluationPayload,
   createPathwayInventoryRouteProbe,
   createPathwayStatusUpdateInput,
   PATHWAY_INVENTORY_EXPECTED_MINIMUM_FIELDS,
@@ -17,20 +16,6 @@ import {
 } from '../support/fixtures/test-data'
 import { getTestEnvironment } from '../support/helpers/env'
 
-type RecommendationPathwayResponse = {
-  runId: string
-  profileSnapshotId: string
-  direct: Array<{
-    pathwayId: string
-    status: 'direct'
-  }>
-  blocked: Array<{
-    pathwayId: string
-    status: 'blocked'
-    unmetConditions: string[]
-  }>
-}
-
 function uniqueAuthEmail(label: string) {
   const seed = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
   return `playwright-${getTestEnvironment()}-${label}-${seed}@example.com`
@@ -42,10 +27,10 @@ function uniqueId(prefix: string) {
 }
 
 function resolveAdminAllowlistEmail() {
-  const configured = process.env.TEST_ADMIN_EMAIL
-    || process.env.NUXT_RAG_ADMIN_EMAILS
-      ?.split(/[\n,]/g)
-      .map(value => value.trim())
+  const configured =
+    process.env.TEST_ADMIN_EMAIL ||
+    process.env.NUXT_RAG_ADMIN_EMAILS?.split(/[\n,]/g)
+      .map((value) => value.trim())
       .find(Boolean)
 
   return configured || 'ops-admin@example.com'
@@ -59,7 +44,7 @@ async function describeAuthFailure(response: Awaited<ReturnType<APIRequestContex
 async function ensureSession(
   request: APIRequestContext,
   appBaseUrl: string,
-  input: { email: string, name: string },
+  input: { email: string; name: string },
 ) {
   const password = 'PlaywrightPass123!'
 
@@ -138,7 +123,11 @@ async function ensureAdminRequest(request: APIRequestContext, appBaseUrl: string
   expect(accessResponse.status()).toBe(200)
 }
 
-async function listPathwayDefinitions(request: APIRequestContext, appBaseUrl: string, status?: PathwayDefinitionStatus) {
+async function listPathwayDefinitions(
+  request: APIRequestContext,
+  appBaseUrl: string,
+  status?: PathwayDefinitionStatus,
+) {
   const routeProbe = createPathwayInventoryRouteProbe(appBaseUrl)
   const response = await request.get(routeProbe.listPath, {
     params: status ? { status } : undefined,
@@ -147,7 +136,7 @@ async function listPathwayDefinitions(request: APIRequestContext, appBaseUrl: st
 
   return {
     response,
-    body: await response.json() as {
+    body: (await response.json()) as {
       ok: boolean
       items: PathwayDefinitionRecord[]
       totalCount: number
@@ -155,7 +144,11 @@ async function listPathwayDefinitions(request: APIRequestContext, appBaseUrl: st
   }
 }
 
-async function createPathwayDefinition(request: APIRequestContext, appBaseUrl: string, payload: ReturnType<typeof createPathwayDefinitionCreateInput>) {
+async function createPathwayDefinition(
+  request: APIRequestContext,
+  appBaseUrl: string,
+  payload: ReturnType<typeof createPathwayDefinitionCreateInput>,
+) {
   const routeProbe = createPathwayInventoryRouteProbe(appBaseUrl)
   const response = await request.post(routeProbe.listPath, {
     data: payload,
@@ -164,7 +157,7 @@ async function createPathwayDefinition(request: APIRequestContext, appBaseUrl: s
 
   return {
     response,
-    body: await response.json() as PathwayDefinitionRecord,
+    body: (await response.json()) as PathwayDefinitionRecord,
   }
 }
 
@@ -182,7 +175,7 @@ async function updatePathwayDefinition(
 
   return {
     response,
-    body: await response.json() as PathwayDefinitionRecord,
+    body: (await response.json()) as PathwayDefinitionRecord,
   }
 }
 
@@ -200,71 +193,17 @@ async function updatePathwayStatus(
 
   return {
     response,
-    body: await response.json() as PathwayDefinitionRecord,
+    body: (await response.json()) as PathwayDefinitionRecord,
   }
-}
-
-async function resetRecommendationRuns(request: APIRequestContext, appBaseUrl: string) {
-  const response = await request.post(`${appBaseUrl}/api/recommendations/testing/reset`, {
-    failOnStatusCode: false,
-  })
-
-  expect(response.status()).toBe(200)
-}
-
-async function seedRecommendationRun(
-  request: APIRequestContext,
-  appBaseUrl: string,
-  input: {
-    runId: string
-    profileSnapshotId: string
-    submittedPayload: unknown
-  },
-) {
-  const response = await request.post(`${appBaseUrl}/api/recommendations/testing/seed`, {
-    data: {
-      runId: input.runId,
-      profileSnapshotId: input.profileSnapshotId,
-      status: 'queued',
-      resetExisting: true,
-      submittedPayload: input.submittedPayload,
-    },
-    failOnStatusCode: false,
-  })
-
-  expect(response.status()).toBe(200)
-  return await response.json() as { runId: string, profileSnapshotId: string, status: string }
-}
-
-async function startRecommendationRun(request: APIRequestContext, appBaseUrl: string, runId: string) {
-  const routeProbe = createPathwayInventoryRouteProbe(appBaseUrl)
-  const response = await request.post(routeProbe.recommendationRunStartPath(runId), {
-    failOnStatusCode: false,
-  })
-
-  expect(response.status()).toBe(200)
-}
-
-async function readPathwaysForRun(request: APIRequestContext, appBaseUrl: string, runId: string) {
-  const routeProbe = createPathwayInventoryRouteProbe(appBaseUrl)
-  const response = await request.get(routeProbe.recommendationRunPathwaysPath(runId), {
-    failOnStatusCode: false,
-  })
-
-  return {
-    response,
-    body: await response.json() as RecommendationPathwayResponse,
-  }
-}
-
-function outcomeIds(body: RecommendationPathwayResponse) {
-  return [...body.direct, ...body.blocked].map(pathway => pathway.pathwayId)
 }
 
 test.describe('Story 5.1 Admin Pathway Inventory API RED ATDD', () => {
   test.describe.configure({ mode: 'serial' })
 
-  test.skip('[P0][AC1] unauthenticated callers cannot read the admin pathway inventory', async ({ request, appBaseUrl }) => {
+  test.skip('[P0][AC1] unauthenticated callers cannot read the admin pathway inventory', async ({
+    request,
+    appBaseUrl,
+  }) => {
     const routeProbe = createPathwayInventoryRouteProbe(appBaseUrl)
 
     const response = await request.get(routeProbe.listPath, {
@@ -294,10 +233,14 @@ test.describe('Story 5.1 Admin Pathway Inventory API RED ATDD', () => {
 
     expect(response.status()).toBe(200)
     expect(body.items).toHaveLength(RECOMMENDATION_PATHWAY_SUPPORTED_IDS.length)
-    expect(body.items.map(item => item.pathwayId)).toEqual([...RECOMMENDATION_PATHWAY_SUPPORTED_IDS])
+    expect(body.items.map((item) => item.pathwayId)).toEqual([
+      ...RECOMMENDATION_PATHWAY_SUPPORTED_IDS,
+    ])
 
     for (const item of body.items) {
-      expect(Object.keys(item).sort()).toEqual([...PATHWAY_INVENTORY_EXPECTED_MINIMUM_FIELDS].sort())
+      expect(Object.keys(item).sort()).toEqual(
+        [...PATHWAY_INVENTORY_EXPECTED_MINIMUM_FIELDS].sort(),
+      )
       expect(PATHWAY_INVENTORY_STATUS_VALUES).toContain(item.status)
       expect(item.displayName.trim().length).toBeGreaterThan(0)
       expect(item.createdAt.trim().length).toBeGreaterThan(0)
@@ -324,13 +267,20 @@ test.describe('Story 5.1 Admin Pathway Inventory API RED ATDD', () => {
     const created = await createPathwayDefinition(request, appBaseUrl, createInput)
     expect(created.response.status()).toBe(201)
     expect(created.body).toMatchObject(createInput)
-    expect(Object.keys(created.body).sort()).toEqual([...PATHWAY_INVENTORY_EXPECTED_MINIMUM_FIELDS].sort())
+    expect(Object.keys(created.body).sort()).toEqual(
+      [...PATHWAY_INVENTORY_EXPECTED_MINIMUM_FIELDS].sort(),
+    )
 
     const updateInput = createPathwayDefinitionUpdateInput({
       displayName: 'Atlantic employer pathway (pilot)',
       description: 'Updated description for pilot rollout.',
     })
-    const updated = await updatePathwayDefinition(request, appBaseUrl, createInput.pathwayId, updateInput)
+    const updated = await updatePathwayDefinition(
+      request,
+      appBaseUrl,
+      createInput.pathwayId,
+      updateInput,
+    )
 
     expect(updated.response.status()).toBe(200)
     expect(updated.body.displayName).toBe(updateInput.displayName)
@@ -338,29 +288,33 @@ test.describe('Story 5.1 Admin Pathway Inventory API RED ATDD', () => {
     expect(updated.body).not.toHaveProperty('rules')
     expect(updated.body).not.toHaveProperty('evidenceSources')
 
-    const inactive = await updatePathwayStatus(request, appBaseUrl, createInput.pathwayId, 'inactive')
+    const inactive = await updatePathwayStatus(
+      request,
+      appBaseUrl,
+      createInput.pathwayId,
+      'inactive',
+    )
     expect(inactive.response.status()).toBe(200)
     expect(inactive.body.status).toBe('inactive')
 
     const activeItems = await listPathwayDefinitions(request, appBaseUrl, 'active')
     expect(activeItems.response.status()).toBe(200)
-    expect(activeItems.body.items.every(item => item.status === 'active')).toBe(true)
+    expect(activeItems.body.items.every((item) => item.status === 'active')).toBe(true)
   })
 
-  test.skip('[P0][AC2][AC4] disabling a supported pathway only changes the targeted inventory entry and excludes it from future recommendation outputs', async ({
+  test.skip('[P0][AC2][AC4] disabling a supported pathway only changes the targeted inventory entry', async ({
     request,
     appBaseUrl,
   }) => {
     await ensureAdminRequest(request, appBaseUrl)
-    await resetRecommendationRuns(request, appBaseUrl)
 
     const targetPathwayId = RECOMMENDATION_PATHWAY_SUPPORTED_IDS[1]
 
     const before = await listPathwayDefinitions(request, appBaseUrl)
     expect(before.response.status()).toBe(200)
     const initiallyActiveIds = before.body.items
-      .filter(item => item.status === 'active')
-      .map(item => item.pathwayId)
+      .filter((item) => item.status === 'active')
+      .map((item) => item.pathwayId)
 
     expect(initiallyActiveIds).toContain(targetPathwayId)
 
@@ -373,28 +327,14 @@ test.describe('Story 5.1 Admin Pathway Inventory API RED ATDD', () => {
     expect(after.response.status()).toBe(200)
 
     const activeIds = after.body.items
-      .filter(item => item.status === 'active')
-      .map(item => item.pathwayId)
+      .filter((item) => item.status === 'active')
+      .map((item) => item.pathwayId)
 
     expect(activeIds).not.toContain(targetPathwayId)
     expect(
       initiallyActiveIds
-        .filter(pathwayId => pathwayId !== targetPathwayId)
-        .every(pathwayId => activeIds.includes(pathwayId)),
+        .filter((pathwayId) => pathwayId !== targetPathwayId)
+        .every((pathwayId) => activeIds.includes(pathwayId)),
     ).toBe(true)
-
-    await ensureAuthenticatedRequest(request, appBaseUrl)
-    const seededRun = await seedRecommendationRun(request, appBaseUrl, {
-      runId: uniqueId('run-story51-inventory-scope-red'),
-      profileSnapshotId: uniqueId('snapshot-story51-inventory-scope-red'),
-      submittedPayload: createPathwayInventoryEvaluationPayload(),
-    })
-
-    await startRecommendationRun(request, appBaseUrl, seededRun.runId)
-    const { response, body } = await readPathwaysForRun(request, appBaseUrl, seededRun.runId)
-
-    expect(response.status()).toBe(200)
-    expect(outcomeIds(body)).not.toContain(targetPathwayId)
-    expect(outcomeIds(body).every(pathwayId => activeIds.includes(pathwayId))).toBe(true)
   })
 })

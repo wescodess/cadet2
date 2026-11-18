@@ -1,0 +1,205 @@
+✔ /workspace is unavailable to every caller and method (14832.68025ms)
+✔ /workspace/intake is unavailable to every caller and method (56.003542ms)
+✔ /workspace/recommendations is unavailable to every caller and method (57.85575ms)
+✔ /workspace/recommendations/legacy-private-run is unavailable to every caller and method (65.390625ms)
+✔ /workspace/recommendations/legacy-private-run/pathways/private-pathway-canary is unavailable to every caller and method (68.067542ms)
+✔ /workspace/history is unavailable to every caller and method (54.875208ms)
+✔ /workspace/compare is unavailable to every caller and method (52.645208ms)
+✔ /workspace/settings is unavailable to every caller and method (51.698959ms)
+✔ /workspace/unknown is unavailable to every caller and method (49.022375ms)
+✔ /tasks is unavailable to every caller and method (53.085417ms)
+✔ /api/workspace is unavailable to every caller and method (49.187ms)
+✔ /api/workspace/me is unavailable to every caller and method (53.033666ms)
+✔ /api/workspace/summary is unavailable to every caller and method (49.415958ms)
+✔ /api/workspace/recommendation-runs is unavailable to every caller and method (52.107ms)
+✔ /api/workspace/runs is unavailable to every caller and method (51.193583ms)
+✔ /api/workspace/runs/legacy-private-run is unavailable to every caller and method (48.843833ms)
+✔ /api/workspace/runs/compare is unavailable to every caller and method (51.259125ms)
+✔ /api/workspace/unknown is unavailable to every caller and method (49.928916ms)
+✔ /api/intake is unavailable to every caller and method (45.910833ms)
+✔ /api/intake/draft is unavailable to every caller and method (47.422417ms)
+✔ /api/intake/submit is unavailable to every caller and method (47.627875ms)
+✔ /api/intake/unknown is unavailable to every caller and method (48.569708ms)
+✔ /api/recommendations/runs is unavailable to every caller and method (48.230167ms)
+✔ /api/recommendations/runs/legacy-private-run/status is unavailable to every caller and method (47.773042ms)
+✔ /api/recommendations/runs/legacy-private-run/pathways is unavailable to every caller and method (48.72ms)
+✔ /api/recommendations/runs/legacy-private-run/results is unavailable to every caller and method (48.641417ms)
+✔ /api/recommendations/runs/legacy-private-run/start is unavailable to every caller and method (47.515ms)
+✔ /api/recommendations/runs/legacy-private-run/refresh is unavailable to every caller and method (49.116583ms)
+✔ /api/recommendations/runs/legacy-private-run/unknown is unavailable to every caller and method (45.022292ms)
+✔ SSR payloads, encoded paths and prefetches cannot reach a retired loader (146.97375ms)
+✔ JSON, malformed bodies and extension methods are rejected before reading input (76.533958ms)
+✔ the shipped browser chunks contain no legacy navigation, polling or automatic starts (44.96825ms)
+✔ public entry preserves authentication without advertising retired navigation (10.531416ms)
+✔ real sign-in, session and backend admission still work after denied requests (27.591709ms)
+▶ missing operator credentials return 503 for both review readers
+  ✖ list (135.008791ms)
+  ✖ /legacy-private-run (36.313208ms)
+✖ missing operator credentials return 503 for both review readers (2403.87375ms)
+▶ review boundaries consistently require a stored grant before reads or actions
+  ✖ GET /api/admin/access (19.381458ms)
+  ✔ GET /api/admin/recommendation-reviews (61.859833ms)
+  ✔ GET /api/admin/recommendation-reviews/legacy-private-run (65.12475ms)
+  ✔ GET /api/admin/recommendation-reviews/legacy-private-run/citations (56.797917ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/citations/legacy-private-run-private-pathway-canary-1/flag (65.143667ms)
+  ✖ POST /api/admin/recommendation-reviews/legacy-private-run/flag (47.346459ms)
+  ✖ POST /api/admin/recommendation-reviews/legacy-private-run/dismiss (25.366625ms)
+  ✖ POST /api/admin/recommendation-reviews/legacy-private-run/resolve (21.494166ms)
+✖ review boundaries consistently require a stored grant before reads or actions (401.186917ms)
+✖ raw dot-segment requests stop before routing, including encoded and mixed-case forms (15.782958ms)
+ℹ tests 47
+ℹ suites 0
+ℹ pass 38
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24565.576083
+
+✖ failing tests:
+
+test at tests/security/legacy-http.test.mjs:206:21
+✖ list (135.008791ms)
+  AssertionError [ERR_ASSERTION]: {"ok":true,"items":[],"totalCount":0}
+
+  200 !== 503
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:210:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:206:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 503,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:206:21
+✖ /legacy-private-run (36.313208ms)
+  AssertionError [ERR_ASSERTION]: {
+    "error": true,
+    "url": "http://127.0.0.1:57360/api/admin/recommendation-reviews/legacy-private-run",
+    "statusCode": 404,
+    "statusMessage": "Recommendation review run not found",
+    "message": "Recommendation review run not found"
+  }
+
+  404 !== 503
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:210:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:206:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 503,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:241:19
+✖ GET /api/admin/access (19.381458ms)
+  AssertionError [ERR_ASSERTION]: {"ok":true,"authorizationSource":"allowlist","user":{"userId":"Db7ipUYFnJV9mMKTClcDL65jjmVE4ZLc","email":"ordinary@example.test","name":"Synthetic ordinary"}}
+
+  200 !== 403
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:248:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:241:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 403,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:241:19
+✖ POST /api/admin/recommendation-reviews/legacy-private-run/flag (47.346459ms)
+  AssertionError [ERR_ASSERTION]: {"ok":true,"runId":"legacy-private-run","reviewState":"flagged","reason":"Synthetic boundary probe","updatedAt":"2026-11-18T00:56:00.387Z"}
+
+  200 !== 403
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:248:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:241:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 403,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:241:19
+✖ POST /api/admin/recommendation-reviews/legacy-private-run/dismiss (25.366625ms)
+  AssertionError [ERR_ASSERTION]: {"ok":true,"runId":"legacy-private-run","reviewState":"dismissed","reason":"Synthetic boundary probe","updatedAt":"2026-11-18T00:56:00.440Z"}
+
+  200 !== 403
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:248:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:241:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 403,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:241:19
+✖ POST /api/admin/recommendation-reviews/legacy-private-run/resolve (21.494166ms)
+  AssertionError [ERR_ASSERTION]: {"ok":true,"runId":"legacy-private-run","reviewState":"resolved","reason":"Synthetic boundary probe","updatedAt":"2026-11-18T00:56:00.462Z"}
+
+  200 !== 403
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:248:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:241:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 200,
+    expected: 403,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:262:1
+✖ raw dot-segment requests stop before routing, including encoded and mixed-case forms (15.782958ms)
+  AssertionError [ERR_ASSERTION]: /workspace/..
+  + actual - expected
+
+  + 'no-cache'
+  - 'private, no-store'
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:268:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'no-cache',
+    expected: 'private, no-store',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

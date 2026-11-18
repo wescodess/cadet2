@@ -700,10 +700,10 @@ function toFallbackReviewRunRecord(
 
 async function loadRecommendationRuns(event: H3Event) {
   await requireAdminSession(event)
+  const convex = await createConvexAdminClient()
   let runs: ConvexRecommendationReviewRun[] = []
 
   try {
-    const convex = await createConvexAdminClient()
     runs = await convex.query(listReviewRuns, {})
   } catch {
     runs = listFallbackRecommendationRuns().map((run) =>
@@ -725,8 +725,8 @@ async function loadRecommendationRuns(event: H3Event) {
 
 async function loadRecommendationRunDetail(event: H3Event, runId: string) {
   await requireAdminSession(event)
+  const convex = await createConvexAdminClient()
   try {
-    const convex = await createConvexAdminClient()
     return await convex.query(readReviewRun, {
       runId,
     })

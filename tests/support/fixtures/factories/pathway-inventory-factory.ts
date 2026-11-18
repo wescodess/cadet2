@@ -4,7 +4,7 @@ import {
   RECOMMENDATION_PATHWAY_SUPPORTED_IDS,
 } from '../test-data'
 
-export type PathwayDefinitionStatus = typeof PATHWAY_INVENTORY_STATUS_VALUES[number]
+export type PathwayDefinitionStatus = (typeof PATHWAY_INVENTORY_STATUS_VALUES)[number]
 
 export type PathwayDefinitionRecord = {
   pathwayId: string
@@ -75,10 +75,10 @@ export function createPathwayInventoryRouteProbe(appBaseUrl: string) {
     adminAccessPath: `${normalizedBaseUrl}/api/admin/access`,
     adminSyncPath: `${normalizedBaseUrl}/api/admin/rag/convex-admin/sync-current-user`,
     listPath: `${normalizedBaseUrl}/api/admin/pathways`,
-    detailPath: (pathwayId: string) => `${normalizedBaseUrl}/api/admin/pathways/${encodeURIComponent(pathwayId)}`,
-    statusPath: (pathwayId: string) => `${normalizedBaseUrl}/api/admin/pathways/${encodeURIComponent(pathwayId)}/status`,
-    recommendationRunStartPath: (runId: string) => `${normalizedBaseUrl}/api/recommendations/runs/${encodeURIComponent(runId)}/start`,
-    recommendationRunPathwaysPath: (runId: string) => `${normalizedBaseUrl}/api/recommendations/runs/${encodeURIComponent(runId)}/pathways`,
+    detailPath: (pathwayId: string) =>
+      `${normalizedBaseUrl}/api/admin/pathways/${encodeURIComponent(pathwayId)}`,
+    statusPath: (pathwayId: string) =>
+      `${normalizedBaseUrl}/api/admin/pathways/${encodeURIComponent(pathwayId)}/status`,
   }
 }
 
@@ -89,22 +89,27 @@ export function createSeededPathwayDefinitions(overrides: Partial<PathwayDefinit
   }))
 }
 
-export function createPathwayDefinitionRecord(overrides: Partial<PathwayDefinitionRecord> = {}): PathwayDefinitionRecord {
+export function createPathwayDefinitionRecord(
+  overrides: Partial<PathwayDefinitionRecord> = {},
+): PathwayDefinitionRecord {
   const pathwayId = overrides.pathwayId || uniqueSeed('mvp-admin-pathway')
 
   return {
     pathwayId,
     displayName: overrides.displayName || 'Atlantic Employer pathway',
-    description: overrides.description === undefined
-      ? 'Admin-managed pathway introduced during Story 5.1.'
-      : overrides.description,
+    description:
+      overrides.description === undefined
+        ? 'Admin-managed pathway introduced during Story 5.1.'
+        : overrides.description,
     status: overrides.status || 'draft',
     createdAt: overrides.createdAt || DEFAULT_CREATED_AT,
     updatedAt: overrides.updatedAt || DEFAULT_UPDATED_AT,
   }
 }
 
-export function createPathwayDefinitionCreateInput(overrides: Partial<PathwayDefinitionRecord> = {}) {
+export function createPathwayDefinitionCreateInput(
+  overrides: Partial<PathwayDefinitionRecord> = {},
+) {
   const record = createPathwayDefinitionRecord(overrides)
   return {
     pathwayId: record.pathwayId,
@@ -114,7 +119,9 @@ export function createPathwayDefinitionCreateInput(overrides: Partial<PathwayDef
   }
 }
 
-export function createPathwayDefinitionUpdateInput(overrides: Partial<PathwayDefinitionRecord> = {}) {
+export function createPathwayDefinitionUpdateInput(
+  overrides: Partial<PathwayDefinitionRecord> = {},
+) {
   const record = createPathwayDefinitionRecord(overrides)
   return {
     displayName: record.displayName,
@@ -128,7 +135,9 @@ export function createPathwayStatusUpdateInput(status: PathwayDefinitionStatus) 
   }
 }
 
-export function createPathwayInventoryListResponse(items = createSeededPathwayDefinitions()): PathwayInventoryListResponse {
+export function createPathwayInventoryListResponse(
+  items = createSeededPathwayDefinitions(),
+): PathwayInventoryListResponse {
   return {
     ok: true,
     items,
@@ -136,7 +145,9 @@ export function createPathwayInventoryListResponse(items = createSeededPathwayDe
   }
 }
 
-export function createAdminAccessResponse(overrides: Partial<AdminAccessResponse['user']> = {}): AdminAccessResponse {
+export function createAdminAccessResponse(
+  overrides: Partial<AdminAccessResponse['user']> = {},
+): AdminAccessResponse {
   return {
     ok: true,
     authorizationSource: 'rag_admins',
@@ -144,37 +155,6 @@ export function createAdminAccessResponse(overrides: Partial<AdminAccessResponse
       userId: overrides.userId || 'admin_user_pathway_inventory',
       email: overrides.email || 'ops-admin@example.com',
       name: overrides.name || 'Ops Admin',
-    },
-  }
-}
-
-export function createPathwayInventoryEvaluationPayload() {
-  return {
-    currentSection: 'goals',
-    sectionProgress: {
-      personal: true,
-      education: true,
-      work: true,
-      immigration: true,
-      goals: true,
-    },
-    fieldValues: {
-      personal: {},
-      education: {},
-      work: {
-        yearsSkilledExperience: 4,
-        hasValidJobOffer: 'yes',
-      },
-      immigration: {
-        openToRelocation: 'yes',
-        englishClb: 9,
-        availableSettlementFundsCad: 28000,
-      },
-      goals: {
-        targetTimelineMonths: 14,
-        budgetCad: 42000,
-        willingToStudyOrRetrain: 'yes',
-      },
     },
   }
 }

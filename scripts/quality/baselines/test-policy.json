@@ -3,14 +3,6 @@
   "commit": "fe2b4a4e4f8b4b861fb5c92661b9e411a84ef0b3",
   "counts": {
     "tests/api/admin-pathway-management.red.atdd.spec.ts": 5,
-    "tests/api/intake-draft.atdd.spec.ts": 7,
-    "tests/api/recommendation-citations.red.atdd.spec.ts": 5,
-    "tests/api/run-comparison.red.atdd.spec.ts": 4,
-    "tests/api/workspace-access.atdd.spec.ts": 4,
-    "tests/e2e/admin-pathway-inventory.red.atdd.spec.ts": 5,
-    "tests/e2e/intake-draft.atdd.spec.ts": 6,
-    "tests/e2e/workspace-access.atdd.spec.ts": 6,
-    "tests/e2e/workspace-recommendation-citations.red.atdd.spec.ts": 7,
-    "tests/e2e/workspace-recommendation-run-comparison.red.atdd.spec.ts": 3
+    "tests/e2e/admin-pathway-inventory.red.atdd.spec.ts": 5
   }
 }

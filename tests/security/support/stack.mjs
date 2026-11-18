@@ -115,35 +115,45 @@ export async function createStack() {
     await initializeSql(sqlDirectory)
     const observationsFile = join(directory, 'observations.txt')
     await writeFile(observationsFile, '')
-    const app = start(
-      process.execPath,
-      [
-        '--import',
-        join(root, 'tests/security/support/observe.mjs'),
-        join(root, '.output/server/index.mjs'),
-      ],
-      {
-        cwd: directory,
-        env: {
-          ...env,
-          SECURITY_OBSERVATIONS: observationsFile,
-          SECURITY_PGLITE_MODULE: join(
-            root,
-            '.output/server/node_modules/@electric-sql/pglite/dist/index.js',
-          ),
-          BETTER_AUTH_SECRET: randomBytes(32).toString('hex'),
-          NUXT_BETTER_AUTH_SECRET: randomBytes(32).toString('hex'),
-          NUXT_PUBLIC_SITE_URL: origin,
-          CONVEX_URL: backendOrigin,
-          CONVEX_ADMIN_KEY: adminKey,
-          NUXT_PUBLIC_CONVEX_URL: backendOrigin,
-          NITRO_HOST: '127.0.0.1',
-          NITRO_PORT: String(port),
+    const appEnv = {
+      ...env,
+      SECURITY_OBSERVATIONS: observationsFile,
+      SECURITY_PGLITE_MODULE: join(
+        root,
+        '.output/server/node_modules/@electric-sql/pglite/dist/index.js',
+      ),
+      BETTER_AUTH_SECRET: randomBytes(32).toString('hex'),
+      NUXT_BETTER_AUTH_SECRET: randomBytes(32).toString('hex'),
+      NUXT_PUBLIC_SITE_URL: origin,
+      NUXT_RAG_ADMIN_EMAILS: 'ordinary@example.test',
+      CONVEX_URL: backendOrigin,
+      CONVEX_ADMIN_KEY: adminKey,
+      NUXT_PUBLIC_CONVEX_URL: backendOrigin,
+      NITRO_HOST: '127.0.0.1',
+      NITRO_PORT: String(port),
+    }
+    const launchApp = (overrides = {}) =>
+      start(
+        process.execPath,
+        [
+          '--import',
+          join(root, 'tests/security/support/observe.mjs'),
+          join(root, '.output/server/index.mjs'),
+        ],
+        {
+          cwd: directory,
+          env: { ...appEnv, ...overrides },
         },
-      },
-    )
+      )
+    let app = launchApp()
     appProcess = app
     cleanup.push(() => stop(app))
+    const restartApp = async (overrides = {}) => {
+      await stop(app)
+      app = launchApp(overrides)
+      appProcess = app
+      await ready(`${origin}/auth`, app)
+    }
     await ready(`${origin}/auth`, app)
     const users = []
     for (const role of ['ordinary', 'foreign-user', 'own-client', 'admin'])
@@ -224,6 +234,7 @@ export async function createStack() {
       observations,
       directory,
       app,
+      restartApp,
       close: async () => {
         for (const close of cleanup.reverse()) await close()
         await rm(directory, { recursive: true, force: true })

@@ -17,8 +17,13 @@ function normalizePath(path: string) {
 }
 
 export default defineEventHandler((event) => {
-  const path = normalizePath(getRequestURL(event).pathname)
-  if (!retiredRoots.some((root) => path === root || path.startsWith(`${root}/`))) return
+  const paths = [event.path.split('?', 1)[0] || '/', getRequestURL(event).pathname].map(
+    normalizePath,
+  )
+  if (
+    !paths.some((path) => retiredRoots.some((root) => path === root || path.startsWith(`${root}/`)))
+  )
+    return
 
   setResponseHeader(event, 'cache-control', 'private, no-store')
   setResponseStatus(event, 404)

@@ -1,23 +1,8 @@
 import type { WorkspaceSummary } from '../../../../shared/types/workspace-summary'
 
-function normalizeBaseUrl(baseUrl: string) {
-  return baseUrl.replace(/\/+$/, '')
-}
-
-export function createWorkspaceSummaryRouteProbe(baseUrl: string) {
-  const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
-
-  return {
-    dashboardPath: `${normalizedBaseUrl}/workspace`,
-    recommendationsPath: `${normalizedBaseUrl}/workspace/recommendations`,
-    historyPath: `${normalizedBaseUrl}/workspace/history`,
-    intakePath: `${normalizedBaseUrl}/workspace/intake`,
-    comparePath: (runA: string, runB: string) =>
-      `${normalizedBaseUrl}/workspace/compare?runA=${encodeURIComponent(runA)}&runB=${encodeURIComponent(runB)}`,
-  }
-}
-
-export function createWorkspaceSummaryFixture(overrides: Partial<WorkspaceSummary> = {}): WorkspaceSummary {
+export function createWorkspaceSummaryFixture(
+  overrides: Partial<WorkspaceSummary> = {},
+): WorkspaceSummary {
   return {
     state: 'compare-latest-runs',
     draft: {
@@ -80,7 +65,8 @@ export function createWorkspaceSummaryFixture(overrides: Partial<WorkspaceSummar
     nextAction: {
       actionKey: 'compare-latest-runs',
       state: 'compare-latest-runs',
-      reason: 'Two preserved reviewable runs are available, so you can inspect what changed before acting.',
+      reason:
+        'Two preserved reviewable runs are available, so you can inspect what changed before acting.',
     },
     lastActivity: {
       label: 'Comparison ready',

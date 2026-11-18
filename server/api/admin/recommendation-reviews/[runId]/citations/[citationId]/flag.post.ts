@@ -1,16 +1,12 @@
 import { getRouterParam } from 'h3'
 
 import { requireAdminSession } from '../../../../../../utils/auth/requireAdminSession'
-import {
-  recommendationReviewCitationFlagInputSchema,
-} from '../../../../../../utils/recommendations/recommendationReviewSchema'
+import { recommendationReviewCitationFlagInputSchema } from '../../../../../../utils/recommendations/recommendationReviewSchema'
 import { getRecommendationReviewDetail } from '../../../../../../utils/recommendations/recommendationReviewService'
 import { setRecommendationCitationReviewState } from '../../../../../../utils/recommendations/recommendationReviewStateService'
 
 export default defineEventHandler(async (event) => {
-  const { session, userId } = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const { session, userId } = await requireAdminSession(event)
   const runId = getRouterParam(event, 'runId')?.trim() || ''
   const citationId = getRouterParam(event, 'citationId')?.trim() || ''
 
@@ -41,7 +37,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const citation = detail.citations.find(item => item.citationId === citationId)
+  const citation = detail.citations.find((item) => item.citationId === citationId)
   if (!citation) {
     throw createError({
       statusCode: 404,

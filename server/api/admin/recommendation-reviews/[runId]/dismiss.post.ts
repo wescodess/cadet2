@@ -2,18 +2,14 @@ import { getRouterParam } from 'h3'
 
 import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import {
-  recommendationReviewActionInputSchema,
-} from '../../../../utils/recommendations/recommendationReviewSchema'
+import { recommendationReviewActionInputSchema } from '../../../../utils/recommendations/recommendationReviewSchema'
 import {
   loadRecommendationRunReviewStateMap,
   setRecommendationRunReviewState,
 } from '../../../../utils/recommendations/recommendationReviewStateService'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const adminSession = await requireAdminSession(event)
   const { session, userId } = adminSession
   const runId = getRouterParam(event, 'runId')?.trim() || ''
 
@@ -46,23 +42,29 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  await recordGovernanceAction(event, {
-    actionType: 'RECOMMENDATION_DISMISSED',
-    entityType: 'RECOMMENDATION_RUN',
-    entityId: runId,
-    entityLabel: `Recommendation run ${runId}`,
-    changeContext: {
-      before,
-      after: review ? {
-        reviewState: review.reviewState,
-        reason: review.reason,
-        actorUserId: review.actorUserId,
-        actorEmail: review.actorEmail,
-        updatedAt: review.updatedAt,
-      } : null,
+  await recordGovernanceAction(
+    event,
+    {
+      actionType: 'RECOMMENDATION_DISMISSED',
+      entityType: 'RECOMMENDATION_RUN',
+      entityId: runId,
+      entityLabel: `Recommendation run ${runId}`,
+      changeContext: {
+        before,
+        after: review
+          ? {
+              reviewState: review.reviewState,
+              reason: review.reason,
+              actorUserId: review.actorUserId,
+              actorEmail: review.actorEmail,
+              updatedAt: review.updatedAt,
+            }
+          : null,
+      },
+      reason: parsed.data.reason,
     },
-    reason: parsed.data.reason,
-  }, adminSession)
+    adminSession,
+  )
 
   return {
     ok: true,
