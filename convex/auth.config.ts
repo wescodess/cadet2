@@ -1,6 +1,10 @@
 import { getAuthConfigProvider } from '@convex-dev/better-auth/auth-config'
 import type { AuthConfig } from 'convex/server'
 
+declare const process: {
+  env: { CADET_AUTH_ISSUER?: string; CONVEX_SITE_URL?: string }
+}
+
 const convexAuthSiteUrl =
   process.env.CADET_AUTH_ISSUER ?? process.env.CONVEX_SITE_URL ?? 'http://localhost:3000'
 
