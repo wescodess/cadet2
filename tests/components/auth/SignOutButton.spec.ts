@@ -67,6 +67,28 @@ describe('SignOutButton', () => {
     expect(wrapper.get('button').attributes('disabled')).toBeUndefined()
   })
 
+  it('keeps the pending button focusable and ignores repeat activation', async () => {
+    loggedIn.value = true
+    let settle: (value: unknown) => void = () => {}
+    signOut.mockReturnValue(new Promise((resolve) => (settle = resolve)))
+    const wrapper = mount(SignOutButton, { attachTo: document.body })
+    const button = wrapper.get('button')
+    button.element.focus()
+
+    await button.trigger('click')
+    expect(button.attributes('disabled')).toBeUndefined()
+    expect(button.attributes('aria-disabled')).toBe('true')
+    await button.trigger('click')
+    expect(signOut).toHaveBeenCalledTimes(1)
+
+    settle({ data: null, error: { status: 500, message: 'Internal' } })
+    await flushPromises()
+
+    expect(button.attributes('aria-disabled')).toBeUndefined()
+    expect(document.activeElement).toBe(button.element)
+    wrapper.unmount()
+  })
+
   it('keeps the user signed in and reports an error when the request cannot be sent', async () => {
     loggedIn.value = true
     signOut.mockRejectedValue(new TypeError('Failed to fetch'))

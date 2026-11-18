@@ -28,7 +28,12 @@ async function signOut() {
 
 <template>
   <div v-if="loggedIn" class="flex flex-col items-start gap-2">
-    <Button type="button" variant="secondary" :disabled="pending" @click="signOut">
+    <Button
+      type="button"
+      variant="secondary"
+      :aria-disabled="pending || undefined"
+      @click="signOut"
+    >
       Sign out
     </Button>
     <Alert v-if="failed" variant="destructive">

@@ -135,6 +135,10 @@ test('a failed sign-out reports an error and keeps the user signed in', async ()
     await alert.waitFor()
     assert.equal(new URL(page.url()).pathname, '/', 'stays on the page')
     await signOutButton(page).waitFor()
+    assert.ok(
+      await signOutButton(page).evaluate((button) => button === button.ownerDocument.activeElement),
+      'focus stays on Sign out for a keyboard retry',
+    )
     assert.notDeepEqual(await sessionCookies(context), [], 'session cookie retained')
     const session = await context.request.get(`${stack.origin}/api/auth/get-session`)
     assert.equal((await session.json())?.user?.id, user('foreign-user').id, 'still signed in')
