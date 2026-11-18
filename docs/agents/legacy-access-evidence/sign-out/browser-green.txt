@@ -1,0 +1,15 @@
+✔ a signed-out visitor is not offered Sign out (13118.987916ms)
+✔ every admin page and the AI search page offer Sign out to a signed-in admin (1586.485583ms)
+✔ a signed-in user signs out from the landing page with the keyboard (5254.057375ms)
+✔ a failed sign-out reports an error and keeps the user signed in (132.954167ms)
+▶ a signed-in admin signs out from an admin page and loses admin access
+  ✔ known #53 defect: a retained pre-sign-out cookie is still admitted (36.940959ms)
+✔ a signed-in admin signs out from an admin page and loses admin access (5379.439875ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31799.81075

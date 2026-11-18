@@ -2,12 +2,11 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Search, ShieldCheck, ShieldEllipsis, TimerReset } from 'lucide-vue-next'
 
+import SignOutButton from '@/components/auth/SignOutButton.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  adminNavigationLinks,
-} from '@/lib/admin/navigation'
+import { adminNavigationLinks } from '@/lib/admin/navigation'
 import {
   auditBadgeTone,
   auditTrailActionOptions,
@@ -23,7 +22,7 @@ import {
   type AuditTrailSummaryResponse,
 } from '@/lib/admin/auditTrail'
 
-type FilterGroupKey = typeof auditTrailFilterGroups[number]['key']
+type FilterGroupKey = (typeof auditTrailFilterGroups)[number]['key']
 
 type AuditListQuery = {
   actionType?: string
@@ -44,7 +43,7 @@ const summary = ref<AuditTrailSummaryResponse | null>(null)
 const events = ref<AuditTrailEventSummary[]>([])
 const selectedEventId = ref<string | null>(null)
 const detail = ref<AuditTrailEventDetailResponse['event'] | null>(null)
-const feedback = ref<{ tone: 'error' | 'success', message: string } | null>(null)
+const feedback = ref<{ tone: 'error' | 'success'; message: string } | null>(null)
 const loading = ref(false)
 const loadingMore = ref(false)
 const loadingDetail = ref(false)
@@ -112,17 +111,17 @@ async function loadDetail(eventId: string) {
   loadingDetail.value = true
 
   try {
-    const response = await $fetch<AuditTrailEventDetailResponse>(`/api/admin/audit-trail/${encodeURIComponent(eventId)}`)
+    const response = await $fetch<AuditTrailEventDetailResponse>(
+      `/api/admin/audit-trail/${encodeURIComponent(eventId)}`,
+    )
     detail.value = response.event
     selectedEventId.value = eventId
-  }
-  catch (error) {
+  } catch (error) {
     feedback.value = {
       tone: 'error',
       message: resolveErrorMessage(error, 'Unable to load audit event detail.'),
     }
-  }
-  finally {
+  } finally {
     loadingDetail.value = false
   }
 }
@@ -137,21 +136,20 @@ async function loadEvents(preferredEventId?: string | null) {
 
     events.value = response.items
     nextCursor.value = response.nextCursor
-    const nextEventId = preferredEventId && response.items.some(item => item.eventId === preferredEventId)
-      ? preferredEventId
-      : response.items[0]?.eventId || null
+    const nextEventId =
+      preferredEventId && response.items.some((item) => item.eventId === preferredEventId)
+        ? preferredEventId
+        : response.items[0]?.eventId || null
 
     if (nextEventId) {
       await loadDetail(nextEventId)
-    }
-    else {
+    } else {
       detail.value = null
       selectedEventId.value = null
     }
 
     feedback.value = null
-  }
-  catch (error) {
+  } catch (error) {
     events.value = []
     detail.value = null
     selectedEventId.value = null
@@ -160,8 +158,7 @@ async function loadEvents(preferredEventId?: string | null) {
       tone: 'error',
       message: resolveErrorMessage(error, 'Unable to load the audit trail.'),
     }
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
@@ -180,23 +177,18 @@ async function loadMoreEvents() {
 
     events.value = [...events.value, ...response.items]
     nextCursor.value = response.nextCursor
-  }
-  catch (error) {
+  } catch (error) {
     feedback.value = {
       tone: 'error',
       message: resolveErrorMessage(error, 'Unable to load more audit events.'),
     }
-  }
-  finally {
+  } finally {
     loadingMore.value = false
   }
 }
 
 async function refreshAuditTrail(preferredEventId?: string | null) {
-  await Promise.all([
-    loadSummary(),
-    loadEvents(preferredEventId),
-  ])
+  await Promise.all([loadSummary(), loadEvents(preferredEventId)])
 }
 
 async function selectEvent(eventId: string, nextMobileTab?: 'events' | 'detail') {
@@ -209,7 +201,7 @@ async function selectEvent(eventId: string, nextMobileTab?: 'events' | 'detail')
 
 async function applyGroup(key: FilterGroupKey) {
   activeGroup.value = key
-  const group = auditTrailFilterGroups.find(item => item.key === key)
+  const group = auditTrailFilterGroups.find((item) => item.key === key)
   filters.value.entityType = group?.entityType || ''
   await refreshAuditTrail(selectedEventId.value)
 }
@@ -228,9 +220,12 @@ async function resetFilters() {
   await refreshAuditTrail(selectedEventId.value)
 }
 
-watch(() => filters.value.actionType, async () => {
-  await refreshAuditTrail(selectedEventId.value)
-})
+watch(
+  () => filters.value.actionType,
+  async () => {
+    await refreshAuditTrail(selectedEventId.value)
+  },
+)
 
 if (import.meta.client) {
   const syncViewport = () => {
@@ -250,8 +245,7 @@ if (import.meta.client) {
 
   if (!loggedIn.value) {
     await navigateTo('/auth')
-  }
-  else {
+  } else {
     await refreshAuditTrail()
   }
 }
@@ -263,13 +257,13 @@ if (import.meta.client) {
     class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16),_transparent_30%),linear-gradient(180deg,_#06111f_0%,_#0b1728_48%,_#111827_100%)] px-4 py-6 text-slate-100 md:px-6"
   >
     <div class="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-      <aside class="rounded-3xl border border-white/10 bg-slate-950/60 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur">
+      <aside
+        class="rounded-3xl border border-white/10 bg-slate-950/60 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur"
+      >
         <p class="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
           Trust Operations
         </p>
-        <h1 class="mt-2 text-2xl font-semibold text-white">
-          Audit trail
-        </h1>
+        <h1 class="mt-2 text-2xl font-semibold text-white">Audit trail</h1>
         <p class="mt-3 text-sm leading-6 text-slate-300">
           Review governed changes without crossing the user-facing trust boundary.
         </p>
@@ -280,7 +274,11 @@ if (import.meta.client) {
             :key="link.href"
             :to="link.href"
             class="flex items-center justify-between rounded-2xl px-3 py-3 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white"
-            :class="link.href === '/admin/audit-trail' ? 'bg-cyan-400/10 text-white ring-1 ring-cyan-300/20' : ''"
+            :class="
+              link.href === '/admin/audit-trail'
+                ? 'bg-cyan-400/10 text-white ring-1 ring-cyan-300/20'
+                : ''
+            "
           >
             <span>{{ link.label }}</span>
             <ShieldEllipsis
@@ -289,36 +287,29 @@ if (import.meta.client) {
             />
           </NuxtLink>
         </nav>
+
+        <SignOutButton class="mt-6" />
       </aside>
 
-      <section
-        :data-testid="auditTrailTestIds.panel"
-        class="space-y-5"
-      >
+      <section :data-testid="auditTrailTestIds.panel" class="space-y-5">
         <header
           :data-testid="auditTrailTestIds.summaryBar"
           class="grid gap-3 rounded-[28px] border border-white/10 bg-slate-950/55 p-4 shadow-2xl shadow-slate-950/20 backdrop-blur md:grid-cols-4"
         >
           <div class="rounded-2xl bg-white/5 px-4 py-4">
-            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">
-              Events today
-            </p>
+            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Events today</p>
             <p class="mt-3 text-3xl font-semibold text-white">
               {{ summary?.eventsToday ?? '0' }}
             </p>
           </div>
           <div class="rounded-2xl bg-white/5 px-4 py-4">
-            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">
-              Events this week
-            </p>
+            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Events this week</p>
             <p class="mt-3 text-3xl font-semibold text-white">
               {{ summary?.eventsThisWeek ?? '0' }}
             </p>
           </div>
           <div class="rounded-2xl bg-white/5 px-4 py-4">
-            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">
-              Most active actor
-            </p>
+            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Most active actor</p>
             <p class="mt-3 text-sm font-medium text-white">
               {{ summary?.mostActiveActor?.email || 'No audit activity yet' }}
             </p>
@@ -327,9 +318,7 @@ if (import.meta.client) {
             </p>
           </div>
           <div class="rounded-2xl bg-white/5 px-4 py-4">
-            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">
-              Most changed scope
-            </p>
+            <p class="text-xs uppercase tracking-[0.16em] text-slate-400">Most changed scope</p>
             <p class="mt-3 text-sm font-medium text-white">
               {{ summary ? formatAuditEntityLabel(summary.mostChangedEntityType) : 'Governance' }}
             </p>
@@ -346,7 +335,9 @@ if (import.meta.client) {
               :key="group.key"
               variant="outline"
               class="rounded-full border-white/10 bg-white/5 text-slate-100 hover:bg-cyan-400/10"
-              :class="activeGroup === group.key ? 'border-cyan-300/30 bg-cyan-400/15 text-cyan-50' : ''"
+              :class="
+                activeGroup === group.key ? 'border-cyan-300/30 bg-cyan-400/15 text-cyan-50' : ''
+              "
               @click="applyGroup(group.key)"
             >
               {{ group.label }}
@@ -373,7 +364,9 @@ if (import.meta.client) {
             <label class="space-y-2 text-sm text-slate-300">
               <span>Search</span>
               <div class="relative">
-                <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <Search
+                  class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+                />
                 <Input
                   v-model="filters.search"
                   class="h-11 rounded-2xl border-white/10 bg-slate-900/80 pl-10 text-white"
@@ -428,7 +421,11 @@ if (import.meta.client) {
         <p
           v-if="feedback"
           class="rounded-2xl px-4 py-3 text-sm"
-          :class="feedback.tone === 'error' ? 'bg-rose-500/15 text-rose-100' : 'bg-emerald-500/15 text-emerald-100'"
+          :class="
+            feedback.tone === 'error'
+              ? 'bg-rose-500/15 text-rose-100'
+              : 'bg-emerald-500/15 text-emerald-100'
+          "
         >
           {{ feedback.message }}
         </p>
@@ -439,9 +436,7 @@ if (import.meta.client) {
             class="rounded-[28px] border border-white/10 bg-slate-950/60 p-4 shadow-2xl shadow-slate-950/20"
           >
             <div class="flex items-center justify-between">
-              <h2 class="text-lg font-semibold text-white">
-                Governed events
-              </h2>
+              <h2 class="text-lg font-semibold text-white">Governed events</h2>
               <span class="text-xs uppercase tracking-[0.16em] text-slate-400">
                 {{ events.length }} visible
               </span>
@@ -454,13 +449,20 @@ if (import.meta.client) {
                 type="button"
                 :data-testid="isDesktop ? auditTrailTestIds.eventRow : undefined"
                 class="w-full rounded-3xl border px-4 py-4 text-left transition"
-                :class="selectedEventId === item.eventId ? 'border-cyan-300/30 bg-cyan-400/10' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'"
+                :class="
+                  selectedEventId === item.eventId
+                    ? 'border-cyan-300/30 bg-cyan-400/10'
+                    : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]'
+                "
                 @click="selectEvent(item.eventId)"
               >
                 <div class="flex items-start justify-between gap-3">
                   <div>
                     <div class="flex items-center gap-2">
-                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ring-1" :class="auditBadgeTone(item.entityType)">
+                      <span
+                        class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ring-1"
+                        :class="auditBadgeTone(item.entityType)"
+                      >
                         {{ formatAuditEntityLabel(item.entityType) }}
                       </span>
                       <span class="text-xs uppercase tracking-[0.16em] text-slate-500">
@@ -507,7 +509,10 @@ if (import.meta.client) {
           >
             <template v-if="selectedEvent">
               <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ring-1" :class="auditBadgeTone(selectedEvent.entityType)">
+                <span
+                  class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ring-1"
+                  :class="auditBadgeTone(selectedEvent.entityType)"
+                >
                   {{ formatAuditEntityLabel(selectedEvent.entityType) }}
                 </span>
                 <p class="text-lg font-semibold text-white">
@@ -517,33 +522,25 @@ if (import.meta.client) {
 
               <div class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <div class="rounded-2xl bg-white/[0.04] px-4 py-4">
-                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                    Actor
-                  </p>
+                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">Actor</p>
                   <p class="mt-2 text-sm text-white">
                     {{ selectedEvent.actorEmail || selectedEvent.actorUserId }}
                   </p>
                 </div>
                 <div class="rounded-2xl bg-white/[0.04] px-4 py-4">
-                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                    Action
-                  </p>
+                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">Action</p>
                   <p class="mt-2 text-sm text-white">
                     {{ formatAuditActionLabel(selectedEvent.actionType) }}
                   </p>
                 </div>
                 <div class="rounded-2xl bg-white/[0.04] px-4 py-4">
-                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                    Timestamp
-                  </p>
+                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">Timestamp</p>
                   <p class="mt-2 text-sm text-white">
                     {{ formatAuditTimestamp(selectedEvent.timestamp) }}
                   </p>
                 </div>
                 <div class="rounded-2xl bg-white/[0.04] px-4 py-4">
-                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                    Reason
-                  </p>
+                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">Reason</p>
                   <p class="mt-2 text-sm text-white">
                     {{ selectedEvent.reason || 'No explicit reason captured' }}
                   </p>
@@ -555,23 +552,21 @@ if (import.meta.client) {
                 class="mt-5 grid gap-4 xl:grid-cols-2"
               >
                 <div class="rounded-3xl bg-slate-900/80 p-4">
-                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                    Before
-                  </p>
-                  <pre class="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-200">{{ formatAuditJson(selectedEvent.changeContext.before) }}</pre>
+                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">Before</p>
+                  <pre
+                    class="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-200"
+                    >{{ formatAuditJson(selectedEvent.changeContext.before) }}</pre>
                 </div>
                 <div class="rounded-3xl bg-slate-900/80 p-4">
-                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                    After
-                  </p>
-                  <pre class="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-200">{{ formatAuditJson(selectedEvent.changeContext.after) }}</pre>
+                  <p class="text-xs uppercase tracking-[0.16em] text-slate-500">After</p>
+                  <pre
+                    class="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-200"
+                    >{{ formatAuditJson(selectedEvent.changeContext.after) }}</pre>
                 </div>
               </section>
 
               <section class="mt-5 rounded-3xl bg-white/[0.04] p-4">
-                <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                  Related events
-                </p>
+                <p class="text-xs uppercase tracking-[0.16em] text-slate-500">Related events</p>
                 <div class="mt-3 space-y-3">
                   <div
                     v-for="related in selectedEvent.relatedEvents"
@@ -590,10 +585,7 @@ if (import.meta.client) {
                       {{ formatAuditTimestamp(related.timestamp) }}
                     </span>
                   </div>
-                  <p
-                    v-if="selectedEvent.relatedEvents.length === 0"
-                    class="text-sm text-slate-400"
-                  >
+                  <p v-if="selectedEvent.relatedEvents.length === 0" class="text-sm text-slate-400">
                     No adjacent governed events for this entity yet.
                   </p>
                 </div>
@@ -609,10 +601,7 @@ if (import.meta.client) {
           </section>
         </div>
 
-        <Tabs
-          v-model="mobileTab"
-          class="lg:hidden"
-        >
+        <Tabs v-model="mobileTab" class="lg:hidden">
           <TabsList
             :data-testid="auditTrailTestIds.mobileTabs"
             class="grid h-auto w-full grid-cols-2 rounded-2xl bg-slate-950/70 p-1"
@@ -640,16 +629,23 @@ if (import.meta.client) {
             >
               <div class="space-y-3">
                 <button
-                v-for="item in events"
-                :key="item.eventId"
-                type="button"
-                :data-testid="!isDesktop ? auditTrailTestIds.eventRow : undefined"
-                class="w-full rounded-3xl border px-4 py-4 text-left transition"
-                :class="selectedEventId === item.eventId ? 'border-cyan-300/30 bg-cyan-400/10' : 'border-white/5 bg-white/[0.03]'"
-                @click="selectEvent(item.eventId, 'detail')"
+                  v-for="item in events"
+                  :key="item.eventId"
+                  type="button"
+                  :data-testid="!isDesktop ? auditTrailTestIds.eventRow : undefined"
+                  class="w-full rounded-3xl border px-4 py-4 text-left transition"
+                  :class="
+                    selectedEventId === item.eventId
+                      ? 'border-cyan-300/30 bg-cyan-400/10'
+                      : 'border-white/5 bg-white/[0.03]'
+                  "
+                  @click="selectEvent(item.eventId, 'detail')"
                 >
                   <div class="flex items-center gap-2">
-                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ring-1" :class="auditBadgeTone(item.entityType)">
+                    <span
+                      class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ring-1"
+                      :class="auditBadgeTone(item.entityType)"
+                    >
                       {{ formatAuditEntityLabel(item.entityType) }}
                     </span>
                     <span class="text-xs uppercase tracking-[0.16em] text-slate-500">
@@ -697,23 +693,20 @@ if (import.meta.client) {
                   class="mt-4 space-y-3"
                 >
                   <div class="rounded-3xl bg-slate-900/80 p-4">
-                    <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                      Before
-                    </p>
-                    <pre class="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-200">{{ formatAuditJson(selectedEvent.changeContext.before) }}</pre>
+                    <p class="text-xs uppercase tracking-[0.16em] text-slate-500">Before</p>
+                    <pre
+                      class="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-200"
+                      >{{ formatAuditJson(selectedEvent.changeContext.before) }}</pre>
                   </div>
                   <div class="rounded-3xl bg-slate-900/80 p-4">
-                    <p class="text-xs uppercase tracking-[0.16em] text-slate-500">
-                      After
-                    </p>
-                    <pre class="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-200">{{ formatAuditJson(selectedEvent.changeContext.after) }}</pre>
+                    <p class="text-xs uppercase tracking-[0.16em] text-slate-500">After</p>
+                    <pre
+                      class="mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-200"
+                      >{{ formatAuditJson(selectedEvent.changeContext.after) }}</pre>
                   </div>
                 </section>
               </template>
-              <p
-                v-else
-                class="text-sm text-slate-400"
-              >
+              <p v-else class="text-sm text-slate-400">
                 Choose an event from the Events tab to inspect the governed diff.
               </p>
             </section>

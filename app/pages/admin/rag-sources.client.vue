@@ -1,17 +1,19 @@
 <script setup lang="ts">
+import SignOutButton from '@/components/auth/SignOutButton.vue'
 import { adminNavigationLinks } from '@/lib/admin/navigation'
 
 type SourceStatus = 'pending_approval' | 'approved' | 'rejected' | 'paused'
 type SourceType = 'website' | 'youtube_channel'
 type ScheduleFrequency = 'daily' | 'manual' | 'interval'
-type BatchStatus = 'queued' | 'running' | 'ingesting' | 'sync_pending' | 'syncing' | 'completed' | 'failed'
+type BatchStatus =
+  'queued' | 'running' | 'ingesting' | 'sync_pending' | 'syncing' | 'completed' | 'failed'
 type SourceRunStatus = 'queued' | 'running' | 'succeeded' | 'partial' | 'failed' | 'cancelled'
 
 type AdminStatusResult = {
   signedIn: boolean
   adminCount: number
   currentUserIsAdmin: boolean
-  currentUser: { userId: string, email: string | null } | null
+  currentUser: { userId: string; email: string | null } | null
   bootstrapAvailable: boolean
 }
 
@@ -35,7 +37,7 @@ type ListSourcesResult = {
     rejectedAt?: number
     rejectionReason?: string
     enabled: boolean
-    schedule: { frequency: ScheduleFrequency, intervalHours?: number }
+    schedule: { frequency: ScheduleFrequency; intervalHours?: number }
     crawlConfig: Record<string, unknown>
     lastRunAt?: number
     lastSuccessAt?: number
@@ -172,7 +174,7 @@ const youtubePreferredLanguage = ref('')
 function splitCsv(value: string) {
   return value
     .split(',')
-    .map(item => item.trim())
+    .map((item) => item.trim())
     .filter(Boolean)
 }
 
@@ -199,15 +201,17 @@ async function checkPhase0Access() {
   try {
     await $fetch('/api/admin/rag/phase0-readiness')
     phase0Ready.value = true
-  }
-  catch (error) {
+  } catch (error) {
     phase0Ready.value = false
-    phase0Error.value = error instanceof Error ? error.message : 'Phase 0 admin readiness access failed'
+    phase0Error.value =
+      error instanceof Error ? error.message : 'Phase 0 admin readiness access failed'
   }
 }
 
 async function refreshAdminStatus() {
-  const result = await $fetch<AdminStatusResult & { ok: boolean }>('/api/admin/rag/sources/admin-status')
+  const result = await $fetch<AdminStatusResult & { ok: boolean }>(
+    '/api/admin/rag/sources/admin-status',
+  )
   adminStatus.value = {
     signedIn: result.signedIn,
     adminCount: result.adminCount,
@@ -231,17 +235,20 @@ async function refreshSources() {
 }
 
 async function refreshIngestionBatches() {
-  const result = await $fetch<{ ok: boolean } & ListBatchesResult>('/api/admin/rag/ingestion/batches', {
-    query: {
-      limit: 12,
-      status: batchStatusFilter.value === 'all' ? undefined : batchStatusFilter.value,
+  const result = await $fetch<{ ok: boolean } & ListBatchesResult>(
+    '/api/admin/rag/ingestion/batches',
+    {
+      query: {
+        limit: 12,
+        status: batchStatusFilter.value === 'all' ? undefined : batchStatusFilter.value,
+      },
     },
-  })
+  )
 
   ingestionBatches.value = result.items
 
   if (selectedBatchId.value) {
-    const stillExists = result.items.some(batch => batch._id === selectedBatchId.value)
+    const stillExists = result.items.some((batch) => batch._id === selectedBatchId.value)
     if (!stillExists) {
       selectedBatchId.value = null
       selectedBatchDetail.value = null
@@ -252,18 +259,18 @@ async function refreshIngestionBatches() {
 async function inspectBatch(batchId: string) {
   selectedBatchPending.value = true
   try {
-    const result = await $fetch<{ ok: boolean } & BatchDetailResult>(`/api/admin/rag/ingestion/batches/${batchId}`)
+    const result = await $fetch<{ ok: boolean } & BatchDetailResult>(
+      `/api/admin/rag/ingestion/batches/${batchId}`,
+    )
     selectedBatchId.value = batchId
     selectedBatchDetail.value = {
       batch: result.batch,
       sourceRuns: result.sourceRuns,
       syncJob: result.syncJob,
     }
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to load batch detail'
-  }
-  finally {
+  } finally {
     selectedBatchPending.value = false
   }
 }
@@ -282,11 +289,9 @@ async function refreshAll() {
     if (selectedBatchId.value) {
       await inspectBatch(selectedBatchId.value)
     }
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to load sources'
-  }
-  finally {
+  } finally {
     pending.value = false
   }
 }
@@ -295,7 +300,7 @@ async function runManualIngestion(sourceIds?: string[]) {
   actionPending.value = true
   errorMessage.value = ''
   try {
-    const result = await $fetch<{ ok: boolean, batchId: string }>('/api/admin/rag/ingestion/run', {
+    const result = await $fetch<{ ok: boolean; batchId: string }>('/api/admin/rag/ingestion/run', {
       method: 'POST',
       body: {
         mode: 'manual',
@@ -305,11 +310,9 @@ async function runManualIngestion(sourceIds?: string[]) {
 
     await refreshAll()
     await inspectBatch(result.batchId)
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Manual ingestion run failed'
-  }
-  finally {
+  } finally {
     actionPending.value = false
   }
 }
@@ -322,11 +325,9 @@ async function bootstrapAdmin() {
       method: 'POST',
     })
     await refreshAll()
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Admin sync failed'
-  }
-  finally {
+  } finally {
     actionPending.value = false
   }
 }
@@ -336,9 +337,10 @@ async function submitSource() {
   errorMessage.value = ''
 
   try {
-    const schedule = frequency.value === 'interval'
-      ? { frequency: 'interval' as const, intervalHours: intervalHours.value }
-      : { frequency: frequency.value }
+    const schedule =
+      frequency.value === 'interval'
+        ? { frequency: 'interval' as const, intervalHours: intervalHours.value }
+        : { frequency: frequency.value }
 
     const payload: Record<string, unknown> = {
       type: sourceType.value,
@@ -353,7 +355,7 @@ async function submitSource() {
       payload.websiteConfig = {
         seedUrls: websiteSeedUrls.value
           .split('\n')
-          .map(v => v.trim())
+          .map((v) => v.trim())
           .filter(Boolean),
         allowedDomains: splitCsv(websiteAllowedDomains.value),
         includePatterns: splitCsv(websiteIncludePatterns.value),
@@ -363,8 +365,7 @@ async function submitSource() {
         renderMode: websiteRenderMode.value,
         respectRobots: websiteRespectRobots.value,
       }
-    }
-    else {
+    } else {
       payload.youtubeConfig = {
         channelId: youtubeChannelId.value.trim(),
         channelUrl: youtubeChannelUrl.value.trim(),
@@ -381,11 +382,9 @@ async function submitSource() {
     sourceName.value = ''
     tagsCsv.value = ''
     await refreshAll()
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Submit failed'
-  }
-  finally {
+  } finally {
     actionPending.value = false
   }
 }
@@ -408,7 +407,7 @@ async function approveSource(source: ListSourcesResult['items'][number]) {
     return
   }
 
-  let schedule: { frequency: ScheduleFrequency, intervalHours?: number }
+  let schedule: { frequency: ScheduleFrequency; intervalHours?: number }
   if (frequency === 'interval') {
     const intervalInput = window.prompt(
       'Interval hours (integer >= 1)',
@@ -426,8 +425,7 @@ async function approveSource(source: ListSourcesResult['items'][number]) {
     }
 
     schedule = { frequency: 'interval', intervalHours: parsedInterval }
-  }
-  else {
+  } else {
     schedule = { frequency }
   }
 
@@ -442,11 +440,9 @@ async function approveSource(source: ListSourcesResult['items'][number]) {
       },
     })
     await refreshAll()
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Approve failed'
-  }
-  finally {
+  } finally {
     actionPending.value = false
   }
 }
@@ -465,11 +461,9 @@ async function rejectSource(sourceId: string) {
       body: { reason },
     })
     await refreshAll()
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Reject failed'
-  }
-  finally {
+  } finally {
     actionPending.value = false
   }
 }
@@ -483,11 +477,9 @@ async function pauseSource(sourceId: string) {
       body: { note: 'Paused from Phase 1 admin UI' },
     })
     await refreshAll()
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Pause failed'
-  }
-  finally {
+  } finally {
     actionPending.value = false
   }
 }
@@ -501,11 +493,9 @@ async function resumeSource(sourceId: string) {
       body: { note: 'Resumed from Phase 1 admin UI' },
     })
     await refreshAll()
-  }
-  catch (error) {
+  } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Resume failed'
-  }
-  finally {
+  } finally {
     actionPending.value = false
   }
 }
@@ -561,8 +551,7 @@ if (import.meta.client) {
   await waitForSession()
   if (!loggedIn.value) {
     await navigateTo('/auth')
-  }
-  else {
+  } else {
     await refreshAll()
   }
 }
@@ -578,17 +567,15 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
 <template>
   <main class="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-6 py-16">
     <header class="space-y-2">
-      <NuxtLink to="/" class="text-xs text-slate-400 hover:text-slate-200">
-        ← Home
-      </NuxtLink>
-      <p class="text-xs uppercase tracking-[0.2em] text-emerald-300">
-        RAG Sources
-      </p>
+      <NuxtLink to="/" class="text-xs text-slate-400 hover:text-slate-200"> ← Home </NuxtLink>
+      <p class="text-xs uppercase tracking-[0.2em] text-emerald-300">RAG Sources</p>
       <h1 class="text-2xl font-semibold text-white">
         Phase 1/2 Source Registry + Ingestion Orchestrator
       </h1>
       <p class="text-sm text-slate-400">
-        Create and approve sources, then trigger Phase 2 ingestion batches and inspect source-run job tracking. Admin actions are proxied through Nuxt routes protected by the Phase 0 allowlist.
+        Create and approve sources, then trigger Phase 2 ingestion batches and inspect source-run
+        job tracking. Admin actions are proxied through Nuxt routes protected by the Phase 0
+        allowlist.
       </p>
     </header>
 
@@ -598,23 +585,32 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
         :key="link.href"
         :to="link.href"
         class="rounded-full border px-3 py-1.5 text-xs transition"
-        :class="link.href === '/admin/rag-sources'
-          ? 'border-cyan-400/40 bg-cyan-500/10 text-cyan-100'
-          : 'border-slate-700 bg-slate-900/70 text-slate-300 hover:border-slate-500 hover:text-white'"
+        :class="
+          link.href === '/admin/rag-sources'
+            ? 'border-cyan-400/40 bg-cyan-500/10 text-cyan-100'
+            : 'border-slate-700 bg-slate-900/70 text-slate-300 hover:border-slate-500 hover:text-white'
+        "
       >
         {{ link.label }}
       </NuxtLink>
     </nav>
 
+    <SignOutButton />
+
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="space-y-1">
           <p class="text-sm text-slate-300">
-            Phase 0 allowlist access: <span :class="phase0Ready ? 'text-emerald-300' : 'text-rose-300'">{{ phase0Ready ? 'ok' : 'failed' }}</span>
+            Phase 0 allowlist access:
+            <span :class="phase0Ready ? 'text-emerald-300' : 'text-rose-300'">{{
+              phase0Ready ? 'ok' : 'failed'
+            }}</span>
           </p>
           <p v-if="adminStatus" class="text-sm text-slate-300">
             Convex admins: <code>{{ adminStatus.adminCount }}</code> · Current user admin:
-            <span :class="adminStatus.currentUserIsAdmin ? 'text-emerald-300' : 'text-amber-300'">{{ adminStatus.currentUserIsAdmin ? 'yes' : 'no' }}</span>
+            <span :class="adminStatus.currentUserIsAdmin ? 'text-emerald-300' : 'text-amber-300'">{{
+              adminStatus.currentUserIsAdmin ? 'yes' : 'no'
+            }}</span>
           </p>
           <p v-if="phase0Error" class="text-xs text-rose-300">
             {{ phase0Error }}
@@ -651,19 +647,23 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
       </div>
     </section>
 
-    <p v-if="errorMessage" class="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+    <p
+      v-if="errorMessage"
+      class="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+    >
       {{ errorMessage }}
     </p>
 
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 class="text-sm font-medium text-slate-200">
-          New Source Submission
-        </h2>
+        <h2 class="text-sm font-medium text-slate-200">New Source Submission</h2>
         <div class="flex items-center gap-2 text-xs text-slate-400">
           <label class="inline-flex items-center gap-2">
             <span>Type</span>
-            <select v-model="sourceType" class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-slate-200">
+            <select
+              v-model="sourceType"
+              class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-slate-200"
+            >
               <option value="website">website</option>
               <option value="youtube_channel">youtube_channel</option>
             </select>
@@ -675,23 +675,37 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
         <div class="grid gap-4 md:grid-cols-2">
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Name</span>
-            <input v-model="sourceName" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" required>
+            <input
+              v-model="sourceName"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              required
+            />
           </label>
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Tenant ID</span>
-            <input v-model="tenantId" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+            <input
+              v-model="tenantId"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+            />
           </label>
         </div>
 
         <div class="grid gap-4 md:grid-cols-3">
           <label class="space-y-1 text-sm md:col-span-2">
             <span class="text-slate-300">Tags (comma-separated)</span>
-            <input v-model="tagsCsv" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="docs, product">
+            <input
+              v-model="tagsCsv"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              placeholder="docs, product"
+            />
           </label>
           <div class="grid grid-cols-2 gap-3">
             <label class="space-y-1 text-sm">
               <span class="text-slate-300">Frequency</span>
-              <select v-model="frequency" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+              <select
+                v-model="frequency"
+                class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              >
                 <option value="daily">daily</option>
                 <option value="manual">manual</option>
                 <option value="interval">interval</option>
@@ -699,7 +713,13 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
             </label>
             <label class="space-y-1 text-sm">
               <span class="text-slate-300">Interval hrs</span>
-              <input v-model.number="intervalHours" :disabled="frequency !== 'interval'" type="number" min="1" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 disabled:opacity-50">
+              <input
+                v-model.number="intervalHours"
+                :disabled="frequency !== 'interval'"
+                type="number"
+                min="1"
+                class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 disabled:opacity-50"
+              />
             </label>
           </div>
         </div>
@@ -707,40 +727,68 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
         <div v-if="sourceType === 'website'" class="grid gap-4 md:grid-cols-2">
           <label class="space-y-1 text-sm md:col-span-2">
             <span class="text-slate-300">Seed URLs (one per line)</span>
-            <textarea v-model="websiteSeedUrls" rows="3" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" />
+            <textarea
+              v-model="websiteSeedUrls"
+              rows="3"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+            />
           </label>
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Allowed domains (comma-separated)</span>
-            <input v-model="websiteAllowedDomains" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+            <input
+              v-model="websiteAllowedDomains"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+            />
           </label>
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Include patterns</span>
-            <input v-model="websiteIncludePatterns" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+            <input
+              v-model="websiteIncludePatterns"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+            />
           </label>
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Exclude patterns</span>
-            <input v-model="websiteExcludePatterns" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+            <input
+              v-model="websiteExcludePatterns"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+            />
           </label>
           <div class="grid grid-cols-2 gap-3">
             <label class="space-y-1 text-sm">
               <span class="text-slate-300">Max depth</span>
-              <input v-model.number="websiteMaxDepth" type="number" min="0" max="10" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+              <input
+                v-model.number="websiteMaxDepth"
+                type="number"
+                min="0"
+                max="10"
+                class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              />
             </label>
             <label class="space-y-1 text-sm">
               <span class="text-slate-300">Max pages/run</span>
-              <input v-model.number="websiteMaxPagesPerRun" type="number" min="1" max="5000" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+              <input
+                v-model.number="websiteMaxPagesPerRun"
+                type="number"
+                min="1"
+                max="5000"
+                class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              />
             </label>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <label class="space-y-1 text-sm">
               <span class="text-slate-300">Render mode</span>
-              <select v-model="websiteRenderMode" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+              <select
+                v-model="websiteRenderMode"
+                class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              >
                 <option value="static">static</option>
                 <option value="rendered">rendered</option>
               </select>
             </label>
             <label class="inline-flex items-center gap-2 pt-7 text-sm text-slate-300">
-              <input v-model="websiteRespectRobots" type="checkbox" class="size-4">
+              <input v-model="websiteRespectRobots" type="checkbox" class="size-4" />
               Respect robots.txt
             </label>
           </div>
@@ -749,22 +797,40 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
         <div v-else class="grid gap-4 md:grid-cols-2">
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Channel ID</span>
-            <input v-model="youtubeChannelId" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="UC...">
+            <input
+              v-model="youtubeChannelId"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              placeholder="UC..."
+            />
           </label>
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Channel URL</span>
-            <input v-model="youtubeChannelUrl" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="https://www.youtube.com/@channel">
+            <input
+              v-model="youtubeChannelUrl"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              placeholder="https://www.youtube.com/@channel"
+            />
           </label>
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Max videos/run</span>
-            <input v-model.number="youtubeMaxVideosPerRun" type="number" min="1" max="200" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100">
+            <input
+              v-model.number="youtubeMaxVideosPerRun"
+              type="number"
+              min="1"
+              max="200"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+            />
           </label>
           <label class="space-y-1 text-sm">
             <span class="text-slate-300">Preferred language</span>
-            <input v-model="youtubePreferredLanguage" class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" placeholder="en">
+            <input
+              v-model="youtubePreferredLanguage"
+              class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100"
+              placeholder="en"
+            />
           </label>
           <label class="inline-flex items-center gap-2 text-sm text-slate-300">
-            <input v-model="youtubeIncludeShorts" type="checkbox" class="size-4">
+            <input v-model="youtubeIncludeShorts" type="checkbox" class="size-4" />
             Include Shorts
           </label>
         </div>
@@ -784,17 +850,20 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="text-sm font-medium text-slate-200">
-            Ingestion Batches (Phase 2)
-          </h2>
+          <h2 class="text-sm font-medium text-slate-200">Ingestion Batches (Phase 2)</h2>
           <p class="text-xs text-slate-400">
-            Manual and scheduled batch records with source-run summaries. Adapter execution is still scaffold-only in Phase 2, so runs currently fail with "not implemented" until Phases 3/4.
+            Manual and scheduled batch records with source-run summaries. Adapter execution is still
+            scaffold-only in Phase 2, so runs currently fail with "not implemented" until Phases
+            3/4.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3 text-xs">
           <label class="inline-flex items-center gap-2 text-slate-300">
             <span>Batch status</span>
-            <select v-model="batchStatusFilter" class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-slate-200">
+            <select
+              v-model="batchStatusFilter"
+              class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-slate-200"
+            >
               <option value="all">all</option>
               <option value="queued">queued</option>
               <option value="running">running</option>
@@ -829,38 +898,51 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
             <div class="space-y-1">
               <div class="flex flex-wrap items-center gap-2">
                 <span class="font-medium text-slate-100">{{ batch._id }}</span>
-                <span class="inline-flex rounded-full border px-2 py-0.5 text-[11px]" :class="batchStatusBadgeClass(batch.status)">
+                <span
+                  class="inline-flex rounded-full border px-2 py-0.5 text-[11px]"
+                  :class="batchStatusBadgeClass(batch.status)"
+                >
                   {{ batch.status }}
                 </span>
-                <span class="inline-flex rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300">
+                <span
+                  class="inline-flex rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300"
+                >
                   {{ batch.trigger }}
                 </span>
               </div>
               <p class="text-xs text-slate-500">
-                scheduled: <code>{{ formatTimestamp(batch.scheduledFor) }}</code>
-                · started: <code>{{ formatTimestamp(batch.startedAt) }}</code>
-                · finished: <code>{{ formatTimestamp(batch.finishedAt) }}</code>
+                scheduled: <code>{{ formatTimestamp(batch.scheduledFor) }}</code> · started:
+                <code>{{ formatTimestamp(batch.startedAt) }}</code> · finished:
+                <code>{{ formatTimestamp(batch.finishedAt) }}</code>
               </p>
               <p class="text-xs text-slate-500">
-                sources: <code>{{ batch.sourceCount }}</code>
-                · ok: <code>{{ batch.summary.sourcesSucceeded }}</code>
-                · partial: <code>{{ batch.summary.sourcesPartial }}</code>
-                · failed: <code>{{ batch.summary.sourcesFailed }}</code>
+                sources: <code>{{ batch.sourceCount }}</code> · ok:
+                <code>{{ batch.summary.sourcesSucceeded }}</code> · partial:
+                <code>{{ batch.summary.sourcesPartial }}</code> · failed:
+                <code>{{ batch.summary.sourcesFailed }}</code>
               </p>
               <p class="text-xs text-slate-500">
-                items new: <code>{{ batch.summary.itemsNew }}</code>
-                · changed: <code>{{ batch.summary.itemsChanged }}</code>
-                · unchanged: <code>{{ batch.summary.itemsUnchanged }}</code>
-                · failed: <code>{{ batch.summary.itemsFailed }}</code>
+                items new: <code>{{ batch.summary.itemsNew }}</code> · changed:
+                <code>{{ batch.summary.itemsChanged }}</code> · unchanged:
+                <code>{{ batch.summary.itemsUnchanged }}</code> · failed:
+                <code>{{ batch.summary.itemsFailed }}</code>
               </p>
               <p class="text-xs text-slate-500">
-                transcripts: <code>{{ batch.summary.transcriptSucceeded ?? 0 }}</code>/<code>{{ batch.summary.transcriptAttempted ?? 0 }}</code>
-                (<code>{{ formatPercent(batch.summary.transcriptSucceeded, batch.summary.transcriptAttempted) }}</code>)
-                · innertube: <code>{{ batch.summary.transcriptSucceededInnerTubeAndroid ?? 0 }}</code>
-                · api: <code>{{ batch.summary.transcriptSucceededApi ?? 0 }}</code>
-                · captions: <code>{{ batch.summary.transcriptSucceededCaptionsXml ?? 0 }}</code>
-                · timestamped: <code>{{ batch.summary.transcriptSucceededWithTimestamps ?? 0 }}</code>
-                · desc fallback: <code>{{ batch.summary.transcriptDescriptionFallback ?? 0 }}</code>
+                transcripts: <code>{{ batch.summary.transcriptSucceeded ?? 0 }}</code>/<code>{{
+                  batch.summary.transcriptAttempted ?? 0
+                }}</code>
+                (<code>{{
+                  formatPercent(
+                    batch.summary.transcriptSucceeded,
+                    batch.summary.transcriptAttempted,
+                  )
+                }}</code
+                >) · innertube:
+                <code>{{ batch.summary.transcriptSucceededInnerTubeAndroid ?? 0 }}</code> · api:
+                <code>{{ batch.summary.transcriptSucceededApi ?? 0 }}</code> · captions:
+                <code>{{ batch.summary.transcriptSucceededCaptionsXml ?? 0 }}</code> · timestamped:
+                <code>{{ batch.summary.transcriptSucceededWithTimestamps ?? 0 }}</code> · desc
+                fallback: <code>{{ batch.summary.transcriptDescriptionFallback ?? 0 }}</code>
               </p>
               <p class="text-xs text-slate-500">
                 idempotency: <code>{{ batch.idempotencyKey }}</code>
@@ -873,14 +955,21 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
                 :disabled="selectedBatchPending"
                 @click="inspectBatch(batch._id)"
               >
-                {{ selectedBatchPending && selectedBatchId === batch._id ? 'Loading…' : 'Inspect Runs' }}
+                {{
+                  selectedBatchPending && selectedBatchId === batch._id
+                    ? 'Loading…'
+                    : 'Inspect Runs'
+                }}
               </button>
             </div>
           </div>
         </li>
       </ul>
 
-      <div v-if="selectedBatchDetail" class="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+      <div
+        v-if="selectedBatchDetail"
+        class="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4"
+      >
         <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h3 class="text-sm font-medium text-slate-200">
             Batch Detail: <code>{{ selectedBatchDetail.batch._id }}</code>
@@ -908,34 +997,55 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
               <div class="space-y-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="text-sm text-slate-100">{{ run.source?.name || run.sourceId }}</span>
-                  <span v-if="run.source" class="inline-flex rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300">
+                  <span
+                    v-if="run.source"
+                    class="inline-flex rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300"
+                  >
                     {{ run.source.type }}
                   </span>
-                  <span class="inline-flex rounded-full border px-2 py-0.5 text-[11px]" :class="sourceRunStatusBadgeClass(run.status)">
+                  <span
+                    class="inline-flex rounded-full border px-2 py-0.5 text-[11px]"
+                    :class="sourceRunStatusBadgeClass(run.status)"
+                  >
                     {{ run.status }}
                   </span>
-                  <span class="inline-flex rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300">
+                  <span
+                    class="inline-flex rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300"
+                  >
                     {{ run.trigger }} · attempt {{ run.attempt }}/{{ run.maxAttempts }}
                   </span>
                 </div>
                 <p class="text-xs text-slate-500">
-                  started: <code>{{ formatTimestamp(run.startedAt) }}</code>
-                  · finished: <code>{{ formatTimestamp(run.finishedAt) }}</code>
+                  started: <code>{{ formatTimestamp(run.startedAt) }}</code> · finished:
+                  <code>{{ formatTimestamp(run.finishedAt) }}</code>
                 </p>
                 <p class="text-xs text-slate-500">
-                  stats: discovered <code>{{ run.stats.discovered }}</code> · fetched <code>{{ run.stats.fetched }}</code> · new <code>{{ run.stats.new }}</code> · changed <code>{{ run.stats.changed }}</code> · unchanged <code>{{ run.stats.unchanged }}</code> · failed <code>{{ run.stats.failed }}</code>
+                  stats: discovered <code>{{ run.stats.discovered }}</code> · fetched
+                  <code>{{ run.stats.fetched }}</code> · new <code>{{ run.stats.new }}</code> ·
+                  changed <code>{{ run.stats.changed }}</code> · unchanged
+                  <code>{{ run.stats.unchanged }}</code> · failed
+                  <code>{{ run.stats.failed }}</code>
                 </p>
                 <p
-                  v-if="run.source?.type === 'youtube_channel' || (run.stats.transcriptAttempted ?? 0) > 0 || (run.stats.transcriptDescriptionFallback ?? 0) > 0"
+                  v-if="
+                    run.source?.type === 'youtube_channel' ||
+                    (run.stats.transcriptAttempted ?? 0) > 0 ||
+                    (run.stats.transcriptDescriptionFallback ?? 0) > 0
+                  "
                   class="text-xs text-slate-500"
                 >
-                  transcripts <code>{{ run.stats.transcriptSucceeded ?? 0 }}</code>/<code>{{ run.stats.transcriptAttempted ?? 0 }}</code>
-                  (<code>{{ formatPercent(run.stats.transcriptSucceeded, run.stats.transcriptAttempted) }}</code>)
-                  · innertube <code>{{ run.stats.transcriptSucceededInnerTubeAndroid ?? 0 }}</code>
-                  · api <code>{{ run.stats.transcriptSucceededApi ?? 0 }}</code>
-                  · captions <code>{{ run.stats.transcriptSucceededCaptionsXml ?? 0 }}</code>
-                  · timestamped <code>{{ run.stats.transcriptSucceededWithTimestamps ?? 0 }}</code>
-                  · desc fallback <code>{{ run.stats.transcriptDescriptionFallback ?? 0 }}</code>
+                  transcripts <code>{{ run.stats.transcriptSucceeded ?? 0 }}</code>/<code>{{
+                    run.stats.transcriptAttempted ?? 0
+                  }}</code>
+                  (<code>{{
+                    formatPercent(run.stats.transcriptSucceeded, run.stats.transcriptAttempted)
+                  }}</code
+                  >) · innertube
+                  <code>{{ run.stats.transcriptSucceededInnerTubeAndroid ?? 0 }}</code> · api
+                  <code>{{ run.stats.transcriptSucceededApi ?? 0 }}</code> · captions
+                  <code>{{ run.stats.transcriptSucceededCaptionsXml ?? 0 }}</code> · timestamped
+                  <code>{{ run.stats.transcriptSucceededWithTimestamps ?? 0 }}</code> · desc
+                  fallback <code>{{ run.stats.transcriptDescriptionFallback ?? 0 }}</code>
                 </p>
                 <p v-if="run.lastError" class="text-xs text-rose-300">
                   last error: {{ run.lastError }}
@@ -949,17 +1059,18 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
 
     <section class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 class="text-sm font-medium text-slate-200">
-          Sources
-        </h2>
+        <h2 class="text-sm font-medium text-slate-200">Sources</h2>
         <div class="flex flex-wrap items-center gap-3 text-xs">
           <label class="inline-flex items-center gap-2 text-slate-300">
-            <input v-model="showOnlyMine" type="checkbox" class="size-4">
+            <input v-model="showOnlyMine" type="checkbox" class="size-4" />
             Show only mine
           </label>
           <label class="inline-flex items-center gap-2 text-slate-300">
             <span>Status</span>
-            <select v-model="statusFilter" class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-slate-200">
+            <select
+              v-model="statusFilter"
+              class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-slate-200"
+            >
               <option value="all">all</option>
               <option value="pending_approval">pending</option>
               <option value="approved">approved</option>
@@ -969,7 +1080,10 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
           </label>
           <label class="inline-flex items-center gap-2 text-slate-300">
             <span>Type</span>
-            <select v-model="typeFilter" class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-slate-200">
+            <select
+              v-model="typeFilter"
+              class="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-slate-200"
+            >
               <option value="all">all</option>
               <option value="website">website</option>
               <option value="youtube_channel">youtube</option>
@@ -978,12 +1092,8 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
         </div>
       </div>
 
-      <div v-if="pending" class="text-sm text-slate-400">
-        Loading sources…
-      </div>
-      <div v-else-if="!sources.length" class="text-sm text-slate-400">
-        No sources found.
-      </div>
+      <div v-if="pending" class="text-sm text-slate-400">Loading sources…</div>
+      <div v-else-if="!sources.length" class="text-sm text-slate-400">No sources found.</div>
       <ul v-else class="space-y-3">
         <li
           v-for="source in sources"
@@ -996,29 +1106,39 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
                 <h3 class="font-medium text-slate-100">
                   {{ source.name }}
                 </h3>
-                <span class="inline-flex rounded-full border px-2 py-0.5 text-[11px]" :class="statusBadgeClass(source.status)">
+                <span
+                  class="inline-flex rounded-full border px-2 py-0.5 text-[11px]"
+                  :class="statusBadgeClass(source.status)"
+                >
                   {{ source.status }}
                 </span>
-                <span class="inline-flex rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300">
+                <span
+                  class="inline-flex rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[11px] text-slate-300"
+                >
                   {{ source.type }}
                 </span>
               </div>
               <p class="text-xs text-slate-400">
-                tenant: <code>{{ source.tenantId }}</code> · created by <code>{{ source.createdByEmail || source.createdByUserId }}</code>
+                tenant: <code>{{ source.tenantId }}</code> · created by
+                <code>{{ source.createdByEmail || source.createdByUserId }}</code>
               </p>
               <p class="text-xs text-slate-500">
-                schedule: <code>{{ source.schedule.frequency }}</code><span v-if="source.schedule.intervalHours"> ({{ source.schedule.intervalHours }}h)</span>
+                schedule: <code>{{ source.schedule.frequency }}</code><span
+                  v-if="source.schedule.intervalHours"
+                >
+                  ({{ source.schedule.intervalHours }}h)</span
+                >
                 · enabled: <code>{{ source.enabled ? 'true' : 'false' }}</code>
               </p>
               <p class="text-xs text-slate-500">
-                last run: <code>{{ formatTimestamp(source.lastRunAt) }}</code>
-                · last success: <code>{{ formatTimestamp(source.lastSuccessAt) }}</code>
-                · last failure: <code>{{ formatTimestamp(source.lastFailureAt) }}</code>
+                last run: <code>{{ formatTimestamp(source.lastRunAt) }}</code> · last success:
+                <code>{{ formatTimestamp(source.lastSuccessAt) }}</code> · last failure:
+                <code>{{ formatTimestamp(source.lastFailureAt) }}</code>
               </p>
               <p class="text-xs text-slate-500">
-                next run: <code>{{ formatTimestamp(source.nextRunAt) }}</code>
-                · approved at: <code>{{ formatTimestamp(source.approvedAt) }}</code>
-                · rejected at: <code>{{ formatTimestamp(source.rejectedAt) }}</code>
+                next run: <code>{{ formatTimestamp(source.nextRunAt) }}</code> · approved at:
+                <code>{{ formatTimestamp(source.approvedAt) }}</code> · rejected at:
+                <code>{{ formatTimestamp(source.rejectedAt) }}</code>
               </p>
               <p v-if="source.lastFailureReason" class="text-xs text-rose-300">
                 last failure: {{ source.lastFailureReason }}
@@ -1026,12 +1146,16 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
               <p v-if="source.rejectionReason" class="text-xs text-rose-300">
                 rejection: {{ source.rejectionReason }}
               </p>
-              <pre class="mt-2 overflow-x-auto rounded border border-slate-800 bg-slate-950 p-2 text-[11px] leading-5 text-slate-300"><code>{{ JSON.stringify(source.crawlConfig, null, 2) }}</code></pre>
+              <pre
+                class="mt-2 overflow-x-auto rounded border border-slate-800 bg-slate-950 p-2 text-[11px] leading-5 text-slate-300"
+              ><code>{{ JSON.stringify(source.crawlConfig, null, 2) }}</code></pre>
             </div>
 
             <div class="flex flex-wrap gap-2">
               <button
-                v-if="adminStatus?.currentUserIsAdmin && source.status === 'approved' && source.enabled"
+                v-if="
+                  adminStatus?.currentUserIsAdmin && source.status === 'approved' && source.enabled
+                "
                 type="button"
                 class="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs text-cyan-100 hover:bg-cyan-500/20 disabled:opacity-60"
                 :disabled="actionPending"

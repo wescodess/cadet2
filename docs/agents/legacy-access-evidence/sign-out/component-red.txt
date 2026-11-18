@@ -1,0 +1,33 @@
+
+ RUN  v4.0.18 <repo>
+
+ ❯ tests/components/auth/SignOutButton.spec.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/components/auth/SignOutButton.spec.ts [ tests/components/auth/SignOutButton.spec.ts ]
+Error: Failed to resolve import "~/components/auth/SignOutButton.vue" from "tests/components/auth/SignOutButton.spec.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: <repo>/tests/components/auth/SignOutButton.spec.ts:5:26
+  2  |  import { computed, ref } from "vue";
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import SignOutButton from "~/components/auth/SignOutButton.vue";
+     |                             ^
+  5  |  const loggedIn = ref(false);
+  6  |  const signOut = vi.fn();
+ ❯ TransformPluginContext._formatLog node_modules/.pnpm/vite@7.3.1_@types+node@25.3.0_jiti@2.6.1_lightningcss@1.31.1_terser@5.46.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/config.js:28999:43
+ ❯ TransformPluginContext.error node_modules/.pnpm/vite@7.3.1_@types+node@25.3.0_jiti@2.6.1_lightningcss@1.31.1_terser@5.46.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/config.js:28996:14
+ ❯ normalizeUrl node_modules/.pnpm/vite@7.3.1_@types+node@25.3.0_jiti@2.6.1_lightningcss@1.31.1_terser@5.46.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/config.js:27119:18
+ ❯ node_modules/.pnpm/vite@7.3.1_@types+node@25.3.0_jiti@2.6.1_lightningcss@1.31.1_terser@5.46.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/config.js:27177:32
+ ❯ TransformPluginContext.transform node_modules/.pnpm/vite@7.3.1_@types+node@25.3.0_jiti@2.6.1_lightningcss@1.31.1_terser@5.46.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/config.js:27145:4
+ ❯ EnvironmentPluginContainer.transform node_modules/.pnpm/vite@7.3.1_@types+node@25.3.0_jiti@2.6.1_lightningcss@1.31.1_terser@5.46.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/config.js:28797:14
+ ❯ loadAndTransform node_modules/.pnpm/vite@7.3.1_@types+node@25.3.0_jiti@2.6.1_lightningcss@1.31.1_terser@5.46.0_yaml@2.9.1/node_modules/vite/dist/node/chunks/config.js:22670:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  20:18:05
+   Duration  3.51s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 3.27s)
+

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 import EvidenceSourceDetail from '@/components/admin/EvidenceSourceDetail.vue'
 import EvidenceSourceList from '@/components/admin/EvidenceSourceList.vue'
+import SignOutButton from '@/components/auth/SignOutButton.vue'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,13 +70,17 @@ const pending = ref(false)
 const detailPending = ref(false)
 const saving = ref(false)
 const actionPending = ref<string | null>(null)
-const feedback = ref<{ tone: 'success' | 'error', message: string } | null>(null)
+const feedback = ref<{ tone: 'success' | 'error'; message: string } | null>(null)
 const searchQuery = ref('')
 const statusFilter = ref<'all' | 'active' | 'paused' | 'stale' | 'pending' | 'rejected'>('all')
 const confirmAction = ref<'pause' | 'remove' | null>(null)
 
-const activeCount = computed(() => sources.value.filter(source => source.lifecycleStatus === 'active').length)
-const staleCount = computed(() => sources.value.filter(source => source.freshness === 'stale').length)
+const activeCount = computed(
+  () => sources.value.filter((source) => source.lifecycleStatus === 'active').length,
+)
+const staleCount = computed(
+  () => sources.value.filter((source) => source.freshness === 'stale').length,
+)
 const mobileShowsDetail = computed(() => detailMode.value !== 'empty')
 const confirmSource = computed(() => selectedDetail.value?.source || null)
 
@@ -107,9 +112,11 @@ const filteredSources = computed(() => {
       return true
     }
 
-    return source.name.toLowerCase().includes(normalizedSearch)
-      || (source.description || '').toLowerCase().includes(normalizedSearch)
-      || source.tags.some(tag => tag.toLowerCase().includes(normalizedSearch))
+    return (
+      source.name.toLowerCase().includes(normalizedSearch) ||
+      (source.description || '').toLowerCase().includes(normalizedSearch) ||
+      source.tags.some((tag) => tag.toLowerCase().includes(normalizedSearch))
+    )
   })
 })
 
@@ -121,7 +128,7 @@ function resolveErrorMessage(error: unknown, fallback: string) {
 function splitCsv(value: string) {
   return value
     .split(',')
-    .map(item => item.trim())
+    .map((item) => item.trim())
     .filter(Boolean)
 }
 
@@ -139,19 +146,19 @@ async function selectSource(sourceId: string) {
   detailPending.value = true
 
   try {
-    const detail = await $fetch<EvidenceSourceDetailRecord>(`/api/admin/rag/sources/${encodeURIComponent(sourceId)}`)
+    const detail = await $fetch<EvidenceSourceDetailRecord>(
+      `/api/admin/rag/sources/${encodeURIComponent(sourceId)}`,
+    )
     selectedSourceId.value = sourceId
     selectedDetail.value = detail
     detailMode.value = 'view'
     draft.value = createEvidenceSourceDraftFromRecord(detail.source)
-  }
-  catch (error) {
+  } catch (error) {
     feedback.value = {
       tone: 'error',
       message: resolveErrorMessage(error, 'Unable to load the evidence source detail.'),
     }
-  }
-  finally {
+  } finally {
     detailPending.value = false
   }
 }
@@ -162,24 +169,24 @@ async function loadPageData() {
   try {
     await Promise.all([loadPathways(), loadSources()])
 
-    if (selectedSourceId.value && sources.value.some(source => source.id === selectedSourceId.value)) {
+    if (
+      selectedSourceId.value &&
+      sources.value.some((source) => source.id === selectedSourceId.value)
+    ) {
       await selectSource(selectedSourceId.value)
-    }
-    else if (detailMode.value === 'view' || detailMode.value === 'edit') {
+    } else if (detailMode.value === 'view' || detailMode.value === 'edit') {
       selectedSourceId.value = null
       selectedDetail.value = null
       detailMode.value = 'empty'
     }
 
     feedback.value = null
-  }
-  catch (error) {
+  } catch (error) {
     feedback.value = {
       tone: 'error',
       message: resolveErrorMessage(error, 'Unable to load the evidence source curation surface.'),
     }
-  }
-  finally {
+  } finally {
     pending.value = false
   }
 }
@@ -330,10 +337,13 @@ async function saveDetail() {
       return
     }
 
-    const detail = await $fetch<EvidenceSourceDetailRecord>(`/api/admin/rag/sources/${encodeURIComponent(selectedSourceId.value)}`, {
-      method: 'PATCH',
-      body: buildUpdatePayload(),
-    })
+    const detail = await $fetch<EvidenceSourceDetailRecord>(
+      `/api/admin/rag/sources/${encodeURIComponent(selectedSourceId.value)}`,
+      {
+        method: 'PATCH',
+        body: buildUpdatePayload(),
+      },
+    )
 
     selectedDetail.value = detail
     detailMode.value = 'view'
@@ -344,14 +354,12 @@ async function saveDetail() {
       tone: 'success',
       message: `${detail.source.name} was updated in the curated evidence inventory.`,
     }
-  }
-  catch (error) {
+  } catch (error) {
     feedback.value = {
       tone: 'error',
       message: resolveErrorMessage(error, 'Unable to save the evidence source.'),
     }
-  }
-  finally {
+  } finally {
     saving.value = false
   }
 }
@@ -377,8 +385,7 @@ async function runSourceAction(action: 'pause' | 'resume' | 'remove' | 'refresh'
         tone: 'success',
         message: 'Manual refresh queued for the selected evidence source.',
       }
-    }
-    else if (action === 'remove') {
+    } else if (action === 'remove') {
       await $fetch(`/api/admin/rag/sources/${encodeURIComponent(selectedSourceId.value)}`, {
         method: 'DELETE',
       })
@@ -393,11 +400,13 @@ async function runSourceAction(action: 'pause' | 'resume' | 'remove' | 'refresh'
         tone: 'success',
         message: `Evidence source ${removedSourceId} was removed from the curated inventory.`,
       }
-    }
-    else {
-      await $fetch(`/api/admin/rag/sources/${encodeURIComponent(selectedSourceId.value)}/${action}`, {
-        method: 'POST',
-      })
+    } else {
+      await $fetch(
+        `/api/admin/rag/sources/${encodeURIComponent(selectedSourceId.value)}/${action}`,
+        {
+          method: 'POST',
+        },
+      )
 
       await loadSources()
       await selectSource(selectedSourceId.value)
@@ -407,14 +416,12 @@ async function runSourceAction(action: 'pause' | 'resume' | 'remove' | 'refresh'
         message: `Evidence source ${action === 'pause' ? 'paused' : 'resumed'} successfully.`,
       }
     }
-  }
-  catch (error) {
+  } catch (error) {
     feedback.value = {
       tone: 'error',
       message: resolveErrorMessage(error, `Unable to ${action} the evidence source.`),
     }
-  }
-  finally {
+  } finally {
     actionPending.value = null
     confirmAction.value = null
   }
@@ -425,40 +432,36 @@ if (import.meta.client) {
 
   if (!loggedIn.value) {
     await navigateTo('/auth')
-  }
-  else {
+  } else {
     await loadPageData()
   }
 }
 </script>
 
 <template>
-  <main class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,118,110,0.08),_transparent_42%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)] px-4 py-6 text-slate-900 md:px-6">
+  <main
+    class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,118,110,0.08),_transparent_42%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)] px-4 py-6 text-slate-900 md:px-6"
+  >
     <div class="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
       <aside class="rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-sm backdrop-blur">
         <p class="text-xs font-semibold uppercase tracking-[0.24em] text-teal-700">
           Trust Operations
         </p>
-        <h1 class="mt-2 text-2xl font-semibold text-slate-950">
-          Evidence sources
-        </h1>
+        <h1 class="mt-2 text-2xl font-semibold text-slate-950">Evidence sources</h1>
         <p class="mt-3 text-sm leading-6 text-slate-600">
-          Curate the trusted evidence inventory that supports recommendation rationale without exposing governance mechanics to end users.
+          Curate the trusted evidence inventory that supports recommendation rationale without
+          exposing governance mechanics to end users.
         </p>
 
         <dl class="mt-6 grid grid-cols-2 gap-3 text-sm">
           <div class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-            <dt class="text-xs uppercase tracking-[0.16em] text-slate-500">
-              Active
-            </dt>
+            <dt class="text-xs uppercase tracking-[0.16em] text-slate-500">Active</dt>
             <dd class="mt-1 text-2xl font-semibold text-slate-900">
               {{ activeCount }}
             </dd>
           </div>
           <div class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
-            <dt class="text-xs uppercase tracking-[0.16em] text-slate-500">
-              Stale
-            </dt>
+            <dt class="text-xs uppercase tracking-[0.16em] text-slate-500">Stale</dt>
             <dd class="mt-1 text-2xl font-semibold text-slate-900">
               {{ staleCount }}
             </dd>
@@ -471,9 +474,11 @@ if (import.meta.client) {
             :key="link.href"
             :to="link.href"
             class="flex items-center justify-between rounded-2xl border px-3 py-3 text-sm transition"
-            :class="link.href === '/admin/evidence-sources'
-              ? 'border-teal-200 bg-teal-50 text-teal-900'
-              : 'border-transparent bg-slate-50 text-slate-600 hover:border-slate-200 hover:bg-white'"
+            :class="
+              link.href === '/admin/evidence-sources'
+                ? 'border-teal-200 bg-teal-50 text-teal-900'
+                : 'border-transparent bg-slate-50 text-slate-600 hover:border-slate-200 hover:bg-white'
+            "
           >
             <span>{{ link.label }}</span>
             <span class="text-xs uppercase tracking-[0.16em] text-slate-400">
@@ -481,6 +486,8 @@ if (import.meta.client) {
             </span>
           </NuxtLink>
         </nav>
+
+        <SignOutButton class="mt-6" />
       </aside>
 
       <section class="space-y-5">
@@ -490,11 +497,10 @@ if (import.meta.client) {
               <p class="text-xs font-semibold uppercase tracking-[0.24em] text-teal-700">
                 Admin-only governance surface
               </p>
-              <h2 class="text-3xl font-semibold text-slate-950">
-                Master-detail source curation
-              </h2>
+              <h2 class="text-3xl font-semibold text-slate-950">Master-detail source curation</h2>
               <p class="max-w-3xl text-sm leading-6 text-slate-600">
-                Review trusted sources, inspect freshness and trust scoring, then pause, resume, refresh, edit, or remove them without leaving the governance workspace.
+                Review trusted sources, inspect freshness and trust scoring, then pause, resume,
+                refresh, edit, or remove them without leaving the governance workspace.
               </p>
             </div>
             <Button variant="outline" :disabled="pending" @click="loadPageData">
@@ -506,39 +512,28 @@ if (import.meta.client) {
         <div
           v-if="feedback"
           class="rounded-2xl border px-4 py-3 text-sm shadow-sm"
-          :class="feedback.tone === 'success'
-            ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-            : 'border-rose-200 bg-rose-50 text-rose-700'"
+          :class="
+            feedback.tone === 'success'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+              : 'border-rose-200 bg-rose-50 text-rose-700'
+          "
         >
           {{ feedback.message }}
         </div>
 
         <div class="grid gap-5 lg:grid-cols-[minmax(0,0.45fr)_minmax(0,0.55fr)]">
           <div :class="mobileShowsDetail ? 'hidden lg:block' : 'block'">
-            <div class="mb-4 grid gap-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_200px]">
-              <Input
-                v-model="searchQuery"
-                placeholder="Search sources, tags, or description"
-              />
+            <div
+              class="mb-4 grid gap-3 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm md:grid-cols-[minmax(0,1fr)_200px]"
+            >
+              <Input v-model="searchQuery" placeholder="Search sources, tags, or description" />
               <NativeSelect v-model="statusFilter">
-                <option value="all">
-                  All states
-                </option>
-                <option value="active">
-                  Active
-                </option>
-                <option value="paused">
-                  Paused
-                </option>
-                <option value="stale">
-                  Stale
-                </option>
-                <option value="pending">
-                  Pending
-                </option>
-                <option value="rejected">
-                  Rejected
-                </option>
+                <option value="all">All states</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="stale">Stale</option>
+                <option value="pending">Pending</option>
+                <option value="rejected">Rejected</option>
               </NativeSelect>
             </div>
 
@@ -583,15 +578,15 @@ if (import.meta.client) {
             {{ confirmAction === 'remove' ? 'Remove curated source?' : 'Pause curated source?' }}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {{ confirmAction === 'remove'
-              ? `${confirmSource?.name || 'This source'} will be removed from the evidence inventory and no longer appear in the curation workspace.`
-              : `${confirmSource?.name || 'This source'} will stop participating in active recommendation support until it is resumed.` }}
+            {{
+              confirmAction === 'remove'
+                ? `${confirmSource?.name || 'This source'} will be removed from the evidence inventory and no longer appear in the curation workspace.`
+                : `${confirmSource?.name || 'This source'} will stop participating in active recommendation support until it is resumed.`
+            }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="confirmAction = null">
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel @click="confirmAction = null"> Cancel </AlertDialogCancel>
           <AlertDialogAction @click="confirmAction && runSourceAction(confirmAction)">
             Continue
           </AlertDialogAction>
