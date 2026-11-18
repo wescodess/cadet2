@@ -42,5 +42,186 @@
     "status": 0,
     "files": "[{\"file\": \"/repo/tests/unit/example.spec.ts\"}, {\"file\": \"/repo/tests/unit/missing.spec.ts\"}]",
     "stdout": "{\"numTotalTestSuites\": 1, \"numPassedTestSuites\": 1, \"numFailedTestSuites\": 0, \"numPendingTestSuites\": 0, \"numTotalTests\": 2, \"numPassedTests\": 1, \"numFailedTests\": 0, \"numPendingTests\": 1, \"numTodoTests\": 0, \"snapshot\": {\"added\": 0, \"failure\": false, \"filesAdded\": 0, \"filesRemoved\": 0, \"filesRemovedList\": [], \"filesUnmatched\": 0, \"filesUpdated\": 0, \"matched\": 0, \"total\": 0, \"unchecked\": 0, \"uncheckedKeysByFile\": [], \"unmatched\": 0, \"updated\": 0, \"didUpdate\": false}, \"startTime\": 1794960505011, \"success\": true, \"testResults\": [{\"assertionResults\": [{\"ancestorTitles\": [], \"fullName\": \"positive control\", \"status\": \"passed\", \"title\": \"positive control\", \"duration\": 0.5269579999999223, \"failureMessages\": [], \"meta\": {}}, {\"ancestorTitles\": [], \"fullName\": \"unexecuted regression\", \"status\": \"skipped\", \"title\": \"unexecuted regression\", \"failureMessages\": [], \"meta\": {}}], \"startTime\": 1794960507627, \"endTime\": 1794960507627.5269, \"status\": \"passed\", \"message\": \"\", \"name\": \"/repo/tests/unit/example.spec.ts\"}]}"
-  }
+  },
+  "expected": {
+    "status": 0,
+    "files": [
+      {
+        "file": "/repo/tests/unit/example.spec.ts"
+      }
+    ],
+    "stdout": {
+      "numTotalTestSuites": 1,
+      "numPassedTestSuites": 1,
+      "numFailedTestSuites": 0,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 2,
+      "numPassedTests": 1,
+      "numFailedTests": 0,
+      "numPendingTests": 1,
+      "numTodoTests": 0,
+      "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+      },
+      "startTime": 1794960505011,
+      "success": true,
+      "testResults": [
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [],
+              "fullName": "positive control",
+              "status": "passed",
+              "title": "positive control",
+              "duration": 0.5269579999999223,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "unexecuted regression",
+              "status": "skipped",
+              "title": "unexecuted regression",
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794960507627,
+          "endTime": 1794960507627.5269,
+          "status": "passed",
+          "message": "",
+          "name": "/repo/tests/unit/example.spec.ts"
+        }
+      ]
+    }
+  },
+  "alsoExpected": [
+    {
+      "status": 1,
+      "files": [
+        {
+          "file": "/repo/tests/unit/example.spec.ts"
+        }
+      ],
+      "stdout": {
+        "numTotalTestSuites": 1,
+        "numPassedTestSuites": 0,
+        "numFailedTestSuites": 1,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 1,
+        "numPassedTests": 0,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "snapshot": {
+          "added": 0,
+          "failure": false,
+          "filesAdded": 0,
+          "filesRemoved": 0,
+          "filesRemovedList": [],
+          "filesUnmatched": 0,
+          "filesUpdated": 0,
+          "matched": 0,
+          "total": 0,
+          "unchecked": 0,
+          "uncheckedKeysByFile": [],
+          "unmatched": 0,
+          "updated": 0,
+          "didUpdate": false
+        },
+        "startTime": 1794960508584,
+        "success": false,
+        "testResults": [
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [],
+                "fullName": "focused regression",
+                "status": "failed",
+                "title": "focused regression",
+                "failureMessages": ["Error: [Vitest] Unexpected .only modifier."],
+                "meta": {}
+              }
+            ],
+            "startTime": 1794960508584,
+            "endTime": 1794960508584,
+            "status": "failed",
+            "message": "",
+            "name": "/repo/tests/unit/example.spec.ts"
+          }
+        ]
+      }
+    }
+  ],
+  "cases": [
+    {
+      "name": "preserves a completed Vitest file with zero assertions",
+      "valid": true,
+      "input": {
+        "status": 0,
+        "files": "[{\"file\": \"/repo/tests/unit/example.spec.ts\"}]",
+        "stdout": "{\"numTotalTestSuites\": 1, \"numPassedTestSuites\": 1, \"numFailedTestSuites\": 0, \"numPendingTestSuites\": 0, \"numTotalTests\": 0, \"numPassedTests\": 0, \"numFailedTests\": 0, \"numPendingTests\": 0, \"numTodoTests\": 0, \"snapshot\": {\"added\": 0, \"failure\": false, \"filesAdded\": 0, \"filesRemoved\": 0, \"filesRemovedList\": [], \"filesUnmatched\": 0, \"filesUpdated\": 0, \"matched\": 0, \"total\": 0, \"unchecked\": 0, \"uncheckedKeysByFile\": [], \"unmatched\": 0, \"updated\": 0, \"didUpdate\": false}, \"startTime\": 1794960505011, \"success\": true, \"testResults\": [{\"assertionResults\": [], \"startTime\": 1794960507627, \"endTime\": 1794960507627.5269, \"status\": \"passed\", \"message\": \"\", \"name\": \"/repo/tests/unit/example.spec.ts\"}]}"
+      },
+      "expected": {
+        "status": 0,
+        "files": [
+          {
+            "file": "/repo/tests/unit/example.spec.ts"
+          }
+        ],
+        "stdout": {
+          "numTotalTestSuites": 1,
+          "numPassedTestSuites": 1,
+          "numFailedTestSuites": 0,
+          "numPendingTestSuites": 0,
+          "numTotalTests": 0,
+          "numPassedTests": 0,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "snapshot": {
+            "added": 0,
+            "failure": false,
+            "filesAdded": 0,
+            "filesRemoved": 0,
+            "filesRemovedList": [],
+            "filesUnmatched": 0,
+            "filesUpdated": 0,
+            "matched": 0,
+            "total": 0,
+            "unchecked": 0,
+            "uncheckedKeysByFile": [],
+            "unmatched": 0,
+            "updated": 0,
+            "didUpdate": false
+          },
+          "startTime": 1794960505011,
+          "success": true,
+          "testResults": [
+            {
+              "assertionResults": [],
+              "startTime": 1794960507627,
+              "endTime": 1794960507627.5269,
+              "status": "passed",
+              "message": "",
+              "name": "/repo/tests/unit/example.spec.ts"
+            }
+          ]
+        }
+      }
+    }
+  ]
 }

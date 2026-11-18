@@ -18,5 +18,15 @@
       "ignored": true,
       "inferredParser": null
     }
+  ],
+  "expected": {
+    "ignored": false,
+    "inferredParser": "typescript"
+  },
+  "alsoExpected": [
+    {
+      "ignored": true,
+      "inferredParser": null
+    }
   ]
 }

@@ -1,5 +1,24 @@
 {
-  "valid": { "semi": false, "singleQuote": true, "trailingComma": "all", "printWidth": 100 },
-  "invalid": [{ "semi": false, "singleQuote": true, "trailingComma": "all", "printWidth": 0 }],
-  "alsoValid": []
+  "valid": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100
+  },
+  "invalid": [
+    {
+      "semi": false,
+      "singleQuote": true,
+      "trailingComma": "all",
+      "printWidth": 0
+    }
+  ],
+  "alsoValid": [],
+  "expected": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100
+  },
+  "alsoExpected": []
 }

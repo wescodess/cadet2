@@ -76,9 +76,10 @@ describe('quality tool parsers', () => {
       )
       for (const fixtureCase of fixture.cases ?? []) {
         it(fixtureCase.name, () => {
-          const check = expect(() => parse(fixtureCase.input))
-          if (fixtureCase.valid) check.not.toThrow()
-          else check.toThrow(/Invalid /)
+          if (fixtureCase.valid) {
+            expect(fixtureCase).toHaveProperty('expected')
+            expect(parse(fixtureCase.input)).toStrictEqual(fixtureCase.expected)
+          } else expect(() => parse(fixtureCase.input)).toThrow(/Invalid /)
         })
       }
       it('declares and checks independent completeness coverage', () => {
@@ -90,9 +91,13 @@ describe('quality tool parsers', () => {
           expect(completeness[file].length).toBeGreaterThan(20)
         }
       })
-      it('accepts valid tool output', () => {
-        for (const valid of [fixture.valid, ...fixture.alsoValid])
-          expect(() => parse(valid)).not.toThrow()
+      it('preserves the exact result of every valid tool output', () => {
+        expect(fixture).toHaveProperty('expected')
+        expect(fixture.alsoExpected).toHaveLength(fixture.alsoValid.length)
+        expect(parse(fixture.valid)).toStrictEqual(fixture.expected)
+        fixture.alsoValid.forEach((input, index) => {
+          expect(parse(input)).toStrictEqual(fixture.alsoExpected[index])
+        })
       })
       it('rejects the shared malformed corpus and tool-specific inconsistencies', () => {
         for (const value of [...malformedInputs(fixture.valid), ...fixture.invalid])

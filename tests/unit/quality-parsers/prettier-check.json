@@ -1,5 +1,7 @@
 {
   "valid": true,
   "invalid": [],
-  "alsoValid": [false]
+  "alsoValid": [false],
+  "expected": true,
+  "alsoExpected": [false]
 }

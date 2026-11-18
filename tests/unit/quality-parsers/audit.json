@@ -108,6 +108,110 @@
         "stdout": "{\"actions\": [{\"action\": \"review\", \"module\": \"minimatch\", \"resolves\": [{\"id\": 1113540, \"path\": \". > parent@2.0.0 > minimatch@1.0.0\", \"dev\": true, \"optional\": false, \"bundled\": false}]}], \"advisories\": {\"1113540\": {\"findings\": [{\"version\": \"1.0.0\", \"paths\": [\". > minimatch@1.0.0\"]}], \"found_by\": null, \"deleted\": null, \"references\": \"fixture\", \"created\": \"2026-02-26T22:10:18.000Z\", \"id\": 1113540, \"npm_advisory_id\": null, \"overview\": \"fixture\", \"reported_by\": null, \"title\": \"minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments\", \"metadata\": null, \"cves\": [\"CVE-2026-27903\"], \"access\": \"public\", \"severity\": \"high\", \"module_name\": \"minimatch\", \"vulnerable_versions\": \">=5.0.0 <5.1.8\", \"github_advisory_id\": \"GHSA-7r86-cg39-jmmj\", \"recommendation\": \"fixture\", \"patched_versions\": \">=5.1.8\", \"updated\": \"2026-02-26T22:10:20.000Z\", \"cvss\": {\"score\": 7.5, \"vectorString\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H\"}, \"cwe\": [\"CWE-407\"], \"url\": \"https://github.com/advisories/GHSA-7r86-cg39-jmmj\"}}, \"muted\": [], \"metadata\": {\"vulnerabilities\": {\"info\": 0, \"low\": 0, \"moderate\": 0, \"high\": 1, \"critical\": 0}, \"dependencies\": 1, \"devDependencies\": 0, \"optionalDependencies\": 0, \"totalDependencies\": 1}}",
         "stderr": "",
         "packages": ["minimatch@1.0.0"]
+      },
+      "expected": {
+        "status": 1,
+        "stdout": {
+          "actions": [
+            {
+              "action": "review",
+              "module": "minimatch",
+              "resolves": [
+                {
+                  "id": 1113540,
+                  "path": ". > parent@2.0.0 > minimatch@1.0.0",
+                  "dev": true,
+                  "optional": false,
+                  "bundled": false
+                }
+              ]
+            }
+          ],
+          "advisories": {
+            "1113540": {
+              "findings": [
+                {
+                  "version": "1.0.0",
+                  "paths": [". > minimatch@1.0.0"]
+                }
+              ],
+              "found_by": null,
+              "deleted": null,
+              "references": "fixture",
+              "created": "2026-02-26T22:10:18.000Z",
+              "id": 1113540,
+              "npm_advisory_id": null,
+              "overview": "fixture",
+              "reported_by": null,
+              "title": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
+              "metadata": null,
+              "cves": ["CVE-2026-27903"],
+              "access": "public",
+              "severity": "high",
+              "module_name": "minimatch",
+              "vulnerable_versions": ">=5.0.0 <5.1.8",
+              "github_advisory_id": "GHSA-7r86-cg39-jmmj",
+              "recommendation": "fixture",
+              "patched_versions": ">=5.1.8",
+              "updated": "2026-02-26T22:10:20.000Z",
+              "cvss": {
+                "score": 7.5,
+                "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+              },
+              "cwe": ["CWE-407"],
+              "url": "https://github.com/advisories/GHSA-7r86-cg39-jmmj"
+            }
+          },
+          "muted": [],
+          "metadata": {
+            "vulnerabilities": {
+              "info": 0,
+              "low": 0,
+              "moderate": 0,
+              "high": 1,
+              "critical": 0
+            },
+            "dependencies": 1,
+            "devDependencies": 0,
+            "optionalDependencies": 0,
+            "totalDependencies": 1
+          }
+        },
+        "stderr": "",
+        "packages": ["minimatch@1.0.0"]
+      }
+    },
+    {
+      "name": "preserves a completed audit with zero advisories",
+      "valid": true,
+      "input": {
+        "status": 0,
+        "stdout": "{\"actions\": [], \"advisories\": {}, \"muted\": [], \"metadata\": {\"vulnerabilities\": {\"info\": 0, \"low\": 0, \"moderate\": 0, \"high\": 0, \"critical\": 0}, \"dependencies\": 1, \"devDependencies\": 0, \"optionalDependencies\": 0, \"totalDependencies\": 1}}",
+        "stderr": "",
+        "packages": ["minimatch@1.0.0"]
+      },
+      "expected": {
+        "status": 0,
+        "stdout": {
+          "actions": [],
+          "advisories": {},
+          "muted": [],
+          "metadata": {
+            "vulnerabilities": {
+              "info": 0,
+              "low": 0,
+              "moderate": 0,
+              "high": 0,
+              "critical": 0
+            },
+            "dependencies": 1,
+            "devDependencies": 0,
+            "optionalDependencies": 0,
+            "totalDependencies": 1
+          }
+        },
+        "stderr": "",
+        "packages": ["minimatch@1.0.0"]
       }
     }
   ],
@@ -116,5 +220,149 @@
     "stdout": "{\"actions\": [{\"action\": \"review\", \"module\": \"minimatch\", \"resolves\": [{\"id\": 1113540, \"path\": \". > minimatch@1.0.0\", \"dev\": true, \"optional\": false, \"bundled\": false}]}], \"advisories\": {\"1113540\": {\"findings\": [{\"version\": \"1.0.0\", \"paths\": [\". > minimatch@1.0.0\"]}], \"found_by\": null, \"deleted\": null, \"references\": \"fixture\", \"created\": \"2026-02-26T22:10:18.000Z\", \"id\": 1113540, \"npm_advisory_id\": null, \"overview\": \"fixture\", \"reported_by\": null, \"title\": \"minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments\", \"metadata\": null, \"cves\": [\"CVE-2026-27903\"], \"access\": \"public\", \"severity\": \"high\", \"module_name\": \"minimatch\", \"vulnerable_versions\": \">=5.0.0 <5.1.8\", \"github_advisory_id\": \"GHSA-7r86-cg39-jmmj\", \"recommendation\": \"fixture\", \"patched_versions\": \">=5.1.8\", \"updated\": \"2026-02-26T22:10:20.000Z\", \"cvss\": {\"score\": 7.5, \"vectorString\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H\"}, \"cwe\": [\"CWE-407\"], \"url\": \"https://github.com/advisories/GHSA-7r86-cg39-jmmj\"}}, \"muted\": [], \"metadata\": {\"vulnerabilities\": {\"info\": 0, \"low\": 0, \"moderate\": 0, \"high\": 1, \"critical\": 0}, \"dependencies\": 1, \"devDependencies\": 0, \"optionalDependencies\": 0, \"totalDependencies\": 1}}",
     "stderr": "",
     "packages": ["minimatch@1.0.0", "omitted@2.0.0"]
-  }
+  },
+  "expected": {
+    "status": 1,
+    "stdout": {
+      "actions": [
+        {
+          "action": "review",
+          "module": "minimatch",
+          "resolves": [
+            {
+              "id": 1113540,
+              "path": ". > minimatch@1.0.0",
+              "dev": true,
+              "optional": false,
+              "bundled": false
+            }
+          ]
+        }
+      ],
+      "advisories": {
+        "1113540": {
+          "findings": [
+            {
+              "version": "1.0.0",
+              "paths": [". > minimatch@1.0.0"]
+            }
+          ],
+          "found_by": null,
+          "deleted": null,
+          "references": "fixture",
+          "created": "2026-02-26T22:10:18.000Z",
+          "id": 1113540,
+          "npm_advisory_id": null,
+          "overview": "fixture",
+          "reported_by": null,
+          "title": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
+          "metadata": null,
+          "cves": ["CVE-2026-27903"],
+          "access": "public",
+          "severity": "high",
+          "module_name": "minimatch",
+          "vulnerable_versions": ">=5.0.0 <5.1.8",
+          "github_advisory_id": "GHSA-7r86-cg39-jmmj",
+          "recommendation": "fixture",
+          "patched_versions": ">=5.1.8",
+          "updated": "2026-02-26T22:10:20.000Z",
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+          },
+          "cwe": ["CWE-407"],
+          "url": "https://github.com/advisories/GHSA-7r86-cg39-jmmj"
+        }
+      },
+      "muted": [],
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 1,
+          "critical": 0
+        },
+        "dependencies": 1,
+        "devDependencies": 0,
+        "optionalDependencies": 0,
+        "totalDependencies": 1
+      }
+    },
+    "stderr": "",
+    "packages": ["minimatch@1.0.0"]
+  },
+  "alsoExpected": [
+    {
+      "status": 1,
+      "stdout": {
+        "actions": [
+          {
+            "action": "review",
+            "module": "minimatch",
+            "resolves": [
+              {
+                "id": 1113540,
+                "path": ". > minimatch@1.0.0",
+                "dev": true,
+                "optional": false,
+                "bundled": false
+              }
+            ]
+          }
+        ],
+        "advisories": {
+          "1113540": {
+            "findings": [
+              {
+                "version": "1.0.0",
+                "paths": [". > minimatch@1.0.0"]
+              }
+            ],
+            "found_by": null,
+            "deleted": null,
+            "references": "fixture",
+            "created": "2026-02-26T22:10:18.000Z",
+            "id": 1113540,
+            "npm_advisory_id": null,
+            "overview": "fixture",
+            "reported_by": null,
+            "title": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
+            "metadata": null,
+            "cves": ["CVE-2026-27903"],
+            "access": "public",
+            "severity": "high",
+            "module_name": "minimatch",
+            "vulnerable_versions": ">=5.0.0 <5.1.8",
+            "github_advisory_id": "GHSA-7r86-cg39-jmmj",
+            "recommendation": "fixture",
+            "patched_versions": ">=5.1.8",
+            "updated": "2026-02-26T22:10:20.000Z",
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "cwe": ["CWE-407"],
+            "url": "https://github.com/advisories/GHSA-7r86-cg39-jmmj"
+          }
+        },
+        "muted": [],
+        "metadata": {
+          "vulnerabilities": {
+            "info": 0,
+            "low": 0,
+            "moderate": 0,
+            "high": 1,
+            "critical": 0
+          },
+          "dependencies": 2,
+          "devDependencies": 0,
+          "optionalDependencies": 0,
+          "totalDependencies": 2
+        }
+      },
+      "stderr": "",
+      "packages": ["minimatch@1.0.0", "omitted@2.0.0"]
+    }
+  ]
 }

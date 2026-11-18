@@ -47,5 +47,23 @@
       "stdout": "",
       "stderr": ""
     }
+  ],
+  "expected": {
+    "status": 2,
+    "stdout": [
+      {
+        "line": "app/fixture.ts(1,2): error TS2322: Fixture diagnostic",
+        "file": "app/fixture.ts",
+        "code": "TS2322"
+      }
+    ],
+    "stderr": ""
+  },
+  "alsoExpected": [
+    {
+      "status": 0,
+      "stdout": [],
+      "stderr": ""
+    }
   ]
 }

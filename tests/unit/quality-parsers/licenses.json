@@ -67,6 +67,61 @@
         "packages": ["fixture@1.0.0"],
         "stdout": "{\"MIT\": [{\"name\": \"fixture\", \"versions\": [\"1.0.0\", \"1.0.0\"]}]}"
       }
+    },
+    {
+      "name": "accepts a package license matching its category",
+      "valid": true,
+      "input": {
+        "packages": ["fixture@1.0.0"],
+        "stdout": "{\"MIT\":[{\"name\":\"fixture\",\"versions\":[\"1.0.0\"],\"license\":\"MIT\"}]}"
+      },
+      "expected": {
+        "MIT": [
+          {
+            "name": "fixture",
+            "versions": ["1.0.0"],
+            "license": "MIT"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rejects GPL package hidden in MIT category",
+      "valid": false,
+      "input": {
+        "packages": ["fixture@1.0.0"],
+        "stdout": "{\"MIT\":[{\"name\":\"fixture\",\"versions\":[\"1.0.0\"],\"license\":\"GPL-3.0\"}]}"
+      }
+    },
+    {
+      "name": "rejects MIT package in ISC category",
+      "valid": false,
+      "input": {
+        "packages": ["fixture@1.0.0"],
+        "stdout": "{\"ISC\":[{\"name\":\"fixture\",\"versions\":[\"1.0.0\"],\"license\":\"MIT\"}]}"
+      }
+    }
+  ],
+  "expected": {
+    "MIT": [
+      {
+        "name": "fixture",
+        "versions": ["1.0.0"]
+      }
+    ]
+  },
+  "alsoExpected": [
+    {
+      "MIT": [
+        {
+          "name": "fixture",
+          "versions": ["1.0.0"]
+        },
+        {
+          "name": "omitted",
+          "versions": ["2.0.0"]
+        }
+      ]
     }
   ]
 }
