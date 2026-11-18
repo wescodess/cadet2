@@ -1,0 +1,16 @@
+
+ RUN  v4.0.18 /private/tmp/fix-pr55-b2r2
+
+ ✓ tests/unit/quality-parsers.spec.mjs (60 tests) 30ms
+ ✓ tests/unit/quality-policy.spec.mjs (5 tests) 2505ms
+     ✓ counts every skipped test and todo, including suite children and dynamic skips  385ms
+     ✓ forbids 'options only' through Vitest  603ms
+     ✓ forbids 'modifier only' through Vitest  599ms
+     ✓ requires a ticket for each source skip even when its condition does not skip at runtime  519ms
+     ✓ accepts ticket references without removing skips from runtime accounting  398ms
+
+ Test Files  2 passed (2)
+      Tests  65 passed (65)
+   Start at  19:17:38
+   Duration  2.85s (transform 165ms, setup 0ms, import 428ms, tests 2.54s, environment 0ms)
+

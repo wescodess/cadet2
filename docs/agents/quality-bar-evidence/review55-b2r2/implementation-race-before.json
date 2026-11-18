@@ -1,0 +1,4 @@
+{
+  "exits": [0, 0],
+  "publisher": "POSITIVE: {\"status\":0,\"stdout\":\"8.30.1\\n\"}\nAFTER STALE REMOVE: {\"status\":null,\"error\":\"ENOENT\",\"exists\":false}\n"
+}

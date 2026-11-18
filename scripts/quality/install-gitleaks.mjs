@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync
 import { join, resolve } from 'node:path'
 import { parse as parseVersion } from './gitleaks-version.parser.mjs'
 import { parse as parseRelease } from './gitleaks-release.parser.mjs'
-import { run } from './common.mjs'
+import { outputDir, run } from './common.mjs'
 
 export const version = '8.30.1'
 const archives = {
@@ -34,20 +34,17 @@ function verifyBinary(binary, checksum) {
   if (installedVersion(binary) !== version) throw new Error('Unexpected gitleaks version')
 }
 
-export async function gitleaks() {
-  const archive = archives[`${process.platform}-${process.arch}`]
-  if (!archive)
-    throw new Error(`Unsupported gitleaks platform: ${process.platform}-${process.arch}`)
-  const directory = resolve('.cache', 'gitleaks', version)
-  const binary = join(directory, 'gitleaks')
+function verifiedArchive(path, checksum) {
   try {
-    verifyBinary(binary, archive[2])
-    return binary
-  } catch {
-    rmSync(binary, { force: true })
+    return createHash('sha256').update(readFileSync(path)).digest('hex') === checksum
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+    return false
   }
-  mkdirSync(directory, { recursive: true })
-  const temporary = mkdtempSync(join(directory, '.install-'))
+}
+
+async function downloadArchive(archive, destination) {
+  const directory = mkdtempSync(join(resolve('.cache', 'gitleaks'), '.download-'))
   try {
     const name = `gitleaks_${version}_${archive[0]}.tar.gz`
     const signal = AbortSignal.timeout(60_000)
@@ -63,18 +60,27 @@ export async function gitleaks() {
       throw new Error('gitleaks release asset does not match pinned archive')
     const response = await fetch(url, { signal })
     if (!response.ok) throw new Error(`gitleaks download failed: ${response.status}`)
-    const bytes = Buffer.from(await response.arrayBuffer())
-    if (createHash('sha256').update(bytes).digest('hex') !== archive[1])
-      throw new Error('gitleaks checksum mismatch')
-    const archivePath = join(temporary, name)
-    writeFileSync(archivePath, bytes)
-    const extract = run('tar', ['-xzf', archivePath, '-C', temporary, 'gitleaks'])
-    if (extract.status !== 0) throw new Error(extract.stderr)
-    const extracted = join(temporary, 'gitleaks')
-    verifyBinary(extracted, archive[2])
-    renameSync(extracted, binary)
-    return binary
+    const temporary = join(directory, name)
+    writeFileSync(temporary, Buffer.from(await response.arrayBuffer()))
+    if (!verifiedArchive(temporary, archive[1])) throw new Error('gitleaks checksum mismatch')
+    if (!verifiedArchive(destination, archive[1])) renameSync(temporary, destination)
   } finally {
-    rmSync(temporary, { recursive: true, force: true })
+    rmSync(directory, { recursive: true, force: true })
   }
+}
+
+export async function gitleaks() {
+  const archive = archives[`${process.platform}-${process.arch}`]
+  if (!archive)
+    throw new Error(`Unsupported gitleaks platform: ${process.platform}-${process.arch}`)
+  const cache = resolve('.cache', 'gitleaks')
+  mkdirSync(cache, { recursive: true })
+  const archivePath = join(cache, `${archive[1]}.tar.gz`)
+  if (!verifiedArchive(archivePath, archive[1])) await downloadArchive(archive, archivePath)
+  const directory = mkdtempSync(join(outputDir, 'gitleaks-'))
+  const extract = run('tar', ['-xzf', archivePath, '-C', directory, 'gitleaks'])
+  if (extract.status !== 0) throw new Error(extract.stderr)
+  const binary = join(directory, 'gitleaks')
+  verifyBinary(binary, archive[2])
+  return binary
 }

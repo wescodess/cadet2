@@ -1,0 +1,19 @@
+[
+  { "name": "test.skip", "source": "test.skip('test.skip', () => {})" },
+  { "name": "options skip", "source": "test('options skip', { skip: true }, () => {})" },
+  { "name": "skipIf", "source": "test.skipIf(true)('skipIf', () => {})" },
+  { "name": "runIf false", "source": "test.runIf(false)('runIf false', () => {})" },
+  { "name": "todo", "source": "test.todo('todo')" },
+  {
+    "name": "describe.skip child",
+    "source": "describe.skip('suite', () => { test('describe.skip child', () => {}) })"
+  },
+  { "name": "concurrent.skip", "source": "test.concurrent.skip('concurrent.skip', () => {})" },
+  { "name": "dynamic ctx.skip", "source": "test('dynamic ctx.skip', (ctx) => { ctx.skip() })" },
+  {
+    "name": "options only",
+    "source": "test('options only', { only: true }, () => {})",
+    "focus": true
+  },
+  { "name": "modifier only", "source": "test.only('modifier only', () => {})", "focus": true }
+]

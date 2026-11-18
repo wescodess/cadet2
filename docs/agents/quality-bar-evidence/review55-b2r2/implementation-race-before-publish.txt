@@ -1,0 +1,2 @@
+POSITIVE: {"status":0,"stdout":"8.30.1\n"}
+AFTER STALE REMOVE: {"status":null,"error":"ENOENT","exists":false}

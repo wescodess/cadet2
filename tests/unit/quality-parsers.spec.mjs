@@ -11,6 +11,8 @@ const fixtures = readdirSync(fixturesDirectory)
   .filter((file) => file.endsWith('.json'))
   .sort()
 const completeness = {
+  'vitest-results.parser.mjs': true,
+  'playwright-list.parser.mjs': true,
   'audit.parser.mjs': true,
   'licenses.parser.mjs': true,
   'lint.parser.mjs': true,

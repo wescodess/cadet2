@@ -1,0 +1,22 @@
+[
+  {
+    "probe": "skip-options",
+    "row": "policy",
+    "exit": 0
+  },
+  {
+    "probe": "skip-options",
+    "row": "runtime",
+    "exit": 0
+  },
+  {
+    "probe": "focus-options",
+    "row": "policy",
+    "exit": 0
+  },
+  {
+    "probe": "focus-options",
+    "row": "runtime",
+    "exit": 1
+  }
+]
