@@ -1,6 +1,6 @@
 # cadet design system: Relay
 
-**Status:** approved by the owner on 2026-11-17. This is the design system for every cadet UI surface, in both portals.
+**Status:** approved by the owner on 2026-11-17, amended on 2026-11-18 (client text floor in [Typography](#4-typography), no-turn style in [Whose turn](#33-whose-turn)). This is the design system for every cadet UI surface, in both portals.
 
 | Read | What it gives you |
 |---|---|
@@ -123,6 +123,21 @@ Rules:
 5. Unassigned files are the practice’s turn: blue, the word “Unassigned”, and an empty person glyph.
 6. Something the client will do later (for example an ECA report that has not arrived) stays amber and says “later”.
 7. Turn labels use the same words on every screen of a portal.
+8. **Nobody holds the turn: neutral.** When nobody holds the turn, and for pending-counsel marks, use the no-turn style below. Turn colours (amber `--caution` for the client, lake blue `--progress` for the representative) are never used for a turn nobody holds.
+
+**No-turn style** (amendment, 2026-11-18). It is built only from existing neutral tokens; there is no turn alias or role for it. It covers the other side of the turn bar while it can’t act (“Priya Raman: Can’t see your answers yet”), a task that can’t start yet (holder word “Not yet”, prefix “Status:”), states that are not confirmed or not sent, “Draft wording, pending counsel” on legal text, and facts not supplied yet. B1’s `docs/design/b1-access-and-intake/approved.html` (PR #162) renders every part.
+
+| Part | Tokens |
+|---|---|
+| TurnBar segment | `--muted` fill, 3 px inset `--border` bottom rule, label `--foreground`, count `--muted-foreground` |
+| TurnDisc | `--card` fill, 2 px dashed `--input` outline, initials or `·` in `--muted-foreground` |
+| Holder word | `--muted-foreground` |
+| StatusChip | `--muted` fill, `--border` outline, word and glyph `--muted-foreground` |
+| Notice | `--muted` fill, `--border` outline, icon `--muted-foreground` |
+| Pending-counsel mark | `circle-dashed` glyph and words in `--muted-foreground` |
+| “Not supplied” mark | `--muted` fill, 1 px dashed `--input` outline, text `--foreground` |
+
+Computed contrast, light / dark: `--muted-foreground` on `--muted` 5.84 / 6.43, on `--card` 6.32 / 6.66; `--foreground` on `--muted` 16.42 / 13.23; the dashed `--input` outline on `--card` 3.30 / 3.56 and on `--muted` 3.05 / 3.43. The segment’s `--border` rule is not a signal; the word and the dashed disc carry the meaning.
 
 ### 3.4 Expression tokens
 
@@ -161,7 +176,9 @@ Tailwind utilities from `tokens.css`: `h-control`, `min-h-control`, `h-chip`, `r
 | Small | 15 on 22, 400 | 13 on 18, 400 | Sources verified as of 1 Nov 2026. |
 | Label | 15 on 20, 500 | 13 on 18, 500 | Passport number |
 
-13 px is the floor for representative secondary text; test it at 200% zoom. The specimen renders this text smaller. Client: holder word, tab labels, wordmark tag and date-tile year at 12 px, date-tile month at 12.5 px, task badge at 10.5 px, turn-disc initials at 9.6 px (24 px disc). Desk: state chips at 12.5 px (12 px small), holder word, sidebar group labels and counts, queue group labels and date-tile year at 12 px, queue row metadata and dates, column headings, footer, sidebar user line and date-tile month at 12.5 px, keyboard hints at 11.5 px, avatar initials at 10.5 px, turn-disc initials at 9.6 px (24 px disc) and 8 px (20 px disc), and Mono IDs at 0.92em (about 12 to 12.9 px). Build those at the specimen sizes and raise them at the first gate that shows them; this is open in `decision.md`.
+**Client text floor** (amendment, 2026-11-18). Meaningful text in the client expression is at least 13 px. The client expression has no 13 px token: `--t-small-size` and `--t-label-size` are 13 px only under `data-expression="representative"`, and the smallest client styles are Small and Label at 15 px. So client text the specimen sets below 13 px uses the client Label size and line height (`--t-label-size`, `--t-label-lh`; 15 on 20), keeping its own colour and weight: the holder word, tab labels, the wordmark tag, the date-tile month and year, and the task-badge count. Where 15 px does not fit a component (the 16 px task badge, the 52 × 56 px date tile, the 56 to 72 px holder column), the component grows; nothing goes below 13 px. Turn-disc and avatar initials are `aria-hidden` and always sit beside the word or name they stand for, so they are not meaningful text and keep the specimen sizes.
+
+**Representative text.** The desk may keep the specimen’s 12 px and 12.5 px text; test it at 200% zoom. As rendered: state chips at 12.5 px (12 px small), holder word, sidebar group labels and counts, queue group labels and date-tile year at 12 px, queue row metadata and dates, column headings, footer, sidebar user line and date-tile month at 12.5 px, and Mono IDs at 0.92em (about 12 to 12.9 px). Desk text below 12 px (keyboard hints at 11.5 px) is not covered by the amendment and stays open in `decision.md`; avatar initials (10.5 px) and turn-disc initials (9.6 px on a 24 px disc, 8 px on a 20 px disc) are `aria-hidden` like the client’s.
 
 ## 5. Spacing
 
@@ -291,7 +308,7 @@ Values below are the specimen’s final computed styles. Representative values a
 
 **TurnBar** (client). A `nav` labelled “Whose turn” directly under the client top bar on every client screen, with two equal links: the client segment (“Your turn” and a count, “1 thing to do”) and the representative segment (“Priya’s turn”, “2 things in progress”). Each segment: turn tint, 3 px inset bottom rule in the turn colour, 32 px disc, label 15 on 20 at 600 in turn ink, count 14 on 19 in `--foreground`, at least 64 px tall; a hairline between segments. When the client owes nothing the left segment is done green: “Nothing for you”, “Priya has it”. Each segment opens the matching filtered list. Long translations wrap (about 110 px at 320 px in French); nothing truncates. If it is made sticky, reserve its height and add it to `scroll-padding-top`.
 
-**Holder.** Ends every list row in both portals, right-aligned in its own column (56 to 72 px wide). A 24 px TurnDisc over the word (12 px, 600, turn ink, breaking only at spaces). A visually hidden prefix makes it read as a sentence: “Whose turn: You”, “Whose turn: Priya”, “Status: Done”, “Status: Signed”. Client words: You, “You, later”, Priya (the representative’s first name), Done, Checked, Signed. Desk words: You, Client, Unassigned, Signed.
+**Holder.** Ends every list row in both portals, right-aligned in its own column (56 to 72 px wide). A 24 px TurnDisc over the word (600, turn ink, breaking only at spaces; 12 px on the desk, the client Label size in the client portal, see [Typography](#4-typography)). When nobody holds the item it uses the no-turn style ([Whose turn](#33-whose-turn)). A visually hidden prefix makes it read as a sentence: “Whose turn: You”, “Whose turn: Priya”, “Status: Done”, “Status: Signed”. Client words: You, “You, later”, Priya (the representative’s first name), Done, Checked, Signed. Desk words: You, Client, Unassigned, Signed.
 
 **CaseTurnLine** (desk). In the case header under the client name: a 20 px disc and “Your turn: review and sign version 3” in turn ink at 13 px, followed by a muted explanation (“The client is waiting on you. Asking a question passes the turn to them.”).
 

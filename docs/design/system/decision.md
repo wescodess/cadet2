@@ -2,7 +2,7 @@
 
 Date: 2026-11-17
 Gate: UI design gate, system creation (round 1: five options; round 2: three variations)
-Status: approved by the owner
+Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18))
 Approved specimen: [approved.html](approved.html)
 Implementer guide: [DESIGN.md](../../../DESIGN.md)
 Tokens: [tokens.css](tokens.css), [tokens.json](tokens.json) (not yet wired into the app)
@@ -16,6 +16,34 @@ The owner's exact words, unedited:
 > go with recomended
 
 Context: the owner wrote this in reply to the orchestrator's standing recommendation, "Relay, satisfied". That recommendation was the one in the round-2 presentation ("Choose 2. Relay"), so the approval covers Relay exactly as rendered in `approved.html`, including the decisions the specimen makes on the open items listed below.
+
+## Amendments 2026-11-18
+
+The owner approved two amendments on 2026-11-18, at the B1 (access and intake) design gate. They are written into `DESIGN.md` sections 3.3 and 4. No token was added or changed, and `approved.html`, the rejected files, `tokens.css` and `tokens.json` are unchanged.
+
+### 1. Client text is at least 13 px
+
+The orchestrator asked:
+
+> Should meaningful text on the Client's screens be at least 13 px? The approved specimen uses 12 px for some Client labels.
+
+The owner answered:
+
+> Yes, Client side only (Recommended)
+
+The Representative side may keep 12 px. The client expression has no 13 px token (`--t-small-size` and `--t-label-size` are 13 px only for the representative), so client text the specimen sets below 13 px uses the client Label size and line height, `--t-label-size` and `--t-label-lh` (15 on 20). Turn-disc and avatar initials are `aria-hidden` beside their word or name and keep the specimen sizes.
+
+### 2. A neutral "no turn" style
+
+The orchestrator asked:
+
+> When nobody holds the turn, and for pending-counsel marks, should the screens use a neutral "no turn" style built from existing tokens?
+
+The owner answered:
+
+> Yes (Recommended)
+
+The style uses only `--muted`, `--muted-foreground`, `--border`, `--input` (dashed outlines), `--card` (disc fill) and `--foreground`. Amber (`--caution`, the client) and lake blue (`--progress`, the representative) are never used for a turn nobody holds. B1's `docs/design/b1-access-and-intake/approved.html` (PR #162) renders every part.
 
 ## What was chosen
 
@@ -94,7 +122,7 @@ Still open, to be decided at the surface gates (not by implementers):
 
 - Whether the turn bar is sticky on scroll. If it is, reserve its height and set `scroll-padding-top` (see build requirements).
 - How the turn bar appears on one-question intake pages. The approval says every client screen; the specimen renders it on Home and Documents only and shows the one-question page as a component without it.
-- Text below the 13 px floor in the specimen, and blue used outside its meaning (see discrepancies 2 and 7).
+- Desk text below 12 px, and blue used outside its meaning (see discrepancies 2 and 7). Client text below 13 px was settled by the 2026-11-18 amendment.
 
 ## Build requirements recorded in the critiques
 
@@ -119,6 +147,7 @@ Found while recording; none changes the approved design. Implementers follow the
 
 1. **Fonts.** The specimen loads IBM Plex from Google Fonts by URL; the critiques require self-hosting. Expected for a specimen; the build must self-host.
 2. **Text below the 13 px floor.** The round-1 Console critique held 13 px as the floor ("nothing goes smaller"). The Relay specimen renders smaller text in both portals (the client's own small size is 15 px): the holder word at 12 px, representative state chips at 12.5 px (12 px small), desk row metadata and the date-tile month at 12.5 px, tab, group and sidebar labels and the date-tile year at 12 px, keyboard hints at 11.5 px, avatar initials and the client task badge at 10.5 px, turn-disc initials at 8 to 9.6 px and Mono IDs at about 12 px. `DESIGN.md` section 4 lists each one. The Relay critique reports no rendered text below its minimum, so it measured against a lower floor. Owner decision needed before the queue and client list surfaces are built.
+   **Settled in part on 2026-11-18:** client text is at least 13 px and the desk may keep 12 px (see [Amendments](#amendments-2026-11-18)). Desk keyboard hints at 11.5 px remain open.
 3. **Sticky bars.** The specimen's turn bar is not sticky and no screen demonstrates `scroll-padding`, so focus-not-obscured is unproven. Requirement 3 applies.
 4. **Turn bar reach.** "Every client screen" is rendered on Home and Documents only; the one-question intake page has no specimen with the turn bar.
 5. **Turn alias names.** The presentation names `--turn-client` and friends; the specimen's token block defines only `--color-turn-*` inside `@theme inline`, and its own CSS maps turns through `data-turn` attributes. `tokens.css` follows the specimen: `--color-turn-*` in `@theme inline`, pointing straight at the roles, and no `--turn-*` variables.
