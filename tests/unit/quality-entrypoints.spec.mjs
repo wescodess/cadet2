@@ -1,4 +1,7 @@
 // @vitest-environment node
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { parse } from 'yaml'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as common from '../../scripts/quality/common.mjs'
 
@@ -110,13 +113,12 @@ describe('test policy composition', () => {
       'server/fixture.spec.cjs',
     ])
     expect(ratchet.mock.calls).toEqual([
-      ['test-policy', { 'tests/unit/fixture.spec.mjs': 2, 'tests/e2e/fixture.spec.ts': 3 }],
       [
         'test-policy',
         {
-          'tests/unit/fixture.spec.mjs': 1,
+          'tests/unit/fixture.spec.mjs': 2,
           'tests/api/fixture.spec.ts': 1,
-          'tests/e2e/fixture.spec.ts': 1,
+          'tests/e2e/fixture.spec.ts': 3,
           'tests/integration/fixture.spec.ts': 1,
           'tests/helpers/plain.ts': 1,
           'app/fixture.test.js': 1,
@@ -145,5 +147,51 @@ describe('test inventory path boundaries', () => {
     await row('test-policy')
     expect(runPlaywright).toHaveBeenCalledWith([])
     expect(scanFile.mock.calls.map(([path]) => path)).toEqual(scan ? [file] : [])
+  })
+})
+
+describe('quality integration contracts', () => {
+  it('uses the pre-push commit for Verify and fetches full history', () => {
+    const workflow = parse(readFileSync('.github/workflows/test.yml', 'utf8'))
+    const steps = workflow.jobs.verify.steps
+    expect(
+      steps.find((step) => step.uses?.startsWith('actions/checkout@')).with['fetch-depth'],
+    ).toBe(0)
+    expect(steps.find((step) => step.run === 'pnpm verify').env.QUALITY_BASE_REF).toBe(
+      "${{ github.event_name == 'push' && github.event.before || format('origin/{0}', github.base_ref || 'dev') }}",
+    )
+  })
+  it('includes modules and layers in the typed lint project', () => {
+    const project = JSON.parse(readFileSync('tsconfig.eslint.json', 'utf8'))
+    expect(project.include).toEqual(expect.arrayContaining(['modules/**/*', 'layers/**/*']))
+  })
+  it('documents the default-branch prerequisite for the weekly scan', () => {
+    const docs = readFileSync('docs/agents/quality-bar.md', 'utf8')
+    expect(docs).toMatch(/schedule runs only (?:once|when) the workflow is on the default branch/)
+  })
+  it.each([
+    ["it.skip('ticketed #23', () => {})", 1, {}],
+    ["test.skip('ticketed #27', () => {})", 1, {}],
+    ["test('body', () => { test.skip(true, 'missing setup') })", 0, { fixture: 1 }],
+    ["test.skip('unticketed', () => {})", 3, { fixture: 3 }],
+  ])('combines runtime and source skips for %s', async (text, runtime, expected) => {
+    const directory = mkdtempSync(resolve(common.outputDir, 'composition-'))
+    const file = join(directory, 'fixture.spec.mjs')
+    writeFileSync(file, text)
+    const ratchet = vi.fn()
+    options.sourceFiles = () => [file]
+    options.ratchet = ratchet
+    vi.doMock('../../scripts/quality/test-results.mjs', () => ({
+      runVitest: () => (runtime ? { [file]: runtime } : {}),
+      runPlaywright: () => ({}),
+    }))
+    try {
+      await row('test-policy')
+      expect(ratchet.mock.calls).toEqual([
+        ['test-policy', expected.fixture ? { [file]: expected.fixture } : {}],
+      ])
+    } finally {
+      rmSync(directory, { recursive: true, force: true })
+    }
   })
 })

@@ -98,6 +98,7 @@ jobs:
         timeout-minutes: 15
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          QUALITY_BASE_REF: ${{ github.event_name == 'push' && github.event.before || format('origin/{0}', github.base_ref || 'dev') }}
         run: pnpm verify
 
       - name: Upload verification output

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -36,6 +36,23 @@ function fixture(manifest, options = {}) {
     )
   }
   if (options.lock) writeFileSync(join(root, 'pnpm-lock.yaml'), options.lock)
+  writeFileSync(
+    join(root, 'node_modules/.pnpm/lock.yaml'),
+    readFileSync(join(root, 'pnpm-lock.yaml')),
+  )
+  if (manifest?.name === 'installed-alias-target')
+    renameSync(
+      join(root, 'node_modules/.pnpm/fixture@1.0.0'),
+      join(root, 'node_modules/.pnpm/installed-alias-target@2.0.0'),
+    )
+  if (options.orphan) {
+    const orphan = join(root, 'node_modules/.pnpm/orphan@2.0.0/node_modules/orphan')
+    mkdirSync(orphan, { recursive: true })
+    writeFileSync(
+      join(orphan, 'package.json'),
+      JSON.stringify({ name: 'orphan', version: '2.0.0' }),
+    )
+  }
   return spawnSync(
     process.execPath,
     [
@@ -223,4 +240,10 @@ describe('pnpm package identity edge cases', () => {
       }),
     ).toEqual(['.@0.0.0', 'semver@5.0.0'])
   })
+})
+
+it('ignores orphaned directories absent from the installed lock after dependency changes', () => {
+  const result = fixture({ name: 'fixture', version: '1.0.0' }, { orphan: true })
+  expect(result.status, result.stderr).toBe(0)
+  expect(JSON.parse(result.stdout)).toEqual(['fixture@1.0.0'])
 })

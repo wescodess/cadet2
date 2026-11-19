@@ -54,7 +54,7 @@ function hasTicket(node, roots, source) {
   return false
 }
 
-function inspectSkip(node, roots, source, file, counts) {
+function inspectSkip(node, roots, source, file, counts, ticketed) {
   const names = chain(node.expression)
   if (isInnerCall(node)) return
   const modifier = names.some((name) => ['skip', 'fixme', 'todo', 'skipIf', 'runIf'].includes(name))
@@ -68,14 +68,15 @@ function inspectSkip(node, roots, source, file, counts) {
       ),
   )
   if (!(roots.has(names[0]) && (modifier || options)) && names.at(-1) !== 'skip') return
-  if (!hasTicket(node, roots, source)) count(counts, file)
+  if (hasTicket(node, roots, source)) count(ticketed, file)
+  else count(counts, file)
 }
 
-export function scanFile(file, counts) {
+export function scanFile(file, counts, ticketed = {}) {
   const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
   const roots = testRoots(source)
   function visit(node) {
-    if (ts.isCallExpression(node)) inspectSkip(node, roots, source, file, counts)
+    if (ts.isCallExpression(node)) inspectSkip(node, roots, source, file, counts, ticketed)
     ts.forEachChild(node, visit)
   }
   visit(source)

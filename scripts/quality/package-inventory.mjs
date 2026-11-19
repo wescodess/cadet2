@@ -24,14 +24,28 @@ export function packageInventory() {
   const lock = parse(readFileSync('pnpm-lock.yaml', 'utf8'))
   if (lock.lockfileVersion !== '9.0' || !lock.packages || !lock.snapshots || !lock.importers)
     throw new Error('Unsupported package inventory lockfile')
+  const installedLock = parse(readFileSync('node_modules/.pnpm/lock.yaml', 'utf8'))
+  if (
+    installedLock.lockfileVersion !== '9.0' ||
+    !installedLock.packages ||
+    !installedLock.snapshots ||
+    !installedLock.importers
+  )
+    throw new Error('Unsupported installed package inventory lockfile')
+  const prefixes = Object.keys(installedLock.packages).map((id) => id.replaceAll('/', '+'))
+  if (prefixes.some((prefix) => prefix.length > 120))
+    throw new Error('Unsupported installed package directory name')
   const installed = new Map()
   for (const directory of directories(resolve('node_modules/.pnpm'))) {
-    if (basename(directory) === 'node_modules') continue
+    const name = basename(directory)
+    if (!prefixes.some((prefix) => name === prefix || name.startsWith(`${prefix}_`))) continue
     for (const path of packageDirectories(join(directory, 'node_modules'))) {
       const manifest = JSON.parse(readFileSync(join(path, 'package.json'), 'utf8'))
       const id = `${manifest.name}@${manifest.version}`
       if (!Object.hasOwn(lock.packages, id))
         throw new Error(`Installed package absent from frozen lockfile: ${id}`)
+      if (!Object.hasOwn(installedLock.packages, id))
+        throw new Error(`Installed package absent from installed lockfile: ${id}`)
       installed.set(id, manifest)
     }
   }

@@ -40,13 +40,14 @@ export function files() {
 }
 
 export function sourceFiles() {
-  return files()
-    .filter((file) => !file.startsWith('convex/_generated/'))
-    .filter((file) =>
-      /^(app|server|shared|convex|tests|scripts)\/.*\.(?:[cm]?js|ts|vue)$|^[^/]+\.(?:[cm]?js|ts)$/.test(
-        file,
-      ),
-    )
+  return files().filter((file) => /\.(?:[cm]?[jt]sx?|vue)$/.test(file))
+}
+
+export function qualityBaseRef() {
+  const ref = process.env.QUALITY_BASE_REF || 'origin/dev'
+  if (/^0+$/.test(ref))
+    throw new Error('First push has no prior quality base; set a valid QUALITY_BASE_REF')
+  return ref
 }
 
 export function json(path) {
@@ -65,7 +66,7 @@ export function count(counts, key) {
   counts[key] = (counts[key] ?? 0) + 1
 }
 
-export function ratchet(name, counts) {
+export function ratchet(name, counts, { full = true } = {}) {
   const path = `scripts/quality/baselines/${name}.json`
   const legacy = new Set(git('ls-tree', '-r', '--name-only', baselineCommit).split('\n'))
   for (const key of Object.keys(counts)) {
@@ -85,6 +86,12 @@ export function ratchet(name, counts) {
   for (const [key, value] of Object.entries(counts)) {
     if (value > (baseline.counts[key] ?? 0))
       failures.push(`${key}: ${value} > ${baseline.counts[key] ?? 0}`)
+  }
+  if (full) {
+    for (const [key, allowance] of Object.entries(baseline.counts)) {
+      const value = counts[key] ?? 0
+      if (value < allowance) failures.push(`${key}: lower allowance to ${value}`)
+    }
   }
   if (failures.length) throw new Error(`${name} regression:\n${failures.join('\n')}`)
   console.log(

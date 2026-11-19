@@ -1,8 +1,26 @@
 import { createHash } from 'node:crypto'
-import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, rmSync } from 'node:fs'
+import {
+  mkdtempSync,
+  mkdirSync,
+  copyFileSync,
+  existsSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { files, git, json, main, outputDir, run, writeJSON, writingBaseline } from './common.mjs'
+import {
+  files,
+  git,
+  json,
+  main,
+  outputDir,
+  qualityBaseRef,
+  run,
+  writeJSON,
+  writingBaseline,
+} from './common.mjs'
 import { parse } from './gitleaks.parser.mjs'
 import { gitleaks } from './install-gitleaks.mjs'
 
@@ -12,6 +30,8 @@ function scan(binary, directory, name, args) {
   const report = join(directory, `${name}.json`)
   const result = run(binary, [
     ...args,
+    `--config=${join(directory, 'gitleaks.toml')}`,
+    '--ignore-gitleaks-allow',
     '--no-banner',
     '--report-format=json',
     '--exit-code=42',
@@ -30,11 +50,14 @@ function scan(binary, directory, name, args) {
 main(async () => {
   if (git('rev-parse', '--is-shallow-repository') !== 'false')
     throw new Error('Secret history scan requires a full checkout (fetch-depth: 0)')
-  const binary = await gitleaks()
+  if (['.gitleaksignore', '.gitleaks.toml'].some((file) => existsSync(file)))
+    throw new Error('Repository gitleaks suppression files are forbidden')
   const allBranches = process.argv.includes('--all-branches')
   const directory = mkdtempSync(join(tmpdir(), 'cadet2-secrets-'))
   const found = {}
   try {
+    writeFileSync(join(directory, 'gitleaks.toml'), '[extend]\nuseDefault = true\n')
+    const binary = await gitleaks(directory)
     const history = allBranches ? 'all-branches' : 'history'
     found[history] = scan(binary, directory, history, [
       'git',
@@ -42,7 +65,7 @@ main(async () => {
       '.',
     ])
     if (!allBranches) {
-      const base = process.env.QUALITY_BASE_REF || 'origin/dev'
+      const base = qualityBaseRef()
       const mergeBase = git('merge-base', base, 'HEAD')
       found.diff = scan(binary, directory, 'diff', ['git', `--log-opts=${mergeBase}..HEAD`, '.'])
       for (const file of files()) {

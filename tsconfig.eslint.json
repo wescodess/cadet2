@@ -10,6 +10,8 @@
     "app/**/*.vue",
     "server/**/*.ts",
     "shared/**/*.ts",
+    "modules/**/*",
+    "layers/**/*",
     "tests/**/*.ts",
     "*.ts",
     ".nuxt/**/*.d.ts"

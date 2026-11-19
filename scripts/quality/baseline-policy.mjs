@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { baselineCommit, files, git, json, main, run } from './common.mjs'
+import { baselineCommit, files, git, json, main, qualityBaseRef, run } from './common.mjs'
 
 const date = z
   .string()
@@ -72,7 +72,7 @@ function assertSubset(current, prior, path) {
 }
 
 main(() => {
-  const base = git('merge-base', process.env.QUALITY_BASE_REF || 'origin/dev', 'HEAD')
+  const base = git('merge-base', qualityBaseRef(), 'HEAD')
   const directory = 'scripts/quality/baselines/'
   for (const path of files().filter((path) => path.startsWith(directory))) {
     if (!Object.hasOwn(schemas, path.slice(directory.length)))

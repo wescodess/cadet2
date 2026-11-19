@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync
 import { join, resolve } from 'node:path'
 import { parse as parseVersion } from './gitleaks-version.parser.mjs'
 import { parse as parseRelease } from './gitleaks-release.parser.mjs'
-import { outputDir, run } from './common.mjs'
+import { run } from './common.mjs'
 
 export const version = '8.30.1'
 const archives = {
@@ -81,7 +81,7 @@ async function downloadArchive(archive, destination) {
   }
 }
 
-export async function gitleaks() {
+export async function gitleaks(parent) {
   const archive = archives[`${process.platform}-${process.arch}`]
   if (!archive)
     throw new Error(`Unsupported gitleaks platform: ${process.platform}-${process.arch}`)
@@ -89,7 +89,7 @@ export async function gitleaks() {
   mkdirSync(cache, { recursive: true })
   const archivePath = join(cache, `${archive[1]}.tar.gz`)
   if (!verifiedArchive(archivePath, archive[1])) await downloadArchive(archive, archivePath)
-  const directory = mkdtempSync(join(outputDir, 'gitleaks-'))
+  const directory = mkdtempSync(join(parent, 'gitleaks-'))
   const extract = run('tar', ['-xzf', archivePath, '-C', directory, 'gitleaks'])
   if (extract.status !== 0) throw new Error(extract.stderr)
   const binary = join(directory, 'gitleaks')

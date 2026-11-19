@@ -221,3 +221,8 @@ describe('secret identity anchoring', () => {
     await expect(policy()).rejects.toThrow(/Invalid baseline schema/)
   })
 })
+
+it('rejects an all-zero push base instead of comparing against the pushed head', async () => {
+  vi.stubEnv('QUALITY_BASE_REF', '0'.repeat(40))
+  await expect(policy()).rejects.toThrow(/First push has no prior quality base/)
+})

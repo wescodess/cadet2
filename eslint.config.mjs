@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint'
 import vue from 'eslint-plugin-vue'
 import sonarjs from 'eslint-plugin-sonarjs'
 
-const typedFiles = ['**/*.ts', '**/*.vue']
+const typedFiles = ['**/*.{ts,tsx,mts,cts,vue}']
 
 export default [
   {
@@ -26,6 +26,10 @@ export default [
     ],
   },
   js.configs.recommended,
+  {
+    files: ['**/*.{js,jsx,mjs,cjs}'],
+    languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
+  },
   ...tseslint.configs.strictTypeChecked.map((config) => ({ ...config, files: typedFiles })),
   ...vue.configs['flat/essential'],
   {

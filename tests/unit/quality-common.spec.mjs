@@ -78,11 +78,13 @@ describe('shared quality command boundary', () => {
     ])
     expect(common.sourceFiles()).toEqual([
       'app/a.vue',
+      'convex/_generated/a.ts',
       'convex/new.ts',
       'scripts/a.js',
       'server/a.mjs',
       'shared/a.cjs',
       'tests/a.ts',
+      'vendor/a.ts',
       'z.ts',
     ])
     expect(spawnSync.mock.calls[0][1]).toEqual([
@@ -151,6 +153,42 @@ describe('source inventory boundary cases', () => {
       'config.mjs',
       'config.ts',
       'scripts/file.mjs',
+      'vendor/app/file.ts',
     ])
+  })
+})
+
+describe('full count ratchets', () => {
+  it.each(['types', 'types-convex', 'lint', 'test-policy'])(
+    'requires paid-down %s allowances to be lowered, including absent keys',
+    async (name) => {
+      vi.doUnmock('node:child_process')
+      vi.resetModules()
+      const { json, ratchet } = await import('../../scripts/quality/common.mjs')
+      const counts = json(`scripts/quality/baselines/${name}.json`).counts
+      const [key, value] = Object.entries(counts)[0]
+      const lowered = { ...counts, [key]: value - 1 }
+      expect(() => ratchet(name, lowered)).toThrow(`${key}: lower allowance to ${value - 1}`)
+      expect(() => ratchet(name, lowered, { full: false })).not.toThrow()
+      delete lowered[key]
+      expect(() => ratchet(name, lowered)).toThrow(`${key}: lower allowance to 0`)
+    },
+  )
+  it('selects source extensions in modules, layers and arbitrary directories', () => {
+    const paths = [
+      'modules/a.ts',
+      'layers/a.vue',
+      'lib/a.mts',
+      'lib/a.cts',
+      'lib/a.tsx',
+      'lib/a.jsx',
+      'lib/a.mjs',
+      'lib/a.cjs',
+      'lib/a.js',
+      'lib/a.json',
+      'lib/a.ts.bak',
+    ]
+    spawnSync.mockReturnValue({ status: 0, stdout: paths.join('\0'), stderr: '' })
+    expect(common.sourceFiles()).toEqual(paths.filter((path) => !/json|bak/.test(path)).sort())
   })
 })

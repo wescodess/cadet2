@@ -133,8 +133,8 @@ afterEach(() => {
       expect(retained).not.toContain(secret)
     }
 })
-async function install() {
-  return (await import('../../scripts/quality/install-gitleaks.mjs')).gitleaks()
+async function install(parent = root) {
+  return (await import('../../scripts/quality/install-gitleaks.mjs')).gitleaks(parent)
 }
 function cached(contents) {
   mkdirSync(cache, { recursive: true })
@@ -401,4 +401,12 @@ describe('GitHub release metadata authentication', () => {
       ['verify', 'pnpm verify', '${{ github.token }}'],
     ])
   })
+})
+
+it('extracts the binary only inside the caller-owned private scan directory', async () => {
+  const privateDirectory = path.join(root, 'private')
+  mkdirSync(privateDirectory)
+  const binary = await install(privateDirectory)
+  expect(binary.startsWith(privateDirectory + path.sep)).toBe(true)
+  expect(readdirSync(root).filter((file) => file.startsWith('gitleaks-'))).toEqual([])
 })

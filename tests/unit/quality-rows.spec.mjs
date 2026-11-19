@@ -27,6 +27,7 @@ beforeEach(() => {
     run,
     files: () => [source],
     sourceFiles: () => [source],
+    ratchet: (name, counts) => common.ratchet(name, counts, { full: false }),
     main: (fn) => {
       completion = Promise.resolve().then(fn)
     },
@@ -42,6 +43,7 @@ afterEach(() => {
     vi.doUnmock(`../../scripts/quality/${module}.mjs`)
   vi.doUnmock('eslint')
   vi.restoreAllMocks()
+  vi.unstubAllEnvs()
   rmSync(directory, { recursive: true, force: true })
 })
 
@@ -106,6 +108,9 @@ describe('public quality row entry points preserve parser decisions', () => {
     report[0].filePath = source
     vi.doMock('eslint', () => ({
       ESLint: class {
+        async isPathIgnored() {
+          return false
+        }
         async lintFiles() {
           return report
         }
@@ -256,6 +261,9 @@ describe('quality gate regression boundaries', () => {
       source = report[0].filePath
       vi.doMock('eslint', () => ({
         ESLint: class {
+          async isPathIgnored() {
+            return false
+          }
           async lintFiles() {
             return report
           }
@@ -587,6 +595,9 @@ describe('compiler and linter invocation contracts', () => {
     report[0].fatalErrorCount = change.fatal ? 1 : 0
     vi.doMock('eslint', () => ({
       ESLint: class {
+        async isPathIgnored() {
+          return false
+        }
         async lintFiles() {
           return report
         }
@@ -604,6 +615,9 @@ describe('compiler and linter invocation contracts', () => {
     report[0].filePath = source
     vi.doMock('eslint', () => ({
       ESLint: class {
+        async isPathIgnored() {
+          return false
+        }
         async lintFiles() {
           return report
         }
@@ -623,6 +637,9 @@ describe('compiler and linter invocation contracts', () => {
     process.argv = [process.execPath, 'lint.mjs', source, '--write-baseline']
     vi.doMock('eslint', () => ({
       ESLint: class {
+        async isPathIgnored() {
+          return false
+        }
         lintFiles = lintFiles
       },
     }))
@@ -637,6 +654,9 @@ describe('compiler and linter invocation contracts', () => {
     const lintFiles = vi.fn()
     vi.doMock('eslint', () => ({
       ESLint: class {
+        async isPathIgnored() {
+          return false
+        }
         lintFiles = lintFiles
       },
     }))
@@ -1000,6 +1020,9 @@ describe('writer-only selection and ordinary failures', () => {
     })
     vi.doMock('eslint', () => ({
       ESLint: class {
+        async isPathIgnored() {
+          return false
+        }
         lintFiles = lintFiles
       },
     }))
@@ -1107,4 +1130,125 @@ describe('child exit status boundaries', () => {
     const { runVitest } = await import('../../scripts/quality/test-results.mjs')
     expect(() => runVitest()).toThrow(/Invalid Vitest results/)
   })
+})
+
+describe('repository suppression boundaries', () => {
+  function cleanSecrets() {
+    options.git = (...args) => (args[0] === 'rev-parse' ? 'false' : 'base')
+    options.files = () => []
+    options.json = () => []
+    run.mockImplementation((_command, args) => {
+      writeFileSync(args.find((arg) => arg.startsWith('--report-path=')).slice(14), '[]')
+      return success
+    })
+  }
+  it.each([false, true])(
+    'uses private default rules and ignores allow comments (all branches: %s)',
+    async (all) => {
+      cleanSecrets()
+      if (all) process.argv = [process.execPath, 'secrets.mjs', '--all-branches']
+      let privateDirectory
+      vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
+        gitleaks: async (parent) => {
+          expect(parent).toEqual(expect.any(String))
+          privateDirectory = parent
+          writeFileSync(join(parent, 'gitleaks'), 'fixture executable')
+          return join(parent, 'gitleaks')
+        },
+      }))
+      run.mockImplementation((_command, args) => {
+        expect(args).toContain('--ignore-gitleaks-allow')
+        const config = args.find((arg) => arg.startsWith('--config=')).slice(9)
+        expect(config).toBe(join(privateDirectory, 'gitleaks.toml'))
+        expect(readFileSync(config, 'utf8')).toBe('[extend]\nuseDefault = true\n')
+        writeFileSync(args.find((arg) => arg.startsWith('--report-path=')).slice(14), '[]')
+        return success
+      })
+      await expect(row('secrets')).resolves.toBeUndefined()
+      expect(existsSync(privateDirectory)).toBe(false)
+    },
+  )
+  it.each(
+    ['.gitleaksignore', '.gitleaks.toml'].flatMap((file) =>
+      [false, true].map((all) => ({ file, all })),
+    ),
+  )('refuses root $file before scanning (all branches: $all)', async ({ file, all }) => {
+    cleanSecrets()
+    if (all) process.argv = [process.execPath, 'secrets.mjs', '--all-branches']
+    const installer = vi.fn(async () => 'scanner')
+    vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({ gitleaks: installer }))
+    vi.doMock('node:fs', async (original) => ({
+      ...(await original()),
+      existsSync: (path) => path === file,
+    }))
+    await expect(row('secrets')).rejects.toThrow(
+      'Repository gitleaks suppression files are forbidden',
+    )
+    expect(installer).not.toHaveBeenCalled()
+    expect(run).not.toHaveBeenCalled()
+  })
+  it.each(['/* eslint no-unused-vars: "off" */', '/* eslint no-unused-vars: "off" -- #23 */'])(
+    'rejects inline rule configuration: %s',
+    async (comment) => {
+      writeFileSync(source, comment + '\nexport const fixture = 1\n')
+      const report = fixture('lint').valid.results
+      report[0].filePath = source
+      vi.doMock('eslint', () => ({
+        ESLint: class {
+          async isPathIgnored() {
+            return false
+          }
+          async lintFiles() {
+            return report
+          }
+        },
+      }))
+      await expect(row('lint')).rejects.toThrow(/inline ESLint rule configuration is forbidden/)
+    },
+  )
+  it('rejects an all-zero push base for the secret diff', async () => {
+    cleanSecrets()
+    vi.stubEnv('QUALITY_BASE_REF', '0'.repeat(40))
+    vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
+      gitleaks: async () => 'scanner',
+    }))
+    await expect(row('secrets')).rejects.toThrow(/First push has no prior quality base/)
+  })
+})
+
+it('preserves comment-shaped string literals while rejecting actual inline configurations', async () => {
+  writeFileSync(source, 'export const example = "/* eslint complexity: off */"\n')
+  const report = fixture('lint').valid.results
+  report[0].filePath = source
+  vi.doMock('eslint', () => ({
+    ESLint: class {
+      async isPathIgnored() {
+        return false
+      }
+      async lintFiles() {
+        return report
+      }
+    },
+  }))
+  await expect(row('lint')).resolves.toBeUndefined()
+})
+
+it('lets ESLint ignores determine which selected files enter the lint parser population', async () => {
+  const ignored = 'convex/_generated/ignored.js'
+  options.sourceFiles = () => [source, ignored]
+  const lintFiles = vi.fn(async () => {
+    const report = fixture('lint').valid.results
+    report[0].filePath = source
+    return report
+  })
+  vi.doMock('eslint', () => ({
+    ESLint: class {
+      async isPathIgnored(file) {
+        return file === ignored
+      }
+      lintFiles = lintFiles
+    },
+  }))
+  await expect(row('lint')).resolves.toBeUndefined()
+  expect(lintFiles).toHaveBeenCalledWith([source])
 })
