@@ -13,7 +13,7 @@ Tickets this record serves: #104, #105, #106, #107, #108, #109, #110
 3. Root `DESIGN.md`: the approved Relay design system.
 4. `docs/design/system/` (`approved.html`, `decision.md`, `tokens.css`, `tokens.json`) once PR #161 merges.
 
-`approved.html` wins over the round-1 critique and presentation where they differ. The two amendments below win over `approved.html`.
+`approved.html` wins over the round-1 critique and presentation where they differ. The two amendments below, and the [2026-11-19 decisions](#decisions-from-the-b2-gate-2026-11-19), win over `approved.html`.
 
 ## Approval
 
@@ -96,6 +96,44 @@ How it applies to B1: any no-turn or pending-counsel state uses the neutral styl
 | "Not supplied" mark | `--muted` fill, 1 px dashed `--input` outline, text `--foreground` |
 
 The "not supplied" mark for missing legal facts (operator, privacy contact, retention period) is part of the same treatment and is approved as rendered in `approved.html`; it was not put to the owner as its own question.
+
+## Decisions from the B2 gate, 2026-11-19
+
+The owner answered these at the B2 (practice and preparation) design gate, round 2 (PR #164). They change how B1 is built, not `approved.html`. The system rule is recorded in root `DESIGN.md` and `docs/design/system/decision.md` (PR #161).
+
+### Client text at 15 px, to match B2
+
+The orchestrator asked:
+
+> The approved B1 Checklist uses 14 px for some Client text. B2 now uses 15 px for those. Should B1 be built at 15 px too, so the Client screens match?
+
+The owner answered:
+
+> Yes, match at 15 px (Recommended)
+
+How it applies to B1: meaningful Client text uses the Client's existing 15 px Small (`--t-small-size`, `--t-small-lh`; 15 on 22) or Label (`--t-label-size`, `--t-label-lh`; 15 on 20) token, keeping its own colour and weight, as B2's approved screens do. No token value changes. In the Checklist that is:
+
+| Text in `approved.html` | Set at | Builds at |
+|---|---|---|
+| Section headings ("1. Before you answer", `.c-h`) and the turn tag inside them | 14 px | Label |
+| Eyebrows ("Invitation · expires 19 Nov 2026, 9:14 am", `.eyebrow`) | 14 px | Label |
+| Turn-bar segment detail ("Reply to an invitation", `.rl-seg small`) | 14 on 19 | Small |
+| Task and document row detail (`.c-doc small`, `.c-row small`) | 14 px | Small |
+| Pending-counsel mark ("Draft wording, pending counsel", `.pc`) | 13.5 px | Small |
+
+The holder word and wordmark tag already build at Label under the 2026-11-18 amendment. State chips keep the chip tokens (14.5 and 13.5 px), and `aria-hidden` initials in discs and avatars keep their sizes. Any other Client text a B1 screen adds below 15 px follows the same rule.
+
+### A Representative role starts only after a licence check
+
+The orchestrator asked:
+
+> Should "only after a licence check" also apply when an administrator makes another member a Representative? This design applies it only when someone asks for the role themselves.
+
+The owner answered:
+
+> Yes, always (Recommended)
+
+Any Representative role starts only after a different cadet2 admin checks the licence, no matter who asks. How it applies to B1: wherever the Client sees a Practice member's role (the invitation, the representative card, the sharing choice, the submission receipt), "Representative" and the licence line appear only for a member whose Representative role is in effect. A member whose licence check is still pending shows their current role, for example "Daniel Okafor (Staff)". `approved.html` already shows Priya Raman as a verified Representative, so its screens are unchanged.
 
 ## Files in this record
 
