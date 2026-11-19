@@ -1,5 +1,6 @@
 import { convexToJson } from 'convex/values'
 import { sql } from 'drizzle-orm'
+import { boundedChange, auditText } from '../../../shared/utils/governanceAudit'
 import { getSqlDatabase, type SqlExecutor } from '../database'
 
 import type { AuditActionType, AuditChangeContext, AuditEntityType } from './types'
@@ -17,6 +18,9 @@ type AuditLogRow = {
   changeContextAfter: unknown
   reason: string | null
   timestamp: number | string
+  changeSummary: string | null
+  stateDigests?: { before: string; after: string } | null
+  truncated?: boolean
 }
 
 type CountRow = {
@@ -50,28 +54,13 @@ export type StoredAuditEvent = {
   changeContext: AuditChangeContext
   reason?: string
   timestamp: number
-}
-
-export type StoredAuditEventListResult = {
-  items: StoredAuditEvent[]
-  totalCount: number
-  nextCursor: string | null
-}
-
-export type StoredAuditSummaryResult = {
-  eventsToday: number
-  eventsThisWeek: number
-  mostActiveActor: {
-    userId: string
-    email: string
-    eventCount: number
-  } | null
-  mostChangedEntityType: AuditEntityType
+  changeSummary?: string
+  stateDigests?: { before: string; after: string }
+  truncated?: boolean
 }
 
 function createEventId() {
-  const seed = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
-  return `audit-${seed}`
+  return `audit-${crypto.randomUUID()}`
 }
 
 function normalizePostgresText(value: string) {
@@ -135,23 +124,6 @@ function toNumber(value: number | string | null | undefined) {
   return 0
 }
 
-function parseCursor(value?: string) {
-  if (!value) {
-    return 0
-  }
-
-  const parsed = Number.parseInt(value.trim(), 10)
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
-}
-
-function clampPageSize(value?: number) {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    return 25
-  }
-
-  return Math.max(1, Math.min(100, Math.round(value)))
-}
-
 function parseJsonColumn(value: unknown) {
   if (value === null || value === undefined) {
     return null
@@ -184,12 +156,17 @@ function toStoredAuditEvent(row: AuditLogRow): StoredAuditEvent {
     },
     reason: row.reason || undefined,
     timestamp: toNumber(row.timestamp),
+    changeSummary: row.changeSummary ?? undefined,
+    stateDigests: row.stateDigests ?? undefined,
+    truncated: row.truncated ?? false,
   }
 }
 
 async function requireAuditLogTable(database: SqlExecutor = getSqlDatabase()) {
   try {
-    await database.execute(sql`SELECT 1 FROM "governance_audit_log" LIMIT 0`)
+    await database.execute(
+      sql`SELECT "state_digests", "truncated", "change_summary" FROM "governance_audit_log" LIMIT 0`,
+    )
   } catch {
     throw createError({
       statusCode: 503,
@@ -200,15 +177,19 @@ async function requireAuditLogTable(database: SqlExecutor = getSqlDatabase()) {
 
 const publicGovernancePredicate = sql`"entity_type" IN ('PATHWAY', 'PATHWAY_RULE', 'EVIDENCE_SOURCE')`
 
-function buildWhereClause(filters: {
-  actionType?: AuditActionType
-  entityType?: AuditEntityType
-  actorId?: string
-  entityId?: string
-  search?: string
-  dateFrom?: string
-  dateTo?: string
-}) {
+function buildWhereClause(
+  filters: {
+    actionType?: AuditActionType
+    entityType?: AuditEntityType
+    actorId?: string
+    entityId?: string
+    search?: string
+    dateFrom?: string
+    dateTo?: string
+  },
+  upper?: AuditPosition,
+  before?: AuditPosition,
+) {
   const conditions = [publicGovernancePredicate]
 
   if (filters.actionType) {
@@ -242,7 +223,7 @@ function buildWhereClause(filters: {
   }
 
   if (filters.search?.trim()) {
-    const query = `%${normalizePostgresText(filters.search.trim())}%`
+    const query = `%${normalizePostgresText(filters.search.trim()).replace(/([\\%_])/g, '\\$1')}%`
     conditions.push(sql`(
       "event_id" ILIKE ${query}
       OR "entity_id" ILIKE ${query}
@@ -252,6 +233,15 @@ function buildWhereClause(filters: {
       OR COALESCE("reason", '') ILIKE ${query}
     )`)
   }
+
+  if (upper)
+    conditions.push(
+      sql`("timestamp_ms", "event_id" COLLATE "C") <= (${upper.timestamp}, ${upper.eventId})`,
+    )
+  if (before)
+    conditions.push(
+      sql`("timestamp_ms", "event_id" COLLATE "C") < (${before.timestamp}, ${before.eventId})`,
+    )
 
   return conditions.length > 0 ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
 }
@@ -263,8 +253,25 @@ export async function insertAuditLogEvent(
   await requireAuditLogTable(database)
 
   const eventId = createEventId()
-  const before = normalizeJsonRecord(input.changeContext.before)
-  const after = normalizeJsonRecord(input.changeContext.after)
+  const change = await boundedChange(input.changeContext.before, input.changeContext.after)
+  const before = normalizeJsonRecord(change.changeContext.before)
+  const after = normalizeJsonRecord(change.changeContext.after)
+  const changedKeys = [
+    ...new Set([...Object.keys(before ?? {}), ...Object.keys(after ?? {})]),
+  ].filter((key) => JSON.stringify(before?.[key]) !== JSON.stringify(after?.[key]))
+  const changeSummary = auditText(
+    `${before ? (after ? 'Changed' : 'Deleted') : 'Created'}: ${changedKeys.join(', ')}`,
+    512,
+  )
+  const clockResult = await database.execute(sql`
+    INSERT INTO "governance_audit_clock" ("id", "timestamp_ms")
+    VALUES (1, GREATEST(${Math.round(input.timestamp)}, COALESCE((SELECT MAX("timestamp_ms") + 1 FROM "governance_audit_log"), 0)))
+    ON CONFLICT ("id") DO UPDATE SET "timestamp_ms" = GREATEST(EXCLUDED."timestamp_ms", "governance_audit_clock"."timestamp_ms" + 1)
+    RETURNING "timestamp_ms" AS "timestamp";
+  `)
+  const timestamp = toNumber(
+    (clockResult as { rows: { timestamp: number | string }[] }).rows[0]?.timestamp,
+  )
 
   await database.execute(sql`
     INSERT INTO "governance_audit_log" (
@@ -279,7 +286,7 @@ export async function insertAuditLogEvent(
       "change_context_before",
       "change_context_after",
       "reason",
-      "timestamp_ms"
+      "timestamp_ms", "state_digests", "truncated", "change_summary"
     )
     VALUES (
       ${eventId},
@@ -289,185 +296,118 @@ export async function insertAuditLogEvent(
       ${input.actionType},
       ${input.entityType},
       ${normalizePostgresText(input.entityId)},
-      ${normalizePostgresText(input.entityLabel)},
+      ${auditText(input.entityLabel)},
       ${toJsonbFragment(before)},
       ${toJsonbFragment(after)},
-      ${normalizeOptionalString(input.reason)},
-      ${Math.round(input.timestamp)}
+      ${input.reason ? auditText(input.reason, 512) : null},
+      ${timestamp}, ${JSON.stringify(change.stateDigests)}::jsonb, ${change.truncated}, ${changeSummary}
     );
   `)
 
   return { ok: true as const, eventId }
 }
 
-function auditEventSource(sourceEvents: StoredAuditEvent[]) {
-  const rows = sourceEvents.map((event) => ({
-    event_id: event.eventId,
-    actor_id: event.actorId,
-    actor_email: event.actorEmail ?? null,
-    actor_role: event.actorRole ?? null,
-    action_type: event.actionType,
-    entity_type: event.entityType,
-    entity_id: event.entityId,
-    entity_label: event.entityLabel,
-    change_context_before: event.changeContext.before,
-    change_context_after: event.changeContext.after,
-    reason: event.reason ?? null,
-    timestamp_ms: event.timestamp,
-  }))
-  return sql`(
-    SELECT event_id, actor_id, actor_email, actor_role, action_type, entity_type,
-      entity_id, entity_label, change_context_before, change_context_after, reason, timestamp_ms
-    FROM "governance_audit_log"
-    UNION ALL
-    SELECT * FROM jsonb_to_recordset(${stringifyPostgresJson(rows)}::jsonb) AS sourceEvents(
-      event_id text, actor_id text, actor_email text, actor_role text,
-      action_type text, entity_type text, entity_id text, entity_label text,
-      change_context_before jsonb, change_context_after jsonb, reason text, timestamp_ms bigint
-    )
-  ) AS audit_events`
+export type AuditPosition = { timestamp: number; eventId: string }
+export type AuditStoreFilters = {
+  actionType?: AuditActionType
+  entityType?: AuditEntityType
+  actorId?: string
+  entityId?: string
+  search?: string
+  dateFrom?: string
+  dateTo?: string
 }
+
+const metadataColumns = sql`
+  "event_id" AS "eventId", "actor_id" AS "actorId", "actor_email" AS "actorEmail", "actor_role" AS "actorRole",
+  "action_type" AS "actionType", "entity_type" AS "entityType", "entity_id" AS "entityId", LEFT("entity_label", 1024) AS "entityLabel",
+  LEFT("reason", 512) AS "reason", "timestamp_ms" AS "timestamp", "change_summary" AS "changeSummary"
+`
 
 export async function listStoredAuditEvents(
-  filters: {
-    actionType?: AuditActionType
-    entityType?: AuditEntityType
-    actorId?: string
-    entityId?: string
-    search?: string
-    dateFrom?: string
-    dateTo?: string
-    cursor?: string
-    pageSize?: number
-  },
-  sourceEvents: StoredAuditEvent[],
-): Promise<StoredAuditEventListResult> {
-  await requireAuditLogTable()
-  const source = auditEventSource(sourceEvents)
-
-  const whereClause = buildWhereClause(filters)
-  const offset = parseCursor(filters.cursor)
-  const pageSize = clampPageSize(filters.pageSize)
-
-  const countResult = await db.execute(sql`
-    SELECT COUNT(*)::int AS "count"
-    FROM ${source}
-    ${whereClause};
+  filters: AuditStoreFilters,
+  options: { limit: number; upper?: AuditPosition; before?: AuditPosition; includeCount: boolean },
+) {
+  const database = getSqlDatabase()
+  await requireAuditLogTable(database)
+  const result = await database.execute(sql`
+    SELECT ${metadataColumns}
+    FROM "governance_audit_log" ${buildWhereClause(filters, options.upper, options.before)}
+    ORDER BY "timestamp_ms" DESC, "event_id" COLLATE "C" DESC LIMIT ${options.limit};
   `)
-
-  const rowsResult = await db.execute(sql`
-    SELECT
-      "event_id" AS "eventId",
-      "actor_id" AS "actorId",
-      "actor_email" AS "actorEmail",
-      "actor_role" AS "actorRole",
-      "action_type" AS "actionType",
-      "entity_type" AS "entityType",
-      "entity_id" AS "entityId",
-      "entity_label" AS "entityLabel",
-      "change_context_before" AS "changeContextBefore",
-      "change_context_after" AS "changeContextAfter",
-      "reason" AS "reason",
-      "timestamp_ms" AS "timestamp"
-    FROM ${source}
-    ${whereClause}
-    ORDER BY "timestamp_ms" DESC, "event_id" DESC
-    LIMIT ${pageSize}
-    OFFSET ${offset};
-  `)
-
-  const totalCount = toNumber(((countResult as { rows?: CountRow[] }).rows || [])[0]?.count)
-  const rows = (rowsResult as { rows?: AuditLogRow[] }).rows || []
-  const items = rows.map(toStoredAuditEvent)
-
-  return {
-    items,
-    totalCount,
-    nextCursor: offset + pageSize < totalCount ? String(offset + pageSize) : null,
+  const rows = (result as { rows: AuditLogRow[] }).rows
+  const items = rows.map((row) =>
+    toStoredAuditEvent({ ...row, changeContextBefore: null, changeContextAfter: null }),
+  )
+  const upper =
+    options.upper ??
+    (items[0] ? { timestamp: items[0].timestamp, eventId: items[0].eventId } : undefined)
+  let totalCount = 0
+  if (options.includeCount && upper) {
+    const count = await database.execute(
+      sql`SELECT COUNT(*)::int AS "count" FROM "governance_audit_log" ${buildWhereClause(filters, upper)};`,
+    )
+    totalCount = toNumber((count as { rows: CountRow[] }).rows[0]?.count)
   }
+  return { items, totalCount, upper }
 }
 
-export async function getStoredAuditEvent(eventId: string, sourceEvents: StoredAuditEvent[]) {
-  await requireAuditLogTable()
-  const source = auditEventSource(sourceEvents)
-
-  const result = await db.execute(sql`
-    SELECT
-      "event_id" AS "eventId",
-      "actor_id" AS "actorId",
-      "actor_email" AS "actorEmail",
-      "actor_role" AS "actorRole",
-      "action_type" AS "actionType",
-      "entity_type" AS "entityType",
-      "entity_id" AS "entityId",
-      "entity_label" AS "entityLabel",
-      "change_context_before" AS "changeContextBefore",
-      "change_context_after" AS "changeContextAfter",
-      "reason" AS "reason",
-      "timestamp_ms" AS "timestamp"
-    FROM ${source}
-    WHERE "event_id" = ${normalizePostgresText(eventId)} AND ${publicGovernancePredicate}
-    LIMIT 1;
+export async function getStoredAuditEvent(eventId: string) {
+  const database = getSqlDatabase()
+  await requireAuditLogTable(database)
+  const result = await database.execute(sql`
+    SELECT ${metadataColumns}, "change_context_before" AS "changeContextBefore", "change_context_after" AS "changeContextAfter",
+      "state_digests" AS "stateDigests", "truncated"
+    FROM "governance_audit_log" WHERE "event_id" = ${normalizePostgresText(eventId)} AND ${publicGovernancePredicate} LIMIT 1;
   `)
-
-  const row = ((result as { rows?: AuditLogRow[] }).rows || [])[0]
-  return row ? toStoredAuditEvent(row) : null
+  const row = (result as { rows: AuditLogRow[] }).rows[0]
+  if (!row) return null
+  const event = toStoredAuditEvent(row)
+  if (!event.stateDigests)
+    Object.assign(event, await boundedChange(event.changeContext.before, event.changeContext.after))
+  return event
 }
 
-export async function getStoredAuditSummary(
-  sourceEvents: StoredAuditEvent[],
-): Promise<StoredAuditSummaryResult> {
-  await requireAuditLogTable()
-  const source = auditEventSource(sourceEvents)
+export type AuditSummaryParts = {
+  eventsToday: number
+  eventsThisWeek: number
+  actors: { userId: string; email: string; eventCount: number }[]
+  entities: { entityType: AuditEntityType; eventCount: number }[]
+}
 
-  const now = Date.now()
-  const todayFloor = now - 24 * 60 * 60 * 1000
-  const weekFloor = now - 7 * 24 * 60 * 60 * 1000
-
-  const summaryResult = await db.execute(sql`
-    SELECT
-      COUNT(*) FILTER (WHERE "timestamp_ms" >= ${todayFloor})::int AS "eventsToday",
-      COUNT(*) FILTER (WHERE "timestamp_ms" >= ${weekFloor})::int AS "eventsThisWeek"
-    FROM ${source}
-    WHERE ${publicGovernancePredicate};
+export async function getStoredAuditSummary(): Promise<AuditSummaryParts> {
+  const database = getSqlDatabase()
+  await requireAuditLogTable(database)
+  const today = Math.floor(Date.now() / 86400000) * 86400000
+  const count = await database.execute(sql`
+    SELECT COALESCE(SUM("count") FILTER (WHERE "day" = ${today / 86400000}), 0)::int AS "eventsToday",
+      COALESCE(SUM("count"), 0)::int AS "eventsThisWeek" FROM "governance_audit_counts"
+    WHERE "kind" = 'day' AND "day" BETWEEN ${today / 86400000 - 6} AND ${today / 86400000};
   `)
-
-  const actorResult = await db.execute(sql`
-    SELECT
-      "actor_id" AS "userId",
-      COALESCE(MAX("actor_email"), "actor_id") AS "email",
-      COUNT(*)::int AS "eventCount"
-    FROM ${source}
-    WHERE ${publicGovernancePredicate}
-    GROUP BY "actor_id"
-    ORDER BY COUNT(*) DESC, "actor_id" ASC
-    LIMIT 1;
+  const actors = await database.execute(sql`
+    SELECT "key" AS "userId", COALESCE("label", "key") AS "email", "count" AS "eventCount"
+    FROM "governance_audit_counts" WHERE "kind" = 'actor' ORDER BY "key" LIMIT 101;
   `)
-
-  const entityResult = await db.execute(sql`
-    SELECT
-      "entity_type" AS "entityType"
-    FROM ${source}
-    WHERE ${publicGovernancePredicate}
-    GROUP BY "entity_type"
-    ORDER BY COUNT(*) DESC, "entity_type" ASC
-    LIMIT 1;
+  const entities = await database.execute(sql`
+    SELECT "key" AS "entityType", "count" AS "eventCount" FROM "governance_audit_counts" WHERE "kind" = 'entity' ORDER BY "key" LIMIT 3;
   `)
-
-  const summaryRow = ((summaryResult as { rows?: SummaryRow[] }).rows || [])[0]
-  const actorRow = ((actorResult as { rows?: MostActiveActorRow[] }).rows || [])[0]
-  const entityRow = ((entityResult as { rows?: MostChangedEntityRow[] }).rows || [])[0]
-
+  const actorRows = (actors as { rows: MostActiveActorRow[] }).rows
+  if (actorRows.length > 100)
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Audit summary exceeded its actor budget. Contact the operator.',
+    })
+  const summary = (count as { rows: SummaryRow[] }).rows[0]
   return {
-    eventsToday: toNumber(summaryRow?.eventsToday),
-    eventsThisWeek: toNumber(summaryRow?.eventsThisWeek),
-    mostActiveActor: actorRow
-      ? {
-          userId: actorRow.userId,
-          email: actorRow.email || actorRow.userId,
-          eventCount: toNumber(actorRow.eventCount),
-        }
-      : null,
-    mostChangedEntityType: entityRow?.entityType || 'PATHWAY',
+    eventsToday: toNumber(summary?.eventsToday),
+    eventsThisWeek: toNumber(summary?.eventsThisWeek),
+    actors: actorRows.map((row) => ({
+      userId: row.userId,
+      email: row.email ?? row.userId,
+      eventCount: toNumber(row.eventCount),
+    })),
+    entities: (
+      entities as { rows: (MostChangedEntityRow & { eventCount: number | string })[] }
+    ).rows.map((row) => ({ entityType: row.entityType, eventCount: toNumber(row.eventCount) })),
   }
 }

@@ -95,11 +95,12 @@ child.once('exit', async (code) => {
     await cp(resultFile, join(evidence, 'admin-boundary-results.json'))
     await cp(`${resultFile}.tap`, join(evidence, 'admin-boundaries.tap'))
     readBoundaryResult(resultFile)
-    console.log('Admin boundary result: PASS (58 passed; zero failures, skips or cancellations)')
+    console.log('Admin boundary result: PASS (68 passed; zero failures, skips or cancellations)')
   } catch (error) {
     console.error(error)
     process.exitCode = 1
   } finally {
+    await cp(join(directory, 'nitro.log'), join(evidence, 'nitro.log')).catch(() => {})
     if (process.env.CONTAINMENT_RETAIN !== '1')
       await rm(directory, { recursive: true, force: true })
   }

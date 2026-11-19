@@ -1,4 +1,6 @@
-import { v } from 'convex/values'
+import { ConvexError, v } from 'convex/values'
+import { boundedChange, validateSourceSizes } from '../shared/utils/governanceAudit'
+import { sourceActionType, sourcePayloadDigest, writeSourceEvent } from './lib/sourceAudit'
 import { mutation, query, type MutationCtx } from './_generated/server'
 import type { Doc, Id } from './_generated/dataModel'
 import { isReviewedRagAdminGrant, requireRagAdmin } from './lib/ragAdmin'
@@ -55,9 +57,22 @@ async function writeAudit(
     governance: { before: Doc<'sources'> | null; after: Doc<'sources'> | null }
   },
 ) {
-  await ctx.db.insert('approval_audit_log', {
+  const bounded = await boundedChange(input.governance.before, input.governance.after)
+  const auditId = await ctx.db.insert('approval_audit_log', {
     ...input,
+    projected: true,
+    governance: bounded.changeContext,
     timestamp: Date.now(),
+  })
+  await writeSourceEvent(ctx, {
+    eventId: `rag-approval:${auditId}`,
+    actorId: input.actorUserId,
+    actorEmail: input.actorEmail,
+    actionType: sourceActionType(input.action),
+    entityId: input.sourceId,
+    before: input.governance.before,
+    after: input.governance.after,
+    reason: input.reason ?? input.note,
   })
 }
 
@@ -204,6 +219,7 @@ export const getSource = query({
 
 export const createSourceSubmission = mutation({
   args: {
+    idempotencyKey: v.string(),
     type: v.union(v.literal('website'), v.literal('youtube_channel')),
     name: v.string(),
     description: v.optional(v.string()),
@@ -220,6 +236,27 @@ export const createSourceSubmission = mutation({
     const identity = await requireRagAdmin(ctx)
     if (hasControlCharacters([args.name, args.websiteConfig, args.youtubeConfig])) {
       throw new Error('Source names and config must not contain control characters')
+    }
+    validateSourceSizes(args)
+    if (!/^[A-Za-z0-9:_-]{8,128}$/.test(args.idempotencyKey))
+      throw new ConvexError({
+        code: 'INVALID_INPUT',
+        message: 'A valid idempotency key is required',
+      })
+    const payloadDigest = await sourcePayloadDigest(args)
+    const receipt = await ctx.db
+      .query('rag_create_receipts')
+      .withIndex('by_actor_key', (q) =>
+        q.eq('actorId', identity.userId).eq('key', args.idempotencyKey),
+      )
+      .unique()
+    if (receipt) {
+      if (receipt.payloadDigest !== payloadDigest)
+        throw new ConvexError({
+          code: 'IDEMPOTENCY_CONFLICT',
+          message: 'Idempotency key was already used with a different payload',
+        })
+      return receipt.receipt
     }
     const now = Date.now()
     const name = toSafeString(args.name)
@@ -267,11 +304,14 @@ export const createSourceSubmission = mutation({
       note: 'Initial source submission',
     })
 
-    return {
-      ok: true,
-      sourceId,
-      status: 'pending_approval' as const,
-    }
+    const result = { ok: true as const, sourceId, status: 'pending_approval' as const }
+    await ctx.db.insert('rag_create_receipts', {
+      actorId: identity.userId,
+      key: args.idempotencyKey,
+      payloadDigest,
+      receipt: result,
+    })
+    return result
   },
 })
 
@@ -294,6 +334,7 @@ export const updateSourceConfig = mutation({
     if (hasControlCharacters([args.name, args.websiteConfig, args.youtubeConfig])) {
       throw new Error('Source names and config must not contain control characters')
     }
+    validateSourceSizes(args)
     const source = await ctx.db.get(args.sourceId)
 
     if (!source) {
@@ -382,6 +423,8 @@ export const approveSource = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await requireRagAdmin(ctx)
+    if ((args.note?.length ?? 0) > 500)
+      throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)
 
     if (!source) {
@@ -431,6 +474,7 @@ export const rejectSource = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await requireRagAdmin(ctx)
+    if (args.reason.length > 500) throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)
     if (!source) {
       throw new Error('Source not found')
@@ -470,6 +514,8 @@ export const pauseSource = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await requireRagAdmin(ctx)
+    if ((args.note?.length ?? 0) > 500)
+      throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)
     if (!source) {
       throw new Error('Source not found')
@@ -501,6 +547,8 @@ export const resumeSource = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await requireRagAdmin(ctx)
+    if ((args.note?.length ?? 0) > 500)
+      throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)
     if (!source) {
       throw new Error('Source not found')
@@ -557,12 +605,23 @@ export const removeSource = mutation({
     }
 
     await ctx.db.delete(args.sourceId)
-    await ctx.db.insert('rag_source_deletions', {
+    const bounded = await boundedChange(source, null)
+    const deletionId = await ctx.db.insert('rag_source_deletions', {
       sourceId: args.sourceId,
-      source,
+      source: bounded.changeContext.before,
+      projected: true,
       actorId: actor.userId,
       actorEmail: actor.email,
       timestamp: Date.now(),
+    })
+    await writeSourceEvent(ctx, {
+      eventId: `rag-deletion:${deletionId}`,
+      actorId: actor.userId,
+      actorEmail: actor.email,
+      actionType: 'EVIDENCE_SOURCE_DELETED',
+      entityId: args.sourceId,
+      before: source,
+      after: null,
     })
 
     return {

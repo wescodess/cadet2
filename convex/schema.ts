@@ -295,17 +295,68 @@ export default defineSchema({
     .index('by_status_tenantId', ['status', 'tenantId'])
     .index('by_createdByUserId', ['createdByUserId']),
 
+  rag_audit_events: defineTable({
+    eventId: v.string(),
+    actorId: v.string(),
+    actorEmail: v.optional(v.string()),
+    actionType: v.string(),
+    entityType: v.literal('EVIDENCE_SOURCE'),
+    entityId: v.string(),
+    entityLabel: v.string(),
+    timestamp: v.number(),
+    orderKey: v.string(),
+    changeSummary: v.string(),
+    reason: v.optional(v.string()),
+  })
+    .index('by_eventId', ['eventId'])
+    .index('by_orderKey', ['orderKey'])
+    .index('by_action_order', ['actionType', 'orderKey'])
+    .index('by_actor_order', ['actorId', 'orderKey'])
+    .index('by_entity_order', ['entityId', 'orderKey']),
+
+  rag_audit_details: defineTable({
+    eventId: v.string(),
+    changeContext: auditChangeContextValidator,
+    stateDigests: v.object({ before: v.string(), after: v.string() }),
+    truncated: v.boolean(),
+  }).index('by_eventId', ['eventId']),
+
+  rag_audit_counts: defineTable({
+    key: v.string(),
+    kind: v.string(),
+    day: v.optional(v.number()),
+    count: v.number(),
+    email: v.optional(v.string()),
+  })
+    .index('by_key', ['key'])
+    .index('by_kind', ['kind', 'key'])
+    .index('by_kind_day', ['kind', 'day']),
+
+  rag_create_receipts: defineTable({
+    actorId: v.string(),
+    key: v.string(),
+    payloadDigest: v.string(),
+    receipt: v.object({
+      ok: v.literal(true),
+      sourceId: v.id('sources'),
+      status: v.literal('pending_approval'),
+    }),
+  }).index('by_actor_key', ['actorId', 'key']),
+
   rag_source_deletions: defineTable({
+    projected: v.optional(v.boolean()),
     sourceId: v.id('sources'),
     source: v.any(),
     actorId: v.string(),
     actorEmail: v.optional(v.string()),
     timestamp: v.number(),
   })
+    .index('by_projected', ['projected'])
     .index('by_sourceId', ['sourceId'])
     .index('by_timestamp', ['timestamp']),
 
   approval_audit_log: defineTable({
+    projected: v.optional(v.boolean()),
     sourceId: v.id('sources'),
     actorUserId: v.string(),
     actorEmail: v.optional(v.string()),
@@ -323,6 +374,7 @@ export default defineSchema({
     diffSummary: v.optional(v.string()),
     governance: v.optional(v.object({ before: v.any(), after: v.any() })),
   })
+    .index('by_projected', ['projected'])
     .index('by_sourceId', ['sourceId'])
     .index('by_timestamp', ['timestamp']),
 

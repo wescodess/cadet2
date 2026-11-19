@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
   await convex.mutation((anyApi as any).ragSources.updateSourceConfig, {
     sourceId,
     ...parsed.data,
+    description: parsed.data.description === null ? '' : parsed.data.description,
   })
 
   const detail = (await convex.query((anyApi as any).ragSources.getSource, { sourceId })) as {

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { hasControlCharacters } from '../../../convex/lib/sourceText'
+import { validateSourceSizes } from '../../../shared/utils/governanceAudit'
 
 export const evidenceSourceStatusValues = [
   'pending_approval',
@@ -82,6 +83,14 @@ export const evidenceWebsiteConfigSchema = z
     respectRobots: z.boolean(),
   })
   .strict()
+  .refine((value) => {
+    try {
+      validateSourceSizes({ websiteConfig: value })
+      return true
+    } catch {
+      return false
+    }
+  }, 'Config exceeds the 16384 byte limit')
 
 export const evidenceYoutubeConfigSchema = z
   .object({
@@ -92,6 +101,14 @@ export const evidenceYoutubeConfigSchema = z
     preferredLanguage: controlFreeString(z.string().trim().min(1).max(40)).optional(),
   })
   .strict()
+  .refine((value) => {
+    try {
+      validateSourceSizes({ youtubeConfig: value })
+      return true
+    } catch {
+      return false
+    }
+  }, 'Config exceeds the 16384 byte limit')
 
 const evidenceSourceEditableFieldsSchema = {
   name: controlFreeString(z.string().trim().min(1).max(255)).optional(),
@@ -121,10 +138,26 @@ export const createEvidenceSourceSchema = z
     enabled: z.boolean().default(true),
   })
   .strict()
+  .refine((value) => {
+    try {
+      validateSourceSizes(value)
+      return true
+    } catch {
+      return false
+    }
+  }, 'Source input exceeds its size limit')
 
 export const updateEvidenceSourceSchema = z
   .object(evidenceSourceEditableFieldsSchema)
   .strict()
+  .refine((value) => {
+    try {
+      validateSourceSizes(value)
+      return true
+    } catch {
+      return false
+    }
+  }, 'Source input exceeds its size limit')
   .refine((value) => Object.keys(value).length > 0, {
     message: 'At least one editable field is required.',
   })

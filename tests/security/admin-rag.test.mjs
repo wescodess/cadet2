@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict'
 import { execFile, spawn } from 'node:child_process'
-import { randomBytes } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { after, before, test } from 'node:test'
 import { isDeepStrictEqual, promisify } from 'node:util'
 import { once } from 'node:events'
 import { createWriteStream } from 'node:fs'
+import { URLSearchParams } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
 import { ConvexHttpClient } from 'convex/browser'
 import { anyApi } from 'convex/server'
@@ -88,15 +89,21 @@ const stats = Object.fromEntries(
   ].map((key) => [key, 0]),
 )
 
-async function request(path, actor, method = 'GET', body) {
+async function request(path, actor, method = 'GET', body, headers = {}) {
   return fetch(`${origin}${path}`, {
     method,
     headers: {
       ...(actor ? { cookie: actor.cookie } : {}),
       ...(body ? { 'content-type': 'application/json' } : {}),
       origin,
+      ...(method === 'POST' ? { 'Idempotency-Key': randomBytes(16).toString('hex') } : {}),
+      ...headers,
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body
+      ? JSON.stringify(
+          Object.fromEntries(Object.entries(body).filter(([key]) => key !== 'idempotencyKey')),
+        )
+      : undefined,
     redirect: 'manual',
   })
 }
@@ -121,6 +128,15 @@ async function fixture(table, rows, replace = false) {
       env: cliEnv,
     },
   )
+  if (operator && ['approval_audit_log', 'rag_source_deletions'].includes(table)) {
+    let result
+    do {
+      result = await operator.mutation(anyApi.ragSourceAudit.backfillEvents, {
+        table: table === 'approval_audit_log' ? 'approval' : 'deletion',
+        batchSize: 4,
+      })
+    } while (!result.done)
+  }
 }
 
 async function register(name) {
@@ -179,6 +195,7 @@ before(
       },
     )
     await cp(join(root, 'convex'), join(directory, 'backend/convex'), { recursive: true })
+    await cp(join(root, 'shared'), join(directory, 'backend/shared'), { recursive: true })
     const sourceModule = join(directory, 'backend/convex/ragSources.ts')
     const sourceCode = await readFile(sourceModule, 'utf8')
     const deletion = 'await ctx.db.delete(args.sourceId)'
@@ -406,6 +423,9 @@ test('the deployed Convex registration manifest matches the reviewed classificat
 })
 
 const websiteSubmission = {
+  get idempotencyKey() {
+    return randomBytes(16).toString('hex')
+  },
   type: 'website',
   name: 'Official public information',
   schedule: { frequency: 'manual' },
@@ -484,6 +504,7 @@ test('YouTube submissions and every activation transition stay frozen for admins
     [
       'createSourceSubmission',
       {
+        idempotencyKey: randomBytes(16).toString('hex'),
         type: 'youtube_channel',
         name: 'Frozen',
         schedule: { frequency: 'daily' },
@@ -740,6 +761,7 @@ test('explicit isolated operator migrations preserve every enabled admin operati
     '0004_pathway_definitions.sql',
     '0005_pathway_rules.sql',
     '0006_governance_audit_log.sql',
+    '0007_bounded_governance_audit.sql',
   ]) {
     await db.exec(await readFile(join(root, 'server/db/migrations/postgresql', name), 'utf8'))
   }
@@ -885,12 +907,12 @@ async function assertRecordedDeletion(sourceId, history, since) {
   )
   const first = await successful(`/api/admin/audit-trail?search=${sourceId}&pageSize=1`)
   assert.equal(first.items[0].eventId, event.eventId)
-  assert.equal(first.nextCursor, '1')
+  assert.ok(first.nextCursor && first.nextCursor !== '1')
   const second = await successful(
     `/api/admin/audit-trail?search=${sourceId}&pageSize=1&cursor=${first.nextCursor}`,
   )
   assert.equal(second.items[0].actionType, 'EVIDENCE_SOURCE_APPROVED')
-  assert.equal(second.nextCursor, '2')
+  assert.ok(second.nextCursor && second.nextCursor !== first.nextCursor)
   const third = await successful(
     `/api/admin/audit-trail?search=${sourceId}&pageSize=1&cursor=${second.nextCursor}`,
   )
@@ -930,11 +952,15 @@ test('HTTP source deletion ignores forged actor fields and records the same sing
 test('actor arguments cannot grant deletion authority or change the recorded actor', async () => {
   const { sourceId, history } = await reviewedSource('Denied deletion probe')
   for (const actor of [anonymous, ordinary, emailMatch]) {
-    for (const name of ['listDeletionEvents', 'listApprovalEvents']) {
+    for (const [name, args] of [
+      ['listDeletionEvents', { paginationOpts: { cursor: null, numItems: 100 } }],
+      ['listApprovalEvents', { paginationOpts: { cursor: null, numItems: 100 } }],
+      ['listEvents', { filters: {}, limit: 2, includeCount: true }],
+      ['getEvent', { eventId: 'unknown' }],
+      ['getSummary', {}],
+    ]) {
       await assert.rejects(
-        actor.client.query(anyApi.ragSourceAudit[name], {
-          paginationOpts: { cursor: null, numItems: 100 },
-        }),
+        actor.client.query(anyApi.ragSourceAudit[name], args),
         /Authentication required|Admin access required/,
       )
     }
@@ -1690,6 +1716,573 @@ test('a foreign origin cannot use an admitted admin session for source mutations
     body: JSON.stringify(websiteSubmission),
   })
   assert.equal(response.status, 403)
+})
+
+function auditStateHash(value) {
+  const json = JSON.stringify(value, (_key, item) =>
+    item && typeof item === 'object' && !Array.isArray(item)
+      ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+      : item,
+  )
+  return createHash('sha256').update(json).digest('hex')
+}
+
+test('#166 F1: capped submissions and digest-audited legacy records remain maintainable', async () => {
+  const oversized = {
+    ...websiteSubmission,
+    name: '166 oversized input',
+    description: 'z'.repeat(600000),
+  }
+  let rejected = false
+  try {
+    await admin.client.mutation(anyApi.ragSources.createSourceSubmission, oversized)
+  } catch (error) {
+    rejected = /description|size|limit/i.test(String(error))
+  }
+  const { sourceId } = await successful('/api/admin/rag/sources', 'POST', {
+    ...websiteSubmission,
+    name: '166 legacy template',
+  })
+  const template = (await sourceSnapshot(sourceId)).source
+  await fixture('sources', [
+    {
+      ...Object.fromEntries(
+        Object.entries(template).filter(([key]) => !['_id', '_creationTime'].includes(key)),
+      ),
+      name: '166 legacy oversized',
+      description: oversized.description,
+    },
+  ])
+  const legacy = (
+    await admin.client.query(anyApi.ragSources.listSources, { includeAllForAdmin: true })
+  ).items.find((row) => row.name === '166 legacy oversized')
+  const response = await request(`/api/admin/rag/sources/${legacy._id}`, admin, 'PATCH', {
+    name: '166 legacy edited',
+  })
+  const result = { rejected, status: response.status, body: await response.json() }
+  await recordAtomicObservation('166-f1', result)
+  assert.equal(response.status, 200, 'a legacy 600 KB description must not block an ordinary edit')
+  assert.equal(
+    rejected,
+    true,
+    'new 600 KB descriptions must be rejected at the direct Convex boundary',
+  )
+  const trail = await auditFor(legacy._id)
+  const detail = await successful(`/api/admin/audit-trail/${trail.items[0].eventId}`)
+  assert.match(detail.event.stateDigests.before, /^[a-f0-9]{64}$/)
+  const final = (await sourceSnapshot(legacy._id)).source
+  assert.equal(final.description.length, 600000)
+  assert.deepEqual(detail.event.stateDigests, {
+    before: auditStateHash(legacy),
+    after: auditStateHash(final),
+  })
+  assert.deepEqual(detail.event.changeContext.after.description, {
+    digest: auditStateHash(legacy.description),
+    bytes: 600002,
+    truncated: true,
+  })
+  assert.notEqual(detail.event.stateDigests.before, detail.event.stateDigests.after)
+  assert.equal(detail.event.truncated, true)
+  assert.ok(JSON.stringify(detail).length < 32768)
+})
+
+test('#166 F2: sequential and concurrent creates return one actor-bound receipt', async () => {
+  for (const concurrent of [false, true]) {
+    const body = { ...websiteSubmission, name: `166 replay ${concurrent}` }
+    const headers = { 'Idempotency-Key': `166-replay-${concurrent}` }
+    const send = () => request('/api/admin/rag/sources', admin, 'POST', body, headers)
+    const responses = concurrent
+      ? await Promise.all([send(), send()])
+      : [await send(), await send()]
+    const receipts = await Promise.all(responses.map((response) => response.json()))
+    const matches = (
+      await admin.client.query(anyApi.ragSources.listSources, { includeAllForAdmin: true })
+    ).items.filter((row) => row.name === body.name)
+    const events = await successful(
+      `/api/admin/audit-trail?search=${encodeURIComponent(body.name)}`,
+    )
+    await recordAtomicObservation(`166-f2-${concurrent}`, {
+      statuses: responses.map((response) => response.status),
+      receipts,
+      ids: matches.map((row) => row._id),
+      events,
+    })
+    assert.deepEqual(
+      responses.map((response) => response.status),
+      [200, 200],
+    )
+    assert.equal(matches.length, 1, 'replay must create one source')
+    assert.deepEqual(receipts[0], receipts[1], 'replay must return the original receipt')
+    assert.equal(events.totalCount, 1, 'replay must append one governance event')
+    assert.equal(
+      (
+        await request(
+          '/api/admin/rag/sources',
+          admin,
+          'POST',
+          { ...body, name: 'changed payload' },
+          headers,
+        )
+      ).status,
+      409,
+    )
+  }
+})
+
+async function deployAuditProbe(source) {
+  await writeFile(join(directory, 'backend/convex/ragSourceAudit.ts'), source)
+  await run(
+    process.execPath,
+    [
+      join(root, 'node_modules/convex/bin/main.js'),
+      'dev',
+      '--once',
+      '--env-file',
+      join(directory, 'operator.env'),
+      '--typecheck',
+      'disable',
+      '--codegen',
+      'disable',
+    ],
+    { cwd: join(directory, 'backend'), env: cliEnv },
+  )
+}
+
+test('#166 direct creates deduplicate concurrent requests and bind the receipt to the actor', async () => {
+  const payload = {
+    ...websiteSubmission,
+    idempotencyKey: '166-direct-replay',
+    name: '166 direct replay',
+  }
+  const receipts = await Promise.all(
+    Array.from({ length: 6 }, () =>
+      admin.client.mutation(anyApi.ragSources.createSourceSubmission, payload, { skipQueue: true }),
+    ),
+  )
+  for (const receipt of receipts) assert.deepEqual(receipt, receipts[0])
+  assert.deepEqual(
+    await admin.client.mutation(anyApi.ragSources.createSourceSubmission, payload),
+    receipts[0],
+  )
+  await assert.rejects(
+    admin.client.mutation(anyApi.ragSources.createSourceSubmission, {
+      ...payload,
+      name: 'different',
+    }),
+    (error) => error.data?.code === 'IDEMPOTENCY_CONFLICT',
+  )
+  assert.equal((await approvalHistory(receipts[0].sourceId)).length, 1)
+  assert.equal((await auditFor(receipts[0].sourceId)).totalCount, 1)
+  const second = await register('second-reviewed-admin')
+  await fixture('rag_admins', [
+    {
+      userId: second.userId,
+      createdAt: Date.now(),
+      subjectBinding: {
+        issuer: origin,
+        reviewedAt: Date.now(),
+        operatorEvidence: 'isolated operator second subject review',
+      },
+    },
+  ])
+  const other = await second.client.mutation(anyApi.ragSources.createSourceSubmission, payload)
+  assert.notEqual(other.sourceId, receipts[0].sourceId)
+  const event = (await auditFor(other.sourceId)).items[0]
+  assert.equal(event.actorUserId, second.userId)
+  await recordAtomicObservation('166-direct-receipts', { receipts, other, event })
+})
+
+test('#166 SQL pathway and rule creates replay their original receipts without another event', async () => {
+  const pathway = { pathwayId: '166-sql-replay', displayName: '166 SQL replay', status: 'draft' }
+  for (const [path, payload, expected] of [
+    ['/api/admin/pathways', pathway, 201],
+    [
+      `/api/admin/pathways/${pathway.pathwayId}/rules`,
+      { ...atomicRule, unmetConditionId: '166-replay' },
+      200,
+    ],
+  ]) {
+    const headers = { 'Idempotency-Key': `166-sql-${expected}` }
+    const send = () => request(path, admin, 'POST', payload, headers)
+    const responses = await Promise.all([send(), send()])
+    const receipts = await Promise.all(responses.map((response) => response.json()))
+    assert.deepEqual(
+      responses.map((response) => response.status),
+      [expected, expected],
+    )
+    assert.deepEqual(receipts[0], receipts[1])
+    const replay = await send()
+    assert.equal(replay.status, expected)
+    assert.deepEqual(await replay.json(), receipts[0])
+    const changed = path.endsWith('rules')
+      ? { ...payload, comparisonValue: 10 }
+      : { ...payload, displayName: 'different' }
+    assert.equal((await request(path, admin, 'POST', changed, headers)).status, 409)
+    const entityId = receipts[0].item?.id ?? receipts[0].pathwayId
+    assert.equal((await auditFor(entityId)).totalCount, 1)
+    await recordAtomicObservation(`166-sql-receipt-${expected}`, { receipts, entityId })
+  }
+})
+
+test('#166 source caps cover create and update at HTTP and direct Convex seams', async () => {
+  const { sourceId } = await successful('/api/admin/rag/sources', 'POST', {
+    ...websiteSubmission,
+    name: '166 size boundary',
+  })
+  const changes = [
+    { name: 'n'.repeat(256) },
+    { description: 'd'.repeat(600000) },
+    {
+      websiteConfig: {
+        ...websiteSubmission.websiteConfig,
+        seedUrls: Array.from(
+          { length: 300 },
+          (_, i) => `https://www.canada.ca/${i}/${'p'.repeat(70)}`,
+        ),
+      },
+    },
+    { tags: Array.from({ length: 300 }, () => 't'.repeat(120)) },
+  ]
+  const before = await sourceSnapshot(sourceId)
+  for (const change of changes) {
+    await assert.rejects(
+      admin.client.mutation(anyApi.ragSources.createSourceSubmission, {
+        ...websiteSubmission,
+        ...change,
+      }),
+      /size|limit|characters/i,
+    )
+    await assert.rejects(
+      admin.client.mutation(anyApi.ragSources.updateSourceConfig, { sourceId, ...change }),
+      /size|limit|characters/i,
+    )
+    assert.equal(
+      (await request('/api/admin/rag/sources', admin, 'POST', { ...websiteSubmission, ...change }))
+        .status,
+      400,
+    )
+    assert.equal(
+      (await request(`/api/admin/rag/sources/${sourceId}`, admin, 'PATCH', change)).status,
+      400,
+    )
+  }
+  assert.deepEqual(await sourceSnapshot(sourceId), before)
+  const valid = await admin.client.mutation(anyApi.ragSources.updateSourceConfig, {
+    sourceId,
+    name: 'n'.repeat(255),
+    description: 'd'.repeat(4000),
+  })
+  assert.equal(valid.ok, true)
+  const events = await auditFor(sourceId)
+  const detail = await successful(`/api/admin/audit-trail/${events.items[0].eventId}`)
+  assert.equal(detail.event.truncated, true)
+  assert.equal(detail.event.changeContext.after.description.truncated, true)
+})
+
+test('#166 source audit failure is a designed error and SQL detail stays in its own store', async () => {
+  const sql = await successful('/api/admin/audit-trail?entityType=PATHWAY&pageSize=1')
+  const source = await successful('/api/admin/audit-trail?entityType=EVIDENCE_SOURCE&pageSize=1')
+  const module = await readFile(join(directory, 'backend/convex/ragSourceAudit.ts'), 'utf8')
+  const broken = module.replaceAll(
+    'await requireRagAdmin(ctx)',
+    "await requireRagAdmin(ctx)\n    throw new Error('166 injected audit read failure')",
+  )
+  try {
+    await deployAuditProbe(broken)
+    assert.equal((await request('/api/admin/access', admin)).status, 200)
+    const responses = []
+    for (const path of [
+      '/api/admin/audit-trail?pageSize=1',
+      '/api/admin/audit-trail/summary',
+      `/api/admin/audit-trail/${source.items[0].eventId}`,
+    ]) {
+      const response = await request(path, admin)
+      responses.push({ path, status: response.status, body: await response.json() })
+    }
+    assert.deepEqual(
+      responses.map((response) => response.status),
+      [503, 503, 503],
+    )
+    assert.ok(
+      responses.every((response) =>
+        /Source audit storage is unavailable/.test(response.body.statusMessage),
+      ),
+    )
+    assert.equal(
+      (await request(`/api/admin/audit-trail/${sql.items[0].eventId}`, admin)).status,
+      200,
+    )
+    await recordAtomicObservation('166-audit-unavailable', {
+      responses,
+      sqlEventId: sql.items[0].eventId,
+    })
+  } finally {
+    await deployAuditProbe(module)
+  }
+})
+
+test('#166 equal timestamps, filters and opaque cursors agree across both stores', async () => {
+  const { sourceId } = await successful('/api/admin/rag/sources', 'POST', {
+    ...websiteSubmission,
+    name: '166 tie template',
+  })
+  const timestamp = Date.now() - 86400000
+  await fixture(
+    'approval_audit_log',
+    [0, 1].map((index) => ({
+      sourceId,
+      actorUserId: admin.userId,
+      action: 'edit',
+      timestamp,
+      governance: { before: null, after: { name: `166 tied event ${index}` } },
+    })),
+  )
+  await sqlFixture((db) =>
+    db.query(
+      `INSERT INTO governance_audit_log (event_id, actor_id, action_type, entity_type, entity_id, entity_label, timestamp_ms) VALUES ('audit-166-z', $1, 'PATHWAY_UPDATED', 'PATHWAY', '166-tie', '166 tied event Z', $2), ('audit-166-a', $1, 'PATHWAY_UPDATED', 'PATHWAY', '166-tie', '166 tied event A', $2)`,
+      [admin.userId, timestamp],
+    ),
+  )
+  const query = new URLSearchParams({
+    search: '166 tied event',
+    actorId: admin.userId,
+    dateFrom: new Date(timestamp).toISOString(),
+    dateTo: new Date(timestamp).toISOString(),
+    pageSize: '1',
+  })
+  const events = []
+  let cursor
+  do {
+    const page = await successful(
+      `/api/admin/audit-trail?${query}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
+    )
+    assert.equal(page.totalCount, 4)
+    events.push(...page.items)
+    if (!cursor && page.nextCursor) {
+      assert.equal(
+        (await request(`/api/admin/audit-trail?search=changed&cursor=${page.nextCursor}`, admin))
+          .status,
+        400,
+      )
+    }
+    cursor = page.nextCursor
+  } while (cursor)
+  const ids = events.map((event) => event.eventId)
+  assert.deepEqual(ids, [...ids].sort().reverse())
+  assert.equal(new Set(ids).size, 4)
+  assert.equal((await request('/api/admin/audit-trail?cursor=invalid', admin)).status, 400)
+  assert.equal((await successful('/api/admin/audit-trail?search=%25')).totalCount, 0)
+  await recordAtomicObservation('166-keyset-ties', { events })
+})
+
+test('#166 counter failures roll back changes, events and create receipts in both stores', async () => {
+  const pathway = {
+    pathwayId: '166-counter-rollback',
+    displayName: '166 counter rollback',
+    status: 'draft',
+  }
+  const headers = { 'Idempotency-Key': '166-counter-rollback' }
+  await sqlFixture((db) =>
+    db.exec(
+      "ALTER TABLE governance_audit_counts ADD CONSTRAINT counter_fault CHECK (kind <> 'actor') NOT VALID",
+    ),
+  )
+  try {
+    assert.equal(
+      (await request('/api/admin/pathways', admin, 'POST', pathway, headers)).status,
+      500,
+    )
+    assert.equal((await request(`/api/admin/pathways/${pathway.pathwayId}`, admin)).status, 404)
+    assert.equal((await auditFor(pathway.pathwayId)).totalCount, 0)
+  } finally {
+    await sqlFixture((db) =>
+      db.exec('ALTER TABLE governance_audit_counts DROP CONSTRAINT counter_fault'),
+    )
+  }
+  assert.equal((await request('/api/admin/pathways', admin, 'POST', pathway, headers)).status, 201)
+  assert.equal((await auditFor(pathway.pathwayId)).totalCount, 1)
+
+  const helper = join(directory, 'backend/convex/lib/sourceAudit.ts')
+  const original = await readFile(helper, 'utf8')
+  const module = await readFile(join(directory, 'backend/convex/ragSourceAudit.ts'), 'utf8')
+  const marker = "for (const key of eventCountKeys(event)) await increment(ctx, key, 'filter')"
+  assert.ok(original.includes(marker))
+  const payload = { ...websiteSubmission, name: '166 source counter rollback' }
+  const sourceHeaders = { 'Idempotency-Key': '166-source-counter-rollback' }
+  const before = await successful('/api/admin/audit-trail/summary')
+  try {
+    await writeFile(
+      helper,
+      original.replace(
+        marker,
+        `${marker}\n  if (event.after?.name === '166 source counter rollback') throw new Error('166 injected counter failure')`,
+      ),
+    )
+    await deployAuditProbe(module)
+    assert.equal(
+      (await request('/api/admin/rag/sources', admin, 'POST', payload, sourceHeaders)).status,
+      500,
+    )
+    assert.equal(
+      (await successful('/api/admin/audit-trail?search=166%20source%20counter%20rollback'))
+        .totalCount,
+      0,
+    )
+    assert.equal(
+      (
+        await admin.client.query(anyApi.ragSources.listSources, { includeAllForAdmin: true })
+      ).items.filter((row) => row.name === payload.name).length,
+      0,
+    )
+    assert.deepEqual(await successful('/api/admin/audit-trail/summary'), before)
+  } finally {
+    await writeFile(helper, original)
+    await deployAuditProbe(module)
+  }
+  const response = await request('/api/admin/rag/sources', admin, 'POST', payload, sourceHeaders)
+  assert.equal(response.status, 200)
+  const { sourceId } = await response.json()
+  assert.equal((await auditFor(sourceId)).totalCount, 1)
+})
+
+test(
+  '#166 F3: 1000 source events keep list, summary and detail reads bounded',
+  async () => {
+    const retained = []
+    let cursor = null
+    do {
+      const page = await admin.client.query(anyApi.ragSourceAudit.listApprovalEvents, {
+        paginationOpts: { cursor, numItems: 100 },
+      })
+      retained.push(...page.page)
+      cursor = page.isDone ? null : page.continueCursor
+    } while (cursor)
+    const sourceId = retained[0].sourceId
+    await fixture(
+      'approval_audit_log',
+      Array.from({ length: 1000 }, (_, i) => ({
+        sourceId,
+        actorUserId: admin.userId,
+        action: 'edit',
+        timestamp: Date.now() - 10000 - i,
+        governance: { before: null, after: { name: `166 synthetic ${i}` } },
+      })),
+    )
+    const module = await readFile(join(directory, 'backend/convex/ragSourceAudit.ts'), 'utf8')
+    const probe = `
+function boundedProbe(target, budget) {
+  return new Proxy(target, { get(value, key) {
+    const member = Reflect.get(value, key)
+    if (typeof member !== 'function') return member
+    return (...args) => {
+      if (key === 'paginate' && (!(args[0]?.maximumRowsRead <= 512) || !(args[0]?.maximumBytesRead <= 2097152))) throw new Error('166 pagination must impose backend row and byte budgets')
+    if (key === 'take' && args[0] > 2001) throw new Error('166 indexed take exceeds the read budget')
+    const result = member.apply(value, args)
+      if (['get', 'take', 'collect', 'paginate', 'first', 'unique'].includes(String(key))) {
+        return Promise.resolve(result).then(rows => {
+          budget.rows += Array.isArray(rows) ? rows.length : Array.isArray(rows?.page) ? rows.page.length : rows ? 1 : 0
+          if (budget.rows > budget.max) throw new Error('166 audit read row budget exceeded: ' + budget.rows)
+          return rows
+        })
+      }
+      return result && typeof result === 'object' ? boundedProbe(result, budget) : result
+    }
+  } })
+}
+`
+    const instrumented =
+      module.replaceAll(
+        'await requireRagAdmin(ctx)',
+        "await requireRagAdmin(ctx)\n    ctx = { ...ctx, db: boundedProbe(ctx.db, { rows: 0, max: typeof args !== 'undefined' && ('limit' in args || 'paginationOpts' in args) ? 8 : 128 }) }",
+      ) + probe
+    try {
+      await deployAuditProbe(instrumented)
+      const known = await successful('/api/admin/audit-trail?entityType=PATHWAY&pageSize=1')
+      const knownSource = await successful(
+        '/api/admin/audit-trail?entityType=EVIDENCE_SOURCE&pageSize=1',
+      )
+      const paths = [
+        '/api/admin/audit-trail?pageSize=1',
+        '/api/admin/audit-trail?entityType=PATHWAY&pageSize=1',
+        '/api/admin/audit-trail/summary',
+        `/api/admin/audit-trail/${known.items[0].eventId}`,
+        `/api/admin/audit-trail/${knownSource.items[0].eventId}`,
+      ]
+      const results = []
+      for (const path of paths) {
+        const response = await request(path, admin)
+        results.push({ path, status: response.status, body: await response.json() })
+      }
+      await recordAtomicObservation('166-f3', {
+        syntheticEvents: 1000,
+        results,
+        rowBudgets: { list: 8, summary: 128, detail: 128 },
+      })
+      assert.deepEqual(
+        results.map((row) => row.status),
+        [200, 200, 200, 200, 200],
+        'real database result instrumentation must enforce bounded reads',
+      )
+    } finally {
+      await deployAuditProbe(module)
+      await fixture('approval_audit_log', retained, true)
+    }
+  },
+  { timeout: 60000 },
+)
+
+test('#166 F4: concurrent inserts never repeat or skip the original traversal', async () => {
+  const before = await successful('/api/admin/audit-trail?pageSize=100')
+  const originalIds = before.items.map((event) => event.eventId)
+  let originalCursor = before.nextCursor
+  while (originalCursor) {
+    const page = await successful(
+      `/api/admin/audit-trail?pageSize=100&cursor=${encodeURIComponent(originalCursor)}`,
+    )
+    originalIds.push(...page.items.map((event) => event.eventId))
+    originalCursor = page.nextCursor
+  }
+  const first = await successful('/api/admin/audit-trail?pageSize=2')
+  const received = [...first.items]
+  let cursor = first.nextCursor
+  let pages = 0
+  do {
+    await Promise.all([
+      successful('/api/admin/rag/sources', 'POST', {
+        ...websiteSubmission,
+        name: `166 intervening ${pages}`,
+      }),
+      successful(
+        '/api/admin/pathways',
+        'POST',
+        {
+          pathwayId: `166-intervening-${pages}`,
+          displayName: `166 intervening ${pages}`,
+          status: 'draft',
+        },
+        201,
+      ),
+    ])
+    const page = await successful(
+      `/api/admin/audit-trail?pageSize=100&cursor=${encodeURIComponent(cursor)}`,
+    )
+    received.push(...page.items)
+    cursor = page.nextCursor
+    assert.ok(++pages < 30)
+  } while (cursor)
+  const ids = received.map((row) => row.eventId)
+  await recordAtomicObservation('166-f4', {
+    first,
+    received: ids,
+    originalCount: before.totalCount,
+  })
+  assert.equal(new Set(ids).size, ids.length, 'a keyset traversal must never repeat an event')
+  assert.equal(
+    ids.length,
+    before.totalCount,
+    'inserts above the traversal watermark must not replace or skip original events',
+  )
+  assert.deepEqual(new Set(ids), new Set(originalIds))
 })
 
 test('a removed current admin grant immediately denies the same real session and JWT', async () => {

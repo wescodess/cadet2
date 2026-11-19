@@ -1,3 +1,4 @@
+import { requireIdempotencyKey, withCreateReceipt } from '../../../../utils/admin/createReceipt'
 import { withPathwayTransaction } from '../../../../utils/pathways/pathwayTransaction'
 import { getRouterParam } from 'h3'
 
@@ -31,33 +32,43 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const key = requireIdempotencyKey(event)
   try {
-    return await withPathwayTransaction(pathwayId, async (transaction) => {
-      const item = await createRule(pathwayId, parsed.data, transaction)
+    return await withPathwayTransaction(pathwayId, async (transaction) =>
+      withCreateReceipt(
+        transaction,
+        adminSession.userId,
+        `rule-create:${pathwayId}`,
+        key,
+        parsed.data,
+        async () => {
+          const item = await createRule(pathwayId, parsed.data, transaction)
 
-      if (item) {
-        await recordGovernanceAction(
-          event,
-          {
-            actionType: 'PATHWAY_RULE_CREATED',
-            entityType: 'PATHWAY_RULE',
-            entityId: item.id,
-            entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-            changeContext: {
-              before: null,
-              after: item,
-            },
-          },
-          adminSession,
-          transaction,
-        )
-      }
+          if (item) {
+            await recordGovernanceAction(
+              event,
+              {
+                actionType: 'PATHWAY_RULE_CREATED',
+                entityType: 'PATHWAY_RULE',
+                entityId: item.id,
+                entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+                changeContext: {
+                  before: null,
+                  after: item,
+                },
+              },
+              adminSession,
+              transaction,
+            )
+          }
 
-      return {
-        ok: true,
-        item,
-      }
-    })
+          return {
+            ok: true,
+            item,
+          }
+        },
+      ),
+    )
   } catch (error) {
     if (error instanceof PathwayRuleConflictError) {
       throw createError({

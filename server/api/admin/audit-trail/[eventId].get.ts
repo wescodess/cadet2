@@ -1,4 +1,3 @@
-import { loadSourceAuditEvents } from '../../../utils/audit/sourceAuditEvents'
 import { getRouterParam } from 'h3'
 
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
@@ -15,7 +14,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const detail = await getAuditTrailEvent(eventId, await loadSourceAuditEvents(convex))
+  const detail = await getAuditTrailEvent(eventId, convex)
   if (!detail) {
     throw createError({
       statusCode: 404,

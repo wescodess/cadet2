@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import SignOutButton from '@/components/auth/SignOutButton.vue'
+import { createAdminOperation } from '@/lib/admin/createOperation'
+
 import { adminNavigationLinks } from '@/lib/admin/navigation'
 
 type SourceStatus = 'pending_approval' | 'approved' | 'rejected' | 'paused'
@@ -16,6 +18,8 @@ type AdminStatusResult = {
   currentUser: { userId: string; email: string | null } | null
   bootstrapAvailable: boolean
 }
+
+const createOperation = createAdminOperation()
 
 definePageMeta({
   middleware: ['auth', 'admin'],
@@ -362,8 +366,10 @@ async function submitSource() {
 
     await $fetch('/api/admin/rag/sources', {
       method: 'POST',
+      headers: createOperation.headers(payload),
       body: payload,
     })
+    createOperation.complete()
     sourceName.value = ''
     tagsCsv.value = ''
     await refreshAll()

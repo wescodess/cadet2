@@ -1,133 +1,119 @@
 import type { ConvexHttpClient } from 'convex/browser'
 import { makeFunctionReference } from 'convex/server'
 import { z } from 'zod'
-import { normalizeJsonRecord, type StoredAuditEvent } from './auditLogStore'
+import {
+  normalizeJsonRecord,
+  type AuditPosition,
+  type AuditStoreFilters,
+  type StoredAuditEvent,
+} from './auditLogStore'
+import { auditActionTypes, auditEntityTypes } from './types'
 
-const listDeletionEvents = makeFunctionReference<
-  'query',
-  { paginationOpts: { cursor: string | null; numItems: number } },
-  unknown
->('ragSourceAudit:listDeletionEvents')
-
-const listApprovalEvents = makeFunctionReference<
-  'query',
-  { paginationOpts: { cursor: string | null; numItems: number } },
-  unknown
->('ragSourceAudit:listApprovalEvents')
-
-const sourceActionTypes = {
-  submit: 'EVIDENCE_SOURCE_CREATED',
-  edit: 'EVIDENCE_SOURCE_UPDATED',
-  approve: 'EVIDENCE_SOURCE_APPROVED',
-  reject: 'EVIDENCE_SOURCE_REJECTED',
-  pause: 'EVIDENCE_SOURCE_PAUSED',
-  resume: 'EVIDENCE_SOURCE_RESUMED',
-} as const
-
-const approvalPage = z.object({
-  page: z.array(
-    z.object({
-      _id: z.string(),
-      sourceId: z.string(),
-      actorUserId: z.string(),
-      actorEmail: z.string().optional(),
-      action: z.enum(['submit', 'edit', 'approve', 'reject', 'pause', 'resume']),
-      timestamp: z.number(),
-      reason: z.string().optional(),
-      note: z.string().optional(),
-      governance: z.object({ before: z.unknown(), after: z.unknown() }).optional(),
-    }),
-  ),
-  isDone: z.boolean(),
-  continueCursor: z.string(),
+const metadata = z.object({
+  eventId: z.string(),
+  actorId: z.string(),
+  actorEmail: z.string().optional(),
+  actionType: z.enum(auditActionTypes),
+  entityType: z.enum(auditEntityTypes),
+  entityId: z.string(),
+  entityLabel: z.string(),
+  timestamp: z.number(),
+  changeSummary: z.string(),
+  reason: z.string().optional(),
+})
+const eventDetail = metadata.extend({
+  changeContext: z.object({
+    before: z.record(z.string(), z.unknown()).nullable(),
+    after: z.record(z.string(), z.unknown()).nullable(),
+  }),
+  stateDigests: z.object({ before: z.string(), after: z.string() }),
+  truncated: z.boolean(),
+})
+const pageSchema = z.object({ items: z.array(metadata), totalCount: z.number(), upper: z.string() })
+const summarySchema = z.object({
+  eventsToday: z.number(),
+  eventsThisWeek: z.number(),
+  actors: z
+    .array(z.object({ userId: z.string(), email: z.string(), eventCount: z.number() }))
+    .max(100),
+  entities: z.array(z.object({ entityType: z.enum(auditEntityTypes), eventCount: z.number() })),
 })
 
-const deletionPage = z.object({
-  page: z.array(
-    z.object({
-      _id: z.string(),
-      sourceId: z.string(),
-      source: z.unknown(),
-      actorId: z.string(),
-      actorEmail: z.string().optional(),
-      timestamp: z.number(),
-    }),
-  ),
-  isDone: z.boolean(),
-  continueCursor: z.string(),
-})
-
-async function loadSourceDeletionEvents(convex: ConvexHttpClient) {
-  const events: StoredAuditEvent[] = []
-  let cursor: string | null = null
-  let isDone = false
-  while (!isDone) {
-    const result: z.infer<typeof deletionPage> = deletionPage.parse(
-      await convex.query(listDeletionEvents, {
-        paginationOpts: { cursor, numItems: 100 },
-      }),
-    )
-    for (const row of result.page) {
-      const source = normalizeJsonRecord(row.source) ?? normalizeJsonRecord({ value: row.source })
-      const name = source?.name
-      events.push({
-        eventId: `rag-deletion:${row._id}`,
-        actorId: row.actorId,
-        actorEmail: row.actorEmail,
-        actorRole: 'admin',
-        actionType: 'EVIDENCE_SOURCE_DELETED',
-        entityType: 'EVIDENCE_SOURCE',
-        entityId: row.sourceId,
-        entityLabel: typeof name === 'string' && name.trim() ? name : row.sourceId,
-        changeContext: { before: source, after: null },
-        timestamp: row.timestamp,
-      })
-    }
-    isDone = result.isDone
-    cursor = result.continueCursor
-  }
-  return events
+function sourceKey(position?: AuditPosition) {
+  return position
+    ? `${String(position.timestamp).padStart(16, '0')}:${position.eventId}`
+    : undefined
 }
 
-async function loadSourceApprovalEvents(convex: ConvexHttpClient) {
-  const events: StoredAuditEvent[] = []
-  let cursor: string | null = null
-  let isDone = false
-  while (!isDone) {
-    const result: z.infer<typeof approvalPage> = approvalPage.parse(
-      await convex.query(listApprovalEvents, {
-        paginationOpts: { cursor, numItems: 100 },
-      }),
+async function sourceQuery<T>(
+  convex: ConvexHttpClient,
+  name: string,
+  args: Record<string, unknown>,
+  schema: z.ZodType<T>,
+): Promise<T> {
+  try {
+    const result: unknown = await convex.query(
+      makeFunctionReference<'query'>(`ragSourceAudit:${name}`),
+      args,
     )
-    for (const row of result.page) {
-      if (!row.governance) continue
-      const before = normalizeJsonRecord(row.governance.before)
-      const after = normalizeJsonRecord(row.governance.after)
-      const name = after?.name ?? before?.name
-      events.push({
-        eventId: `rag-approval:${row._id}`,
-        actorId: row.actorUserId,
-        actorEmail: row.actorEmail,
-        actorRole: 'admin',
-        actionType: sourceActionTypes[row.action],
-        entityType: 'EVIDENCE_SOURCE',
-        entityId: row.sourceId,
-        entityLabel: typeof name === 'string' && name.trim() ? name : row.sourceId,
-        changeContext: { before, after },
-        reason: row.reason ?? row.note,
-        timestamp: row.timestamp,
-      })
-    }
-    isDone = result.isDone
-    cursor = result.continueCursor
+    return schema.parse(normalizeJsonRecord(result))
+  } catch {
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Source audit storage is unavailable. Contact the operator.',
+    })
   }
-  return events
 }
 
-export async function loadSourceAuditEvents(convex: ConvexHttpClient) {
-  const pages = await Promise.all([
-    loadSourceDeletionEvents(convex),
-    loadSourceApprovalEvents(convex),
-  ])
-  return pages.flat()
+function stored(row: z.infer<typeof metadata>): StoredAuditEvent {
+  return { ...row, actorRole: 'admin', changeContext: { before: null, after: null } }
+}
+
+export async function listSourceAuditEvents(
+  convex: ConvexHttpClient,
+  filters: AuditStoreFilters,
+  options: { limit: number; upper?: AuditPosition; before?: AuditPosition; includeCount: boolean },
+) {
+  const sourceFilters: Record<string, string | number> = {}
+  for (const [key, value] of Object.entries(filters)) {
+    if (!value) continue
+    if (key === 'dateFrom' || key === 'dateTo') {
+      const date = Date.parse(value)
+      if (Number.isFinite(date)) sourceFilters[key] = date
+    } else sourceFilters[key] = value
+  }
+  const result = await sourceQuery(
+    convex,
+    'listEvents',
+    {
+      filters: sourceFilters,
+      limit: options.limit,
+      ...(options.upper ? { upper: sourceKey(options.upper) } : {}),
+      ...(options.before ? { before: sourceKey(options.before) } : {}),
+      includeCount: options.includeCount,
+    },
+    pageSchema,
+  )
+  return {
+    items: result.items.map(stored),
+    totalCount: result.totalCount,
+    upper:
+      options.upper ??
+      (result.items[0]
+        ? { timestamp: result.items[0].timestamp, eventId: result.items[0].eventId }
+        : undefined),
+  }
+}
+
+export async function getSourceAuditEvent(
+  convex: ConvexHttpClient,
+  eventId: string,
+): Promise<StoredAuditEvent | null> {
+  const result = await sourceQuery(convex, 'getEvent', { eventId }, eventDetail.nullable())
+  if (!result) return null
+  return { ...result, actorRole: 'admin' }
+}
+
+export async function getSourceAuditSummary(convex: ConvexHttpClient) {
+  return sourceQuery(convex, 'getSummary', {}, summarySchema)
 }

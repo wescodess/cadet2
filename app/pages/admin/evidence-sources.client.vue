@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { createAdminOperation } from '@/lib/admin/createOperation'
+
 import { computed, ref } from 'vue'
 
 import EvidenceSourceDetail from '@/components/admin/EvidenceSourceDetail.vue'
@@ -53,6 +55,8 @@ type NuxtErrorLike = {
     statusMessage?: string
   }
 }
+
+const createOperation = createAdminOperation()
 
 definePageMeta({
   middleware: ['auth', 'admin'],
@@ -318,13 +322,16 @@ async function saveDetail() {
 
   try {
     if (detailMode.value === 'create') {
+      const payload = buildCreatePayload()
       const created = await $fetch<CreateEvidenceSourceResponse>('/api/admin/rag/sources', {
         method: 'POST',
-        body: buildCreatePayload(),
+        headers: createOperation.headers(payload),
+        body: payload,
       })
 
       await loadSources()
       await selectSource(created.sourceId)
+      if (selectedSourceId.value === created.sourceId) createOperation.complete()
 
       feedback.value = {
         tone: 'success',

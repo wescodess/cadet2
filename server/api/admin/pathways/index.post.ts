@@ -1,3 +1,4 @@
+import { requireIdempotencyKey, withCreateReceipt } from '../../../utils/admin/createReceipt'
 import { getSqlDatabase } from '../../../utils/database'
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 import { recordGovernanceAction } from '../../../utils/audit/recordGovernanceAction'
@@ -23,35 +24,45 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const key = requireIdempotencyKey(event)
   try {
-    const created = await getSqlDatabase().transaction(async (transaction) => {
-      const created = await createPathwayDefinition(parsed.data, transaction)
-
-      if (!created) {
-        throw createError({
-          statusCode: 500,
-          statusMessage: 'Unable to create pathway definition',
-        })
-      }
-
-      await recordGovernanceAction(
-        event,
-        {
-          actionType: 'PATHWAY_CREATED',
-          entityType: 'PATHWAY',
-          entityId: created.pathwayId,
-          entityLabel: created.displayName,
-          changeContext: {
-            before: null,
-            after: created,
-          },
-        },
-        adminSession,
+    const created = await getSqlDatabase().transaction(async (transaction) =>
+      withCreateReceipt(
         transaction,
-      )
+        adminSession.userId,
+        'pathway-create',
+        key,
+        parsed.data,
+        async () => {
+          const created = await createPathwayDefinition(parsed.data, transaction)
 
-      return created
-    })
+          if (!created) {
+            throw createError({
+              statusCode: 500,
+              statusMessage: 'Unable to create pathway definition',
+            })
+          }
+
+          await recordGovernanceAction(
+            event,
+            {
+              actionType: 'PATHWAY_CREATED',
+              entityType: 'PATHWAY',
+              entityId: created.pathwayId,
+              entityLabel: created.displayName,
+              changeContext: {
+                before: null,
+                after: created,
+              },
+            },
+            adminSession,
+            transaction,
+          )
+
+          return created
+        },
+      ),
+    )
 
     setResponseStatus(event, 201)
     return created

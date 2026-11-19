@@ -2,7 +2,7 @@ import type { H3Event } from 'h3'
 import type { SqlExecutor } from '../database'
 
 import { requireAdminSession } from '../auth/requireAdminSession'
-import { insertAuditLogEvent, normalizeOptionalString, normalizeJsonRecord } from './auditLogStore'
+import { insertAuditLogEvent, normalizeOptionalString } from './auditLogStore'
 import type { GovernanceAuditEventInput } from './types'
 
 export async function recordGovernanceAction(
@@ -23,8 +23,8 @@ export async function recordGovernanceAction(
       entityId: input.entityId,
       entityLabel: input.entityLabel,
       changeContext: {
-        before: normalizeJsonRecord(input.changeContext.before),
-        after: normalizeJsonRecord(input.changeContext.after),
+        before: input.changeContext.before,
+        after: input.changeContext.after,
       },
       reason: normalizeOptionalString(input.reason) || undefined,
       timestamp:

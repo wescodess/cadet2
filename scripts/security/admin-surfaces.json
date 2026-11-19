@@ -188,6 +188,22 @@
     "tasks:list": {
       "kind": "query",
       "owner": "28"
+    },
+    "ragSourceAudit:listEvents": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSourceAudit:getEvent": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSourceAudit:getSummary": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSourceAudit:backfillEvents": {
+      "kind": "internalMutation",
+      "owner": "74"
     }
   },
   "http": {
