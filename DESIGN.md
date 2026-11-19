@@ -1,6 +1,6 @@
 # cadet design system: Relay
 
-**Status:** approved by the owner on 2026-11-17, amended on 2026-11-18 (client text floor in [Typography](#4-typography), no-turn style in [Whose turn](#33-whose-turn)) and on 2026-11-19 (client text scale in [Typography](#4-typography), the “Review requested” state in [Semantic states](#11-semantic-states), a colleague’s first name as a desk holder word in [Holder](#122-composed-components)). This is the design system for every cadet UI surface, in both portals.
+**Status:** approved by the owner on 2026-11-17, amended on 2026-11-18 (client text floor in [Typography](#4-typography), no-turn style in [Whose turn](#33-whose-turn)) and on 2026-11-19 (client text scale in [Typography](#4-typography), the “Review requested” state in [Semantic states](#11-semantic-states), a colleague’s first name as a desk holder word in [Holder](#122-composed-components), 12 px [Keyboard hint](#121-primitives-shadcn-vue-on-reka-ui) and the graphite selected-row edge in [QueueRow](#122-composed-components)). This is the design system for every cadet UI surface, in both portals.
 
 | Read | What it gives you |
 |---|---|
@@ -217,7 +217,7 @@ Flat surfaces separated by 1 px hairlines (`--border`). One elevation shadow, `-
 
 - Buttons: a 1 px base line, `0 1px 0 rgba(0,0,0,.04)`.
 - Inputs: `inset 0 1px 1px rgba(0,0,0,.03)`; an invalid input instead gets a 3 px halo of `--destructive` at 18%.
-- Edge rules, drawn as inset shadows: 3 px on the left for the signed-plan header (`--seal`), deadline items (`--urgent` within 90 days, `--caution` within 180 days or date unknown) and changed facts (`--caution`); 3 px at the bottom of turn-bar segments (turn colour); 2 px on the left of the selected queue row (`--ring`).
+- Edge rules, drawn as inset shadows: 3 px on the left for the signed-plan header (`--seal`), deadline items (`--urgent` within 90 days, `--caution` within 180 days or date unknown) and changed facts (`--caution`); 3 px at the bottom of turn-bar segments (turn colour); 2 px on the left of the selected queue row (`--primary`, graphite; never `--ring`).
 
 ## 8. Focus
 
@@ -312,7 +312,7 @@ Values below are the specimen’s final computed styles. Representative values a
 
 ### 12.2 Composed components
 
-**StatusChip.** Glyph (role colour) and word (role ink) for one of the 23 states. Word at 500 in the chip size (`--chip-fs`), glyph 16 px, padding 0 8 px 0 6 px, 5 px gap. Client: `--r-soft` fill, transparent border. Representative: card fill, `--border` hairline. Urgent: solid `--urgent` with `--urgent-foreground`. Sizes: default and small (`--chip-h-sm`). Never truncate the word; let it wrap. Glyph `aria-hidden`.
+**StatusChip.** Glyph (role colour) and word (role ink) for one of the states in [section 11](#11-semantic-states), including the 2026-11-19 `review-requested` amendment. Word at 500 in the chip size (`--chip-fs`), glyph 16 px, padding 0 8 px 0 6 px, 5 px gap. Client: `--r-soft` fill, transparent border. Representative: card fill, `--border` hairline. Urgent: solid `--urgent` with `--urgent-foreground`. Sizes: default and small (`--chip-h-sm`). Never truncate the word; let it wrap. Glyph `aria-hidden`.
 
 **TurnDisc.** A round disc in the turn colour with `-foreground` initials (OA, PR) or a glyph: `check` for done, `pen-line` for signed, `user-round` for unassigned. Sizes 16, 20, 24 (default), 32 and 36 px; initials at 0.4 × the disc size, 600, in `--font-desk`. Always `aria-hidden`; always next to a word.
 

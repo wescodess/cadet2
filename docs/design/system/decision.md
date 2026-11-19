@@ -59,7 +59,7 @@ The owner answered:
 
 > Approve both (Recommended)
 
-`review-requested`, word "Review requested", progress role, Lucide `send` glyph, in the Work status group. On the desk it is the neutral chip: `--card` fill, `--border` hairline, glyph `--progress`, word `--progress-ink`, sized by `--chip-h`, `--chip-px`, `--chip-radius`, `--chip-fs` and their `-sm` forms. B2's concept marks it with a dashed outline as unapproved; the build drops the outline. `tokens.json` still lists the original 23 states, so `DESIGN.md` section 11 is the source for this one.
+`review-requested`, word "Review requested", progress role, Lucide `send` glyph, in the Work status group. On the desk it is the neutral chip: `--card` fill, `--border` hairline, glyph `--progress`, word `--progress-ink`, sized by `--chip-h`, `--chip-px`, `--chip-fs` and `--chip-radius`, or `--chip-h-sm`, `--chip-px-sm` and `--chip-fs-sm` with the same `--chip-radius` at the small size. B2's concept marks it with a dashed outline as unapproved; the build drops the outline. `tokens.json` still lists the original 23 states, so `DESIGN.md` section 11 is the source for this one.
 
 ### 2. A colleague's first name as a desk holder word
 
