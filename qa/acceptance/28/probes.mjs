@@ -29,10 +29,11 @@ for(const persona of who){
 }
 await fs.writeFile(path.join(out,'http.json'),JSON.stringify(rows,null,2));
 const rpc=[];
-for(const persona of who){
+for(const phase of ['query','mutation'])for(const persona of who){
  for(const target of ['own','foreign']){
   const userId=target==='own'?own:foreign,runId=`qa28-${target}-unsigned`;
   for(const [kind,name] of exportsToClose){
+   if(kind!==phase)continue;
    let args={userId,runId};
    if(name.endsWith(':list')||name.endsWith(':getAuditSummary'))args={};
    if(/:(?:listForUser|listRunsForUserTesting|resetRunsForUser)$/.test(name))args={userId};
@@ -42,6 +43,7 @@ for(const persona of who){
    if(/:(?:seedRunForUser|createQueuedRun)$/.test(name))args={userId,runId,profileSnapshotId:`qa28-${target}-snapshot`,...(name.endsWith(':seedRunForUser')?{status:'completed'}:{})};
    if(name.endsWith(':setTerminalStatusForUser'))args={userId,runId,status:'completed'};
    if(name.endsWith(':writePathwayEvaluationForUser'))args={userId,runId,profileSnapshotId:`qa28-${target}-snapshot`,direct:[],blocked:[]};
+   if(name.endsWith(':writeRankedRecommendationsForUser'))args={userId,runId,profileSnapshotId:`qa28-${target}-snapshot`,direct:[],blocked:[],composed:[]};
    // Public availability is observable even when legacy argument validation rejects a payload.
    const response=await fetch(`${convex}/api/${kind}`,{method:'POST',headers:{'content-type':'application/json',...(signed[persona]?.token?{authorization:`Bearer ${signed[persona].token}`}:{})},body:JSON.stringify({path:name,args,format:'json'})});
    const body=await response.text();
