@@ -203,6 +203,24 @@ describe('public quality row entry points preserve parser decisions', () => {
 })
 
 describe('quality gate regression boundaries', () => {
+  it('types reject a new diagnostic key on a legacy file with another baselined key', async () => {
+    const baseline = common.json('scripts/quality/baselines/types.json')
+    expect(baseline.counts['nuxt.config.ts|TS2322']).toBe(1)
+    expect(baseline.counts['nuxt.config.ts|TS9999']).toBeUndefined()
+    run.mockImplementation((command, args) => {
+      if (args.includes('prepare') || args.includes('tsc')) return success
+      return {
+        status: 1,
+        stderr: '',
+        stdout:
+          'nuxt.config.ts(1,1): error TS2322: Existing diagnostic.\n' +
+          'nuxt.config.ts(2,1): error TS9999: New diagnostic.\n' +
+          'nuxt.config.ts(3,1): error TS9999: Another new diagnostic.\n',
+      }
+    })
+    await expect(row('types')).rejects.toThrow('types regression:\nnuxt.config.ts|TS9999: 2 > 0')
+  })
+
   it.each([1, 2])(
     'types enforce the literal existing-file allowance at %i diagnostics',
     async (amount) => {

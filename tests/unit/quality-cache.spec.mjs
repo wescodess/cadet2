@@ -356,7 +356,7 @@ describe('GitHub release metadata authentication', () => {
       expect(readdirSync(cache)).toEqual([])
     },
   )
-  it.each(['\n', '\r', '\t', '\u007f', '\u0100'])(
+  it.each([' ', '\n', '\r', '\t', '\u001f', '\u007f', '\u0100'])(
     'rejects malformed token separator %j before fetch',
     async (separator) => {
       vi.stubEnv('GITHUB_TOKEN', `fixture-prefix${separator}fixture-suffix`)

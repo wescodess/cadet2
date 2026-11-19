@@ -3,6 +3,7 @@ import { spawn, spawnSync } from 'node:child_process'
 import {
   chmodSync,
   cpSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -199,6 +200,41 @@ describe('aggregate failure and interruption evidence', () => {
 })
 
 describe('local baseline measurement and CI flag boundaries', () => {
+  it.each([false, true])(
+    'refuses to baseline a dirty new file with an existing manifest: %s',
+    (existing) => {
+      const root = sandbox()
+      const path = join(root, 'scripts/quality/baselines/types.json')
+      mkdirSync(join(root, 'scripts/quality/baselines'), { recursive: true })
+      mkdirSync(join(root, 'app'))
+      writeFileSync(join(root, 'app/brand-new-quality-probe.ts'), 'const value: number = "dirty"\n')
+      const original = '{"counts":{"nuxt.config.ts|TS2322":1}}\n'
+      if (existing) writeFileSync(path, original)
+      writeFileSync(join(root, 'git'), '#!/bin/sh\nprintf "nuxt.config.ts\\n"\n')
+      chmodSync(join(root, 'git'), 0o755)
+      const env = environment(root)
+      env.PATH = root + ':' + env.PATH
+      const result = spawnSync(
+        process.execPath,
+        [
+          '--input-type=module',
+          '-e',
+          "const { main, ratchet } = await import('./scripts/quality/common.mjs'); main(() => ratchet('types', { 'app/brand-new-quality-probe.ts|TS2322': 1 }))",
+          '--',
+          '--write-baseline',
+        ],
+        { cwd: root, env, encoding: 'utf8' },
+      )
+      expect(result.status).toBe(1)
+      expect(result.stdout).toBe('')
+      expect(result.stderr).toBe(
+        'types: new files must be clean: app/brand-new-quality-probe.ts|TS2322\n',
+      )
+      if (existing) expect(readFileSync(path, 'utf8')).toBe(original)
+      else expect(existsSync(path)).toBe(false)
+    },
+  )
+
   it('writes a stable sorted local count manifest without reading or changing the repository baseline', () => {
     const root = sandbox()
     mkdirSync(join(root, 'scripts/quality/baselines'), { recursive: true })
@@ -256,7 +292,7 @@ function retainedOutput(directory) {
 }
 
 describe('native secrets row token validation', () => {
-  it.each(['\n', '\r', '\t', '\u007f', '\u0100'])(
+  it.each([' ', '\n', '\r', '\t', '\u001f', '\u007f', '\u0100'])(
     'rejects malformed token separator %j without disclosing either part',
     (separator) => {
       const root = sandbox()
@@ -264,12 +300,18 @@ describe('native secrets row token validation', () => {
       const token = parts.join(separator)
       const env = { ...environment(root), GITHUB_TOKEN: token }
       expect(spawnSync('git', ['init', '--quiet'], { cwd: root, env }).status).toBe(0)
-      const result = spawnSync(process.execPath, [resolve('scripts/quality/secrets.mjs')], {
-        cwd: root,
-        env,
-        encoding: 'utf8',
-      })
+      const preload = join(root, 'preflight.mjs')
+      writeFileSync(
+        preload,
+        "import { writeFileSync } from 'node:fs'; globalThis.fetch = async () => { writeFileSync(new URL('./fetch-called', import.meta.url), 'called'); throw new Error('unexpected preflight fetch') }\n",
+      )
+      const result = spawnSync(
+        process.execPath,
+        ['--import', preload, resolve('scripts/quality/secrets.mjs')],
+        { cwd: root, env, encoding: 'utf8' },
+      )
       expect(result.status).toBe(1)
+      expect(existsSync(join(root, 'fetch-called'))).toBe(false)
       expect(result.stdout).toBe('')
       expect(result.stderr).toBe('Invalid GITHUB_TOKEN characters\n')
       const retained = retainedOutput(root).join(' ')
