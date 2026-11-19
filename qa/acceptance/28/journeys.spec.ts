@@ -9,6 +9,15 @@ const test = base.extend<{observed:void}>({
     page.on('pageerror',e=>errors.push(`pageerror: ${e.message}`));
     page.on('console',m=>{if(m.type()==='error' && !/Failed to load resource.*(?:404|401|403)/.test(m.text()))errors.push(`console: ${m.text()}`)});
     page.on('requestfailed',r=>{if(!/net::ERR_ABORTED/.test(r.failure()?.errorText||''))errors.push(`requestfailed: ${r.method()} ${r.url()} ${r.failure()?.errorText}`)});
+    // Expected failures per journey: closed bookmark 404; existing admin/tool
+    // admission 401/403. #74 owns those tools' containment, not this ticket.
+    page.on('response',r=>{
+      if(r.status()<400)return;
+      const pathname=new URL(r.url()).pathname;
+      const expected=(r.status()===404&&/^\/(?:workspace|tasks)(?:\/|$)/.test(pathname))
+        ||([401,403].includes(r.status())&&/^\/(?:api\/)?(?:admin|ai-search)(?:\/|$)/.test(pathname));
+      if(!expected)errors.push(`unexpected HTTP ${r.status()}: ${r.request().method()} ${pathname}`);
+    });
     await use();
     await testInfo.attach('browser-errors.json',{body:JSON.stringify(errors,null,2),contentType:'application/json'});
     expect.soft(errors,'REAL-USER.md: no console errors, unhandled exceptions, or unexpected failed requests').toEqual([]);
@@ -40,7 +49,7 @@ async function assertClosed(page:Page,path:string){
 test('J28-01 visitor landing and retired bookmarks',async({page})=>{
   await page.goto('/');
   // LR L40: minimal public/auth entry, no debug, tasks or engine-readiness promises.
-  await expect.soft(page.getByRole('link',{name:/sign in|log in|login|create account/i}).first(),oracle.landing).toBeVisible();
+  await expect.soft(page.getByRole('link',{name:/sign in|log in|login|create account|auth/i}).first(),oracle.landing).toBeVisible();
   await expect.soft(page.getByRole('link',{name:/workspace|tasks|playground|ai search/i}),oracle.landing).toHaveCount(0);
   await expect.soft(page.getByText(/useUserSession\(\)|debug landing|engine readiness|readiness diagnostics/i),oracle.landing).toHaveCount(0);
   for(const path of oldPages) await assertClosed(page,path);
