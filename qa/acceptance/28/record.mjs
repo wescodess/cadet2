@@ -2,14 +2,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 const evidence='/Users/wesleyukadike/.orchestrate/evidence/cadet2/28/run-2';
 const rows=[],retained=new Set(),pruned=[];
-for(const artifact of ['base','candidate']){
- const file=path.join(evidence,artifact,'ui/results.json');
+for(const artifact of ['base','candidate'])for(const run of ['ui','ui-ready']){
+ const file=path.join(evidence,artifact,run,'results.json');
  const d=await fs.readFile(file,'utf8').then(JSON.parse).catch(()=>null);
  if(d){
   const walk=async s=>{
    for(const spec of s.specs||[])for(const t of spec.tests||[])for(const r of t.results||[]){
     const message=(r.errors?.[0]?.message||'').replace(/\u001b\[[0-9;]*m/g,'').split('\n').filter(Boolean).slice(0,4).join(' ').slice(0,400);
-    rows.push(`| ${artifact} | ${t.projectName} | ${spec.title} | ${r.status} | ${message.replaceAll('|','/')} |`);
+    rows.push(`| ${artifact}/${run} | ${t.projectName} | ${spec.title} | ${r.status} | ${message.replaceAll('|','/')} |`);
     const key=`${artifact}:${spec.title}`;
     if(r.status==='passed'&&retained.has(key)){
      for(const a of r.attachments||[])if(a.path&&/\.(?:zip|webm)$/.test(a.path)){

@@ -81,9 +81,12 @@ for(const persona of ['visitor','client','admin'] as const) test(`J28-04 ${perso
   const observations=[];
   for(const path of remainingPages){
     await page.goto(path);
+    // Wait for the destination to render, including slow admission redirects.
+    await expect(page.getByRole('heading').first()).toBeVisible({timeout:45000});
     // LR L40-L59 and AC3. Admin/RAG admission defects are reported to #74 separately.
     await expect.soft(page.getByRole('link',{name:/workspace|tasks|playground/i}),oracle.replacement).toHaveCount(0);
     observations.push({path,url:page.url(),headings:await page.getByRole('heading').allTextContents(),links:await page.getByRole('link').allTextContents()});
+    await page.screenshot({path:test.info().outputPath(`remaining-${path.replaceAll('/','_')||'landing'}.png`),fullPage:true});
   }
   await test.info().attach('remaining-pages.json',{body:JSON.stringify(observations,null,2),contentType:'application/json'});
 });
