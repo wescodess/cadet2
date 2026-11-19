@@ -8,4 +8,9 @@ for(const [persona,a] of Object.entries(data.probes)){
  a.token=body.token;
 }
 await fs.writeFile(file,JSON.stringify(data,null,2),{mode:0o600});
+// Exercise the admitted inventory control before the before-batch snapshot too;
+// this keeps any historical initialization separate from denied-request effects.
+const admin=data.probes.admin;
+const control=await fetch(`${process.env.QA_URL}/api/admin/pathways`,{headers:{cookie:admin.cookies.map(c=>`${c.name}=${c.value}`).join('; ')}});
+await fs.writeFile(file.replace('.json','-control.json'),JSON.stringify({status:control.status,body:await control.text()},null,2),{mode:0o600});
 console.log('Refreshed genuine probe JWTs through the public auth endpoint');

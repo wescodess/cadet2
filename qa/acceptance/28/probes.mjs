@@ -64,7 +64,10 @@ await fs.writeFile(path.join(out,'convex.json'),JSON.stringify(rpc,null,2));
 const admin=signed.admin;
 const res=await fetch(`${url}/api/admin/access`,{headers:{cookie:admin.cookies.map(c=>`${c.name}=${c.value}`).join('; ')}});
 const body=await res.text();
-const positive={status:res.status,pass:res.status===200,body,expected:oracle.admin};
+const inventory=await fetch(`${url}/api/admin/pathways`,{headers:{cookie:admin.cookies.map(c=>`${c.name}=${c.value}`).join('; ')}});
+const inventoryBody=await inventory.text();
+const positive={status:res.status,pass:res.status===200&&inventory.status===200,body,
+ inventory:{status:inventory.status,body:inventoryBody.slice(0,10000)},expected:oracle.admin};
 await fs.writeFile(path.join(out,'positive-control.json'),JSON.stringify(positive,null,2));
 const summary={http:{total:rows.length,passed:rows.filter(r=>r.pass).length,failed:rows.filter(r=>!r.pass).length},convex:{total:rpc.length,passed:rpc.filter(r=>r.pass).length,failed:rpc.filter(r=>!r.pass).length},positive};
 await fs.writeFile(path.join(out,'summary.json'),JSON.stringify(summary,null,2));
