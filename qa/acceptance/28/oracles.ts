@@ -46,6 +46,11 @@ export const oldApi = [
   '/workspace/_payload.json','/workspace/history/_payload.json',
   '/workspace/recommendations/qa28-own-unsigned/_payload.json',
   '/tasks/_payload.json',
+  // AC1's every-descendant boundary also covers encoded bookmark spellings.
+  '/%77orkspace/recommendations/qa28-own-unsigned',
+  '/workspace%2frecommendations%2fqa28-own-unsigned',
+  '/api/%77orkspace/me','/api/workspace%2fme','/api/intake%2fdraft',
+  '/api/recommendations/runs%2fqa28-own-unsigned%2fresults','/tasks%2fnested',
 ];
 export const exportsToClose: Array<[string,string]> = [
   ['query','tasks:list'],
