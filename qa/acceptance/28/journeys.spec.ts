@@ -61,9 +61,10 @@ test('J28-01 visitor landing and retired bookmarks',async({page})=>{
 
 for(const persona of ['client','admin'] as const){
   test(`J28-${persona==='client'?'02':'03'} ${persona} bookmarks, safe entry and visible sign-out`,async({page},info)=>{
-    await signIn(page,accounts()[info.project.name][persona]);
+    const account=accounts()[info.project.name][persona];
+    await signIn(page,account);
     // LR L28/L30/L41 and ticket AC1: admission does not reopen legacy results.
-    for(const path of oldPages)await assertClosed(page,path);
+    for(const path of oldPages)await assertClosed(page,path.replaceAll('qa28-own-unsigned',account.ownRunId));
     await page.goto('/');
     await expect.soft(page.getByRole('link',{name:/workspace|tasks|playground/i}),oracle.close).toHaveCount(0);
     let signOut=page.getByRole('button',{name:/sign out|log out/i}).or(page.getByRole('link',{name:/sign out|log out/i}));
