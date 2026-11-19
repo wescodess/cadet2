@@ -47,7 +47,7 @@ The style uses only `--muted`, `--muted-foreground`, `--border`, `--input` (dash
 
 ## Amendments 2026-11-19
 
-The owner approved three amendments on 2026-11-19, at the B2 (practice and preparation) design gate, round 2 (PR #164). They are written into `DESIGN.md` sections 4, 11 and 12.2. No token was added or changed, and `approved.html`, the rejected files, `tokens.css` and `tokens.json` are unchanged.
+The owner approved these amendments on 2026-11-19 at the B2 (practice and preparation) design gate (PR #164). They are written into `DESIGN.md` sections 4, 11, 12.1 and 12.2. No token was added or changed, and `approved.html`, the rejected files, `tokens.css` and `tokens.json` are unchanged.
 
 ### 1. A "Review requested" state chip
 
@@ -89,6 +89,24 @@ Meaningful client text uses the client's existing 15 px Small (15 on 22) and Lab
 | 12.2, Holder | Desk words | You, Client, Unassigned, Signed | Adds a colleague's first name |
 
 The client Avatar's 13 px initials are `aria-hidden`, so its spec is unchanged.
+
+### 4. Desk keyboard hints, selected row edge and desk chips
+
+At B2 round 1 the orchestrator asked:
+
+> Accept these four visual details? (a) Neutral desk chips: a neutral chip with a coloured glyph and word. (b) The selected-row edge in graphite, not focus blue, because blue means the Representative's turn. (c) Client small text at 15 px using existing sizes, with no new 13 px size. (d) Desk keyboard hints raised from 11.5 to 12 px.
+
+The owner answered:
+
+> Accept all four (Recommended)
+
+(c) is amendment 3. The other three settle discrepancies 2, 7 and 8 below. Keyboard hints are 12 px. The selected queue row's left edge is `--primary` (graphite), not the focus ring colour. Desk state chips are neutral (card fill, hairline, glyph in role colour, word in role ink), as `DESIGN.md` already records.
+
+| Section | Spec | Was | Now |
+|---|---|---|---|
+| 4, Typography | Desk text below 12 px | Keyboard hints at 11.5 px, open | Keyboard hints 12 px |
+| 12.1, Keyboard hint | Size | 11.5 px at 500 | 12 px at 500 |
+| 12.2, QueueRow | Selected row edge | 2 px left edge (specimen: focus ring colour) | 2 px `--primary` left edge |
 
 ## What was chosen
 
@@ -167,7 +185,7 @@ Still open, to be decided at the surface gates (not by implementers):
 
 - Whether the turn bar is sticky on scroll. If it is, reserve its height and set `scroll-padding-top` (see build requirements).
 - How the turn bar appears on one-question intake pages. The approval says every client screen; the specimen renders it on Home and Documents only and shows the one-question page as a component without it.
-- Desk text below 12 px, and blue used outside its meaning (see discrepancies 2 and 7). Client text below 13 px was settled by the 2026-11-18 amendment.
+- The client notice's lake blue tint (see discrepancy 7). Client text was settled by the 2026-11-18 and 2026-11-19 amendments; desk keyboard hints and the selected row edge by the 2026-11-19 amendment.
 
 ## Build requirements recorded in the critiques
 
@@ -192,13 +210,13 @@ Found while recording; none changes the approved design. Implementers follow the
 
 1. **Fonts.** The specimen loads IBM Plex from Google Fonts by URL; the critiques require self-hosting. Expected for a specimen; the build must self-host.
 2. **Text below the 13 px floor.** The round-1 Console critique held 13 px as the floor ("nothing goes smaller"). The Relay specimen renders smaller text in both portals (the client's own small size is 15 px): the holder word at 12 px, representative state chips at 12.5 px (12 px small), desk row metadata and the date-tile month at 12.5 px, tab, group and sidebar labels and the date-tile year at 12 px, keyboard hints at 11.5 px, avatar initials and the client task badge at 10.5 px, turn-disc initials at 8 to 9.6 px and Mono IDs at about 12 px. `DESIGN.md` section 4 lists each one. The Relay critique reports no rendered text below its minimum, so it measured against a lower floor. Owner decision needed before the queue and client list surfaces are built.
-   **Settled in part on 2026-11-18:** client text is at least 13 px and the desk may keep 12 px (see [Amendments](#amendments-2026-11-18)). Desk keyboard hints at 11.5 px remain open.
+   **Settled in part on 2026-11-18:** client text is at least 13 px and the desk may keep 12 px (see [Amendments](#amendments-2026-11-18)). **Settled on 2026-11-19:** desk keyboard hints are 12 px, and client text uses the 15 px tokens (see [Amendments](#amendments-2026-11-19)).
 3. **Sticky bars.** The specimen's turn bar is not sticky and no screen demonstrates `scroll-padding`, so focus-not-obscured is unproven. Requirement 3 applies.
 4. **Turn bar reach.** "Every client screen" is rendered on Home and Documents only; the one-question intake page has no specimen with the turn bar.
 5. **Turn alias names.** The presentation names `--turn-client` and friends; the specimen's token block defines only `--color-turn-*` inside `@theme inline`, and its own CSS maps turns through `data-turn` attributes. `tokens.css` follows the specimen: `--color-turn-*` in `@theme inline`, pointing straight at the roles, and no `--turn-*` variables.
 6. **Icon stroke.** The specimen says "Lucide at 1.75 px stroke for everything"; the state glyphs inside chips render at 2 px. `DESIGN.md` records both as rendered: 1.75 px for interface icons, 2 px for state glyphs.
-7. **Blue outside its meaning.** Relay's rule is that lake blue is always the representative's turn and ultramarine is only focus. Two places in the specimen, inherited from Console, bend it: the client "General information, not legal advice" notice uses the progress (lake blue) tint, and the selected queue row marks its left edge with the focus-ring colour. Neither was flagged by the critique. Owner decision needed at the first gate that shows either surface.
-8. **Desk examples inherit client rules.** Every representative panel in `approved.html` (53 of them) sits inside the page's `.doc.x-client` wrapper, so the specimen's `.x-client …` rules and the client's `--input-radius` also reach the desk examples. As rendered, desk state chips are tinted (all 156), desk dialog actions stack, desk avatars are 32 px, the desk CICC register link is 32 px tall and desk inputs have 10 px corners. The specimen's own text ("Representatives get a neutral chip so rows stay quiet") and its rules scoped to the client describe the opposite, so `DESIGN.md` records the values the stylesheet gives a standalone `data-expression="representative"` layout: neutral chips, actions in a row, 24 px avatars, a 24 px link, 6 px input corners. Owner decision needed at the first desk gate.
+7. **Blue outside its meaning.** Relay's rule is that lake blue is always the representative's turn and ultramarine is only focus. Two places in the specimen, inherited from Console, bend it: the client "General information, not legal advice" notice uses the progress (lake blue) tint, and the selected queue row marks its left edge with the focus-ring colour. Neither was flagged by the critique. **Selected row settled on 2026-11-19:** a 2 px `--primary` (graphite) edge (see [Amendments](#amendments-2026-11-19)). The client notice tint stays open until a gate shows that notice.
+8. **Desk examples inherit client rules.** Every representative panel in `approved.html` (53 of them) sits inside the page's `.doc.x-client` wrapper, so the specimen's `.x-client …` rules and the client's `--input-radius` also reach the desk examples. As rendered, desk state chips are tinted (all 156), desk dialog actions stack, desk avatars are 32 px, the desk CICC register link is 32 px tall and desk inputs have 10 px corners. The specimen's own text ("Representatives get a neutral chip so rows stay quiet") and its rules scoped to the client describe the opposite, so `DESIGN.md` records the values the stylesheet gives a standalone `data-expression="representative"` layout: neutral chips, actions in a row, 24 px avatars, a 24 px link, 6 px input corners. **Settled on 2026-11-19:** neutral desk chips (see [Amendments](#amendments-2026-11-19)).
 
 ## Files in this record
 
