@@ -8,6 +8,8 @@ const out=process.env.QA_EVIDENCE;
 if(!url||!convex||!out)throw Error('Set QA_URL, QA_CONVEX_URL, QA_ACCOUNTS, QA_EVIDENCE');
 await fs.mkdir(out,{recursive:true});
 const rows=[];
+const backendLog=process.env.QA_BACKEND_LOG;
+const logStart=backendLog?(await fs.stat(backendLog)).size:0;
 const who=['visitor','client','foreign','admin'];
 const signed=data.probes;
 const own=signed.client.userId, foreign=signed.foreign.userId;
@@ -22,12 +24,17 @@ for(const persona of who){
    for(const query of variants){
     const response=await fetch(`${url}${route}${query}`,{method,redirect:'manual',headers:{...headers,accept:'application/json','content-type':'application/json'},...(method!=='GET'&&method!=='HEAD'?{body:JSON.stringify({userId:own,runId:'qa28-own-unsigned',sourceRunId:'qa28-foreign-unsigned',mode:'mock',force:true})}:{})});
     const body=await response.text();
-    rows.push({batch:'http',persona,route:route+query,method,status:response.status,location:response.headers.get('location'),pass:response.status===404&&!response.headers.get('location')&&!privateKeys.test(body),expected:`${oracle.close}; ${oracle.helpers}; ${oracle.noEffects}`,body:body.slice(0,2500)});
+    rows.push({batch:'http',persona,route:route+query,method,status:response.status,location:response.headers.get('location'),pass:response.status===404&&!response.headers.get('location')&&!privateKeys.test(body)&&!body.includes('QA28_PRIVATE_UNSIGNED_'),expected:`${oracle.close}; ${oracle.helpers}; ${oracle.noEffects}`,body:body.slice(0,2500)});
    }
   }
  }
 }
 await fs.writeFile(path.join(out,'http.json'),JSON.stringify(rows,null,2));
+if(backendLog){
+ const log=(await fs.readFile(backendLog)).subarray(logStart).toString();
+ await fs.writeFile(path.join(out,'http-backend.log'),log);
+ await fs.writeFile(path.join(out,'http-backend-calls.json'),JSON.stringify({publicFunctionRpcRequests:(log.match(/POST \/api\/(?:query|mutation|action) HTTP/g)||[]).length,note:'Backend log segment brackets only the retired HTTP batch, before direct-Convex probes and the admitted control.'},null,2));
+}
 const rpc=[];
 for(const phase of ['query','mutation'])for(const persona of who){
  for(const target of ['own','foreign']){
