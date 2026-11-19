@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 const root=path.resolve(process.argv[2]);
 const config=JSON.parse(await fs.readFile(path.join(root,'.nuxt/hub/db/config.json'),'utf8'));
 const schema=await import(pathToFileURL(path.join(root,'.nuxt/hub/db/schema.mjs')).href);
-const dbDir=path.resolve(root,config.db.connection.dataDir);
+const dbDir=path.resolve(root,process.env.QA_DB_DIR||config.db.connection.dataDir);
 await fs.mkdir(path.dirname(dbDir),{recursive:true});
 const client=new PGlite(dbDir);
 try{

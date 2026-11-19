@@ -17,11 +17,14 @@ const test = base.extend<{observed:void}>({
 
 async function signIn(page:Page,account:Account){
   await page.goto('/auth');
-  const tab=page.getByRole('tab',{name:/^(?:sign in|login|log in)$/i});
-  if(await tab.isVisible()) { await tab.click(); await expect(tab).toHaveAttribute('aria-selected','true'); }
+  // Visible form-heading transition proves hydration before entering credentials.
+  await expect(async()=>{
+    await page.getByRole('button',{name:'Sign In',exact:true}).click();
+    await expect(page.getByRole('heading',{level:1})).toHaveText(/welcome back|sign in/i,{timeout:700});
+  }).toPass({timeout:30000});
   await page.getByLabel(/email/i).fill(account.email);
   await page.getByLabel(/^password$/i).fill(account.password);
-  await page.getByRole('button',{name:/^(?:sign in|login|log in)$/i}).click();
+  await page.getByRole('button',{name:/^(?:sign in|login|log in)$/i}).last().click();
   await expect(page.getByRole('button',{name:/sign out|log out/i}).or(page.getByRole('link',{name:/sign out|log out/i}))).toBeVisible({timeout:30000});
 }
 
