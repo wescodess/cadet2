@@ -58,6 +58,17 @@ describe('installed package inventory', () => {
     expect(JSON.parse(result.stdout)).toEqual(['fixture@1.0.0'])
   })
 
+  it('uses the manifest identity for an installed alias target', () => {
+    const result = fixture(
+      { name: 'installed-alias-target', version: '2.0.0' },
+      {
+        lock: "lockfileVersion: '9.0'\npackages:\n  installed-alias-target@2.0.0: {}\nsnapshots:\n  installed-alias-target@2.0.0: {}\nimporters:\n  .:\n    dependencies:\n      installed-alias:\n        specifier: npm:installed-alias-target@2.0.0\n        version: installed-alias-target@2.0.0\n",
+      },
+    )
+    expect(result.status, result.stderr).toBe(0)
+    expect(JSON.parse(result.stdout)).toEqual(['installed-alias-target@2.0.0'])
+  })
+
   it('fails when a real package directory has no manifest', () => {
     const result = fixture()
     expect(result.status).toBe(1)

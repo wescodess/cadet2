@@ -50,7 +50,7 @@ async function row(name) {
   return completion
 }
 
-const installedPackages = ['minimatch@1.0.0', 'installed-alias@npm:fixture@2.0.0']
+const installedPackages = ['minimatch@1.0.0', 'installed-alias-target@2.0.0']
 const lockPackages = ['minimatch@1.0.0', '@esbuild/linux-x64@0.25.0', 'synthetic-importer@0.0.0']
 
 function inventory(installed = installedPackages, lock = lockPackages) {
@@ -80,8 +80,8 @@ function dependencyOutput({
   audit = { ...audit, stdout: JSON.stringify(report) }
   const licensePopulation = JSON.parse(licenses)
   if (licensePopulation.MIT)
-    licensePopulation.MIT.push({ name: 'installed-alias', versions: ['npm:fixture@2.0.0'] })
-  else licensePopulation.MIT = [{ name: 'installed-alias', versions: ['npm:fixture@2.0.0'] }]
+    licensePopulation.MIT.push({ name: 'installed-alias-target', versions: ['2.0.0'] })
+  else licensePopulation.MIT = [{ name: 'installed-alias-target', versions: ['2.0.0'] }]
   licenses = JSON.stringify(licensePopulation)
   run.mockImplementation((command, args) => {
     if (args[0] === 'install') return install
@@ -363,7 +363,7 @@ describe('dependency command and allowance contracts', () => {
       ['pnpm', ['--dir', expect.any(String), 'licenses', 'list', '--json']],
     ])
     expect(JSON.parse(readFileSync(join(directory, 'package-inventory.json'), 'utf8'))).toEqual({
-      installed: ['installed-alias@npm:fixture@2.0.0', 'minimatch@1.0.0'],
+      installed: ['installed-alias-target@2.0.0', 'minimatch@1.0.0'],
       audit: ['minimatch@1.0.0', '@esbuild/linux-x64@0.25.0', 'synthetic-importer@0.0.0'],
     })
     expect(existsSync(run.mock.calls[2][1][1])).toBe(false)
@@ -926,7 +926,7 @@ describe('deterministic dependency evidence', () => {
     dependencyOutput({
       audit,
       licenses: '{"GPL-3.0":[{"name":"minimatch","versions":["2.0.0","1.0.0"]}]}',
-      installed: ['minimatch@2.0.0', 'minimatch@1.0.0', 'installed-alias@npm:fixture@2.0.0'],
+      installed: ['minimatch@2.0.0', 'minimatch@1.0.0', 'installed-alias-target@2.0.0'],
       lock: [
         'minimatch@2.0.0',
         'minimatch@1.0.0',
@@ -952,7 +952,7 @@ describe('deterministic dependency evidence', () => {
       'z > minimatch@1.0.0',
     ])
     expect(options.writeJSON).toHaveBeenCalledWith(`${directory}/package-inventory.json`, {
-      installed: ['installed-alias@npm:fixture@2.0.0', 'minimatch@1.0.0', 'minimatch@2.0.0'],
+      installed: ['installed-alias-target@2.0.0', 'minimatch@1.0.0', 'minimatch@2.0.0'],
       audit: [
         'minimatch@2.0.0',
         'minimatch@1.0.0',
