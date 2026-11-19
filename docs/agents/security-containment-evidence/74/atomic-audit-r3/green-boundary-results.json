@@ -1,0 +1,15 @@
+{
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "counts": {
+    "planned": 58,
+    "tests": 58,
+    "suites": 0,
+    "passed": 58,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  }
+}

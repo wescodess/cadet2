@@ -1,3 +1,4 @@
+import { withPathwayTransaction } from '../../../../../utils/pathways/pathwayTransaction'
 import { getRouterParam } from 'h3'
 
 import { recordGovernanceAction } from '../../../../../utils/audit/recordGovernanceAction'
@@ -24,33 +25,37 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const before = (await listPathwayRules(pathwayId)).find((item) => item.id === ruleId) || null
-  const item = await deleteRule(ruleId, pathwayId)
+  return withPathwayTransaction(pathwayId, async (transaction) => {
+    const before =
+      (await listPathwayRules(pathwayId, transaction)).find((item) => item.id === ruleId) || null
+    const item = await deleteRule(ruleId, pathwayId, transaction)
 
-  if (!item) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Pathway rule not found',
-    })
-  }
+    if (!item) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Pathway rule not found',
+      })
+    }
 
-  await recordGovernanceAction(
-    event,
-    {
-      actionType: 'PATHWAY_RULE_DELETED',
-      entityType: 'PATHWAY_RULE',
-      entityId: item.id,
-      entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-      changeContext: {
-        before: before || item,
-        after: null,
+    await recordGovernanceAction(
+      event,
+      {
+        actionType: 'PATHWAY_RULE_DELETED',
+        entityType: 'PATHWAY_RULE',
+        entityId: item.id,
+        entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+        changeContext: {
+          before: before || item,
+          after: null,
+        },
       },
-    },
-    adminSession,
-  )
+      adminSession,
+      transaction,
+    )
 
-  return {
-    ok: true,
-    item,
-  }
+    return {
+      ok: true,
+      item,
+    }
+  })
 })

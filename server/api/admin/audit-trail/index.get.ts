@@ -1,4 +1,4 @@
-import { loadSourceDeletionEvents } from '../../../utils/audit/sourceDeletionEvents'
+import { loadSourceAuditEvents } from '../../../utils/audit/sourceAuditEvents'
 import { getQuery } from 'h3'
 
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
@@ -49,5 +49,5 @@ export default defineEventHandler(async (event) => {
     pageSize: toOptionalNumber(query.pageSize),
   }
 
-  return await listAuditTrailEvents(await loadSourceDeletionEvents(convex), filters)
+  return await listAuditTrailEvents(await loadSourceAuditEvents(convex), filters)
 })

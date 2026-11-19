@@ -321,6 +321,7 @@ export default defineSchema({
     reason: v.optional(v.string()),
     note: v.optional(v.string()),
     diffSummary: v.optional(v.string()),
+    governance: v.optional(v.object({ before: v.any(), after: v.any() })),
   })
     .index('by_sourceId', ['sourceId'])
     .index('by_timestamp', ['timestamp']),

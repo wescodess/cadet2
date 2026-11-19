@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto'
 import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { after, before, test } from 'node:test'
-import { promisify } from 'node:util'
+import { isDeepStrictEqual, promisify } from 'node:util'
 import { once } from 'node:events'
 import { createWriteStream } from 'node:fs'
 import { PGlite } from '@electric-sql/pglite'
@@ -185,10 +185,17 @@ before(
     assert.equal(sourceCode.split(deletion).length, 2)
     await writeFile(
       sourceModule,
-      sourceCode.replace(
-        deletion,
-        `${deletion}\n    if (source.name === 'Rollback deletion probe') throw new Error('Injected deletion audit failure')`,
-      ),
+      sourceCode
+        .replace(
+          deletion,
+          `${deletion}\n    if (source.name === 'Rollback deletion probe') throw new Error('Injected deletion audit failure')`,
+        )
+        .replace(
+          'timestamp: Date.now(),\n  })',
+          `timestamp: Date.now(),\n  })
+  if ('governance' in input && (await ctx.db.get(input.sourceId))?.name === 'Rollback governance ' + input.action)
+    throw new Error('Injected governance audit failure')`,
+        ),
     )
     await run(
       process.execPath,
@@ -819,22 +826,17 @@ test('explicit isolated operator migrations preserve every enabled admin operati
 })
 
 async function approvalHistory(sourceId) {
-  const result = await run(
-    process.execPath,
-    [
-      join(root, 'node_modules/convex/bin/main.js'),
-      'data',
-      'approval_audit_log',
-      '--format',
-      'json',
-      '--env-file',
-      join(directory, 'operator.env'),
-    ],
-    { cwd: join(directory, 'backend'), env: cliEnv },
-  )
-  return JSON.parse(result.stdout)
-    .filter((row) => row.sourceId === sourceId)
-    .sort((a, b) => a._id.localeCompare(b._id))
+  const rows = []
+  let cursor = null
+  while (true) {
+    const result = await admin.client.query(anyApi.ragSourceAudit.listApprovalEvents, {
+      paginationOpts: { cursor, numItems: 100 },
+    })
+    rows.push(...result.page)
+    if (result.isDone) break
+    cursor = result.continueCursor
+  }
+  return rows.filter((row) => row.sourceId === sourceId).sort((a, b) => a._id.localeCompare(b._id))
 }
 
 async function reviewedSource(name) {
@@ -876,7 +878,7 @@ async function assertRecordedDeletion(sourceId, history, since) {
   assert.equal(filtered.items[0].eventId, event.eventId)
   assert.equal(filtered.nextCursor, null)
   const retained = await successful(`/api/admin/audit-trail?search=${sourceId}`)
-  assert.equal(retained.totalCount, 2)
+  assert.equal(retained.totalCount, 3)
   assert.equal(
     retained.items.filter((item) => item.actionType === 'EVIDENCE_SOURCE_CREATED').length,
     1,
@@ -887,8 +889,13 @@ async function assertRecordedDeletion(sourceId, history, since) {
   const second = await successful(
     `/api/admin/audit-trail?search=${sourceId}&pageSize=1&cursor=${first.nextCursor}`,
   )
-  assert.equal(second.items[0].actionType, 'EVIDENCE_SOURCE_CREATED')
-  assert.equal(second.nextCursor, null)
+  assert.equal(second.items[0].actionType, 'EVIDENCE_SOURCE_APPROVED')
+  assert.equal(second.nextCursor, '2')
+  const third = await successful(
+    `/api/admin/audit-trail?search=${sourceId}&pageSize=1&cursor=${second.nextCursor}`,
+  )
+  assert.equal(third.items[0].actionType, 'EVIDENCE_SOURCE_CREATED')
+  assert.equal(third.nextCursor, null)
   const unfiltered = await successful('/api/admin/audit-trail?pageSize=100')
   assert.equal(unfiltered.items.filter((item) => item.eventId === event.eventId).length, 1)
   const summary = await successful('/api/admin/audit-trail/summary')
@@ -923,12 +930,14 @@ test('HTTP source deletion ignores forged actor fields and records the same sing
 test('actor arguments cannot grant deletion authority or change the recorded actor', async () => {
   const { sourceId, history } = await reviewedSource('Denied deletion probe')
   for (const actor of [anonymous, ordinary, emailMatch]) {
-    await assert.rejects(
-      actor.client.query(anyApi.ragSourceAudit.listDeletionEvents, {
-        paginationOpts: { cursor: null, numItems: 100 },
-      }),
-      /Authentication required|Admin access required/,
-    )
+    for (const name of ['listDeletionEvents', 'listApprovalEvents']) {
+      await assert.rejects(
+        actor.client.query(anyApi.ragSourceAudit[name], {
+          paginationOpts: { cursor: null, numItems: 100 },
+        }),
+        /Authentication required|Admin access required/,
+      )
+    }
   }
   await assert.rejects(
     admin.client.mutation(anyApi.ragSources.removeSource, {
@@ -1126,8 +1135,8 @@ test('public source actions project NUL snapshots and audit text safely into SQL
   assert.equal(canonical.source.description, 'retained\u0000description')
   assert.equal(canonical.source.rejectionReason, 'audit\u0000reason')
   const listed = await successful(`/api/admin/audit-trail?search=${sourceId}`)
-  assert.equal(listed.totalCount, 1)
-  const event = listed.items[0]
+  assert.equal(listed.totalCount, 2)
+  const event = listed.items.find((item) => item.actionType === 'EVIDENCE_SOURCE_REJECTED')
   assert.equal(event.reason, 'audit�reason')
   const detail = await successful(`/api/admin/audit-trail/${event.eventId}`)
   assert.equal(detail.event.changeContext.before.description, 'retained�description')
@@ -1218,6 +1227,454 @@ test('source creation and update reject control characters in names and config a
   assert.equal(
     (await admin.client.query(anyApi.ragSources.getSource, { sourceId })).source.name,
     name,
+  )
+})
+
+const atomicRule = {
+  unmetConditionId: 'atomic-condition',
+  fieldPath: 'englishClb',
+  operator: '>=',
+  comparisonValue: 8,
+}
+
+const sqlWrites = [
+  ['pathway-create', 'PATHWAY_CREATED'],
+  ['pathway-update', 'PATHWAY_UPDATED'],
+  ['pathway-status', 'PATHWAY_STATUS_CHANGED'],
+  ['rule-create', 'PATHWAY_RULE_CREATED'],
+  ['rules-replace', 'PATHWAY_RULE_UPDATED'],
+  ['rule-update', 'PATHWAY_RULE_UPDATED'],
+  ['rule-delete', 'PATHWAY_RULE_DELETED'],
+]
+
+async function sqlFixture(callback) {
+  await stopRuntime()
+  const db = new PGlite(join(directory, 'app/.data/db/pglite-dev'))
+  try {
+    return await callback(db)
+  } finally {
+    await db.close()
+    await startRuntime()
+  }
+}
+
+async function rejectSqlAudit(action) {
+  assert.match(action, /^[A-Z_]+$/)
+  await sqlFixture((db) =>
+    db.exec(
+      `ALTER TABLE governance_audit_log ADD CONSTRAINT atomic_audit_fault CHECK (action_type <> '${action}') NOT VALID`,
+    ),
+  )
+}
+
+async function restoreSqlAudit() {
+  await sqlFixture((db) =>
+    db.exec('ALTER TABLE governance_audit_log DROP CONSTRAINT atomic_audit_fault'),
+  )
+}
+
+async function prepareSqlWrite(name, suffix) {
+  const pathwayId = `atomic-${name}-${suffix}`
+  const path = `/api/admin/pathways/${pathwayId}`
+  let rule
+  if (name !== 'pathway-create') {
+    await successful(
+      '/api/admin/pathways',
+      'POST',
+      {
+        pathwayId,
+        displayName: pathwayId,
+        status: 'draft',
+      },
+      201,
+    )
+  }
+  if (['rules-replace', 'rule-update', 'rule-delete'].includes(name)) {
+    rule = (await successful(`${path}/rules`, 'POST', atomicRule)).item
+  }
+  const operations = {
+    'pathway-create': [
+      '/api/admin/pathways',
+      'POST',
+      { pathwayId, displayName: pathwayId, status: 'draft' },
+    ],
+    'pathway-update': [path, 'PATCH', { displayName: `${pathwayId}-updated` }],
+    'pathway-status': [`${path}/status`, 'PATCH', { status: 'inactive' }],
+    'rule-create': [`${path}/rules`, 'POST', atomicRule],
+    'rules-replace': [
+      `${path}/rules`,
+      'PUT',
+      { rules: [{ ...atomicRule, id: rule?.id, comparisonValue: 9 }] },
+    ],
+    'rule-update': [`${path}/rules/${rule?.id}`, 'PATCH', { ...atomicRule, comparisonValue: 9 }],
+    'rule-delete': [`${path}/rules/${rule?.id}`, 'DELETE'],
+  }
+  return { pathwayId, path, operation: operations[name], rule }
+}
+
+async function pathwaySnapshot(path) {
+  const response = await request(path, admin)
+  if (response.status === 404) return null
+  assert.equal(response.status, 200)
+  return { pathway: await response.json(), rules: (await successful(`${path}/rules`)).items }
+}
+
+async function auditFor(entityId) {
+  return successful(`/api/admin/audit-trail?search=${encodeURIComponent(entityId)}&pageSize=100`)
+}
+
+async function recordAtomicObservation(name, observation) {
+  await writeFile(
+    join(process.env.QUALITY_OUTPUT_DIR, `${name}.json`),
+    JSON.stringify(observation, null, 2),
+  )
+}
+
+for (const [name, action] of sqlWrites) {
+  test(`${name} rolls back state, parent timestamp and audit on audit failure`, async () => {
+    const { pathwayId, path, operation } = await prepareSqlWrite(name, 'rollback')
+    const before = await pathwaySnapshot(path)
+    const auditBefore = await auditFor(pathwayId)
+    await rejectSqlAudit(action)
+    try {
+      const [route, method, body] = operation
+      const response = await request(route, admin, method, body)
+      const after = await pathwaySnapshot(path)
+      const auditAfter = await auditFor(pathwayId)
+      await recordAtomicObservation(name, {
+        status: response.status,
+        before,
+        after,
+        auditBefore,
+        auditAfter,
+      })
+      assert.equal(response.status, 500)
+      assert.deepEqual(after, before, 'a rejected mandatory audit must roll back all domain state')
+      assert.deepEqual(auditAfter, auditBefore)
+    } finally {
+      await restoreSqlAudit()
+    }
+  })
+}
+
+const sourceWrites = [
+  ['submit', 'EVIDENCE_SOURCE_CREATED'],
+  ['edit', 'EVIDENCE_SOURCE_UPDATED'],
+  ['approve', 'EVIDENCE_SOURCE_APPROVED'],
+  ['reject', 'EVIDENCE_SOURCE_REJECTED'],
+  ['pause', 'EVIDENCE_SOURCE_PAUSED'],
+  ['resume', 'EVIDENCE_SOURCE_RESUMED'],
+]
+
+async function prepareSourceWrite(action, name) {
+  let sourceId
+  if (action !== 'submit') {
+    sourceId = (await successful('/api/admin/rag/sources', 'POST', { ...websiteSubmission, name }))
+      .sourceId
+    if (action === 'resume')
+      await successful(`/api/admin/rag/sources/${sourceId}/pause`, 'POST', {})
+  }
+  const path = `/api/admin/rag/sources/${sourceId}`
+  const operation =
+    action === 'submit'
+      ? ['/api/admin/rag/sources', 'POST', { ...websiteSubmission, name }]
+      : action === 'edit'
+        ? [path, 'PATCH', { description: 'Updated atomic source' }]
+        : [
+            `${path}/${action}`,
+            'POST',
+            action === 'reject' ? { reason: 'Atomic rejection' } : { note: 'Atomic decision' },
+          ]
+  return { sourceId, operation }
+}
+
+async function sourceSnapshot(sourceId, name) {
+  if (sourceId) return admin.client.query(anyApi.ragSources.getSource, { sourceId })
+  const result = await admin.client.query(anyApi.ragSources.listSources, {
+    includeAllForAdmin: true,
+  })
+  return result.items.filter((source) => source.name === name)
+}
+
+for (const [action, actionType] of sourceWrites) {
+  test(`source-${action} rolls back its mutation and approval history on audit failure`, async () => {
+    const name = `Rollback governance ${action}`
+    const { sourceId, operation } = await prepareSourceWrite(action, name)
+    const before = await sourceSnapshot(sourceId, name)
+    const auditBefore = await auditFor(sourceId ?? name)
+    await rejectSqlAudit(actionType)
+    try {
+      const [route, method, body] = operation
+      const response = await request(route, admin, method, body)
+      const after = await sourceSnapshot(sourceId, name)
+      const auditAfter = await auditFor(sourceId ?? name)
+      await recordAtomicObservation(`source-${action}`, {
+        status: response.status,
+        before,
+        after,
+        auditBefore,
+        auditAfter,
+      })
+      assert.equal(response.status, 500)
+      assert.deepEqual(
+        after,
+        before,
+        'a rejected mandatory audit must roll back the source and approval history',
+      )
+      assert.deepEqual(auditAfter, auditBefore)
+    } finally {
+      await restoreSqlAudit()
+    }
+  })
+}
+
+async function newAuditEvents(entityId, previous) {
+  const result = await auditFor(entityId)
+  const known = new Set(previous.items.map((event) => event.eventId))
+  return result.items.filter((event) => !known.has(event.eventId))
+}
+
+async function assertAuditDetail(event, actionType, before, after) {
+  assert.equal(event.actionType, actionType)
+  assert.equal(event.actorUserId, admin.userId)
+  assert.equal(event.actorEmail, admin.email)
+  assert.equal(event.actorRole, 'admin')
+  const detail = await successful(`/api/admin/audit-trail/${event.eventId}`)
+  assert.deepEqual(detail.event.changeContext, { before, after })
+}
+
+for (const [name, action] of sqlWrites) {
+  test(`${name} commits exactly one actor-bound audit with its domain change`, async () => {
+    const { pathwayId, path, operation, rule } = await prepareSqlWrite(name, 'success')
+    const before = await pathwaySnapshot(path)
+    const auditBefore = await auditFor(pathwayId)
+    const [route, method, body] = operation
+    await successful(route, method, body, name === 'pathway-create' ? 201 : 200)
+    const after = await pathwaySnapshot(path)
+    const events = await newAuditEvents(pathwayId, auditBefore)
+    assert.equal(events.length, 1)
+    const ruleWrite = name.startsWith('rule')
+    await assertAuditDetail(
+      events[0],
+      action,
+      ruleWrite ? (rule ?? null) : (before?.pathway ?? null),
+      ruleWrite ? (after.rules[0] ?? null) : after.pathway,
+    )
+    if (ruleWrite) assert.notEqual(after.pathway.updatedAt, before.pathway.updatedAt)
+    await recordAtomicObservation(`${name}-success`, { before, after, events })
+  })
+}
+
+for (const [action, actionType] of sourceWrites) {
+  test(`source-${action} commits one canonical governance event visible in every audit view`, async () => {
+    const name = `Success governance ${action}`
+    const prepared = await prepareSourceWrite(action, name)
+    const before = prepared.sourceId ? (await sourceSnapshot(prepared.sourceId, name)).source : null
+    const auditBefore = await auditFor(prepared.sourceId ?? name)
+    const [route, method, body] = prepared.operation
+    const result = await successful(route, method, body)
+    const sourceId = prepared.sourceId ?? result.sourceId
+    const after = (await sourceSnapshot(sourceId, name)).source
+    const events = await newAuditEvents(sourceId, auditBefore)
+    assert.equal(events.length, 1)
+    await assertAuditDetail(events[0], actionType, before, after)
+    const filtered = await successful(
+      `/api/admin/audit-trail?search=${sourceId}&actionType=${actionType}&actorId=${admin.userId}&pageSize=1`,
+    )
+    assert.equal(filtered.totalCount, 1)
+    assert.equal(filtered.items[0].eventId, events[0].eventId)
+    assert.equal(filtered.nextCursor, null)
+    const canonical = await approvalHistory(sourceId)
+    const row = canonical.find((item) => `rag-approval:${item._id}` === events[0].eventId)
+    assert.ok(row, 'the displayed event must be the canonical approval row')
+    assert.deepEqual(row.governance, { before, after })
+    const sqlRows = await sqlFixture((db) =>
+      db.query('SELECT event_id FROM governance_audit_log WHERE entity_id = $1', [sourceId]),
+    )
+    assert.equal(sqlRows.rows.length, 0, 'source writes must not create a second SQL audit')
+    const all = await successful('/api/admin/audit-trail?pageSize=100')
+    assert.equal((await successful('/api/admin/audit-trail/summary')).eventsToday, all.totalCount)
+    await recordAtomicObservation(`source-${action}-success`, { before, after, events })
+  })
+}
+
+test('bulk failures and cross-parent rule identifiers leave both parents and all audits unchanged', async () => {
+  const first = await prepareSqlWrite('rule-update', 'binding-first')
+  const second = await prepareSqlWrite('rule-update', 'binding-second')
+  const before = [await pathwaySnapshot(first.path), await pathwaySnapshot(second.path)]
+  const audits = [await auditFor(first.pathwayId), await auditFor(second.pathwayId)]
+  for (const [route, method, body, expected] of [
+    [`${first.path}/rules/${second.rule.id}`, 'PATCH', atomicRule, 404],
+    [`${first.path}/rules/${second.rule.id}`, 'DELETE', undefined, 404],
+    [`${first.path}/rules`, 'POST', { ...atomicRule, id: second.rule.id }, 409],
+    [`${first.path}/rules`, 'PUT', { rules: [{ ...atomicRule, id: second.rule.id }] }, 409],
+    ['/api/admin/pathways/missing-atomic-parent/rules', 'POST', atomicRule, 404],
+  ]) {
+    assert.equal((await request(route, admin, method, body)).status, expected)
+    assert.deepEqual(
+      [await pathwaySnapshot(first.path), await pathwaySnapshot(second.path)],
+      before,
+    )
+    assert.deepEqual([await auditFor(first.pathwayId), await auditFor(second.pathwayId)], audits)
+  }
+  await rejectSqlAudit('PATHWAY_RULE_UPDATED')
+  try {
+    const response = await request(`${first.path}/rules`, admin, 'PUT', {
+      rules: [
+        { ...atomicRule, unmetConditionId: 'atomic-new-before-failure' },
+        { ...atomicRule, id: first.rule.id, comparisonValue: 9 },
+      ],
+    })
+    assert.equal(response.status, 500)
+    assert.deepEqual(await pathwaySnapshot(first.path), before[0])
+    assert.deepEqual(
+      await auditFor(first.pathwayId),
+      audits[0],
+      'even an earlier successful audit insert must roll back',
+    )
+  } finally {
+    await restoreSqlAudit()
+  }
+  await sqlFixture((db) =>
+    db.exec('ALTER TABLE governance_audit_log RENAME TO atomic_audit_backup'),
+  )
+  let sourceId
+  try {
+    const response = await request('/api/admin/pathways', admin, 'POST', {
+      pathwayId: 'atomic-missing-audit',
+      displayName: 'Missing audit rollback',
+      status: 'draft',
+    })
+    assert.equal(response.status, 503)
+    assert.equal((await request('/api/admin/pathways/atomic-missing-audit', admin)).status, 404)
+    assert.deepEqual(await pathwaySnapshot(first.path), before[0])
+    sourceId = (
+      await successful('/api/admin/rag/sources', 'POST', {
+        ...websiteSubmission,
+        name: 'Canonical source without SQL audit storage',
+      })
+    ).sourceId
+    const canonical = await approvalHistory(sourceId)
+    assert.equal(canonical.length, 1)
+    assert.equal(canonical[0].governance.after._id, sourceId)
+  } finally {
+    await sqlFixture((db) =>
+      db.exec('ALTER TABLE atomic_audit_backup RENAME TO governance_audit_log'),
+    )
+  }
+  assert.equal((await auditFor(sourceId)).totalCount, 1)
+  await fixture('approval_audit_log', [
+    {
+      sourceId,
+      actorUserId: admin.userId,
+      action: 'edit',
+      timestamp: 1,
+    },
+  ])
+  await sqlFixture((db) =>
+    db.query(
+      `INSERT INTO governance_audit_log
+     (event_id, actor_id, action_type, entity_type, entity_id, entity_label, timestamp_ms)
+     VALUES ('legacy-approval-sql', $1, 'EVIDENCE_SOURCE_UPDATED', 'EVIDENCE_SOURCE', $2, 'Retained legacy source event', 1)`,
+      [admin.userId, sourceId],
+    ),
+  )
+  const retained = await auditFor(sourceId)
+  assert.equal(
+    retained.totalCount,
+    2,
+    'legacy approval rows must not duplicate retained SQL history',
+  )
+  assert.equal(retained.items.filter((event) => event.eventId === 'legacy-approval-sql').length, 1)
+})
+
+async function assertSnapshotChain(events, initial, final) {
+  const details = await Promise.all(
+    events.map((event) => successful(`/api/admin/audit-trail/${event.eventId}`)),
+  )
+  const remaining = details.map((detail) => detail.event.changeContext)
+  let current = initial
+  while (remaining.length) {
+    const next = remaining.findIndex((change) => isDeepStrictEqual(change.before, current))
+    assert.notEqual(next, -1, 'concurrent writes must audit the serialized before-state')
+    current = remaining.splice(next, 1)[0].after
+  }
+  assert.deepEqual(current, final)
+}
+
+test('concurrent pathway, rule and source writes serialize snapshots and duplicate creates record one event', async () => {
+  const prepared = await prepareSqlWrite('pathway-update', 'concurrent')
+  const before = await successful(prepared.path)
+  const auditBefore = await auditFor(prepared.pathwayId)
+  await Promise.all(
+    ['First concurrent name', 'Second concurrent name'].map((displayName) =>
+      successful(prepared.path, 'PATCH', { displayName }),
+    ),
+  )
+  const events = await newAuditEvents(prepared.pathwayId, auditBefore)
+  assert.equal(events.length, 2)
+  await assertSnapshotChain(events, before, await successful(prepared.path))
+  await Promise.all(
+    ['first', 'second'].map((suffix) =>
+      successful(`${prepared.path}/rules`, 'POST', {
+        ...atomicRule,
+        unmetConditionId: `concurrent-${suffix}`,
+      }),
+    ),
+  )
+  const rules = (await successful(`${prepared.path}/rules`)).items
+  assert.deepEqual(
+    rules.map((rule) => rule.displayOrder),
+    [0, 1],
+  )
+  const duplicate = {
+    pathwayId: 'atomic-duplicate',
+    displayName: 'Concurrent duplicate',
+    status: 'draft',
+  }
+  const responses = await Promise.all([
+    request('/api/admin/pathways', admin, 'POST', duplicate),
+    request('/api/admin/pathways', admin, 'POST', duplicate),
+  ])
+  assert.deepEqual(responses.map((response) => response.status).sort(), [201, 409])
+  assert.equal((await auditFor(duplicate.pathwayId)).totalCount, 1)
+  const { sourceId } = await successful('/api/admin/rag/sources', 'POST', {
+    ...websiteSubmission,
+    name: 'Concurrent source snapshots',
+  })
+  const sourceBefore = (await sourceSnapshot(sourceId)).source
+  const sourceAudits = await auditFor(sourceId)
+  await Promise.all(
+    ['First source update', 'Second source update'].map((description) =>
+      successful(`/api/admin/rag/sources/${sourceId}`, 'PATCH', { description }),
+    ),
+  )
+  const sourceEvents = await newAuditEvents(sourceId, sourceAudits)
+  assert.equal(sourceEvents.length, 2)
+  await assertSnapshotChain(sourceEvents, sourceBefore, (await sourceSnapshot(sourceId)).source)
+})
+
+test('unavailable recommendation-review and ingestion routes reject before any write', async () => {
+  const auditBefore = await successful('/api/admin/audit-trail?pageSize=100')
+  const sourcesBefore = await admin.client.query(anyApi.ragSources.listSources, {
+    includeAllForAdmin: true,
+  })
+  for (const path of [
+    '/api/admin/recommendation-reviews/foreign-run/flag',
+    '/api/admin/recommendation-reviews/foreign-run/dismiss',
+    '/api/admin/recommendation-reviews/foreign-run/resolve',
+    '/api/admin/recommendation-reviews/foreign-run/citations/foreign-citation/flag',
+    '/api/admin/rag/ingestion/run',
+  ]) {
+    assert.equal(
+      (await request(path, admin, 'POST', { force: true, reason: 'Unavailable operation' })).status,
+      503,
+    )
+  }
+  assert.deepEqual(await successful('/api/admin/audit-trail?pageSize=100'), auditBefore)
+  assert.deepEqual(
+    await admin.client.query(anyApi.ragSources.listSources, { includeAllForAdmin: true }),
+    sourcesBefore,
   )
 })
 

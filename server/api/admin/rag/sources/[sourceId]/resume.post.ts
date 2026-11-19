@@ -1,5 +1,4 @@
 import { anyApi } from 'convex/server'
-import { recordGovernanceAction } from '../../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../../utils/auth/requireAdminSession'
 import { resumeEvidenceSourceActionSchema } from '../../../../../utils/admin/evidenceSourceSchema'
 
@@ -28,34 +27,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const beforeDetail = (await convex.query((anyApi as any).ragSources.getSource, { sourceId })) as {
-    source: Record<string, unknown> | null
-  } | null
-
   const result = await convex.mutation((anyApi as any).ragSources.resumeSource, {
     sourceId,
     note: parsed.data.note,
   })
-
-  const afterDetail = (await convex.query((anyApi as any).ragSources.getSource, { sourceId })) as {
-    source: Record<string, unknown> | null
-  } | null
-
-  await recordGovernanceAction(
-    event,
-    {
-      actionType: 'EVIDENCE_SOURCE_RESUMED',
-      entityType: 'EVIDENCE_SOURCE',
-      entityId: sourceId,
-      entityLabel: String((afterDetail?.source as { name?: unknown } | null)?.name || sourceId),
-      changeContext: {
-        before: beforeDetail?.source || null,
-        after: afterDetail?.source || null,
-      },
-      reason: parsed.data.note,
-    },
-    adminSession,
-  )
 
   return {
     ok: true,

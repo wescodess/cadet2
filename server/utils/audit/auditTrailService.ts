@@ -134,7 +134,7 @@ function toRelatedEvent(event: RawAuditEvent): AuditTrailRelatedEvent {
   }
 }
 
-async function queryAuditEvents(filters: AuditTrailFilters, deletions: StoredAuditEvent[]) {
+async function queryAuditEvents(filters: AuditTrailFilters, sourceEvents: StoredAuditEvent[]) {
   return (await listStoredAuditEvents(
     {
       actionType: filters.actionType,
@@ -147,15 +147,15 @@ async function queryAuditEvents(filters: AuditTrailFilters, deletions: StoredAud
       cursor: filters.cursor?.trim() || undefined,
       pageSize: filters.pageSize,
     },
-    deletions,
+    sourceEvents,
   )) as RawAuditEventListResult
 }
 
 export async function listAuditTrailEvents(
-  deletions: StoredAuditEvent[],
+  sourceEvents: StoredAuditEvent[],
   filters: AuditTrailFilters = {},
 ): Promise<AuditTrailListResponse> {
-  const result = await queryAuditEvents(filters, deletions)
+  const result = await queryAuditEvents(filters, sourceEvents)
 
   return {
     ok: true,
@@ -167,9 +167,9 @@ export async function listAuditTrailEvents(
 
 export async function getAuditTrailEvent(
   eventId: string,
-  deletions: StoredAuditEvent[],
+  sourceEvents: StoredAuditEvent[],
 ): Promise<AuditTrailDetailResponse | null> {
-  const event = (await getStoredAuditEvent(eventId, deletions)) as RawAuditEvent | null
+  const event = (await getStoredAuditEvent(eventId, sourceEvents)) as RawAuditEvent | null
 
   if (!event) {
     return null
@@ -180,7 +180,7 @@ export async function getAuditTrailEvent(
       entityId: event.entityId,
       pageSize: 6,
     },
-    deletions,
+    sourceEvents,
   )
 
   const detail: AuditTrailDetailItem = {
@@ -199,9 +199,9 @@ export async function getAuditTrailEvent(
 }
 
 export async function getAuditTrailSummary(
-  deletions: StoredAuditEvent[],
+  sourceEvents: StoredAuditEvent[],
 ): Promise<AuditTrailSummaryResponse> {
-  const summary = (await getStoredAuditSummary(deletions)) as RawAuditSummaryResult
+  const summary = (await getStoredAuditSummary(sourceEvents)) as RawAuditSummaryResult
 
   return {
     ok: true,

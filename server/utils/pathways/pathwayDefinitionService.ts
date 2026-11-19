@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm'
+import { getSqlDatabase, isUniqueViolationError, type SqlExecutor } from '../database'
 
 import { MVP_PATHWAY_IDS, type MvpPathwayDefinition } from './mvpPathwayCatalog'
 import { resolveStoredRecommendationPathwayCatalog } from './pathwayRuleService'
@@ -60,18 +61,9 @@ function toPathwayDefinitionRecord(row: PathwayDefinitionRow): PathwayDefinition
   })
 }
 
-function isUniqueViolationError(error: unknown) {
-  const code =
-    typeof error === 'object' && error !== null && 'code' in error
-      ? String((error as { code?: unknown }).code || '')
-      : ''
-
-  return code === '23505'
-}
-
-async function requirePathwayDefinitions() {
+async function requirePathwayDefinitions(database: SqlExecutor) {
   try {
-    await db.execute(sql`SELECT 1 FROM "pathway_definitions" LIMIT 0`)
+    await database.execute(sql`SELECT 1 FROM "pathway_definitions" LIMIT 0`)
   } catch {
     throw createError({
       statusCode: 503,
@@ -80,12 +72,15 @@ async function requirePathwayDefinitions() {
   }
 }
 
-async function listPathwayDefinitionRows(status?: PathwayDefinitionStatus) {
-  await requirePathwayDefinitions()
+async function listPathwayDefinitionRows(
+  status?: PathwayDefinitionStatus,
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requirePathwayDefinitions(database)
 
   const whereClause = status ? sql`WHERE "status" = ${status}` : sql``
 
-  const result = await db.execute(sql`
+  const result = await database.execute(sql`
     SELECT
       "pathway_id" AS "pathwayId",
       "display_name" AS "displayName",
@@ -112,10 +107,14 @@ export async function listPathwayDefinitions(status?: PathwayDefinitionStatus) {
   return rows.map(toPathwayDefinitionRecord)
 }
 
-export async function getPathwayDefinition(pathwayId: string) {
-  await requirePathwayDefinitions()
+export async function getPathwayDefinition(
+  pathwayId: string,
+  database: SqlExecutor = getSqlDatabase(),
+  forUpdate = false,
+) {
+  await requirePathwayDefinitions(database)
 
-  const result = await db.execute(sql`
+  const result = await database.execute(sql`
     SELECT
       "pathway_id" AS "pathwayId",
       "display_name" AS "displayName",
@@ -125,18 +124,22 @@ export async function getPathwayDefinition(pathwayId: string) {
       "updated_at" AS "updatedAt"
     FROM "pathway_definitions"
     WHERE "pathway_id" = ${pathwayId}
-    LIMIT 1;
+    LIMIT 1
+    ${forUpdate ? sql`FOR UPDATE` : sql``};
   `)
 
   const row = ((result as { rows?: PathwayDefinitionRow[] }).rows || [])[0]
   return row ? toPathwayDefinitionRecord(row) : null
 }
 
-export async function createPathwayDefinition(input: CreatePathwayDefinitionInput) {
-  await requirePathwayDefinitions()
+export async function createPathwayDefinition(
+  input: CreatePathwayDefinitionInput,
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requirePathwayDefinitions(database)
 
   try {
-    const result = await db.execute(sql`
+    const result = await database.execute(sql`
       INSERT INTO "pathway_definitions" (
         "id",
         "pathway_id",
@@ -178,10 +181,11 @@ export async function createPathwayDefinition(input: CreatePathwayDefinitionInpu
 export async function updatePathwayDefinition(
   pathwayId: string,
   input: UpdatePathwayDefinitionInput,
+  database: SqlExecutor = getSqlDatabase(),
 ) {
-  await requirePathwayDefinitions()
+  await requirePathwayDefinitions(database)
 
-  const result = await db.execute(sql`
+  const result = await database.execute(sql`
     UPDATE "pathway_definitions"
     SET
       "display_name" = ${input.displayName},
@@ -201,10 +205,14 @@ export async function updatePathwayDefinition(
   return row ? toPathwayDefinitionRecord(row) : null
 }
 
-export async function updatePathwayStatus(pathwayId: string, status: PathwayDefinitionStatus) {
-  await requirePathwayDefinitions()
+export async function updatePathwayStatus(
+  pathwayId: string,
+  status: PathwayDefinitionStatus,
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requirePathwayDefinitions(database)
 
-  const result = await db.execute(sql`
+  const result = await database.execute(sql`
     UPDATE "pathway_definitions"
     SET
       "status" = ${status},

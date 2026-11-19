@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { mutation, query, type MutationCtx } from './_generated/server'
+import type { Doc, Id } from './_generated/dataModel'
 import { isReviewedRagAdminGrant, requireRagAdmin } from './lib/ragAdmin'
 import { hasControlCharacters } from './lib/sourceText'
 
@@ -42,15 +43,16 @@ function computeNextRunAt(
 }
 
 async function writeAudit(
-  ctx: { db: any },
+  ctx: MutationCtx,
   input: {
-    sourceId: any
+    sourceId: Id<'sources'>
     actorUserId: string
     actorEmail?: string
     action: 'submit' | 'approve' | 'reject' | 'pause' | 'resume' | 'edit'
     reason?: string
     note?: string
     diffSummary?: string
+    governance: { before: Doc<'sources'> | null; after: Doc<'sources'> | null }
   },
 ) {
   await ctx.db.insert('approval_audit_log', {
@@ -261,6 +263,7 @@ export const createSourceSubmission = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'submit',
+      governance: { before: null, after: await ctx.db.get(sourceId) },
       note: 'Initial source submission',
     })
 
@@ -362,6 +365,7 @@ export const updateSourceConfig = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'edit',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       diffSummary: diffParts.join(', ') || 'none',
     })
 
@@ -412,6 +416,7 @@ export const approveSource = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'approve',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       note: toSafeString(args.note) || undefined,
     })
 
@@ -450,6 +455,7 @@ export const rejectSource = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'reject',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       reason,
     })
 
@@ -480,6 +486,7 @@ export const pauseSource = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'pause',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       note: toSafeString(args.note) || undefined,
     })
 
@@ -518,6 +525,7 @@ export const resumeSource = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'resume',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       note: toSafeString(args.note) || undefined,
     })
 

@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm'
+import { getSqlDatabase, isUniqueViolationError, type SqlExecutor } from '../database'
 
 import { MVP_PATHWAY_IDS, type MvpPathwayDefinition, type MvpPathwayId } from './mvpPathwayCatalog'
 import { buildPathwayRuleEvaluator } from './eligibilityDslEvaluator'
@@ -73,26 +74,17 @@ function toPathwayRuleRecord(row: PathwayRuleRow) {
   })
 }
 
-function isUniqueViolationError(error: unknown) {
-  const code =
-    typeof error === 'object' && error !== null && 'code' in error
-      ? String((error as { code?: unknown }).code || '')
-      : ''
-
-  return code === '23505'
-}
-
-async function touchPathwayDefinition(pathwayId: string) {
-  await db.execute(sql`
+async function touchPathwayDefinition(pathwayId: string, database: SqlExecutor) {
+  await database.execute(sql`
     UPDATE "pathway_definitions"
     SET "updated_at" = now()
     WHERE "pathway_id" = ${pathwayId};
   `)
 }
 
-async function requirePathwayRules() {
+async function requirePathwayRules(database: SqlExecutor) {
   try {
-    await db.execute(sql`SELECT 1 FROM "pathway_definitions", "pathway_rules" LIMIT 0`)
+    await database.execute(sql`SELECT 1 FROM "pathway_definitions", "pathway_rules" LIMIT 0`)
   } catch {
     throw createError({
       statusCode: 503,
@@ -101,11 +93,16 @@ async function requirePathwayRules() {
   }
 }
 
-async function insertRuleRow(pathwayId: string, rule: PathwayRuleInput, displayOrder: number) {
+async function insertRuleRow(
+  pathwayId: string,
+  rule: PathwayRuleInput,
+  displayOrder: number,
+  database: SqlExecutor,
+) {
   const parsed = pathwayRuleInputSchema.parse(rule)
 
   try {
-    const result = await db.execute(sql`
+    const result = await database.execute(sql`
       INSERT INTO "pathway_rules" (
         "id",
         "pathway_id",
@@ -141,7 +138,7 @@ async function insertRuleRow(pathwayId: string, rule: PathwayRuleInput, displayO
     `)
 
     const row = ((result as { rows?: PathwayRuleRow[] }).rows || [])[0]
-    await touchPathwayDefinition(pathwayId)
+    await touchPathwayDefinition(pathwayId, database)
     return row ? toPathwayRuleRecord(row) : null
   } catch (error) {
     if (isUniqueViolationError(error)) {
@@ -152,10 +149,13 @@ async function insertRuleRow(pathwayId: string, rule: PathwayRuleInput, displayO
   }
 }
 
-export async function listRulesForPathway(pathwayId: string) {
-  await requirePathwayRules()
+export async function listRulesForPathway(
+  pathwayId: string,
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requirePathwayRules(database)
 
-  const result = await db.execute(sql`
+  const result = await database.execute(sql`
     SELECT
       "id" AS "id",
       "pathway_id" AS "pathwayId",
@@ -176,14 +176,17 @@ export async function listRulesForPathway(pathwayId: string) {
 
 export const listPathwayRules = listRulesForPathway
 
-export async function listPathwayRulesByPathwayIds(pathwayIds: string[]) {
+export async function listPathwayRulesByPathwayIds(
+  pathwayIds: string[],
+  database: SqlExecutor = getSqlDatabase(),
+) {
   if (pathwayIds.length === 0) {
     return new Map<string, PathwayRuleRecord[]>()
   }
 
-  await requirePathwayRules()
+  await requirePathwayRules(database)
 
-  const result = await db.execute(sql`
+  const result = await database.execute(sql`
     SELECT
       "id" AS "id",
       "pathway_id" AS "pathwayId",
@@ -213,24 +216,33 @@ export async function listPathwayRulesByPathwayIds(pathwayIds: string[]) {
   return grouped
 }
 
-export async function createRule(pathwayId: string, input: PathwayRuleInput) {
-  await requirePathwayRules()
+export async function createRule(
+  pathwayId: string,
+  input: PathwayRuleInput,
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requirePathwayRules(database)
 
-  const currentRules = await listRulesForPathway(pathwayId)
+  const currentRules = await listRulesForPathway(pathwayId, database)
   const nextDisplayOrder =
     currentRules.reduce((maxOrder, rule) => Math.max(maxOrder, rule.displayOrder), -1) + 1
-  return insertRuleRow(pathwayId, input, nextDisplayOrder)
+  return insertRuleRow(pathwayId, input, nextDisplayOrder, database)
 }
 
-export async function updateRule(ruleId: string, input: PathwayRuleInput, pathwayId?: string) {
-  await requirePathwayRules()
+export async function updateRule(
+  ruleId: string,
+  input: PathwayRuleInput,
+  pathwayId?: string,
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requirePathwayRules(database)
 
   const parsed = pathwayRuleInputSchema.parse(input)
 
   try {
     const pathwayClause = pathwayId ? sql`AND "pathway_id" = ${pathwayId}` : sql``
 
-    const result = await db.execute(sql`
+    const result = await database.execute(sql`
       UPDATE "pathway_rules"
       SET
         "unmet_condition_id" = ${parsed.unmetConditionId},
@@ -258,7 +270,7 @@ export async function updateRule(ruleId: string, input: PathwayRuleInput, pathwa
       return null
     }
 
-    await touchPathwayDefinition(row.pathwayId)
+    await touchPathwayDefinition(row.pathwayId, database)
     return toPathwayRuleRecord(row)
   } catch (error) {
     if (isUniqueViolationError(error)) {
@@ -269,12 +281,16 @@ export async function updateRule(ruleId: string, input: PathwayRuleInput, pathwa
   }
 }
 
-export async function deleteRule(ruleId: string, pathwayId?: string) {
-  await requirePathwayRules()
+export async function deleteRule(
+  ruleId: string,
+  pathwayId?: string,
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requirePathwayRules(database)
 
   const pathwayClause = pathwayId ? sql`AND "pathway_id" = ${pathwayId}` : sql``
 
-  const result = await db.execute(sql`
+  const result = await database.execute(sql`
     DELETE FROM "pathway_rules"
     WHERE "id" = ${ruleId}
     ${pathwayClause}
@@ -296,22 +312,27 @@ export async function deleteRule(ruleId: string, pathwayId?: string) {
     return null
   }
 
-  await touchPathwayDefinition(row.pathwayId)
+  await touchPathwayDefinition(row.pathwayId, database)
   return toPathwayRuleRecord(row)
 }
 
-export async function bulkSaveRules(pathwayId: string, rules: PathwayRuleInput[]) {
-  await requirePathwayRules()
+export async function bulkSaveRules(
+  pathwayId: string,
+  rules: PathwayRuleInput[],
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requirePathwayRules(database)
   const parsedRules = rules.map((rule) => pathwayRuleInputSchema.parse(rule))
 
-  await db.execute(sql`
+  try {
+    await database.execute(sql`
     DELETE FROM "pathway_rules"
     WHERE "pathway_id" = ${pathwayId};
   `)
 
-  const valuesSql = sql.join(
-    parsedRules.map(
-      (rule, index) => sql`
+    const valuesSql = sql.join(
+      parsedRules.map(
+        (rule, index) => sql`
       (
         ${rule.id?.trim() || `${pathwayId}-rule-${crypto.randomUUID()}`},
         ${pathwayId},
@@ -324,11 +345,11 @@ export async function bulkSaveRules(pathwayId: string, rules: PathwayRuleInput[]
         now()
       )
     `,
-    ),
-    sql`,`,
-  )
+      ),
+      sql`,`,
+    )
 
-  await db.execute(sql`
+    await database.execute(sql`
     INSERT INTO "pathway_rules" (
       "id",
       "pathway_id",
@@ -343,9 +364,13 @@ export async function bulkSaveRules(pathwayId: string, rules: PathwayRuleInput[]
     VALUES ${valuesSql};
   `)
 
-  await touchPathwayDefinition(pathwayId)
+    await touchPathwayDefinition(pathwayId, database)
 
-  return await listRulesForPathway(pathwayId)
+    return await listRulesForPathway(pathwayId, database)
+  } catch (error) {
+    if (isUniqueViolationError(error)) throw new PathwayRuleConflictError()
+    throw error
+  }
 }
 
 export const replacePathwayRules = bulkSaveRules

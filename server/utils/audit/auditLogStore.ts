@@ -1,5 +1,6 @@
 import { convexToJson } from 'convex/values'
 import { sql } from 'drizzle-orm'
+import { getSqlDatabase, type SqlExecutor } from '../database'
 
 import type { AuditActionType, AuditChangeContext, AuditEntityType } from './types'
 
@@ -186,9 +187,9 @@ function toStoredAuditEvent(row: AuditLogRow): StoredAuditEvent {
   }
 }
 
-async function requireAuditLogTable() {
+async function requireAuditLogTable(database: SqlExecutor = getSqlDatabase()) {
   try {
-    await db.execute(sql`SELECT 1 FROM "governance_audit_log" LIMIT 0`)
+    await database.execute(sql`SELECT 1 FROM "governance_audit_log" LIMIT 0`)
   } catch {
     throw createError({
       statusCode: 503,
@@ -255,14 +256,17 @@ function buildWhereClause(filters: {
   return conditions.length > 0 ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
 }
 
-export async function insertAuditLogEvent(input: Omit<StoredAuditEvent, 'eventId'>) {
-  await requireAuditLogTable()
+export async function insertAuditLogEvent(
+  input: Omit<StoredAuditEvent, 'eventId'>,
+  database: SqlExecutor = getSqlDatabase(),
+) {
+  await requireAuditLogTable(database)
 
   const eventId = createEventId()
   const before = normalizeJsonRecord(input.changeContext.before)
   const after = normalizeJsonRecord(input.changeContext.after)
 
-  await db.execute(sql`
+  await database.execute(sql`
     INSERT INTO "governance_audit_log" (
       "event_id",
       "actor_id",
@@ -296,8 +300,8 @@ export async function insertAuditLogEvent(input: Omit<StoredAuditEvent, 'eventId
   return { ok: true as const, eventId }
 }
 
-function auditEventSource(deletions: StoredAuditEvent[]) {
-  const rows = deletions.map((event) => ({
+function auditEventSource(sourceEvents: StoredAuditEvent[]) {
+  const rows = sourceEvents.map((event) => ({
     event_id: event.eventId,
     actor_id: event.actorId,
     actor_email: event.actorEmail ?? null,
@@ -316,7 +320,7 @@ function auditEventSource(deletions: StoredAuditEvent[]) {
       entity_id, entity_label, change_context_before, change_context_after, reason, timestamp_ms
     FROM "governance_audit_log"
     UNION ALL
-    SELECT * FROM jsonb_to_recordset(${stringifyPostgresJson(rows)}::jsonb) AS deletions(
+    SELECT * FROM jsonb_to_recordset(${stringifyPostgresJson(rows)}::jsonb) AS sourceEvents(
       event_id text, actor_id text, actor_email text, actor_role text,
       action_type text, entity_type text, entity_id text, entity_label text,
       change_context_before jsonb, change_context_after jsonb, reason text, timestamp_ms bigint
@@ -336,10 +340,10 @@ export async function listStoredAuditEvents(
     cursor?: string
     pageSize?: number
   },
-  deletions: StoredAuditEvent[],
+  sourceEvents: StoredAuditEvent[],
 ): Promise<StoredAuditEventListResult> {
   await requireAuditLogTable()
-  const source = auditEventSource(deletions)
+  const source = auditEventSource(sourceEvents)
 
   const whereClause = buildWhereClause(filters)
   const offset = parseCursor(filters.cursor)
@@ -383,9 +387,9 @@ export async function listStoredAuditEvents(
   }
 }
 
-export async function getStoredAuditEvent(eventId: string, deletions: StoredAuditEvent[]) {
+export async function getStoredAuditEvent(eventId: string, sourceEvents: StoredAuditEvent[]) {
   await requireAuditLogTable()
-  const source = auditEventSource(deletions)
+  const source = auditEventSource(sourceEvents)
 
   const result = await db.execute(sql`
     SELECT
@@ -411,10 +415,10 @@ export async function getStoredAuditEvent(eventId: string, deletions: StoredAudi
 }
 
 export async function getStoredAuditSummary(
-  deletions: StoredAuditEvent[],
+  sourceEvents: StoredAuditEvent[],
 ): Promise<StoredAuditSummaryResult> {
   await requireAuditLogTable()
-  const source = auditEventSource(deletions)
+  const source = auditEventSource(sourceEvents)
 
   const now = Date.now()
   const todayFloor = now - 24 * 60 * 60 * 1000

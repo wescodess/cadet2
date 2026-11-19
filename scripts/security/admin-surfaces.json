@@ -81,6 +81,10 @@
       "kind": "internalMutation",
       "owner": "74"
     },
+    "ragSourceAudit:listApprovalEvents": {
+      "kind": "query",
+      "owner": "74"
+    },
     "ragSourceAudit:listDeletionEvents": {
       "kind": "query",
       "owner": "74"

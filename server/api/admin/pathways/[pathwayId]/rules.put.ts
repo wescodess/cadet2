@@ -1,3 +1,4 @@
+import { withPathwayTransaction } from '../../../../utils/pathways/pathwayTransaction'
 import { getRouterParam } from 'h3'
 
 import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
@@ -35,57 +36,61 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const before = await listPathwayRules(pathwayId)
-    const items = await bulkSaveRules(pathwayId, parsed.data.rules)
-    const beforeById = new Map(before.map((item) => [item.id, item] as const))
-    const afterById = new Map(items.map((item) => [item.id, item] as const))
+    return await withPathwayTransaction(pathwayId, async (transaction) => {
+      const before = await listPathwayRules(pathwayId, transaction)
+      const items = await bulkSaveRules(pathwayId, parsed.data.rules, transaction)
+      const beforeById = new Map(before.map((item) => [item.id, item] as const))
+      const afterById = new Map(items.map((item) => [item.id, item] as const))
 
-    for (const item of items) {
-      const previous = beforeById.get(item.id) || null
-      const actionType = previous ? 'PATHWAY_RULE_UPDATED' : 'PATHWAY_RULE_CREATED'
+      for (const item of items) {
+        const previous = beforeById.get(item.id) || null
+        const actionType = previous ? 'PATHWAY_RULE_UPDATED' : 'PATHWAY_RULE_CREATED'
 
-      if (!previous || JSON.stringify(previous) !== JSON.stringify(item)) {
-        await recordGovernanceAction(
-          event,
-          {
-            actionType,
-            entityType: 'PATHWAY_RULE',
-            entityId: item.id,
-            entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-            changeContext: {
-              before: previous,
-              after: item,
+        if (!previous || JSON.stringify(previous) !== JSON.stringify(item)) {
+          await recordGovernanceAction(
+            event,
+            {
+              actionType,
+              entityType: 'PATHWAY_RULE',
+              entityId: item.id,
+              entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+              changeContext: {
+                before: previous,
+                after: item,
+              },
             },
-          },
-          adminSession,
-        )
+            adminSession,
+            transaction,
+          )
+        }
       }
-    }
 
-    for (const item of before) {
-      if (!afterById.has(item.id)) {
-        await recordGovernanceAction(
-          event,
-          {
-            actionType: 'PATHWAY_RULE_DELETED',
-            entityType: 'PATHWAY_RULE',
-            entityId: item.id,
-            entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-            changeContext: {
-              before: item,
-              after: null,
+      for (const item of before) {
+        if (!afterById.has(item.id)) {
+          await recordGovernanceAction(
+            event,
+            {
+              actionType: 'PATHWAY_RULE_DELETED',
+              entityType: 'PATHWAY_RULE',
+              entityId: item.id,
+              entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+              changeContext: {
+                before: item,
+                after: null,
+              },
             },
-          },
-          adminSession,
-        )
+            adminSession,
+            transaction,
+          )
+        }
       }
-    }
 
-    return {
-      ok: true,
-      items,
-      totalCount: items.length,
-    }
+      return {
+        ok: true,
+        items,
+        totalCount: items.length,
+      }
+    })
   } catch (error) {
     if (error instanceof PathwayRuleConflictError) {
       throw createError({

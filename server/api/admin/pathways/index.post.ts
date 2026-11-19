@@ -1,3 +1,4 @@
+import { getSqlDatabase } from '../../../utils/database'
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 import { recordGovernanceAction } from '../../../utils/audit/recordGovernanceAction'
 import {
@@ -23,29 +24,34 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const created = await createPathwayDefinition(parsed.data)
+    const created = await getSqlDatabase().transaction(async (transaction) => {
+      const created = await createPathwayDefinition(parsed.data, transaction)
 
-    if (!created) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: 'Unable to create pathway definition',
-      })
-    }
+      if (!created) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: 'Unable to create pathway definition',
+        })
+      }
 
-    await recordGovernanceAction(
-      event,
-      {
-        actionType: 'PATHWAY_CREATED',
-        entityType: 'PATHWAY',
-        entityId: created.pathwayId,
-        entityLabel: created.displayName,
-        changeContext: {
-          before: null,
-          after: created,
+      await recordGovernanceAction(
+        event,
+        {
+          actionType: 'PATHWAY_CREATED',
+          entityType: 'PATHWAY',
+          entityId: created.pathwayId,
+          entityLabel: created.displayName,
+          changeContext: {
+            before: null,
+            after: created,
+          },
         },
-      },
-      adminSession,
-    )
+        adminSession,
+        transaction,
+      )
+
+      return created
+    })
 
     setResponseStatus(event, 201)
     return created

@@ -63,6 +63,12 @@ All seven `ragSources.ts` mutations were checked; only `removeSource` erased his
 
 Four additional boundary cases bring the mandatory population to 29. The source guard reads concurrently and shares fixture setup; specific mutation failures remain mandatory, with no timeout increase. The retained successful fresh-install verification passes all nine rows, 125 Vitest cases and 29 boundary cases. Baselines and allowances are unchanged. Concurrent verification and the exact-head CI result are recorded in the PR.
 
+## Stage A atomic audit correction
+
+[Round 3 evidence](security-containment-evidence/74/atomic-audit-r3/README.md) inventories all 13 split writes. The pinned production build reproduced 13 rollback failures with 29 passing controls. All seven pathway/rule HTTP writes now commit their mutation, parent timestamp and mandatory audit through one SQL transaction, locking the parent before reading the old state and rechecking rule binding inside it. All six source HTTP transitions commit their governance snapshots on the existing Convex approval rows and write no separate SQL audit. The audit views combine those canonical events, retained deletion events and legacy SQL history without projecting old approval rows twice.
+
+The mandatory boundary population is 58, including 13 rollback and 13 one-event controls, partial bulk audit failure, missing audit storage, cross-parent IDs, serialized concurrent snapshots, duplicate creation and unavailable review/ingestion transports. The built-app suite passes all 58 with zero failures, skips, cancellations or todos. Source deletion remains atomic; review and ingestion transports remain unavailable before mutation. Baselines, allowances and the test timeout are unchanged. Final clean-install verification and exact-head CI are recorded with the evidence and PR.
+
 ## Remaining gates
 
 - The owner must review and revoke/rotate affected controlled credentials through #22's access process. Code removal is **not revocation evidence**; no key was tested or copied into fixtures/configuration.
