@@ -5,6 +5,8 @@ const accounts=JSON.parse(await fs.readFile(process.env.QA_ACCOUNTS,'utf8'));
 for(const [group,values] of Object.entries(accounts))for(const [persona,a] of Object.entries(values)){
  const owner=group==='probes'&&['client','foreign'].includes(persona)?(persona==='client'?'own':'foreign'):`${group}-${persona}`;
  a.ownRunId=`qa28-${owner}-unsigned`;
+ const reset=await fetch(`${process.env.QA_CONVEX_URL}/api/mutation`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({path:'recommendationRuns:resetRunsForUser',args:{userId:a.userId},format:'json'})});
+ if((await reset.json()).status!=='success')throw Error('Public local-fixture reset failed');
  const args={userId:a.userId,runId:a.ownRunId,profileSnapshotId:`qa28-${owner}-snapshot`,status:'completed'};
  const response=await fetch(`${process.env.QA_CONVEX_URL}/api/mutation`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({path:'recommendationRuns:seedRunForUser',args,format:'json'})});
  const body=await response.json();
