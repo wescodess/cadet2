@@ -1,6 +1,6 @@
 # cadet design system: Relay
 
-**Status:** approved by the owner on 2026-11-17, amended on 2026-11-18 (client text floor in [Typography](#4-typography), no-turn style in [Whose turn](#33-whose-turn)). This is the design system for every cadet UI surface, in both portals.
+**Status:** approved by the owner on 2026-11-17, amended on 2026-11-18 (client text floor in [Typography](#4-typography), no-turn style in [Whose turn](#33-whose-turn)) and on 2026-11-19 (client text scale in [Typography](#4-typography), the “Review requested” state in [Semantic states](#11-semantic-states), a colleague’s first name as a desk holder word in [Holder](#122-composed-components)). This is the design system for every cadet UI surface, in both portals.
 
 | Read | What it gives you |
 |---|---|
@@ -178,6 +178,8 @@ Tailwind utilities from `tokens.css`: `h-control`, `min-h-control`, `h-chip`, `r
 
 **Client text floor** (amendment, 2026-11-18). Meaningful text in the client expression is at least 13 px. The client expression has no 13 px token: `--t-small-size` and `--t-label-size` are 13 px only under `data-expression="representative"`, and the smallest client styles are Small and Label at 15 px. So client text the specimen sets below 13 px uses the client Label size and line height (`--t-label-size`, `--t-label-lh`; 15 on 20), keeping its own colour and weight: the holder word, tab labels, the wordmark tag, the date-tile month and year, and the task-badge count. Where 15 px does not fit a component (the 16 px task badge, the 52 × 56 px date tile, the 56 to 72 px holder column), the component grows; nothing goes below 13 px. Turn-disc and avatar initials are `aria-hidden` and always sit beside the word or name they stand for, so they are not meaningful text and keep the specimen sizes.
 
+**Client text scale** (amendment, 2026-11-19). The owner’s words: “Yes, match at 15 px (Recommended)”. Meaningful client text uses the client’s existing 15 px Small (`--t-small-size`, `--t-small-lh`; 15 on 22) and Label (`--t-label-size`, `--t-label-lh`; 15 on 20) tokens. This now also covers text the specimen or B1’s approved Checklist set at 13 to 14.9 px, so client screens match across batches. In the specimen that is the TurnBar count, client section headings and the turn tag beside them, task metadata (“Asked by Priya Raman on 15 Nov 2026”), row, document and plan detail lines, and the deadline month; B1’s are listed in `docs/design/b1-access-and-intake/decision.md`. Running text, metadata and counts take Small; short labels and headings take Label; each keeps its own colour and weight. Two things keep their sizes: state chips, which use the chip tokens (`--chip-fs` 14.5 px, `--chip-fs-sm` 13.5 px), and `aria-hidden` initials in turn discs and avatars. No token value changes.
+
 **Representative text.** The desk may keep the specimen’s 12 px and 12.5 px text; test it at 200% zoom. As rendered: state chips at 12.5 px (12 px small), holder word, sidebar group labels and counts, queue group labels and date-tile year at 12 px, queue row metadata and dates, column headings, footer, sidebar user line and date-tile month at 12.5 px, and Mono IDs at 0.92em (about 12 to 12.9 px). Desk text below 12 px (keyboard hints at 11.5 px) is not covered by the amendment and stays open in `decision.md`; avatar initials (10.5 px) and turn-disc initials (9.6 px on a 24 px disc, 8 px on a 20 px disc) are `aria-hidden` like the client’s.
 
 ## 5. Spacing
@@ -242,7 +244,7 @@ One custom family, drawn as small Vue components on a 24 px grid: **work-status 
 
 ## 11. Semantic states
 
-Twenty-three states in five groups. Each is a glyph in the role colour, a word in the role ink and, for clients, the role tint behind the chip. Urgent states alone are solid. The exact words are part of the system; `tokens.json` carries the same table under `states`.
+Twenty-three states in five groups, plus “Review requested” added by the 2026-11-19 amendment below. Each is a glyph in the role colour, a word in the role ink and, for clients, the role tint behind the chip. Urgent states alone are solid. The exact words are part of the system; `tokens.json` carries the same table under `states`.
 
 | Group | State | Word | Role | Glyph |
 |---|---|---|---|---|
@@ -269,6 +271,14 @@ Twenty-three states in five groups. Each is a glyph in the role colour, a word i
 | | `due-90` | Expires in {n} days (within 90) | urgent, solid | `alarm-clock` |
 | | `due-180` | Expires in {n} days (91 to 180) | caution | `calendar-clock` |
 | | `date-unknown` | Expiry date unknown | caution | `calendar-search` |
+
+**Review requested** (amendment, 2026-11-19). The owner’s words: “Approve both (Recommended)”. A Work status state for a review that Staff requested from a representative and nobody has started. It must never read as “Representative reviewing”. B2’s `docs/design/b2-practice-preparation/approved.html` renders it.
+
+| Group | State | Word | Role | Glyph |
+|---|---|---|---|---|
+| Work status | `review-requested` | Review requested | progress | `send` |
+
+On the desk it is the neutral representative StatusChip: `--card` fill, `--border` hairline, glyph in `--progress`, word in `--progress-ink`, sized by `--chip-h`, `--chip-px`, `--chip-radius` and `--chip-fs` (small: `--chip-h-sm`, `--chip-px-sm`, `--chip-fs-sm`). B2’s concept draws a dashed outline around it to mark it as unapproved; the build drops that outline. No token is added. `tokens.json` still lists the original 23 states, so take this one from here.
 
 Escalation triggers for “Needs a licensed professional now”: refusal, removal, criminality, health, or status ending soon. Status ending within 90 days escalates automatically. An unknown expiry never shows a guessed countdown; a question goes to the client.
 
@@ -306,9 +316,9 @@ Values below are the specimen’s final computed styles. Representative values a
 
 **TurnDisc.** A round disc in the turn colour with `-foreground` initials (OA, PR) or a glyph: `check` for done, `pen-line` for signed, `user-round` for unassigned. Sizes 16, 20, 24 (default), 32 and 36 px; initials at 0.4 × the disc size, 600, in `--font-desk`. Always `aria-hidden`; always next to a word.
 
-**TurnBar** (client). A `nav` labelled “Whose turn” directly under the client top bar on every client screen, with two equal links: the client segment (“Your turn” and a count, “1 thing to do”) and the representative segment (“Priya’s turn”, “2 things in progress”). Each segment: turn tint, 3 px inset bottom rule in the turn colour, 32 px disc, label 15 on 20 at 600 in turn ink, count 14 on 19 in `--foreground`, at least 64 px tall; a hairline between segments. When the client owes nothing the left segment is done green: “Nothing for you”, “Priya has it”. Each segment opens the matching filtered list. Long translations wrap (about 110 px at 320 px in French); nothing truncates. If it is made sticky, reserve its height and add it to `scroll-padding-top`.
+**TurnBar** (client). A `nav` labelled “Whose turn” directly under the client top bar on every client screen, with two equal links: the client segment (“Your turn” and a count, “1 thing to do”) and the representative segment (“Priya’s turn”, “2 things in progress”). Each segment: turn tint, 3 px inset bottom rule in the turn colour, 32 px disc, label 15 on 20 at 600 in turn ink, count at the client Small size and line height (`--t-small-size`, `--t-small-lh`; 15 on 22, amended 2026-11-19 from 14 on 19) in `--foreground`, at least 64 px tall; a hairline between segments. When the client owes nothing the left segment is done green: “Nothing for you”, “Priya has it”. Each segment opens the matching filtered list. Long translations wrap (about 110 px at 320 px in French); nothing truncates. If it is made sticky, reserve its height and add it to `scroll-padding-top`.
 
-**Holder.** Ends every list row in both portals, right-aligned in its own column (56 to 72 px wide). A 24 px TurnDisc over the word (600, turn ink, breaking only at spaces; 12 px on the desk, the client Label size in the client portal, see [Typography](#4-typography)). When nobody holds the item it uses the no-turn style ([Whose turn](#33-whose-turn)). A visually hidden prefix makes it read as a sentence: “Whose turn: You”, “Whose turn: Priya”, “Status: Done”, “Status: Signed”. Client words: You, “You, later”, Priya (the representative’s first name), Done, Checked, Signed. Desk words: You, Client, Unassigned, Signed.
+**Holder.** Ends every list row in both portals, right-aligned in its own column (56 to 72 px wide). A 24 px TurnDisc over the word (600, turn ink, breaking only at spaces; 12 px on the desk, the client Label size in the client portal, see [Typography](#4-typography)). When nobody holds the item it uses the no-turn style ([Whose turn](#33-whose-turn)). A visually hidden prefix makes it read as a sentence: “Whose turn: You”, “Whose turn: Priya”, “Status: Done”, “Status: Signed”. Client words: You, “You, later”, Priya (the representative’s first name), Done, Checked, Signed. Desk words: You, Client, Unassigned, Signed, and a colleague’s first name (“Daniel”; amendment 2026-11-19, the owner’s words: “Approve both (Recommended)”) when another member of the practice holds the turn. A colleague holds it as the practice, so the disc and word use the representative turn colour, as “You” and “Unassigned” do, and the hidden prefix reads “Whose turn: Daniel”.
 
 **CaseTurnLine** (desk). In the case header under the client name: a 20 px disc and “Your turn: review and sign version 3” in turn ink at 13 px, followed by a muted explanation (“The client is waiting on you. Asking a question passes the turn to them.”).
 

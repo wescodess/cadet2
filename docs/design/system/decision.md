@@ -2,7 +2,7 @@
 
 Date: 2026-11-17
 Gate: UI design gate, system creation (round 1: five options; round 2: three variations)
-Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18))
+Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)) and 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19))
 Approved specimen: [approved.html](approved.html)
 Implementer guide: [DESIGN.md](../../../DESIGN.md)
 Tokens: [tokens.css](tokens.css), [tokens.json](tokens.json) (not yet wired into the app)
@@ -44,6 +44,51 @@ The owner answered:
 > Yes (Recommended)
 
 The style uses only `--muted`, `--muted-foreground`, `--border`, `--input` (dashed outlines), `--card` (disc fill) and `--foreground`. Amber (`--caution`, the client) and lake blue (`--progress`, the representative) are never used for a turn nobody holds. B1's `docs/design/b1-access-and-intake/approved.html` (PR #162) renders every part.
+
+## Amendments 2026-11-19
+
+The owner approved three amendments on 2026-11-19, at the B2 (practice and preparation) design gate, round 2 (PR #164). They are written into `DESIGN.md` sections 4, 11 and 12.2. No token was added or changed, and `approved.html`, the rejected files, `tokens.css` and `tokens.json` are unchanged.
+
+### 1. A "Review requested" state chip
+
+The orchestrator asked:
+
+> Approve the two small additions still waiting from round 1? A "Review requested" status chip (in the progress style, with a send icon), and showing a colleague's first name ("Daniel") to mark whose turn it is on the desk.
+
+The owner answered:
+
+> Approve both (Recommended)
+
+`review-requested`, word "Review requested", progress role, Lucide `send` glyph, in the Work status group. On the desk it is the neutral chip: `--card` fill, `--border` hairline, glyph `--progress`, word `--progress-ink`, sized by `--chip-h`, `--chip-px`, `--chip-radius`, `--chip-fs` and their `-sm` forms. B2's concept marks it with a dashed outline as unapproved; the build drops the outline. `tokens.json` still lists the original 23 states, so `DESIGN.md` section 11 is the source for this one.
+
+### 2. A colleague's first name as a desk holder word
+
+Same question and answer as amendment 1. When another member of the practice holds the turn, the desk holder word is their first name ("Daniel"), in the representative turn colour like "You" and "Unassigned", read as "Whose turn: Daniel". The desk words are now You, Client, Unassigned, Signed and a colleague's first name.
+
+### 3. Client text uses the 15 px Small and Label tokens
+
+The orchestrator asked:
+
+> The approved B1 Checklist uses 14 px for some Client text. B2 now uses 15 px for those. Should B1 be built at 15 px too, so the Client screens match?
+
+The owner answered:
+
+> Yes, match at 15 px (Recommended)
+
+This follows the owner's earlier answer at B2 round 1 (Q-20261119-3, which also settled Q-20261118-2), "Accept all four (Recommended)", which put client small text at 15 px on existing tokens with no new 13 px token.
+
+Meaningful client text uses the client's existing 15 px Small (15 on 22) and Label (15 on 20) tokens. That now also covers text the specimen or B1 set at 13 to 14.9 px, so client screens match across batches. No token value changes. State chips keep the chip tokens (14.5 and 13.5 px), and `aria-hidden` initials in discs and avatars keep their sizes.
+
+`DESIGN.md` specs changed by this amendment:
+
+| Section | Spec | Was | Now |
+|---|---|---|---|
+| 4, Typography | Client text scale | Client text below 13 px moved to Label; 13 to 14.9 px text not covered | All meaningful client text on the 15 px Small or Label token, listing the specimen's 14 px client text |
+| 11, Semantic states | State list | 23 states | 23 states plus `review-requested` |
+| 12.2, TurnBar | Segment count | 14 on 19 | Client Small, 15 on 22 (`--t-small-size`, `--t-small-lh`) |
+| 12.2, Holder | Desk words | You, Client, Unassigned, Signed | Adds a colleague's first name |
+
+The client Avatar's 13 px initials are `aria-hidden`, so its spec is unchanged.
 
 ## What was chosen
 
@@ -143,7 +188,7 @@ These are outside what a static specimen can prove. Every UI ticket that builds 
 
 ## Discrepancies between the approved specimen and the critiques
 
-Found while recording; none changes the approved design. Implementers follow the specimen, except where a dated amendment (2026-11-18, below and in `DESIGN.md`) changes it, and raise these at the first UI gate.
+Found while recording; none changes the approved design. Implementers follow the specimen, except where a dated amendment (2026-11-18 or 2026-11-19, above and in `DESIGN.md`) changes it, and raise these at the first UI gate.
 
 1. **Fonts.** The specimen loads IBM Plex from Google Fonts by URL; the critiques require self-hosting. Expected for a specimen; the build must self-host.
 2. **Text below the 13 px floor.** The round-1 Console critique held 13 px as the floor ("nothing goes smaller"). The Relay specimen renders smaller text in both portals (the client's own small size is 15 px): the holder word at 12 px, representative state chips at 12.5 px (12 px small), desk row metadata and the date-tile month at 12.5 px, tab, group and sidebar labels and the date-tile year at 12 px, keyboard hints at 11.5 px, avatar initials and the client task badge at 10.5 px, turn-disc initials at 8 to 9.6 px and Mono IDs at about 12 px. `DESIGN.md` section 4 lists each one. The Relay critique reports no rendered text below its minimum, so it measured against a lower floor. Owner decision needed before the queue and client list surfaces are built.
