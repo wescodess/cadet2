@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import { expect, it } from 'vitest'
 import {
   captureBoundaryResult,
+  combineBoundaryResults,
   readBoundaryResult,
 } from '../../scripts/security/boundary-results.mjs'
 
@@ -47,4 +48,51 @@ it('rejects a passing but incomplete mandatory population', async () => {
 
 it('rejects absent completion evidence', () => {
   expect(() => readBoundaryResult('/nonexistent/cadet2-boundary-result.json')).toThrow()
+})
+
+it('combines complete mandatory child results without dropping a population', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'cadet2-boundary-groups-'))
+  try {
+    const file = join(directory, 'fixture.test.mjs')
+    await writeFile(file, "import { test } from 'node:test'\ntest('positive', () => {})\n")
+    const children = ['core', 'design'].map((name) => ({
+      name,
+      file: join(directory, name + '.json'),
+      expectedTests: 1,
+    }))
+    for (const child of children) captureBoundaryResult(file, child.file, 'pipe')
+    const aggregate = join(directory, 'aggregate.json')
+    combineBoundaryResults(children, aggregate)
+    expect(readBoundaryResult(aggregate, 2).counts.passed).toBe(2)
+    expect(() => readBoundaryResult(aggregate, 3)).toThrow()
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+it('rejects a missing or failed mandatory child instead of reporting aggregate success', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'cadet2-boundary-groups-'))
+  try {
+    const file = join(directory, 'fixture.test.mjs')
+    await writeFile(
+      file,
+      "import { test } from 'node:test'\ntest('negative', () => { throw new Error('deliberate red') })\n",
+    )
+    const failed = join(directory, 'failed.json')
+    captureBoundaryResult(file, failed, 'pipe')
+    expect(() =>
+      combineBoundaryResults(
+        [{ file: failed, expectedTests: 1 }],
+        join(directory, 'aggregate.json'),
+      ),
+    ).toThrow()
+    expect(() =>
+      combineBoundaryResults(
+        [{ file: join(directory, 'missing.json'), expectedTests: 1 }],
+        join(directory, 'aggregate.json'),
+      ),
+    ).toThrow()
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })

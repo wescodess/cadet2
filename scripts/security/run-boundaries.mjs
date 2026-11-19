@@ -93,7 +93,6 @@ child.once('exit', async (code) => {
   try {
     if (code !== 0) throw new Error(`Convex boundary launcher exited ${code}`)
     await cp(resultFile, join(evidence, 'admin-boundary-results.json'))
-    await cp(`${resultFile}.tap`, join(evidence, 'admin-boundaries.tap'))
     readBoundaryResult(resultFile)
     console.log('Admin boundary result: PASS (68 passed; zero failures, skips or cancellations)')
   } catch (error) {

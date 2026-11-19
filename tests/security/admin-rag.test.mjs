@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { execFile, spawn } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
-import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
+import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { after, before, test } from 'node:test'
+import { after, before, test as registerTest } from 'node:test'
 import { isDeepStrictEqual, promisify } from 'node:util'
 import { once } from 'node:events'
 import { createWriteStream } from 'node:fs'
@@ -12,9 +12,17 @@ import { PGlite } from '@electric-sql/pglite'
 import { ConvexHttpClient } from 'convex/browser'
 import { anyApi } from 'convex/server'
 
+const group = process.env.CONTAINMENT_TEST_GROUP ?? 'all'
+if (!['all', 'core', 'design'].includes(group)) throw new Error('Invalid mandatory boundary group')
+function test(name, ...args) {
+  if (group === 'all' || (name.startsWith('#166') ? 'design' : 'core') === group)
+    return registerTest(name, ...args)
+}
+
 const root = resolve(import.meta.dirname, '../..')
 const directory = process.env.CONTAINMENT_DIRECTORY
 const origin = process.env.CONTAINMENT_ORIGIN
+const appDirectory = join(directory ?? '.', `app-${group}`)
 const run = promisify(execFile)
 let server
 let backend
@@ -35,7 +43,7 @@ let deployedFunctions
 
 async function startRuntime() {
   server = spawn(process.execPath, [join(root, '.output/server/index.mjs')], {
-    cwd: join(directory, 'app'),
+    cwd: appDirectory,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: runtimeEnv,
   })
@@ -232,6 +240,9 @@ before(
         env: cliEnv,
       },
     )
+    for (const name of await readdir(join(directory, 'backend'))) {
+      if (/^function_spec_\d+\.json$/.test(name)) await rm(join(directory, 'backend', name))
+    }
     await run(
       process.execPath,
       [
@@ -262,11 +273,11 @@ before(
       process.env.QUALITY_OUTPUT_DIR ?? join(root, '.quality-output/admin-boundaries')
     await mkdir(evidence, { recursive: true })
     await writeFile(
-      join(evidence, 'deployed-functions.json'),
+      join(evidence, `deployed-functions-${group}.json`),
       JSON.stringify(deployedFunctions, null, 2),
     )
-    await mkdir(join(directory, 'app/.data/db'), { recursive: true })
-    const db = new PGlite(join(directory, 'app/.data/db/pglite-dev'))
+    await mkdir(join(appDirectory, '.data/db'), { recursive: true })
+    const db = new PGlite(join(appDirectory, '.data/db/pglite-dev'))
     await db.exec(`
     CREATE TABLE "user" (id text PRIMARY KEY, name text NOT NULL, email text UNIQUE NOT NULL, "emailVerified" boolean NOT NULL DEFAULT false, image text, "createdAt" timestamp NOT NULL DEFAULT now(), "updatedAt" timestamp NOT NULL DEFAULT now(), "userId" text);
     CREATE TABLE session (id text PRIMARY KEY, "expiresAt" timestamp NOT NULL, token text UNIQUE NOT NULL, "createdAt" timestamp NOT NULL DEFAULT now(), "updatedAt" timestamp NOT NULL DEFAULT now(), "ipAddress" text, "userAgent" text, "userId" text NOT NULL REFERENCES "user"(id));
@@ -274,6 +285,16 @@ before(
     CREATE TABLE verification (id text PRIMARY KEY, identifier text NOT NULL, value text NOT NULL, "expiresAt" timestamp NOT NULL, "createdAt" timestamp NOT NULL DEFAULT now(), "updatedAt" timestamp NOT NULL DEFAULT now());
     CREATE TABLE jwks (id text PRIMARY KEY, "publicKey" text NOT NULL, "privateKey" text NOT NULL, "createdAt" timestamp NOT NULL, "expiresAt" timestamp);
   `)
+    if (group === 'design') {
+      for (const name of [
+        '0004_pathway_definitions.sql',
+        '0005_pathway_rules.sql',
+        '0006_governance_audit_log.sql',
+        '0007_bounded_governance_audit.sql',
+      ]) {
+        await db.exec(await readFile(join(root, 'server/db/migrations/postgresql', name), 'utf8'))
+      }
+    }
     await db.close()
     runtimeEnv = {
       ...process.env,
@@ -315,6 +336,7 @@ before(
     ])
     operator = new ConvexHttpClient(backend, { logger: false })
     operator.setAdminAuth(config.adminKey)
+    if (group === 'design') return
     await fixture('sources', [
       {
         type: 'youtube_channel',
@@ -756,7 +778,7 @@ async function successful(path, method = 'GET', body, expected = 200) {
 
 test('explicit isolated operator migrations preserve every enabled admin operation', async () => {
   await stopRuntime()
-  const db = new PGlite(join(directory, 'app/.data/db/pglite-dev'))
+  const db = new PGlite(join(appDirectory, '.data/db/pglite-dev'))
   for (const name of [
     '0004_pathway_definitions.sql',
     '0005_pathway_rules.sql',
@@ -1275,7 +1297,7 @@ const sqlWrites = [
 
 async function sqlFixture(callback) {
   await stopRuntime()
-  const db = new PGlite(join(directory, 'app/.data/db/pglite-dev'))
+  const db = new PGlite(join(appDirectory, '.data/db/pglite-dev'))
   try {
     return await callback(db)
   } finally {

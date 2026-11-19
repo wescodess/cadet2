@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { z } from 'zod'
 
-export function captureBoundaryResult(file, resultFile, stdio = 'inherit') {
+export function captureBoundaryResult(file, resultFile, stdio = 'inherit', env = process.env) {
   const result = spawnSync(
     process.execPath,
     [
@@ -13,7 +13,7 @@ export function captureBoundaryResult(file, resultFile, stdio = 'inherit') {
       `--test-reporter-destination=${resultFile}.tap`,
       file,
     ],
-    { stdio, timeout: 120_000 },
+    { stdio, timeout: 120_000, env },
   )
   let counts = null
   try {
@@ -63,4 +63,18 @@ export function readBoundaryResult(file, expectedTests = 68) {
     })
     .strict()
     .parse(JSON.parse(readFileSync(file, 'utf8')))
+}
+
+export function combineBoundaryResults(children, resultFile) {
+  if (children.length === 0) throw new Error('Missing mandatory boundary groups')
+  const records = children.map((child) => readBoundaryResult(child.file, child.expectedTests))
+  const counts = Object.fromEntries(
+    Object.keys(records[0].counts).map((key) => [
+      key,
+      records.reduce((sum, record) => sum + record.counts[key], 0),
+    ]),
+  )
+  const record = { exitCode: 0, signal: null, error: null, counts }
+  writeFileSync(resultFile, JSON.stringify(record, null, 2))
+  return record
 }

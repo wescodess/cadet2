@@ -11,7 +11,7 @@ Source input limits apply independently at HTTP and direct Convex create/update 
 - Complete submitted create/update input: 32,768 UTF-8 bytes of canonical JSON, including other arrays and strings.
 - Decision notes and rejection reasons: 500 UTF-16 code units.
 
-A new source plus its bounded audit is far below the 1 MiB Convex document limit, including worst-case multibyte text. Limits apply only to submitted fields during an edit. The audit projection budgets also cover imported records independently of their old sizes.
+A new source plus its bounded audit is far below the 1 MiB Convex document limit, including worst-case multibyte text. Limits apply only to submitted fields during an edit. The audit projection budgets also cover imported records independently of their old sizes. The source editor submits only changed fields, so an unchanged oversized legacy field is omitted; a no-op edit sends no mutation.
 
 ## Reads and continuity
 
@@ -36,3 +36,5 @@ After deploying the Convex schema/functions, invoke the internal operator-only `
 Audit list/summary/source-detail reads return unavailable while an unprojected legacy row remains. This prevents silent omission of history. Source changes can still commit their new bounded events atomically during the backfill. New operational approval/deletion rows are bounded; canonical metadata, details and counters use the same event ID.
 
 The implementation does not run these migrations against a managed deployment or reopen YouTube, AI Search, reviews or ingestion.
+
+The mandatory security runner executes the 58 core cases and 10 design cases in separate child processes, with the existing 120-second child deadline unchanged. Each child owns an app database and origin. The launcher requires both complete native TAP/exit records before summing the 68-case result; missing, failed, cancelled, skipped, extra or incomplete populations fail the gate. Both original TAP streams are retained separately.

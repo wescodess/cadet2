@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { createAdminOperation } from '@/lib/admin/createOperation'
+import { changedSourceFields } from '@/lib/admin/sourceChanges'
 
 import { computed, ref } from 'vue'
 
@@ -273,34 +274,34 @@ function buildCreatePayload() {
   }
 }
 
-function buildUpdatePayload() {
+function buildUpdatePayload(input: EvidenceSourceDraft = draft.value) {
   const basePayload = {
-    name: draft.value.name.trim(),
-    description: draft.value.description.trim() || null,
-    trustScore: Math.max(0, Math.min(100, Math.round(draft.value.trustScore))),
-    tenantId: draft.value.tenantId.trim() || 'default',
-    linkedPathwayIds: draft.value.linkedPathwayIds,
-    tags: splitCsv(draft.value.tagsText),
+    name: input.name.trim(),
+    description: input.description.trim() || null,
+    trustScore: Math.max(0, Math.min(100, Math.round(input.trustScore))),
+    tenantId: input.tenantId.trim() || 'default',
+    linkedPathwayIds: input.linkedPathwayIds,
+    tags: splitCsv(input.tagsText),
     schedule: {
-      frequency: draft.value.frequency,
-      intervalHours: draft.value.frequency === 'interval' ? draft.value.intervalHours : undefined,
+      frequency: input.frequency,
+      intervalHours: input.frequency === 'interval' ? input.intervalHours : undefined,
     },
-    enabled: true,
+    enabled: input.enabled,
   }
 
-  if (draft.value.type === 'website') {
+  if (input.type === 'website') {
     return {
       ...basePayload,
       websiteConfig: {
-        seedUrls: splitCsv(draft.value.websiteSeedUrls),
-        allowedDomains: splitCsv(draft.value.websiteAllowedDomains),
-        includePatterns: splitCsv(draft.value.websiteIncludePatterns),
-        excludePatterns: splitCsv(draft.value.websiteExcludePatterns),
-        maxDepth: draft.value.websiteMaxDepth,
-        maxPagesPerRun: draft.value.websiteMaxPagesPerRun,
-        renderMode: draft.value.websiteRenderMode,
-        requestHeadersRef: draft.value.websiteRequestHeadersRef.trim() || undefined,
-        respectRobots: draft.value.websiteRespectRobots,
+        seedUrls: splitCsv(input.websiteSeedUrls),
+        allowedDomains: splitCsv(input.websiteAllowedDomains),
+        includePatterns: splitCsv(input.websiteIncludePatterns),
+        excludePatterns: splitCsv(input.websiteExcludePatterns),
+        maxDepth: input.websiteMaxDepth,
+        maxPagesPerRun: input.websiteMaxPagesPerRun,
+        renderMode: input.websiteRenderMode,
+        requestHeadersRef: input.websiteRequestHeadersRef.trim() || undefined,
+        respectRobots: input.websiteRespectRobots,
       },
     }
   }
@@ -308,11 +309,11 @@ function buildUpdatePayload() {
   return {
     ...basePayload,
     youtubeConfig: {
-      channelId: draft.value.youtubeChannelId.trim(),
-      channelUrl: draft.value.youtubeChannelUrl.trim(),
-      maxVideosPerRun: draft.value.youtubeMaxVideosPerRun,
-      includeShorts: draft.value.youtubeIncludeShorts,
-      preferredLanguage: draft.value.youtubePreferredLanguage.trim() || undefined,
+      channelId: input.youtubeChannelId.trim(),
+      channelUrl: input.youtubeChannelUrl.trim(),
+      maxVideosPerRun: input.youtubeMaxVideosPerRun,
+      includeShorts: input.youtubeIncludeShorts,
+      preferredLanguage: input.youtubePreferredLanguage.trim() || undefined,
     },
   }
 }
@@ -340,7 +341,15 @@ async function saveDetail() {
       return
     }
 
-    if (!selectedSourceId.value) {
+    if (!selectedSourceId.value || !selectedDetail.value) {
+      return
+    }
+    const patch = changedSourceFields(
+      buildUpdatePayload(),
+      buildUpdatePayload(createEvidenceSourceDraftFromRecord(selectedDetail.value.source)),
+    )
+    if (Object.keys(patch).length === 0) {
+      detailMode.value = 'view'
       return
     }
 
@@ -348,7 +357,7 @@ async function saveDetail() {
       `/api/admin/rag/sources/${encodeURIComponent(selectedSourceId.value)}`,
       {
         method: 'PATCH',
-        body: buildUpdatePayload(),
+        body: patch,
       },
     )
 
