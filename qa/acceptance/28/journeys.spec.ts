@@ -31,7 +31,7 @@ async function signIn(page:Page,account:Account){
 async function assertClosed(page:Page,path:string){
   const response=await page.goto(path);
   expect.soft(response?.status(),`${oracle.close}; ${oracle.tasks}; ${path}`).toBe(404);
-  await expect.soft(page.getByText(/404|not found|unavailable/i).first(),oracle.close).toBeVisible();
+  if(response?.status()===404) await expect.soft(page.getByText(/404|not found|unavailable/i).first(),oracle.close).toBeVisible();
   expect.soft(new URL(page.url()).pathname,oracle.close).toBe(new URL(path,'http://localhost').pathname);
   await expect.soft(page.getByRole('link',{name:/signed plan/i}),oracle.close).toHaveCount(0);
   await test.info().attach(`bookmark-${encodeURIComponent(path)}.txt`,{body:(await page.getByRole('heading').allTextContents()).join('\n'),contentType:'text/plain'});
@@ -66,7 +66,8 @@ for(const persona of ['client','admin'] as const){
   });
 }
 
-test('J28-04 remaining pages have no retired navigation or replacement activation',async({page})=>{
+for(const persona of ['visitor','client','admin'] as const) test(`J28-04 ${persona} remaining pages have no retired navigation or replacement activation`,async({page},info)=>{
+  if(persona!=='visitor')await signIn(page,accounts()[info.project.name][`${persona}Remaining`]);
   const observations=[];
   for(const path of remainingPages){
     await page.goto(path);

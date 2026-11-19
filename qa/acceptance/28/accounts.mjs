@@ -5,10 +5,11 @@ import crypto from 'node:crypto';
 const url=process.env.QA_URL,out=process.env.QA_ACCOUNTS;
 if(!url||!out)throw Error('Set QA_URL and QA_ACCOUNTS');
 const browser=await chromium.launch();
-const result={desktop:{},mobile:{},probes:{}};
+const result=await fs.readFile(out,'utf8').then(JSON.parse).catch(()=>({desktop:{},mobile:{},probes:{}}));
 try {
  for(const group of ['desktop','mobile','probes']){
-  for(const persona of group==='probes'?['client','foreign','admin']:['client','admin']){
+  for(const persona of group==='probes'?['client','foreign','admin']:['client','admin','clientRemaining','adminRemaining']){
+   if(result[group][persona])continue;
    const context=await browser.newContext({viewport:group==='mobile'?{width:390,height:844}:{width:1440,height:900}});
    const page=await context.newPage();
    const account={email:`qa28-${group}-${persona}-${crypto.randomUUID().slice(0,8)}@example.invalid`,password:crypto.randomBytes(18).toString('base64url')};
