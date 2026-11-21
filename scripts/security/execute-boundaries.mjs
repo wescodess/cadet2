@@ -24,6 +24,7 @@ try {
   for (const [name, expectedTests] of [
     ['core', 58],
     ['design', 10],
+    ['navigation', 2],
   ]) {
     const file = evidence
       ? resolve(evidence, `admin-boundaries-${name}.json`)

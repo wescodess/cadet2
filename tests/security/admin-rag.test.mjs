@@ -11,12 +11,17 @@ import { URLSearchParams } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
 import { ConvexHttpClient } from 'convex/browser'
 import { anyApi } from 'convex/server'
+import { chromium } from '@playwright/test'
 
 const group = process.env.CONTAINMENT_TEST_GROUP ?? 'all'
-if (!['all', 'core', 'design'].includes(group)) throw new Error('Invalid mandatory boundary group')
+if (!['all', 'core', 'design', 'navigation'].includes(group))
+  throw new Error('Invalid mandatory boundary group')
+function groupOf(name) {
+  if (name.startsWith('#166')) return 'design'
+  return name.startsWith('denied ') ? 'navigation' : 'core'
+}
 function test(name, ...args) {
-  if (group === 'all' || (name.startsWith('#166') ? 'design' : 'core') === group)
-    return registerTest(name, ...args)
+  if (group === 'all' || groupOf(name) === group) return registerTest(name, ...args)
 }
 
 const root = resolve(import.meta.dirname, '../..')
@@ -303,6 +308,7 @@ before(
       CONVEX_SITE_URL: origin,
       CADET_AUTH_ISSUER: origin,
       CONVEX_URL: backend,
+      NUXT_PUBLIC_CONVEX_URL: backend,
       NITRO_HOST: '127.0.0.1',
       NITRO_PORT: new URL(origin).port,
       NUXT_RAG_ADMIN_EMAILS: 'email-match@example.test',
@@ -336,7 +342,7 @@ before(
     ])
     operator = new ConvexHttpClient(backend, { logger: false })
     operator.setAdminAuth(config.adminKey)
-    if (group === 'design') return
+    if (group !== 'core' && group !== 'all') return
     await fixture('sources', [
       {
         type: 'youtube_channel',
@@ -677,6 +683,157 @@ test('AI Search API and SSR page deny non-admins and remain off for admins', asy
     }
   }
   assert.equal((await request('/ai-search', admin)).status, 200)
+})
+
+const adminPages = [
+  'pathways',
+  'pathway-rules',
+  'evidence-sources',
+  'rag-sources',
+  'rag-phase0',
+  'recommendation-reviews',
+  'audit-trail',
+].map((name) => `/admin/${name}`)
+
+async function settle(page, destination) {
+  await page.waitForFunction((target) => {
+    const app = globalThis.document.querySelector('#__nuxt')?.__vue_app__?.config.globalProperties
+    return (
+      app?.$nuxt.isHydrating === false &&
+      !app.$nuxt._processingMiddleware &&
+      app.$router.currentRoute.value.fullPath === target
+    )
+  }, destination)
+}
+
+async function deniedPageVisit(page, path, mode) {
+  if (mode === 'direct') {
+    await page.goto(`${origin}${path}`)
+    return
+  }
+  await page.evaluate(async (target) => {
+    const { $router } =
+      globalThis.document.querySelector('#__nuxt').__vue_app__.config.globalProperties
+    await $router.push('/')
+    await $router.push(target)
+  }, path)
+}
+
+async function browserPage(browser, viewport, actor) {
+  const context = await browser.newContext({ viewport, colorScheme: 'light' })
+  if (actor) {
+    await context.addCookies(
+      actor.cookie.split('; ').map((pair) => {
+        const separator = pair.indexOf('=')
+        return { name: pair.slice(0, separator), value: pair.slice(separator + 1), url: origin }
+      }),
+    )
+  }
+  const page = await context.newPage()
+  const problems = []
+  page.on('console', (message) => {
+    if (['error', 'warning'].includes(message.type()))
+      problems.push({ console: message.text(), url: message.location().url })
+  })
+  page.on('pageerror', (error) => problems.push({ exception: error.message }))
+  page.on('response', (response) => {
+    if (response.status() >= 400) problems.push({ status: response.status(), url: response.url() })
+  })
+  await page.goto(`${origin}/`)
+  await settle(page, '/')
+  return { context, page, problems }
+}
+
+async function assertCleanDenial(page, problems, { actor, destination, landmark, mode, label }) {
+  const accessDenial = `${origin}/api/admin/access`
+  const denial =
+    mode === 'client' && actor
+      ? page.waitForEvent('console', (message) => message.type() === 'error')
+      : null
+  await deniedPageVisit(page, label.path, mode)
+  await settle(page, destination)
+  await denial
+  await landmark.waitFor({ timeout: 10_000 })
+  assert.doesNotMatch(
+    await page.locator('body').innerText(),
+    /Admin access denied|Authentication required|\b40[13]\b/,
+    label.text,
+  )
+  assert.deepEqual(
+    problems.splice(0).sort((a, b) => Object.keys(a)[0].localeCompare(Object.keys(b)[0])),
+    denial
+      ? [
+          {
+            console:
+              'Failed to load resource: the server responded with a status of 403 (Admin access denied)',
+            url: accessDenial,
+          },
+          { status: 403, url: accessDenial },
+        ]
+      : [],
+    label.text,
+  )
+}
+
+test('denied page documents redirect while payloads and admin APIs keep their denial status', async () => {
+  for (const [actor, status, location] of [
+    [null, 401, '/auth'],
+    [ordinary, 403, '/'],
+  ]) {
+    for (const path of [...adminPages, '/ai-search']) {
+      const page = await request(path, actor, 'GET', undefined, { accept: 'text/html' })
+      assert.equal(page.status, 302, path)
+      assert.equal(page.headers.get('location'), location, path)
+      assert.match(page.headers.get('cache-control'), /no-store/, path)
+      const payload = await request(`${path}/_payload.json`, actor, 'GET', undefined, {
+        accept: 'text/html',
+      })
+      assert.equal(payload.status, status, path)
+    }
+    assert.equal((await request('/api/admin/access', actor)).status, status)
+  }
+})
+
+test('denied admin pages land on a clean safe page for direct loads and client navigation', async () => {
+  const desktop = { width: 1440, height: 900 }
+  const browser = await chromium.launch()
+  try {
+    for (const { actor, destination, landmark, paths, viewports } of [
+      {
+        actor: ordinary,
+        destination: '/',
+        landmark: (page) => page.getByTestId('home-hero'),
+        paths: [...adminPages, '/ai-search'],
+        viewports: [desktop, { width: 390, height: 844 }],
+      },
+      {
+        actor: null,
+        destination: '/auth',
+        landmark: (page) => page.getByRole('heading', { name: 'Create account' }),
+        paths: [adminPages[0]],
+        viewports: [desktop],
+      },
+    ]) {
+      for (const viewport of viewports) {
+        const { context, page, problems } = await browserPage(browser, viewport, actor)
+        for (const mode of ['direct', 'client']) {
+          for (const path of paths) {
+            await assertCleanDenial(page, problems, {
+              actor,
+              destination,
+              landmark: landmark(page),
+              mode,
+              label: { path, text: `${mode} ${path} ${viewport.width}px → ${destination}` },
+            })
+          }
+        }
+        await context.close()
+        assert.deepEqual(problems, [])
+      }
+    }
+  } finally {
+    await browser.close()
+  }
 })
 
 test('bootstrap and allowlist-sync registrations are absent', async () => {
