@@ -757,6 +757,29 @@ async function browserPage(browser, viewport, actor) {
   return { context, page, problems }
 }
 
+async function openAuditTrail(browser) {
+  const session = await browserPage(browser, { width: 1440, height: 900 }, admin)
+  const listed = session.page.waitForResponse(
+    (response) => new URL(response.url()).pathname === '/api/admin/audit-trail',
+  )
+  await session.page.goto(`${origin}/admin/audit-trail`)
+  await settle(session.page, '/admin/audit-trail')
+  await listed
+  return session
+}
+
+async function applyAuditFilter(page, apply, expected) {
+  const listed = page.waitForResponse((response) => {
+    const url = new URL(response.url())
+    return (
+      url.pathname === '/api/admin/audit-trail' &&
+      Object.entries(expected).every(([key, value]) => url.searchParams.get(key) === value)
+    )
+  })
+  await apply()
+  assert.equal((await listed).status(), 200)
+}
+
 async function assertCleanDenial(page, problems, { actor, destination, landmark, mode, label }) {
   const accessDenial = `${origin}/api/admin/access`
   const denial =
@@ -1564,6 +1587,84 @@ async function recordAtomicObservation(name, observation) {
     JSON.stringify(observation, null, 2),
   )
 }
+
+test('evidence-source and SQL audit details open exactly as the audit page requests them', async () => {
+  const marker = `encoded-detail-${randomBytes(4).toString('hex')}`
+  await reviewedSource(`${marker} approved source`)
+  const { sourceId: deletedId } = await successful('/api/admin/rag/sources', 'POST', {
+    ...websiteSubmission,
+    name: `${marker} deleted source`,
+  })
+  await successful(`/api/admin/rag/sources/${deletedId}`, 'DELETE')
+  await successful(
+    '/api/admin/pathways',
+    'POST',
+    { pathwayId: `${marker}-pathway`, displayName: `${marker} pathway`, status: 'draft' },
+    201,
+  )
+  const listed = (await successful(`/api/admin/audit-trail?search=${marker}&pageSize=100`)).items
+  const events = [
+    ['EVIDENCE_SOURCE_APPROVED', `${marker} approved source`, 'rag-approval:'],
+    ['EVIDENCE_SOURCE_DELETED', `${marker} deleted source`, 'rag-deletion:'],
+    ['PATHWAY_CREATED', `${marker} pathway`, 'audit-'],
+  ].map(([actionType, label, prefix]) => {
+    const event = listed.find((item) => item.actionType === actionType)
+    assert.ok(event?.eventId.startsWith(prefix), actionType)
+    return { ...event, label }
+  })
+  const observations = []
+  for (const { eventId } of events) {
+    const encoded = encodeURIComponent(eventId)
+    for (const path of [eventId, encoded, encoded.replaceAll('%3A', '%3a')]) {
+      const response = await request(`/api/admin/audit-trail/${path}`, admin)
+      const body = await response.json()
+      observations.push({ path, status: response.status })
+      assert.equal(response.status, 200, `${path}: ${JSON.stringify(body)}`)
+      assert.equal(body.event.eventId, eventId)
+    }
+  }
+  for (const path of [`${encodeURIComponent(events[0].eventId)}%E0%A4%A`, '%', '%3']) {
+    const response = await request(`/api/admin/audit-trail/${path}`, admin)
+    observations.push({ path, status: response.status })
+    assert.equal(response.status, 400, path)
+  }
+  const browser = await chromium.launch({
+    executablePath: process.env.CONTAINMENT_BROWSER_EXECUTABLE,
+  })
+  try {
+    const { context, page, problems } = await openAuditTrail(browser)
+    const search = page.getByPlaceholder('Entity, actor, or reason')
+    await applyAuditFilter(
+      page,
+      async () => {
+        await search.fill(marker)
+        await search.press('Enter')
+        await search.blur()
+      },
+      { search: marker },
+    )
+    const detailPanel = page.getByTestId('admin-audit-detail-panel')
+    await detailPanel.getByText(events[2].label, { exact: true }).first().waitFor()
+    for (const { eventId, label } of events) {
+      const path = `/api/admin/audit-trail/${encodeURIComponent(eventId)}`
+      const opened = page.waitForResponse((response) => new URL(response.url()).pathname === path)
+      await page
+        .getByRole('button', { name: new RegExp(label) })
+        .first()
+        .click()
+      const response = await opened
+      assert.equal(response.status(), 200, `${label} must open from the audit page`)
+      await detailPanel.getByText(label, { exact: true }).first().waitFor()
+      observations.push({ ui: path, status: response.status() })
+    }
+    assert.doesNotMatch(await page.locator('main').innerText(), /Audit event not found/)
+    assert.deepEqual(problems, [])
+    await context.close()
+  } finally {
+    await browser.close()
+  }
+  await recordAtomicObservation('sb2-encoded-detail', observations)
+})
 
 registrationGroup = 'sql-rollback'
 
@@ -2920,3 +3021,104 @@ for (const count of [513, 2101]) {
     await recordAtomicObservation(`sb1-search-${count}`, { observations, broad })
   })
 }
+
+test('actor and action filters find matches behind more than a page of newer source events', async () => {
+  const marker = `sparse-filter-${randomBytes(4).toString('hex')}`
+  const actorId = `${marker}-actor`
+  const base = Date.now() - 60000
+  const sourceEvent = (index, actionType, entityLabel) => {
+    const eventId = `rag-approval:${marker}-${String(index).padStart(2, '0')}`
+    const timestamp = base + index
+    return {
+      eventId,
+      timestamp,
+      orderKey: `${String(timestamp).padStart(16, '0')}:${eventId}`,
+      actorId,
+      entityType: 'EVIDENCE_SOURCE',
+      actionType,
+      entityId: marker,
+      entityLabel,
+      changeSummary: 'Synthetic sparse filter fixture',
+    }
+  }
+  const rejected = sourceEvent(1, 'EVIDENCE_SOURCE_REJECTED', `${marker} rejected source`)
+  const newer = Array.from({ length: 40 }, (_, index) =>
+    sourceEvent(index + 2, 'EVIDENCE_SOURCE_UPDATED', `${marker} newer ${index}`),
+  )
+  await fixture('rag_audit_events', [rejected, ...newer])
+  await fixture(
+    'rag_audit_details',
+    [rejected, ...newer].map(({ eventId, entityLabel }) => ({
+      eventId,
+      changeContext: { before: null, after: { name: entityLabel } },
+      stateDigests: { before: 'none', after: 'none' },
+      truncated: false,
+    })),
+  )
+  const pathway = { eventId: `audit-${marker}-pathway`, entityLabel: `${marker} pathway` }
+  await sqlFixture((db) =>
+    db.query(
+      `INSERT INTO governance_audit_log (event_id, actor_id, action_type, entity_type, entity_id, entity_label, timestamp_ms) VALUES ($1, $2, 'PATHWAY_CREATED', 'PATHWAY', $3, $4, $5)`,
+      [pathway.eventId, actorId, `${marker}-pathway`, pathway.entityLabel, base],
+    ),
+  )
+  const cases = [
+    [{ actorId, actionType: 'EVIDENCE_SOURCE_REJECTED' }, rejected],
+    [{ actorId, actionType: 'PATHWAY_CREATED' }, pathway],
+    [{ actorId, entityId: marker, actionType: 'EVIDENCE_SOURCE_REJECTED' }, rejected],
+    [{ search: marker, actorId, actionType: 'EVIDENCE_SOURCE_REJECTED' }, rejected],
+  ]
+  const observations = []
+  for (const [filters, expected] of cases) {
+    const page = await successful(
+      `/api/admin/audit-trail?${new URLSearchParams({ ...filters, pageSize: '25' })}`,
+    )
+    observations.push({ filters, ids: page.items.map((item) => item.eventId) })
+    assert.deepEqual(
+      page.items.map((item) => item.eventId),
+      [expected.eventId],
+      `${JSON.stringify(filters)} must return its match on the first page`,
+    )
+  }
+  const browser = await chromium.launch({
+    executablePath: process.env.CONTAINMENT_BROWSER_EXECUTABLE,
+  })
+  try {
+    for (const [actionType, expected] of [
+      ['EVIDENCE_SOURCE_REJECTED', rejected],
+      ['PATHWAY_CREATED', pathway],
+    ]) {
+      const { context, page, problems } = await openAuditTrail(browser)
+      const actor = page.getByPlaceholder('Actor user id')
+      await applyAuditFilter(
+        page,
+        async () => {
+          await actor.fill(actorId)
+          await actor.press('Enter')
+          await actor.blur()
+        },
+        { actorId },
+      )
+      await applyAuditFilter(
+        page,
+        () =>
+          page.getByTestId('admin-audit-filter-ribbon').locator('select').selectOption(actionType),
+        { actorId, actionType },
+      )
+      const row = page.getByRole('button', { name: new RegExp(expected.entityLabel) })
+      await row.first().waitFor({ timeout: 10_000 })
+      assert.equal(await row.count(), 1)
+      assert.equal(
+        await page.getByText('No audit events matched the current filters.').count(),
+        0,
+        `${actionType} must be visible on the first page`,
+      )
+      observations.push({ ui: actionType, visible: true })
+      assert.deepEqual(problems, [])
+      await context.close()
+    }
+  } finally {
+    await browser.close()
+  }
+  await recordAtomicObservation('sb2-sparse-filters', observations)
+})

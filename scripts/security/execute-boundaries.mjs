@@ -25,13 +25,13 @@ async function availableOrigin() {
 try {
   for (const [name, expectedTests] of [
     ['admission', 21],
-    ['source-audit', 9],
+    ['source-audit', 10],
     ['sql-rollback', 7],
     ['source-rollback', 6],
     ['audit-success', 13],
     ['audit-consistency', 2],
     ['design', 11],
-    ['audit-search', 2],
+    ['audit-search', 3],
     ['navigation', 2],
     ['network', 4],
   ]) {
