@@ -220,6 +220,23 @@ describe('quality integration contracts', () => {
       2,
       { fixture: 1 },
     ],
+    [
+      "describe.skip('group #23', () => { it('a', () => {}) }); it('outside', () => {})",
+      2,
+      { fixture: 1 },
+    ],
+    ["it.skip('a #23', (ctx) => { ctx.skip() }); it('b', () => {})", 2, { fixture: 1 }],
+    [
+      "test.describe('group', () => { test.skip(() => true, 'blocked #27'); test('a', async () => {}); test('b', async () => {}) })",
+      2,
+      {},
+    ],
+    ["describe.skip('group #23', () => { it.todo('a'); it('b', () => {}) })", 2, {}],
+    [
+      "describe.skip('group #23', () => { it('a', () => {}); it.skip('b #23', () => {}) })",
+      3,
+      { fixture: 1 },
+    ],
   ])('combines runtime and source skips for %s', async (text, runtime, expected) => {
     const directory = mkdtempSync(resolve(common.outputDir, 'composition-'))
     const file = join(directory, 'fixture.spec.mjs')

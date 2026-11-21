@@ -270,6 +270,20 @@ describe('baseline comparison bases', () => {
     expect(shown.filter((base) => base === 'main-base')).toHaveLength(7)
     expect(shown.filter((base) => base === 'dev-base')).toHaveLength(7)
   })
+  it('rejects an increase against the second base when the first base allows it', async () => {
+    manifests.add('main-base')
+    const counts = current[path('types')].counts
+    const key = Object.keys(counts)[0]
+    counts[key] += 1
+    const allowing = globalThis.structuredClone(prior[path('types')])
+    allowing.counts[key] += 1
+    run.mockImplementation((_command, args) => {
+      const [base, file] = args[1].split(':')
+      const manifest = base === 'main-base' && file === path('types') ? allowing : prior[file]
+      return { status: 0, stdout: JSON.stringify(manifest), stderr: '' }
+    })
+    await expect(policy()).rejects.toThrow(`Baseline count increased: ${path('types')}`)
+  })
   it('fails closed when no base has manifests and none descends from the adoption commit', async () => {
     manifests.clear()
     await expect(policy()).rejects.toThrow(
