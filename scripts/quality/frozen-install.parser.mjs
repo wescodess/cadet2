@@ -10,6 +10,10 @@ const manifest = z
     dependencies: z.record(nonempty, nonempty),
     devDependencies: z.record(nonempty, nonempty),
     packageManager: z.literal('pnpm@9.12.3'),
+    pnpm: z
+      .object({ overrides: z.record(nonempty, nonempty) })
+      .strict()
+      .optional(),
   })
   .strict()
 const event = z.object({

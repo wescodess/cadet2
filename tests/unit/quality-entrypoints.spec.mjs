@@ -169,6 +169,15 @@ describe('quality integration contracts', () => {
       'cancel-in-progress': true,
     })
   })
+  it('resolves effect at or above the GHSA-7589-6fvf-x4pw fix', () => {
+    const lock = parse(readFileSync('pnpm-lock.yaml', 'utf8'))
+    const versions = Object.keys(lock.packages)
+      .filter((key) => key.startsWith('effect@'))
+      .map((key) => key.slice('effect@'.length).split('.').map(Number))
+    expect(versions.length).toBeGreaterThan(0)
+    for (const [major, minor, patch] of versions)
+      expect(major * 1e6 + minor * 1e3 + patch).toBeGreaterThanOrEqual(3_022_001)
+  })
   it('includes modules and layers in the typed lint project', () => {
     const project = JSON.parse(readFileSync('tsconfig.eslint.json', 'utf8'))
     expect(project.include).toEqual(expect.arrayContaining(['modules/**/*', 'layers/**/*']))
