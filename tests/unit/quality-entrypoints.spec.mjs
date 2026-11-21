@@ -161,6 +161,14 @@ describe('quality integration contracts', () => {
       "${{ github.event_name == 'push' && github.event.before || format('origin/{0}', github.base_ref || 'dev') }}",
     )
   })
+  it('never cancels a push run that a later push compares against', () => {
+    const workflow = parse(readFileSync('.github/workflows/test.yml', 'utf8'))
+    expect(workflow.concurrency).toEqual({
+      group:
+        "${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}",
+      'cancel-in-progress': true,
+    })
+  })
   it('includes modules and layers in the typed lint project', () => {
     const project = JSON.parse(readFileSync('tsconfig.eslint.json', 'utf8'))
     expect(project.include).toEqual(expect.arrayContaining(['modules/**/*', 'layers/**/*']))
