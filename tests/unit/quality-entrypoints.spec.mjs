@@ -146,6 +146,7 @@ describe('no new skips', () => {
     run.mockImplementation((command, args, settings) =>
       common.run(command, args[1] === runner ? [...args, '--config', config] : args, settings),
     )
+    options.outputDir = directory
     options.sourceFiles = () => [subject]
     options.ratchet = (name, { [subject]: value = 0, ...rest }) =>
       common.ratchet(name, { ...legacy, ...rest, [baselined]: value })
