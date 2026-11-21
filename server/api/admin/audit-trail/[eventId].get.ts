@@ -6,7 +6,15 @@ import { getAuditTrailEvent } from '../../../utils/audit/auditTrailService'
 export default defineEventHandler(async (event) => {
   const { convex } = await requireAdminSession(event)
 
-  const eventId = getRouterParam(event, 'eventId')?.trim() || ''
+  let eventId: string
+  try {
+    eventId = decodeURIComponent(getRouterParam(event, 'eventId') ?? '').trim()
+  } catch {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'eventId is malformed',
+    })
+  }
   if (!eventId) {
     throw createError({
       statusCode: 400,
