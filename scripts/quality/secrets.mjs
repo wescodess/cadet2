@@ -25,18 +25,28 @@ import { parse } from './gitleaks.parser.mjs'
 import { gitleaks } from './install-gitleaks.mjs'
 
 const baselinePath = 'scripts/quality/baselines/secrets.json'
+const logOptions = '--text --no-textconv --no-ext-diff --no-color --root'
 
 function scan(binary, directory, name, args) {
   const report = join(directory, `${name}.json`)
-  const result = run(binary, [
-    ...args,
-    `--config=${join(directory, 'gitleaks.toml')}`,
-    '--ignore-gitleaks-allow',
-    '--no-banner',
-    '--report-format=json',
-    '--exit-code=42',
-    `--report-path=${report}`,
-  ])
+  const env = {
+    ...process.env,
+    GIT_NO_REPLACE_OBJECTS: '1',
+    GIT_GRAFT_FILE: join(directory, 'grafts'),
+  }
+  const result = run(
+    binary,
+    [
+      ...args,
+      `--config=${join(directory, 'gitleaks.toml')}`,
+      '--ignore-gitleaks-allow',
+      '--no-banner',
+      '--report-format=json',
+      '--exit-code=42',
+      `--report-path=${report}`,
+    ],
+    { env },
+  )
   if (![0, 42].includes(result.status))
     throw new Error(`gitleaks ${name} failed (exit ${result.status})`)
   const findings = parse({ status: result.status, stdout: readFileSync(report, 'utf8') }).stdout
@@ -61,13 +71,17 @@ main(async () => {
     const history = allBranches ? 'all-branches' : 'history'
     found[history] = scan(binary, directory, history, [
       'git',
-      `--log-opts=${allBranches ? '--all' : 'HEAD'}`,
+      `--log-opts=${logOptions} ${allBranches ? '--all' : 'HEAD'}`,
       '.',
     ])
     if (!allBranches) {
       const base = qualityBaseRef()
       const mergeBase = git('merge-base', base, 'HEAD')
-      found.diff = scan(binary, directory, 'diff', ['git', `--log-opts=${mergeBase}..HEAD`, '.'])
+      found.diff = scan(binary, directory, 'diff', [
+        'git',
+        `--log-opts=${logOptions} ${mergeBase}..HEAD`,
+        '.',
+      ])
       for (const file of files()) {
         const destination = join(directory, 'tree', file)
         mkdirSync(dirname(destination), { recursive: true })

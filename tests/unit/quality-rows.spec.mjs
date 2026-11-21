@@ -1,6 +1,7 @@
 // @vitest-environment node
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { execFileSync } from 'node:child_process'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as common from '../../scripts/quality/common.mjs'
 
@@ -766,7 +767,7 @@ describe('secret scan enforcement', () => {
       for (const file of reports) expect(() => readFileSync(file)).toThrow()
       expect(run.mock.calls[0][1].slice(0, 3)).toEqual([
         'git',
-        stage === 'all-branches' ? '--log-opts=--all' : '--log-opts=HEAD',
+        `--log-opts=--text --no-textconv --no-ext-diff --no-color --root ${stage === 'all-branches' ? '--all' : 'HEAD'}`,
         '.',
       ])
       if (stage === 'all-branches') {
@@ -778,7 +779,11 @@ describe('secret scan enforcement', () => {
         expect(run).toHaveBeenCalledTimes(3)
         expect(run.mock.calls[2][1][0]).toBe('dir')
         expect(run.mock.calls[2][1][1]).toMatch(/\/tree$/)
-        expect(run.mock.calls[1][1].slice(0, 3)).toEqual(['git', '--log-opts=base..HEAD', '.'])
+        expect(run.mock.calls[1][1].slice(0, 3)).toEqual([
+          'git',
+          '--log-opts=--text --no-textconv --no-ext-diff --no-color --root base..HEAD',
+          '.',
+        ])
       }
     },
   )
@@ -843,6 +848,121 @@ describe('secret scan enforcement', () => {
       'fixture|fixture|f16d05ec6b29248d2c61adb1e9263f78e4f7bace1b955014a2d17872cfe4064d',
     ])
   })
+})
+
+describe('secret history visibility', () => {
+  const marker = 'history-visibility-marker'
+  const write = (repo, file, content) => {
+    mkdirSync(dirname(join(repo, file)), { recursive: true })
+    writeFileSync(join(repo, file), content)
+  }
+  const commit = (file, content) => (git, repo) => {
+    write(repo, file, content)
+    git('add', '-f', file)
+    git('commit', '-q', '-m', file)
+  }
+  const configure = (entries, attributes) => (git, repo) => {
+    if (attributes) write(repo, '.git/info/attributes', attributes)
+    for (const [key, value] of Object.entries(entries)) git('config', key, value)
+  }
+  const scenarios = [
+    ['committed root -diff attribute', commit('.gitattributes', 'probe/** -diff\n')],
+    ['committed nested binary attribute', commit('probe/.gitattributes', '* binary\n')],
+    ['committed pem binary attribute', commit('.gitattributes', '*.pem binary\n'), 'probe/key.pem'],
+    ['repository attributes', configure({}, '* -diff\n')],
+    [
+      'core.attributesFile',
+      (git, repo) => {
+        write(repo, '.git/hidden-attributes', '* -diff\n')
+        git('config', 'core.attributesFile', join(repo, '.git/hidden-attributes'))
+      },
+    ],
+    ['textconv driver', configure({ 'diff.hide.textconv': 'cat /dev/null #' }, '* diff=hide\n')],
+    ['binary diff driver', configure({ 'diff.hide.binary': 'true' }, '* diff=hide\n')],
+    ['forced colour', configure({ 'color.ui': 'always' })],
+    ['big file threshold', configure({ 'core.bigFileThreshold': '1' })],
+    ['hidden root diff', configure({ 'log.showRoot': 'false' }), 'probe/leak.ts', true],
+    [
+      'replace ref',
+      (git) => {
+        const base = git('rev-parse', 'HEAD~2')
+        const replacement = git('commit-tree', '-p', base, '-m', 'add', `${base}^{tree}`)
+        git('replace', git('rev-parse', 'HEAD~1'), replacement)
+      },
+    ],
+    [
+      'graft',
+      (git, repo) =>
+        write(
+          repo,
+          '.git/info/grafts',
+          `${git('rev-parse', 'HEAD')} ${git('rev-parse', 'HEAD~2')}\n`,
+        ),
+    ],
+  ]
+  it.each(
+    scenarios.flatMap(([name, setup, file = 'probe/leak.ts', root = false]) =>
+      [false, true].map((all) => ({ name, setup, file, root, all })),
+    ),
+  )(
+    'reports a deleted secret hidden by $name (all branches: $all)',
+    async ({ setup, file, root, all }) => {
+      const repo = mkdtempSync(join(directory, 'history-'))
+      const git = (...args) =>
+        execFileSync('git', ['-C', repo, '-c', 'commit.gpgsign=false', ...args], {
+          encoding: 'utf8',
+        }).trim()
+      git('init', '-q')
+      git('config', 'user.email', 'probe@example.invalid')
+      git('config', 'user.name', 'probe')
+      if (!root) git('commit', '-q', '--allow-empty', '-m', 'base')
+      write(repo, file, `export const value = '${marker}'\n`)
+      git('add', file)
+      git('commit', '-q', '-m', 'add')
+      git('rm', '-q', file)
+      git('commit', '-q', '-m', 'delete')
+      const base = git('rev-parse', root ? 'HEAD' : 'HEAD~2')
+      setup(git, repo)
+      vi.stubEnv('QUALITY_BASE_REF', base)
+      options.git = git
+      options.files = () => []
+      options.json = () => []
+      if (all) process.argv = [process.execPath, 'secrets.mjs', '--all-branches']
+      vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
+        gitleaks: async () => 'scanner',
+      }))
+      const [template] = JSON.parse(fixture('gitleaks').valid.stdout)
+      run.mockImplementation((_command, args, runOptions = {}) => {
+        const report = args.find((arg) => arg.startsWith('--report-path=')).slice(14)
+        const logOptions = args.find((arg) => arg.startsWith('--log-opts='))
+        const patch = logOptions
+          ? execFileSync(
+              'git',
+              ['-C', repo, 'log', '-p', '-U0', ...logOptions.slice(11).split(' ')],
+              {
+                encoding: 'utf8',
+                env: runOptions.env,
+              },
+            )
+          : ''
+        const leaked = patch
+          .split('\n')
+          .some((line) => line.startsWith('+') && line.includes(marker))
+        writeFileSync(
+          report,
+          JSON.stringify(leaked ? [{ ...template, Secret: marker, File: file }] : []),
+        )
+        return { ...success, status: leaked ? 42 : 0 }
+      })
+      const stage = all ? 'all-branches' : 'history'
+      await expect(row('secrets')).rejects.toThrow(`secrets ${stage}: 1 new findings`)
+      const found = JSON.parse(
+        readFileSync(join(directory, `secrets${all ? '-all-branches' : ''}.json`), 'utf8'),
+      )
+      expect(found[stage]).toHaveLength(1)
+      if (!all) expect(found.diff).toHaveLength(root ? 0 : 1)
+    },
+  )
 })
 
 describe('runtime discovery command contracts', () => {
