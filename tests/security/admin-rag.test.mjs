@@ -7,6 +7,8 @@ import { after, before, test as registerTest } from 'node:test'
 import { isDeepStrictEqual, promisify } from 'node:util'
 import { once } from 'node:events'
 import { createWriteStream } from 'node:fs'
+import { createServer } from 'node:http'
+import { setInterval, clearInterval } from 'node:timers'
 import { URLSearchParams } from 'node:url'
 import { PGlite } from '@electric-sql/pglite'
 import { ConvexHttpClient } from 'convex/browser'
@@ -25,6 +27,7 @@ if (
     'audit-consistency',
     'design',
     'navigation',
+    'network',
   ].includes(group)
 )
   throw new Error('Invalid mandatory boundary group')
@@ -2541,4 +2544,215 @@ test('an unavailable authority backend cannot fall back to allowlists or deploym
   await startRuntime()
   assert.equal((await request('/api/admin/access', admin)).status, 503)
   assert.equal((await request('/api/admin/rag/phase0-readiness', admin)).status, 503)
+})
+
+registrationGroup = 'network'
+const adminDeadlineMs = 10_000
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function stalledUpstream({ functions = [], authPath }, verify) {
+  const holds = []
+  const proxy = createServer(async (req, res) => {
+    try {
+      const chunks = []
+      for await (const chunk of req) chunks.push(chunk)
+      const body = Buffer.concat(chunks)
+      const path = body.length ? JSON.parse(body.toString()).path : undefined
+      if (functions.includes(path) || (authPath && req.url === authPath)) {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.write('{"status":')
+        const hold = { path: path ?? req.url, closed: false, ticks: 0 }
+        holds.push(hold)
+        const timer = setInterval(() => {
+          hold.ticks++
+          res.write(' ')
+        }, 50)
+        res.once('close', () => {
+          clearInterval(timer)
+          hold.closed = true
+        })
+        return
+      }
+      const upstream = await fetch(
+        (req.url.startsWith('/api/auth/') ? origin : backend) + req.url,
+        {
+          method: req.method,
+          headers: {
+            'content-type': 'application/json',
+            ...(req.headers.authorization ? { authorization: req.headers.authorization } : {}),
+            ...(req.headers.cookie ? { cookie: req.headers.cookie } : {}),
+          },
+          ...(body.length ? { body } : {}),
+          redirect: 'manual',
+        },
+      )
+      res.writeHead(upstream.status, { 'content-type': 'application/json' })
+      res.end(Buffer.from(await upstream.arrayBuffer()))
+    } catch (error) {
+      res.writeHead(502)
+      res.end(String(error))
+    }
+  })
+  await new Promise((resolve) => proxy.listen(0, '127.0.0.1', resolve))
+  const originalUrl = runtimeEnv.CONVEX_URL
+  const originalSite = runtimeEnv.NUXT_PUBLIC_SITE_URL
+  try {
+    await stopRuntime()
+    runtimeEnv.CONVEX_URL = `http://127.0.0.1:${proxy.address().port}`
+    if (authPath) runtimeEnv.NUXT_PUBLIC_SITE_URL = runtimeEnv.CONVEX_URL
+    await startRuntime()
+    await verify(holds)
+  } finally {
+    proxy.closeAllConnections()
+    await new Promise((resolve) => proxy.close(resolve))
+    await stopRuntime()
+    runtimeEnv.CONVEX_URL = originalUrl
+    runtimeEnv.NUXT_PUBLIC_SITE_URL = originalSite
+    await startRuntime()
+  }
+}
+
+async function deadlineResponse(path, method = 'GET', body) {
+  const start = Date.now()
+  const response = await fetch(origin + path, {
+    method,
+    headers: {
+      cookie: admin.cookie,
+      origin,
+      'content-type': 'application/json',
+      'Idempotency-Key': randomBytes(16).toString('hex'),
+    },
+    ...(body
+      ? {
+          body: JSON.stringify(
+            Object.fromEntries(Object.entries(body).filter(([key]) => key !== 'idempotencyKey')),
+          ),
+        }
+      : {}),
+    signal: globalThis.AbortSignal.timeout(adminDeadlineMs + 5000),
+  })
+  const responseBody = await response.text()
+  const elapsedMs = Date.now() - start
+  assert.equal(response.status, 503, `${method} ${path}: ${responseBody}`)
+  assert(
+    elapsedMs >= adminDeadlineMs - 500 && elapsedMs < adminDeadlineMs + 3000,
+    `${path}: ${elapsedMs}ms`,
+  )
+  return { path, method, elapsedMs, status: response.status }
+}
+
+async function assertUpstreamsClosed(holds, count) {
+  const deadline = Date.now() + 1000
+  while (holds.some((hold) => !hold.closed) && Date.now() < deadline) await wait(20)
+  assert.equal(holds.length, count)
+  assert(
+    holds.every((hold) => hold.closed),
+    'all stalled upstream reads must be cancelled',
+  )
+}
+
+test('admin audit, source query and mutation streams return 503 within one deadline', async () => {
+  await stalledUpstream(
+    {
+      functions: [
+        'ragSourceAudit:listEvents',
+        'ragSourceAudit:getSummary',
+        'ragSourceAudit:getEvent',
+        'ragSources:listSources',
+        'ragSources:createSourceSubmission',
+      ],
+    },
+    async (holds) => {
+      const timings = []
+      for (let i = 0; i < 10; i++) {
+        const start = Date.now()
+        assert.equal(
+          (await request('/api/admin/access', admin)).status,
+          200,
+          'real authority positive control',
+        )
+        timings.push(Date.now() - start)
+      }
+      const responses = await Promise.all([
+        deadlineResponse('/api/admin/audit-trail?pageSize=1'),
+        deadlineResponse('/api/admin/audit-trail/summary'),
+        deadlineResponse('/api/admin/audit-trail/rag-approval:synthetic'),
+        deadlineResponse('/api/admin/rag/sources'),
+        deadlineResponse('/api/admin/rag/sources', 'POST', websiteSubmission),
+      ])
+      await assertUpstreamsClosed(holds, 5)
+      assert(
+        holds.every((hold) => hold.ticks >= 100),
+        'periodic bytes must not renew the application deadline',
+      )
+      await recordAtomicObservation('network-deadlines', {
+        authorityTimingsMs: timings,
+        responses,
+        holds,
+      })
+    },
+  )
+})
+
+test('stalled real authority reads return the designed 503 within the deadline', async () => {
+  await stalledUpstream({ functions: ['ragSources:getAdminStatus'] }, async (holds) => {
+    const response = await deadlineResponse('/api/admin/access')
+    await assertUpstreamsClosed(holds, 1)
+    await recordAtomicObservation('network-authority-deadline', { response, holds })
+  })
+})
+
+test('session and token HTTP reads share the finite admin deadline', async () => {
+  const observations = []
+  for (const authPath of ['/api/auth/get-session', '/api/auth/convex/token']) {
+    await stalledUpstream({ authPath }, async (holds) => {
+      const response = await deadlineResponse('/api/admin/access')
+      await assertUpstreamsClosed(holds, 1)
+      observations.push({ authPath, response, holds })
+    })
+  }
+  await recordAtomicObservation('network-auth-deadlines', observations)
+})
+
+test('disconnect cancels actual audit, authority, session and token upstream reads', async () => {
+  const observations = []
+  for (const config of [
+    { functions: ['ragSourceAudit:listEvents'], path: '/api/admin/audit-trail?pageSize=1' },
+    { functions: ['ragSources:getAdminStatus'], path: '/api/admin/access' },
+    { authPath: '/api/auth/get-session', path: '/api/admin/access' },
+    { authPath: '/api/auth/convex/token', path: '/api/admin/access' },
+  ]) {
+    await stalledUpstream(config, async (holds) => {
+      const controller = new globalThis.AbortController()
+      let settled = false
+      const pending = fetch(origin + config.path, {
+        headers: { cookie: admin.cookie, origin },
+        signal: controller.signal,
+      }).then(
+        (response) => {
+          settled = true
+          return { response }
+        },
+        (error) => {
+          settled = true
+          return { error }
+        },
+      )
+      try {
+        const deadline = Date.now() + 2000
+        while (holds.length === 0 && !settled && Date.now() < deadline) await wait(10)
+        assert.equal(settled, false, 'stalled response must not complete before disconnect')
+        assert.equal(holds.length, 1)
+        controller.abort()
+        const outcome = await pending
+        assert.equal(outcome.error?.name, 'AbortError')
+        await assertUpstreamsClosed(holds, 1)
+        observations.push({ ...config, holds })
+      } finally {
+        controller.abort()
+        await pending
+      }
+    })
+  }
+  await recordAtomicObservation('network-client-aborts', observations)
 })

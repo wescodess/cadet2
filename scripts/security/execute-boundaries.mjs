@@ -32,6 +32,7 @@ try {
     ['audit-consistency', 2],
     ['design', 10],
     ['navigation', 2],
+    ['network', 4],
   ]) {
     const file = evidence
       ? resolve(evidence, `admin-boundaries-${name}.json`)
@@ -53,6 +54,16 @@ try {
     children.push({ name, file, expectedTests })
     readBoundaryResult(file, expectedTests)
   }
+  const launcherFile = evidence
+    ? resolve(evidence, 'admin-boundaries-launcher.json')
+    : `${resultFile}.launcher`
+  captureBoundaryResult(
+    resolve(import.meta.dirname, '../../tests/security/launcher.test.mjs'),
+    launcherFile,
+    'inherit',
+  )
+  children.push({ name: 'launcher', file: launcherFile, expectedTests: 2 })
+  readBoundaryResult(launcherFile, 2)
   combineBoundaryResults(children, resultFile)
   readBoundaryResult(resultFile)
 } catch (error) {
