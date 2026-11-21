@@ -102,13 +102,22 @@ export const listEvents = query({
     await requireRagAdmin(ctx)
     await requireSourceAuditProjection(ctx)
     const filters = args.filters
-    if (filters.entityType && filters.entityType !== 'EVIDENCE_SOURCE')
+    if (
+      (filters.entityType && filters.entityType !== 'EVIDENCE_SOURCE') ||
+      (filters.actionType && !filters.actionType.startsWith('EVIDENCE_SOURCE_'))
+    )
       return { items: [], totalCount: 0, upper: args.upper ?? '' }
     const limit = Math.max(1, Math.min(101, Math.floor(args.limit)))
     const range = eventRange(ctx, filters, args.upper, args.before)
+    const indexed = filters.entityId ? 'entityId' : filters.actorId ? 'actorId' : 'actionType'
+    const postFiltered =
+      Boolean(filters.search) ||
+      (['entityId', 'actorId', 'actionType'] as const).some(
+        (key) => filters[key] && key !== indexed,
+      )
     const page = await range.paginate({
       cursor: null,
-      numItems: filters.search ? 512 : limit,
+      numItems: postFiltered ? 512 : limit,
       maximumRowsRead: 512,
       maximumBytesRead: 1048576,
     })
