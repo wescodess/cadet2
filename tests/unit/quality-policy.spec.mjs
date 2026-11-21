@@ -1,10 +1,10 @@
 // @vitest-environment node
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { outputDir, ratchet, run } from '../../scripts/quality/common.mjs'
-import { scanFile } from '../../scripts/quality/test-policy-source.mjs'
-import { vitestCounts, vitestFindings } from '../../scripts/quality/test-results.mjs'
+import { covers, scanFile } from '../../scripts/quality/test-policy-source.mjs'
+import { vitestFindings, vitestSkips } from '../../scripts/quality/test-results.mjs'
 import { parse } from '../../scripts/quality/vitest-results.parser.mjs'
 
 const cases = JSON.parse(
@@ -13,7 +13,7 @@ const cases = JSON.parse(
 const cli = resolve('node_modules/vitest/vitest.mjs')
 
 function fixtureRun(source) {
-  const directory = mkdtempSync(resolve(outputDir, 'policy-fixture-'))
+  const directory = realpathSync(mkdtempSync(resolve(outputDir, 'policy-fixture-')))
   const file = resolve(directory, 'fixture.spec.mjs')
   const config = resolve(directory, 'vitest.config.mjs')
   const report = resolve(directory, 'results.json')
@@ -26,6 +26,7 @@ function fixtureRun(source) {
     config,
     '--maxWorkers=1',
     '--allowOnly=false',
+    '--includeTaskLocation',
     '--reporter=json',
     `--outputFile=${report}`,
   ])
@@ -36,8 +37,9 @@ function fixtureRun(source) {
       stdout: readFileSync(report, 'utf8'),
     }).stdout
     const tickets = {}
-    scanFile(file, tickets)
-    return { parsed, tickets }
+    const ticketed = {}
+    scanFile(file, tickets, ticketed)
+    return { parsed, tickets, spans: ticketed[file] }
   } finally {
     rmSync(directory, { recursive: true, force: true })
   }
@@ -51,9 +53,17 @@ describe('runtime test policy', () => {
     for (const entry of skips) {
       expect(tests.find((test) => test.title === entry.name)?.status).toMatch(/skipped|todo/)
     }
-    expect(Object.values(vitestCounts(parsed))).toEqual([skips.length])
+    const runtime = vitestSkips(parsed)
+    expect(Object.values(runtime).map((locations) => locations.length)).toEqual([skips.length])
     expect(Object.values(tickets)).toEqual([skips.length])
-    expect(() => ratchet('test-policy', vitestCounts(parsed))).toThrow(/new files must be clean/)
+    expect(() =>
+      ratchet(
+        'test-policy',
+        Object.fromEntries(
+          Object.entries(runtime).map(([file, locations]) => [file, locations.length]),
+        ),
+      ),
+    ).toThrow(/new files must be clean/)
   }, 30_000)
 
   it.each(cases.filter((entry) => entry.focus))(
@@ -72,16 +82,31 @@ describe('runtime test policy', () => {
 
   it('requires a ticket for each source skip even when its condition does not skip at runtime', () => {
     const { parsed, tickets } = fixtureRun("test.skipIf(false)('conditional', () => {})")
-    expect(vitestCounts(parsed)).toEqual({})
+    expect(vitestSkips(parsed)).toEqual({})
     expect(Object.values(tickets)).toEqual([1])
   }, 30_000)
 
   it('accepts ticket references without removing skips from runtime accounting', () => {
-    const { parsed, tickets } = fixtureRun(
+    const { parsed, tickets, spans } = fixtureRun(
       "test.skip('ticketed #23', () => {})\ntest('dynamic #23', (ctx) => { ctx.skip() })",
     )
     expect(tickets).toEqual({})
-    expect(Object.values(vitestCounts(parsed))).toEqual([2])
+    const [locations] = Object.values(vitestSkips(parsed))
+    expect(locations).toHaveLength(2)
+    expect(locations.every((location) => covers(spans, location))).toBe(true)
+  }, 30_000)
+
+  it('credits only tests a ticketed skip actually skips at runtime', () => {
+    const { parsed, spans } = fixtureRun(
+      [
+        "describe.skipIf(false)('active #27', () => { test('a', () => {}); test('b', () => {}); test('c', () => {}) })",
+        "describe.skip('blocked #23', () => { test('d', () => {}); test.each([1, 2])('e %i', () => {}) })",
+        "for (let i = 0; i < 6; i++) test.skip('unticketed ' + i, () => {})",
+      ].join('\n'),
+    )
+    const [locations] = Object.values(vitestSkips(parsed))
+    expect(locations).toHaveLength(9)
+    expect(locations.filter((location) => !covers(spans, location))).toHaveLength(6)
   }, 30_000)
 })
 

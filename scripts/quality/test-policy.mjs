@@ -1,6 +1,6 @@
 import { main, ratchet, sourceFiles } from './common.mjs'
 import { runPlaywright, runVitest } from './test-results.mjs'
-import { scanFile } from './test-policy-source.mjs'
+import { covers, scanFile } from './test-policy-source.mjs'
 
 main(() => {
   const counts = {}
@@ -16,8 +16,11 @@ main(() => {
     (file) => file.startsWith('tests/') || /\.(?:spec|test)\.[cm]?[jt]s$/.test(file),
   ))
     scanFile(file, counts, ticketed)
-  for (const [file, total] of Object.entries(runtime)) {
-    const unticketed = Math.max(counts[file] ?? 0, total - (ticketed[file] ?? 0))
+  for (const [file, skips] of Object.entries(runtime)) {
+    const unticketed = Math.max(
+      counts[file] ?? 0,
+      skips.filter((location) => !covers(ticketed[file], location)).length,
+    )
     if (unticketed > 0) counts[file] = unticketed
   }
   ratchet('test-policy', counts)

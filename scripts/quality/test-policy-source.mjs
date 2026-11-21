@@ -141,6 +141,24 @@ function inspectSkip(node, roots, source, file, counts, credited) {
   else for (const test of skippedTests(node, roots, source)) credited.add(test)
 }
 
+function span(node, source) {
+  const at = (position) => {
+    const { line, character } = source.getLineAndCharacterOfPosition(position)
+    return [line + 1, character + 1]
+  }
+  return [at(node.getStart(source)), at(node.arguments.pos)]
+}
+
+function compare(left, right) {
+  return left[0] - right[0] || left[1] - right[1]
+}
+
+export function covers(spans = [], location) {
+  if (!location) return false
+  const at = [location.line, location.column]
+  return spans.some(([from, to]) => compare(from, at) <= 0 && compare(at, to) < 0)
+}
+
 export function scanFile(file, counts, ticketed = {}) {
   const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
   const roots = testRoots(source)
@@ -150,5 +168,6 @@ export function scanFile(file, counts, ticketed = {}) {
     ts.forEachChild(node, visit)
   }
   visit(source)
-  if (credited.size) ticketed[file] = (ticketed[file] ?? 0) + credited.size
+  if (credited.size)
+    ticketed[file] = [...(ticketed[file] ?? []), ...[...credited].map((test) => span(test, source))]
 }
