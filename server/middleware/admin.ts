@@ -1,4 +1,11 @@
-import { defineEventHandler, getHeader, getRequestURL, isError, sendRedirect } from 'h3'
+import {
+  createError,
+  defineEventHandler,
+  getHeader,
+  getRequestURL,
+  isError,
+  sendRedirect,
+} from 'h3'
 import type { H3Event } from 'h3'
 import { requireAdminSession } from '../utils/auth/requireAdminSession'
 
@@ -13,9 +20,16 @@ function isPageDocumentRequest(event: H3Event, path: string) {
 }
 
 export default defineEventHandler(async (event) => {
-  const path = decodeURIComponent(getRequestURL(event).pathname)
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(getRequestURL(event).pathname)
+  } catch {
+    throw createError({ statusCode: 400, statusMessage: 'Bad Request' })
+  }
+  const path = decoded
     .replaceAll('\\', '/')
     .replace(/\/{2,}/g, '/')
+    .toLowerCase()
   if (!/^\/(admin|ai-search)(\/|$)/.test(path)) return
   try {
     await requireAdminSession(event)

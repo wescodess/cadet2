@@ -780,7 +780,12 @@ test('denied page documents redirect while payloads and admin APIs keep their de
     [null, 401, '/auth'],
     [ordinary, 403, '/'],
   ]) {
-    for (const path of [...adminPages, '/ai-search']) {
+    const pages = [...adminPages, '/ai-search']
+    const caseVariants = pages.flatMap((path) => [
+      path.toUpperCase(),
+      path.replace(/^\/(\w)/, (_, first) => `/${first.toUpperCase()}`),
+    ])
+    for (const path of [...pages, ...caseVariants]) {
       const page = await request(path, actor, 'GET', undefined, { accept: 'text/html' })
       assert.equal(page.status, 302, path)
       assert.equal(page.headers.get('location'), location, path)
@@ -791,6 +796,10 @@ test('denied page documents redirect while payloads and admin APIs keep their de
       assert.equal(payload.status, status, path)
     }
     assert.equal((await request('/api/admin/access', actor)).status, status)
+  }
+  for (const path of ['/admin/%', '/admin/%E0%A4%A', '/%']) {
+    const page = await request(path, null, 'GET', undefined, { accept: 'text/html' })
+    assert.equal(page.status, 400, path)
   }
 })
 
