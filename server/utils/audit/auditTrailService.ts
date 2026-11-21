@@ -36,6 +36,7 @@ const cursorSchema = z
     convex: positionSchema.nullable(),
     before: positionSchema,
     totalCount: z.number().int().nonnegative(),
+    totalCountCapped: z.boolean().default(false),
   })
   .strict()
 
@@ -97,27 +98,38 @@ export async function listAuditTrailEvents(
       ? { items: [], totalCount: 0, upper: undefined }
       : listStoredAuditEvents(filters, { ...common, upper: cursor?.sql ?? undefined }),
     cursor && !cursor.convex
-      ? { items: [], totalCount: 0, upper: undefined }
+      ? {
+          items: [],
+          totalCount: 0,
+          upper: undefined,
+          scanBoundary: undefined,
+          totalCountCapped: false,
+        }
       : listSourceAuditEvents(convex, filters, { ...common, upper: cursor?.convex ?? undefined }),
   ])
-  const merged = [...sql.items, ...source.items].sort(compare)
+  const boundary = source.scanBoundary
+  const merged = [...sql.items, ...source.items]
+    .filter((row) => !boundary || compare(row, boundary) <= 0)
+    .sort(compare)
   const items = merged.slice(0, limit)
   const totalCount = cursor?.totalCount ?? sql.totalCount + source.totalCount
+  const totalCountCapped = cursor?.totalCountCapped ?? source.totalCountCapped
   const last = items.at(-1)
-  const nextCursor =
-    merged.length > limit && last
-      ? Buffer.from(
-          JSON.stringify({
-            v: 1,
-            filters: fingerprint,
-            sql: cursor?.sql ?? sql.upper ?? null,
-            convex: cursor?.convex ?? source.upper ?? null,
-            before: { timestamp: last.timestamp, eventId: last.eventId },
-            totalCount,
-          }),
-        ).toString('base64url')
-      : null
-  return { ok: true, items: items.map(toListItem), totalCount, nextCursor }
+  const before = merged.length > limit && last ? last : boundary
+  const nextCursor = before
+    ? Buffer.from(
+        JSON.stringify({
+          v: 1,
+          filters: fingerprint,
+          sql: cursor?.sql ?? sql.upper ?? null,
+          convex: cursor?.convex ?? source.upper ?? null,
+          before: { timestamp: before.timestamp, eventId: before.eventId },
+          totalCount,
+          totalCountCapped,
+        }),
+      ).toString('base64url')
+    : null
+  return { ok: true, items: items.map(toListItem), totalCount, totalCountCapped, nextCursor }
 }
 
 export async function getAuditTrailEvent(

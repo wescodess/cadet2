@@ -20,11 +20,7 @@ export type AuditActionType =
   | 'GOVERNANCE_SETTING_CHANGED'
 
 export type AuditEntityType =
-  | 'PATHWAY'
-  | 'PATHWAY_RULE'
-  | 'EVIDENCE_SOURCE'
-  | 'RECOMMENDATION_RUN'
-  | 'GOVERNANCE_SETTING'
+  'PATHWAY' | 'PATHWAY_RULE' | 'EVIDENCE_SOURCE' | 'RECOMMENDATION_RUN' | 'GOVERNANCE_SETTING'
 
 export type AuditTrailEventSummary = {
   eventId: string
@@ -61,6 +57,7 @@ export type AuditTrailListResponse = {
   ok: true
   items: AuditTrailEventSummary[]
   totalCount: number
+  totalCountCapped: boolean
   nextCursor: string | null
 }
 

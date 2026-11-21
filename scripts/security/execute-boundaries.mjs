@@ -30,7 +30,8 @@ try {
     ['source-rollback', 6],
     ['audit-success', 13],
     ['audit-consistency', 2],
-    ['design', 10],
+    ['design', 11],
+    ['audit-search', 2],
     ['navigation', 2],
     ['network', 4],
   ]) {
@@ -62,8 +63,8 @@ try {
     launcherFile,
     'inherit',
   )
-  children.push({ name: 'launcher', file: launcherFile, expectedTests: 2 })
-  readBoundaryResult(launcherFile, 2)
+  children.push({ name: 'launcher', file: launcherFile, expectedTests: 5 })
+  readBoundaryResult(launcherFile, 5)
   combineBoundaryResults(children, resultFile)
   readBoundaryResult(resultFile)
 } catch (error) {

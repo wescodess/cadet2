@@ -26,6 +26,7 @@ if (
     'audit-success',
     'audit-consistency',
     'design',
+    'audit-search',
     'navigation',
     'network',
   ].includes(group)
@@ -2151,6 +2152,11 @@ test('#166 source caps cover create and update at HTTP and direct Convex seams',
   })
   const changes = [
     { name: 'n'.repeat(256) },
+    { schedule: { frequency: 'interval', intervalHours: 169 } },
+    { schedule: { frequency: 'interval', intervalHours: 0 } },
+    { schedule: { frequency: 'interval', intervalHours: 1.5 } },
+    { tags: ['t'.repeat(121)] },
+    { linkedPathwayIds: ['p'.repeat(121)] },
     { description: 'd'.repeat(600000) },
     {
       websiteConfig: {
@@ -2170,11 +2176,11 @@ test('#166 source caps cover create and update at HTTP and direct Convex seams',
         ...websiteSubmission,
         ...change,
       }),
-      /size|limit|characters/i,
+      /size|limit|characters|intervalHours/i,
     )
     await assert.rejects(
       admin.client.mutation(anyApi.ragSources.updateSourceConfig, { sourceId, ...change }),
-      /size|limit|characters/i,
+      /size|limit|characters|intervalHours/i,
     )
     assert.equal(
       (await request('/api/admin/rag/sources', admin, 'POST', { ...websiteSubmission, ...change }))
@@ -2191,12 +2197,63 @@ test('#166 source caps cover create and update at HTTP and direct Convex seams',
     sourceId,
     name: 'n'.repeat(255),
     description: 'd'.repeat(4000),
+    schedule: { frequency: 'interval', intervalHours: 168 },
+    tags: ['t'.repeat(120)],
+    linkedPathwayIds: ['p'.repeat(120)],
   })
   assert.equal(valid.ok, true)
   const events = await auditFor(sourceId)
   const detail = await successful(`/api/admin/audit-trail/${events.items[0].eventId}`)
   assert.equal(detail.event.truncated, true)
   assert.equal(detail.event.changeContext.after.description.truncated, true)
+})
+
+test('source schedule approval rejects invalid input and legacy bounds cannot break HTTP reads', async () => {
+  const { sourceId } = await successful('/api/admin/rag/sources', 'POST', {
+    ...websiteSubmission,
+    name: 'Legacy bounds template',
+  })
+  for (const intervalHours of [0, 169, 1.5]) {
+    await assert.rejects(
+      admin.client.mutation(anyApi.ragSources.approveSource, {
+        sourceId,
+        schedule: { frequency: 'interval', intervalHours },
+      }),
+      /intervalHours/,
+    )
+  }
+  const template = (await sourceSnapshot(sourceId)).source
+  await fixture('sources', [
+    {
+      ...Object.fromEntries(
+        Object.entries(template).filter(([key]) => !['_id', '_creationTime'].includes(key)),
+      ),
+      name: 'Legacy invalid bounds',
+      schedule: { frequency: 'interval', intervalHours: 500 },
+      tags: ['valid-tag', 't'.repeat(121)],
+      linkedPathwayIds: ['valid-pathway', 'p'.repeat(121)],
+    },
+  ])
+  const raw = (
+    await admin.client.query(anyApi.ragSources.listSources, { includeAllForAdmin: true })
+  ).items.find((row) => row.name === 'Legacy invalid bounds')
+  const list = await successful('/api/admin/rag/sources')
+  const projected = list.items.find((row) => row.id === raw._id)
+  const detail = await successful(`/api/admin/rag/sources/${raw._id}`)
+  assert.deepEqual(
+    Object.fromEntries(Object.keys(detail.source).map((key) => [key, projected[key]])),
+    detail.source,
+  )
+  assert.deepEqual(projected.schedule, { frequency: 'interval', intervalHours: 168 })
+  assert.deepEqual(projected.tags, ['valid-tag'])
+  assert.deepEqual(projected.linkedPathwayIds, ['valid-pathway'])
+  assert.equal((await sourceSnapshot(raw._id)).source.schedule.intervalHours, 500)
+  await successful(`/api/admin/rag/sources/${raw._id}`, 'PATCH', { name: 'Legacy bounds edited' })
+  await admin.client.mutation(anyApi.ragSources.approveSource, {
+    sourceId,
+    schedule: { frequency: 'interval', intervalHours: 168 },
+  })
+  await recordAtomicObservation('sb1-source-bounds', { projected, detail })
 })
 
 test('#166 source audit failure is a designed error and SQL detail stays in its own store', async () => {
@@ -2756,3 +2813,110 @@ test('disconnect cancels actual audit, authority, session and token upstream rea
   }
   await recordAtomicObservation('network-client-aborts', observations)
 })
+
+registrationGroup = 'audit-search'
+
+for (const count of [513, 2101]) {
+  test(`bounded search resumes through ${count} source events and interleaved SQL matches`, async () => {
+    const marker = `sb1-search-${count}`
+    const base = Date.now() - 60000
+    const targets = new Set([0, Math.floor(count / 2), count - 512, count - 1])
+    const rows = Array.from({ length: count }, (_, index) => {
+      const eventId = `rag-approval:${marker}-${String(index).padStart(4, '0')}`
+      const timestamp = base + index
+      return {
+        eventId,
+        timestamp,
+        orderKey: `${String(timestamp).padStart(16, '0')}:${eventId}`,
+        actorId: admin.userId,
+        actorEmail: admin.email,
+        entityType: 'EVIDENCE_SOURCE',
+        actionType: 'EVIDENCE_SOURCE_UPDATED',
+        entityId: marker,
+        entityLabel: `${marker} ${targets.has(index) ? 'target' : 'filler'} ${index}`,
+        changeSummary: 'Synthetic search boundary fixture',
+      }
+    })
+    rows[2].actorId = ordinary.userId
+    rows[2].entityLabel = `${marker} target foreign actor`
+    rows[3].timestamp = base - 1
+    rows[3].orderKey = `${String(base - 1).padStart(16, '0')}:${rows[3].eventId}`
+    rows[3].entityLabel = `${marker} target outside date range`
+    await fixture('rag_audit_events', rows)
+    const sqlRows = [100, count - 2].map((index) => ({
+      eventId: `audit-${marker}-${index}`,
+      timestamp: base + index,
+      entityLabel: `${marker} target SQL ${index}`,
+    }))
+    await sqlFixture(async (db) => {
+      for (const row of sqlRows)
+        await db.query(
+          `INSERT INTO governance_audit_log (event_id, actor_id, action_type, entity_type, entity_id, entity_label, timestamp_ms) VALUES ($1, $2, 'PATHWAY_UPDATED', 'PATHWAY', $3, $4, $5)`,
+          [row.eventId, admin.userId, marker, row.entityLabel, row.timestamp],
+        )
+    })
+    const observations = []
+    async function traverse(filters) {
+      const events = []
+      const cursors = new Set()
+      let cursor
+      let first
+      do {
+        const query = new URLSearchParams({
+          pageSize: '1',
+          ...filters,
+          ...(cursor ? { cursor } : {}),
+        })
+        const page = await successful(`/api/admin/audit-trail?${query}`)
+        first ??= page
+        assert.equal(page.totalCount, first.totalCount)
+        assert.equal(page.totalCountCapped, first.totalCountCapped)
+        events.push(...page.items)
+        cursor = page.nextCursor
+        if (cursor) {
+          assert.ok(!cursors.has(cursor), 'each scan must advance even without a match')
+          cursors.add(cursor)
+        }
+        assert.ok(cursors.size < 30)
+      } while (cursor)
+      const ids = events.map((row) => row.eventId)
+      assert.equal(new Set(ids).size, ids.length)
+      const sorted = [...events].sort(
+        (a, b) =>
+          Date.parse(b.timestamp) - Date.parse(a.timestamp) || (a.eventId < b.eventId ? 1 : -1),
+      )
+      assert.deepEqual(events, sorted)
+      observations.push({ filters, pages: cursors.size + 1, first, ids })
+      return ids
+    }
+    for (const index of [count - 1, 0, Math.floor(count / 2)]) {
+      assert.deepEqual(await traverse({ search: rows[index].entityLabel }), [rows[index].eventId])
+    }
+    const expected = [...rows.filter((row) => targets.has(row.timestamp - base)), ...sqlRows]
+      .sort((a, b) => b.timestamp - a.timestamp || (a.eventId < b.eventId ? 1 : -1))
+      .map((row) => row.eventId)
+    assert.deepEqual(
+      await traverse({
+        search: `${marker} target`,
+        actorId: admin.userId,
+        dateFrom: new Date(base).toISOString(),
+        dateTo: new Date(base + count - 1).toISOString(),
+      }),
+      expected,
+    )
+    assert.deepEqual(await traverse({ search: `${marker} absent`, actorId: admin.userId }), [])
+    const broad = await successful(
+      `/api/admin/audit-trail?${new URLSearchParams({
+        search: marker,
+        entityType: 'EVIDENCE_SOURCE',
+        entityId: marker,
+        actorId: admin.userId,
+        dateFrom: new Date(base).toISOString(),
+        dateTo: new Date(base + count - 1).toISOString(),
+      })}`,
+    )
+    assert.equal(broad.totalCount, Math.min(count - 2, 2000))
+    assert.equal(broad.totalCountCapped, count > 2000)
+    await recordAtomicObservation(`sb1-search-${count}`, { observations, broad })
+  })
+}

@@ -81,6 +81,9 @@ export function validateSourceSizes(input: {
   description?: string | null
   websiteConfig?: unknown
   youtubeConfig?: unknown
+  schedule?: { intervalHours?: number }
+  tags?: string[]
+  linkedPathwayIds?: string[]
 }) {
   if (
     input.name !== undefined &&
@@ -89,6 +92,19 @@ export function validateSourceSizes(input: {
     throw new Error('Source name must contain 1 to 255 characters')
   if (input.description && input.description.length > sourceSizeLimits.description)
     throw new Error('Source description exceeds the 4000 character limit')
+  const interval = input.schedule?.intervalHours
+  if (interval !== undefined && (!Number.isInteger(interval) || interval < 1 || interval > 168))
+    throw new Error('Source intervalHours must be an integer from 1 to 168')
+  for (const [field, values, limit] of [
+    ['tags', input.tags, 24],
+    ['linkedPathwayIds', input.linkedPathwayIds, 16],
+  ] as const) {
+    if (
+      values &&
+      (values.length > limit || values.some((value) => !value.trim() || value.trim().length > 120))
+    )
+      throw new Error(`Source ${field} exceeds its entry or 120 character limit`)
+  }
   if (
     [input.websiteConfig, input.youtubeConfig].some(
       (value) => value !== undefined && jsonBytes(value) > sourceSizeLimits.configBytes,

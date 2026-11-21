@@ -314,7 +314,24 @@ export function deriveEvidenceLifecycleStatus(source: RawEvidenceSource) {
   return 'rejected'
 }
 
+function projectSourceEntries(values: string[] = []) {
+  return values
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0 && value.length <= 120)
+}
+
 export function toEvidenceSourceRecord(source: RawEvidenceSource) {
+  const interval = source.schedule.intervalHours
+  const schedule = {
+    frequency: source.schedule.frequency,
+    ...(interval === undefined
+      ? {}
+      : {
+          intervalHours: Number.isFinite(interval)
+            ? Math.max(1, Math.min(168, Math.floor(interval)))
+            : 24,
+        }),
+  }
   return evidenceSourceRecordSchema.parse({
     id: source._id,
     createdAt: source._creationTime,
@@ -328,8 +345,8 @@ export function toEvidenceSourceRecord(source: RawEvidenceSource) {
         ? source.description.trim()
         : null,
     tenantId: source.tenantId,
-    tags: source.tags || [],
-    linkedPathwayIds: source.linkedPathwayIds || [],
+    tags: projectSourceEntries(source.tags),
+    linkedPathwayIds: projectSourceEntries(source.linkedPathwayIds),
     trustScore:
       typeof source.trustScore === 'number' && Number.isFinite(source.trustScore)
         ? Math.max(0, Math.min(100, Math.round(source.trustScore)))
@@ -340,7 +357,7 @@ export function toEvidenceSourceRecord(source: RawEvidenceSource) {
     rejectedAt: source.rejectedAt ?? null,
     rejectionReason: source.rejectionReason || null,
     enabled: source.enabled,
-    schedule: source.schedule,
+    schedule,
     crawlConfig: source.crawlConfig || {},
     lastRunAt: source.lastRunAt ?? null,
     lastSuccessAt: source.lastSuccessAt ?? null,

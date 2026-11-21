@@ -423,6 +423,7 @@ export const approveSource = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await requireRagAdmin(ctx)
+    validateSourceSizes({ schedule: args.schedule })
     if ((args.note?.length ?? 0) > 500)
       throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)

@@ -8,6 +8,7 @@ import { inspectAdminSources, inspectBuiltAdminRoutes } from './admin-surfaces.m
 import { readBoundaryResult } from './boundary-results.mjs'
 import { recoverStartupLocks } from './startup-lock.mjs'
 import { stopOwnedProcessGroup } from './owned-process.mjs'
+import { cleanupBoundaryRun } from './cleanup.mjs'
 
 async function availablePort() {
   const server = createServer()
@@ -32,7 +33,8 @@ const handlers = Object.fromEntries(
       if (controller.signal.aborted) return
       process.exitCode = code
       controller.abort(new Error(`Boundary launcher interrupted: ${signal}`))
-      stopping = stopOwnedProcessGroup(child)
+      stopping = stopOwnedProcessGroup(child, { owned: true })
+      stopping.catch(() => {})
     },
   ]),
 )
@@ -131,23 +133,23 @@ try {
   if (code !== 0) throw new Error(`Convex boundary launcher exited ${code}`)
   await cp(resultFile, join(evidence, 'admin-boundary-results.json'))
   readBoundaryResult(resultFile)
-  console.log('Admin boundary result: PASS (76 passed; zero failures, skips or cancellations)')
+  console.log('Admin boundary result: PASS (82 passed; zero failures, skips or cancellations)')
 } catch (error) {
   console.error(error)
   process.exitCode ||= 1
 } finally {
-  await (stopping ?? stopOwnedProcessGroup(child))
-  // Recovery is safe only after our entire setup group has stopped. Live groups
-  // from other launchers are retained, even if their wrapper has died.
-  try {
-    recoverStartupLocks(startupLock)
-  } finally {
-    if (directory) {
+  await cleanupBoundaryRun({
+    stop: () => stopping ?? stopOwnedProcessGroup(child, { owned: true }),
+    recover: () => recoverStartupLocks(startupLock),
+    removeWorkspace: async () => {
+      if (!directory) return
       if (evidence)
         await cp(join(directory, 'nitro.log'), join(evidence, 'nitro.log')).catch(() => {})
       if (process.env.CONTAINMENT_RETAIN !== '1' || controller.signal.aborted)
         await rm(directory, { recursive: true, force: true })
-    }
-    for (const [signal, handler] of Object.entries(handlers)) process.off(signal, handler)
-  }
+    },
+    removeHandlers: () => {
+      for (const [signal, handler] of Object.entries(handlers)) process.off(signal, handler)
+    },
+  })
 }

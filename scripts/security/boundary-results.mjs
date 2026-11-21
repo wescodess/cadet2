@@ -42,7 +42,7 @@ export function captureBoundaryResult(file, resultFile, stdio = 'inherit', env =
   return record
 }
 
-export function readBoundaryResult(file, expectedTests = 76) {
+export function readBoundaryResult(file, expectedTests = 82) {
   return z
     .object({
       exitCode: z.literal(0),

@@ -105,12 +105,7 @@ export const listEvents = query({
     if (filters.entityType && filters.entityType !== 'EVIDENCE_SOURCE')
       return { items: [], totalCount: 0, upper: args.upper ?? '' }
     const limit = Math.max(1, Math.min(101, Math.floor(args.limit)))
-    let range = eventRange(ctx, filters, args.upper, args.before)
-    if (filters.actionType)
-      range = range.filter((q) => q.eq(q.field('actionType'), filters.actionType))
-    if (filters.actorId) range = range.filter((q) => q.eq(q.field('actorId'), filters.actorId))
-    if (filters.entityId) range = range.filter((q) => q.eq(q.field('entityId'), filters.entityId))
-    // The row budget applies before filters, including a rare search.
+    const range = eventRange(ctx, filters, args.upper, args.before)
     const page = await range.paginate({
       cursor: null,
       numItems: filters.search ? 512 : limit,
@@ -118,15 +113,17 @@ export const listEvents = query({
       maximumBytesRead: 1048576,
     })
     const items = page.page.filter((row) => matches(row, filters)).slice(0, limit)
-    if (!page.isDone && items.length < limit)
-      throw new Error('Audit query exceeded its read budget; narrow the filters')
+    const last = page.page[page.page.length - 1]
+    const scanBoundary =
+      !page.isDone && last ? { timestamp: last.timestamp, eventId: last.eventId } : undefined
+    const upper = args.upper ?? page.page[0]?.orderKey ?? ''
     let totalCount = 0
+    let totalCountCapped = false
     if (args.includeCount) {
       if (filters.search || filters.dateFrom !== undefined || filters.dateTo !== undefined) {
-        const candidates = await eventRange(ctx, filters).take(2001)
-        if (candidates.length > 2000)
-          throw new Error('Audit count exceeded its read budget; narrow the filters')
-        totalCount = candidates.filter((row) => matches(row, filters)).length
+        const candidates = await eventRange(ctx, filters, upper || undefined).take(2001)
+        totalCountCapped = candidates.length > 2000
+        totalCount = candidates.slice(0, 2000).filter((row) => matches(row, filters)).length
       } else {
         totalCount =
           (
@@ -137,7 +134,7 @@ export const listEvents = query({
           )?.count ?? 0
       }
     }
-    return { items, totalCount, upper: args.upper ?? items[0]?.orderKey ?? '' }
+    return { items, totalCount, totalCountCapped, upper, scanBoundary }
   },
 })
 

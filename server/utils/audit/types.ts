@@ -86,6 +86,7 @@ export type AuditTrailListResponse = {
   ok: true
   items: AuditTrailListItem[]
   totalCount: number
+  totalCountCapped: boolean
   nextCursor: string | null
 }
 

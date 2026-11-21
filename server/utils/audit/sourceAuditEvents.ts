@@ -29,7 +29,13 @@ const eventDetail = metadata.extend({
   stateDigests: z.object({ before: z.string(), after: z.string() }),
   truncated: z.boolean(),
 })
-const pageSchema = z.object({ items: z.array(metadata), totalCount: z.number(), upper: z.string() })
+const pageSchema = z.object({
+  items: z.array(metadata),
+  totalCount: z.number(),
+  totalCountCapped: z.boolean().default(false),
+  upper: z.string(),
+  scanBoundary: z.object({ timestamp: z.number(), eventId: z.string() }).optional(),
+})
 const summarySchema = z.object({
   eventsToday: z.number(),
   eventsThisWeek: z.number(),
@@ -49,7 +55,7 @@ async function sourceQuery<T>(
   convex: ConvexHttpClient,
   name: string,
   args: Record<string, unknown>,
-  schema: z.ZodType<T>,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
 ): Promise<T> {
   try {
     const result: unknown = await convex.query(
@@ -97,10 +103,12 @@ export async function listSourceAuditEvents(
   return {
     items: result.items.map(stored),
     totalCount: result.totalCount,
+    totalCountCapped: result.totalCountCapped,
+    scanBoundary: result.scanBoundary,
     upper:
       options.upper ??
-      (result.items[0]
-        ? { timestamp: result.items[0].timestamp, eventId: result.items[0].eventId }
+      (result.upper
+        ? { timestamp: Number(result.upper.slice(0, 16)), eventId: result.upper.slice(17) }
         : undefined),
   }
 }

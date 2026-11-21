@@ -5,6 +5,8 @@ import { mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { test } from 'node:test'
+import { createInterface } from 'node:readline'
+import { cleanupBoundaryRun } from '../../scripts/security/cleanup.mjs'
 import { setTimeout } from 'node:timers/promises'
 import { promisify } from 'node:util'
 import { acquireStartupLock } from '../../scripts/security/startup-lock.mjs'
@@ -86,12 +88,78 @@ for (const waiting of [false, true]) {
         }
       } finally {
         // Both groups were created by this test; never signal unrelated processes.
-        if (cliPid) await stopOwnedProcessGroup({ pid: cliPid })
-        await stopOwnedProcessGroup(child)
+        if (cliPid) await stopOwnedProcessGroup({ pid: cliPid }, { owned: true })
+        await stopOwnedProcessGroup(child, { owned: true })
         await exited
         release?.()
         await rm(home, { recursive: true, force: true })
       }
+    }
+  })
+}
+
+test('an owned zombie-only group is confirmed gone on Darwin while unowned EPERM stays fatal', async () => {
+  const python = spawn('python3', ['-I', join(root, 'tests/security/zombie-group.py')], {
+    stdio: ['pipe', 'pipe', 'inherit'],
+  })
+  const exited = once(python, 'exit')
+  const lines = createInterface({ input: python.stdout })[Symbol.asyncIterator]()
+  const pid = Number((await lines.next()).value)
+  let reaped = false
+  assert.ok(Number.isSafeInteger(pid) && pid > 0)
+  try {
+    if (process.platform === 'darwin') {
+      assert.throws(() => process.kill(-pid, 0), { code: 'EPERM' })
+      await assert.rejects(stopOwnedProcessGroup({ pid }), { code: 'EPERM' })
+      await stopOwnedProcessGroup({ pid }, { owned: true })
+    } else {
+      python.stdin.write('\n')
+      assert.equal((await lines.next()).value, 'reaped')
+      reaped = true
+      await stopOwnedProcessGroup({ pid }, { owned: true })
+    }
+  } finally {
+    python.stdin.end(reaped ? undefined : '\n')
+    await exited
+    assert.throws(() => process.kill(-pid, 0), { code: 'ESRCH' })
+  }
+})
+
+for (const failure of ['stop', 'recover']) {
+  test(`cleanup removes workspace and signal handlers after ${failure} fails`, async () => {
+    const workspace = await mkdtemp(join(tmpdir(), 'cadet2-cleanup-test-'))
+    await writeFile(join(workspace, 'operator.env'), 'synthetic fixture')
+    const calls = []
+    const handler = () => {}
+    process.on('SIGTERM', handler)
+    try {
+      await assert.rejects(
+        cleanupBoundaryRun({
+          stop: async () => {
+            calls.push('stop')
+            if (failure === 'stop') throw new Error('injected stop failure')
+          },
+          recover: () => {
+            calls.push('recover')
+            if (failure === 'recover') throw new Error('injected recover failure')
+          },
+          removeWorkspace: async () => {
+            calls.push('removeWorkspace')
+            await rm(workspace, { recursive: true, force: true })
+          },
+          removeHandlers: () => {
+            calls.push('removeHandlers')
+            process.off('SIGTERM', handler)
+          },
+        }),
+        new RegExp(`injected ${failure} failure`),
+      )
+      assert.deepEqual(calls, ['stop', 'recover', 'removeWorkspace', 'removeHandlers'])
+      await assert.rejects(readdir(workspace), { code: 'ENOENT' })
+      assert.equal(process.listeners('SIGTERM').includes(handler), false)
+    } finally {
+      process.off('SIGTERM', handler)
+      await rm(workspace, { recursive: true, force: true })
     }
   })
 }
