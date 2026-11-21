@@ -13,8 +13,25 @@ function chain(node) {
   return []
 }
 
+const modifiers = new Set([
+  'skip',
+  'only',
+  'fixme',
+  'todo',
+  'fail',
+  'fails',
+  'slow',
+  'concurrent',
+  'sequential',
+  'shuffle',
+  'skipIf',
+  'runIf',
+  'each',
+  'for',
+])
+
 function testRoots(source) {
-  const roots = new Set(['test', 'it', 'describe', 'suite'])
+  const roots = new Map(['test', 'it', 'describe', 'suite'].map((name) => [name, name]))
   for (const statement of source.statements.filter(ts.isImportDeclaration)) {
     const bindings = statement.importClause?.namedBindings
     if (
@@ -22,14 +39,66 @@ function testRoots(source) {
       ts.isNamespaceImport(bindings) &&
       ['vitest', '@playwright/test'].includes(statement.moduleSpecifier.text)
     )
-      roots.add(bindings.name.text)
+      roots.set(bindings.name.text, null)
     if (bindings && ts.isNamedImports(bindings)) {
       for (const binding of bindings.elements) {
-        if (roots.has(binding.propertyName?.text ?? binding.name.text)) roots.add(binding.name.text)
+        const imported = binding.propertyName?.text ?? binding.name.text
+        if (roots.has(imported)) roots.set(binding.name.text, roots.get(imported))
       }
     }
   }
   return roots
+}
+
+function canonical(names, roots) {
+  if (!roots.has(names[0])) return []
+  const root = roots.get(names[0])
+  return root ? [root, ...names.slice(1)] : names.slice(1)
+}
+
+function isFunction(node) {
+  return ts.isArrowFunction(node) || ts.isFunctionExpression(node)
+}
+
+function isGroup(node, roots) {
+  return canonical(chain(node.expression), roots).some((name) =>
+    ['describe', 'suite'].includes(name),
+  )
+}
+
+function isDeclaration(node, roots) {
+  const [root, ...rest] = canonical(chain(node.expression), roots)
+  return (
+    ['test', 'it'].includes(root) &&
+    rest.every((name) => modifiers.has(name)) &&
+    !isInnerCall(node) &&
+    (rest.includes('todo') || node.arguments.slice(1).some(isFunction))
+  )
+}
+
+function declarations(node, roots) {
+  const found = []
+  function visit(child) {
+    if (ts.isCallExpression(child) && isDeclaration(child, roots)) found.push(child)
+    ts.forEachChild(child, visit)
+  }
+  visit(node)
+  return found
+}
+
+function skippedTests(node, roots, source) {
+  if (isGroup(node, roots))
+    return node.arguments.filter(isFunction).flatMap((callback) => declarations(callback, roots))
+  if (isDeclaration(node, roots)) return [node]
+  let scope = node.parent
+  while (scope && !isFunction(scope)) scope = scope.parent
+  if (!scope) return declarations(source, roots)
+  const owner = scope.parent
+  if (ts.isCallExpression(owner) && owner.arguments.includes(scope)) {
+    if (isGroup(owner, roots)) return declarations(scope, roots)
+    if (isDeclaration(owner, roots)) return [owner]
+  }
+  return [node]
 }
 
 function isInnerCall(node) {
@@ -54,7 +123,7 @@ function hasTicket(node, roots, source) {
   return false
 }
 
-function inspectSkip(node, roots, source, file, counts, ticketed) {
+function inspectSkip(node, roots, source, file, counts, credited) {
   const names = chain(node.expression)
   if (isInnerCall(node)) return
   const modifier = names.some((name) => ['skip', 'fixme', 'todo', 'skipIf', 'runIf'].includes(name))
@@ -68,16 +137,18 @@ function inspectSkip(node, roots, source, file, counts, ticketed) {
       ),
   )
   if (!(roots.has(names[0]) && (modifier || options)) && names.at(-1) !== 'skip') return
-  if (hasTicket(node, roots, source)) count(ticketed, file)
-  else count(counts, file)
+  if (!hasTicket(node, roots, source)) count(counts, file)
+  else for (const test of skippedTests(node, roots, source)) credited.add(test)
 }
 
 export function scanFile(file, counts, ticketed = {}) {
   const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
   const roots = testRoots(source)
+  const credited = new Set()
   function visit(node) {
-    if (ts.isCallExpression(node)) inspectSkip(node, roots, source, file, counts, ticketed)
+    if (ts.isCallExpression(node)) inspectSkip(node, roots, source, file, counts, credited)
     ts.forEachChild(node, visit)
   }
   visit(source)
+  if (credited.size) ticketed[file] = (ticketed[file] ?? 0) + credited.size
 }
