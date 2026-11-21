@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { localPath, outputDir, run, writeJSON } from './common.mjs'
+import { count, localPath, outputDir, run, writeJSON } from './common.mjs'
 import { parse } from './vitest-results.parser.mjs'
 import { parse as parsePlaywright, specifications } from './playwright-list.parser.mjs'
 
@@ -25,16 +25,11 @@ export function vitestFindings(report) {
   )
 }
 
-export function vitestSkips(report) {
+export function vitestCounts(report) {
   return Object.fromEntries(
-    report.testResults
-      .map((file) => [
-        localPath(file.name),
-        file.assertionResults
-          .filter((test) => ['skipped', 'pending', 'todo'].includes(test.status))
-          .map((test) => test.location ?? null),
-      ])
-      .filter(([, skips]) => skips.length > 0),
+    Object.entries(vitestFindings(report))
+      .map(([file, counts]) => [file, counts.skipped + counts.todo])
+      .filter(([, count]) => count > 0),
   )
 }
 
@@ -48,7 +43,6 @@ export function runVitest() {
     'run',
     '--maxWorkers=2',
     '--allowOnly=false',
-    '--includeTaskLocation',
     '--reporter=json',
     `--outputFile=${path}`,
   ])
@@ -64,7 +58,7 @@ export function runVitest() {
       throw new Error(`${file}: ${counts.focused} focused tests are forbidden; see ${path}`)
   }
   if (!report.success) throw new Error(`Vitest failed (focused tests are forbidden); see ${path}`)
-  return vitestSkips(report)
+  return vitestCounts(report)
 }
 
 export function runPlaywright(files) {
@@ -81,14 +75,11 @@ export function runPlaywright(files) {
       `Playwright discovery failed (focus forbidden): ${result.stdout}${result.stderr}`,
     )
   const report = parsePlaywright({ files, stdout: readFileSync(path, 'utf8') }).stdout
-  const skips = {}
+  const counts = {}
   for (const spec of specifications(report.suites)) {
     if (spec.tests.some((test) => test.expectedStatus === 'skipped'))
-      (skips[localPath(resolve(report.config.rootDir, spec.file))] ??= []).push({
-        line: spec.line,
-        column: spec.column,
-      })
+      count(counts, localPath(resolve(report.config.rootDir, spec.file)))
   }
-  writeJSON(`${outputDir}/playwright-skips.json`, skips)
-  return skips
+  writeJSON(`${outputDir}/playwright-skips.json`, counts)
+  return counts
 }

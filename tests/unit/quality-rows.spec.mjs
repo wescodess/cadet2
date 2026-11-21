@@ -180,10 +180,9 @@ describe('public quality row entry points preserve parser decisions', () => {
     await expect(row('dependencies')).rejects.toThrow(/Invalid frozen-lockfile install/)
   })
 
-  it('test policy Vitest entry point retains a runtime skip with its location', async () => {
+  it('test policy Vitest entry point counts each runtime skip', async () => {
     const input = fixture('vitest-results').valid
     const report = JSON.parse(input.stdout)
-    report.testResults[0].assertionResults[1].location = { line: 7, column: 3 }
     run.mockImplementation((command, args) => {
       const output = args.find((arg) => arg.startsWith('--outputFile='))
       if (!output) return { ...success, stdout: input.files }
@@ -192,7 +191,7 @@ describe('public quality row entry points preserve parser decisions', () => {
     })
     const { runVitest } = await import('../../scripts/quality/test-results.mjs')
     expect(runVitest()).toStrictEqual({
-      [common.localPath('/repo/tests/unit/example.spec.ts')]: [{ line: 7, column: 3 }],
+      [common.localPath('/repo/tests/unit/example.spec.ts')]: 1,
     })
   })
 
@@ -207,7 +206,7 @@ describe('public quality row entry points preserve parser decisions', () => {
     })
     const { runPlaywright } = await import('../../scripts/quality/test-results.mjs')
     expect(runPlaywright(input.files)).toStrictEqual({
-      [common.localPath(input.files[0])]: [{ line: 154, column: 3 }],
+      [common.localPath(input.files[0])]: 1,
     })
   })
 })
@@ -1014,9 +1013,7 @@ describe('runtime discovery command contracts', () => {
         expect(() => runVitest()).toThrow(/focused tests are forbidden/)
       else
         expect(runVitest()).toEqual(
-          kind === 'pending'
-            ? { [common.localPath('/repo/tests/unit/example.spec.ts')]: [null] }
-            : {},
+          kind === 'pending' ? { [common.localPath('/repo/tests/unit/example.spec.ts')]: 1 } : {},
         )
       if (kind === 'pending')
         expect(
@@ -1040,7 +1037,6 @@ describe('runtime discovery command contracts', () => {
           'run',
           '--maxWorkers=2',
           '--allowOnly=false',
-          '--includeTaskLocation',
           '--reporter=json',
           `--outputFile=${resolve(directory, 'vitest-results.json')}`,
         ],
@@ -1078,7 +1074,7 @@ describe('runtime discovery command contracts', () => {
       })
       const { runPlaywright } = await import('../../scripts/quality/test-results.mjs')
       expect(runPlaywright(input.files)).toEqual(
-        kind === 'mixed' ? { [common.localPath(input.files[0])]: [{ line: 154, column: 3 }] } : {},
+        kind === 'mixed' ? { [common.localPath(input.files[0])]: 1 } : {},
       )
     },
   )

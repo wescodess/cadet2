@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { parse } from 'yaml'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -71,13 +71,13 @@ describe('hook installation', () => {
 })
 
 describe('test policy composition', () => {
-  it('ratchets runtime counts and independently scans the full source test population', async () => {
+  it('adds skips the runners cannot observe to the runtime counts', async () => {
     const ratchet = vi.fn()
-    const scanFile = vi.fn((file, counts) => {
-      counts[file] = 1
-    })
-    const runVitest = vi.fn(() => ({ 'tests/unit/fixture.spec.mjs': [null, null] }))
-    const runPlaywright = vi.fn(() => ({ 'tests/e2e/fixture.spec.ts': [null, null, null] }))
+    const unobservedSkips = vi.fn(
+      (file) => ({ 'tests/e2e/fixture.spec.ts': 2, 'tests/helpers/plain.ts': 1 })[file] ?? 0,
+    )
+    const runVitest = vi.fn(() => ({ 'tests/unit/fixture.spec.mjs': 2 }))
+    const runPlaywright = vi.fn(() => ({ 'tests/e2e/fixture.spec.ts': 3 }))
     const population = [
       'tests/unit/fixture.spec.mjs',
       'tests/api/fixture.spec.ts',
@@ -91,10 +91,7 @@ describe('test policy composition', () => {
     options.sourceFiles = () => population
     options.ratchet = ratchet
     vi.doMock('../../scripts/quality/test-results.mjs', () => ({ runVitest, runPlaywright }))
-    vi.doMock('../../scripts/quality/test-policy-source.mjs', async (importOriginal) => ({
-      ...(await importOriginal()),
-      scanFile,
-    }))
+    vi.doMock('../../scripts/quality/test-policy-source.mjs', () => ({ unobservedSkips }))
     await expect(row('test-policy')).resolves.toBeUndefined()
     expect(runVitest).toHaveBeenCalledTimes(1)
     expect(runPlaywright.mock.calls).toEqual([
@@ -106,39 +103,119 @@ describe('test policy composition', () => {
         ],
       ],
     ])
-    expect(scanFile.mock.calls.map(([file]) => file)).toEqual([
-      'tests/unit/fixture.spec.mjs',
-      'tests/api/fixture.spec.ts',
-      'tests/e2e/fixture.spec.ts',
-      'tests/integration/fixture.spec.ts',
-      'tests/helpers/plain.ts',
-      'app/fixture.test.js',
-      'server/fixture.spec.cjs',
-    ])
+    expect(unobservedSkips.mock.calls.map(([file]) => file)).toEqual(population.slice(0, -1))
     expect(ratchet.mock.calls).toEqual([
       [
         'test-policy',
         {
           'tests/unit/fixture.spec.mjs': 2,
-          'tests/api/fixture.spec.ts': 1,
-          'tests/e2e/fixture.spec.ts': 3,
-          'tests/integration/fixture.spec.ts': 1,
+          'tests/e2e/fixture.spec.ts': 5,
           'tests/helpers/plain.ts': 1,
-          'app/fixture.test.js': 1,
-          'server/fixture.spec.cjs': 1,
         },
       ],
     ])
   })
 })
 
-describe('ticketed skip credit', () => {
+describe('no new skips', () => {
   const baselined = 'tests/e2e/workspace-recommendation-run-comparison.red.atdd.spec.ts'
+  const legacy = common.json('scripts/quality/baselines/test-policy.json').counts
+  const unit = [
+    "import { describe, it } from 'vitest'",
+    ...[1, 2, 3].map((index) => `it.skip('legacy ${index}', () => {})`),
+    "it('runs', () => {})",
+  ]
+  const browser = [
+    "import { test } from '@playwright/test'",
+    ...[1, 2, 3].map((index) => `test.skip('legacy ${index}', async () => {})`),
+    "test('runs', async () => {})",
+  ]
+
+  async function policy(runner, lines) {
+    const directory = realpathSync(mkdtempSync(resolve(common.outputDir, 'no-skip-')))
+    const file = join(directory, runner === 'vitest' ? 'fixture.test.mjs' : 'fixture.spec.ts')
+    const config = join(directory, `${runner}.config.mjs`)
+    writeFileSync(file, [...lines, ''].join('\n'))
+    writeFileSync(
+      config,
+      runner === 'vitest'
+        ? `export default { test: { include: [${JSON.stringify(file)}] } }\n`
+        : `export default { testDir: ${JSON.stringify(directory)}, testMatch: ['fixture.spec.ts'], projects: [{ name: 'fixture' }] }\n`,
+    )
+    const subject = common.localPath(file)
+    run.mockImplementation((command, args, settings) =>
+      common.run(command, args[1] === runner ? [...args, '--config', config] : args, settings),
+    )
+    options.sourceFiles = () => [subject]
+    options.ratchet = (name, { [subject]: value = 0, ...rest }) =>
+      common.ratchet(name, { ...legacy, ...rest, [baselined]: value })
+    vi.doMock('../../scripts/quality/test-results.mjs', async (importOriginal) => {
+      const actual = await importOriginal()
+      return {
+        runVitest: runner === 'vitest' ? actual.runVitest : () => ({}),
+        runPlaywright: () => (runner === 'playwright' ? actual.runPlaywright([file]) : {}),
+      }
+    })
+    try {
+      return await row('test-policy')
+    } finally {
+      rmSync(directory, { recursive: true, force: true })
+    }
+  }
+
+  it.each([
+    ['vitest', unit],
+    ['playwright', browser],
+  ])(
+    'passes the unchanged %s legacy skips at 52/52',
+    async (runner, lines) => {
+      const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+      await expect(policy(runner, lines)).resolves.toBeUndefined()
+      expect(log).toHaveBeenCalledWith('test-policy: PASS (52 current; 52 baseline)')
+    },
+    60_000,
+  )
+
+  it.each([
+    ['vitest', unit],
+    ['playwright', browser],
+  ])(
+    'asks to lower the allowance when a %s legacy skip is removed',
+    async (runner, lines) => {
+      await expect(
+        policy(
+          runner,
+          lines.filter((line) => !line.includes('legacy 3')),
+        ),
+      ).rejects.toThrow(`test-policy regression:\n${baselined}: lower allowance to 2`)
+    },
+    60_000,
+  )
+
+  it.each(
+    ['', ' #23'].flatMap((ticket) => [
+      ['vitest', `it.skip('new${ticket}', () => {})`, 4],
+      ['playwright', `test.skip('new${ticket}', async () => {})`, 4],
+      ['vitest', `describe.skip('new${ticket}', () => { it('a', () => {}) })`, 4],
+      ['playwright', `test.describe.skip('new${ticket}', () => { test('a', async () => {}) })`, 4],
+      ['playwright', `test('new', async () => { test.skip(true, 'blocked${ticket}') })`, 4],
+      ['vitest', `it.todo('new${ticket}')`, 4],
+      ['vitest', `it('new', (ctx) => { ctx.skip('blocked${ticket}') })`, 5],
+    ]),
+  )(
+    'rejects a new %s skip: %s',
+    async (runner, line, total) => {
+      await expect(
+        policy(runner, [...(runner === 'vitest' ? unit : browser), line]),
+      ).rejects.toThrow(`test-policy regression:\n${baselined}: ${total} > 3`)
+    },
+    60_000,
+  )
+
   it.each([
     [
       'an inactive group ticket beside unticketed skips',
       [
-        "import { test } from '@playwright/test'",
         "test.describe('active tests', () => {",
         "  test.skip(false, 'inactive ticket #27')",
         "  test('a', async () => {})",
@@ -147,20 +224,11 @@ describe('ticketed skip credit', () => {
         '})',
         "for (let i = 0; i < 6; i++) test.skip('unticketed ' + i, async () => {})",
       ],
-      [
-        ...['a', 'b', 'c'].map((title) => [title, `test('${title}'`, 'passed']),
-        ...Array.from({ length: 6 }, (_, index) => [
-          `unticketed ${index}`,
-          "skip('unticketed",
-          'skipped',
-        ]),
-      ],
-      /: 6 > 3$/m,
+      7,
     ],
     [
       'an inactive group ticket around unticketed skips',
       [
-        "import { test } from '@playwright/test'",
         "test.describe('active group', () => {",
         "  test.skip(false, 'inactive #27')",
         "  for (let i = 0; i < 6; i++) test.skip('unticketed inside ' + i, async () => {})",
@@ -168,88 +236,60 @@ describe('ticketed skip credit', () => {
         "test.skip('unticketed outside a', async () => {})",
         "test.skip('unticketed outside b', async () => {})",
       ],
-      [
-        ...Array.from({ length: 6 }, (_, index) => [
-          `unticketed inside ${index}`,
-          "skip('unticketed inside",
-          'skipped',
-        ]),
-        ['unticketed outside a', "skip('unticketed outside a", 'skipped'],
-        ['unticketed outside b', "skip('unticketed outside b", 'skipped'],
-      ],
-      /: 8 > 3$/m,
+      9,
     ],
     [
-      'per-test tickets',
+      'an inactive in-body ticket under a group skip',
       [
-        "import { test } from '@playwright/test'",
-        "for (let i = 0; i < 6; i++) test.skip('blocked #27', async () => {})",
-        "test('runs', async () => { test.skip(true, 'blocked #27') })",
+        "test.describe.skip('unticketed group', () => {",
+        "  for (let i = 0; i < 6; i++) test('unticketed ' + i, async () => {",
+        "    test.skip(false, 'inactive #27')",
+        '  })',
+        '})',
+        "test.skip('outside a', async () => {})",
+        "test.skip('outside b', async () => {})",
       ],
-      [
-        ...Array.from({ length: 6 }, (_, index) => [
-          `blocked ${index}`,
-          "skip('blocked",
-          'skipped',
-        ]),
-        ['runs', "test('runs'", 'passed'],
-      ],
-      null,
+      9,
     ],
-  ])('ratchets %s through the Playwright list', async (_name, lines, listed, failure) => {
-    const directory = mkdtempSync(resolve(common.outputDir, 'skip-credit-'))
-    const file = join(directory, 'fixture.spec.ts')
-    writeFileSync(file, [...lines, ''].join('\n'))
-    const locate = (marker) => {
-      const line = lines.findIndex((text) => text.includes(marker))
-      if (line < 0) throw new Error(`Missing list marker ${marker}`)
-      return { line: line + 1, column: lines[line].indexOf(marker) + 1 }
-    }
-    const input = JSON.parse(
-      readFileSync(new URL('./quality-parsers/playwright-list.json', import.meta.url), 'utf8'),
-    ).valid
-    const report = JSON.parse(input.stdout)
-    const [template] = report.suites[0].specs
-    report.config.rootDir = directory
-    report.suites = [
-      {
-        title: 'fixture.spec.ts',
-        file: 'fixture.spec.ts',
-        line: 0,
-        column: 0,
-        specs: listed.map(([title, marker, expectedStatus]) => ({
-          ...template,
-          title,
-          id: `fixture-${title}`,
-          file: 'fixture.spec.ts',
-          ...locate(marker),
-          tests: [{ ...template.tests[0], expectedStatus }],
-        })),
-      },
-    ]
-    report.stats.skipped = listed.length
-    run.mockImplementation(() => {
-      writeFileSync(join(common.outputDir, 'playwright-list.json'), JSON.stringify(report))
-      return { status: 0, stdout: '', stderr: '' }
-    })
-    options.sourceFiles = () => [common.localPath(file)]
-    options.ratchet = (name, counts) =>
-      common.ratchet(
-        name,
-        Object.fromEntries(Object.values(counts).map((value) => [baselined, value])),
-        { full: false },
-      )
-    vi.doMock('../../scripts/quality/test-results.mjs', async (importOriginal) => {
-      const actual = await importOriginal()
-      return { runVitest: () => ({}), runPlaywright: () => actual.runPlaywright([file]) }
-    })
-    try {
-      if (failure) await expect(row('test-policy')).rejects.toThrow(failure)
-      else await expect(row('test-policy')).resolves.toBeUndefined()
-    } finally {
-      rmSync(directory, { recursive: true, force: true })
-    }
-  })
+    [
+      'a ticket in a never-called nested function',
+      [
+        "test.describe.skip('unticketed group', () => {",
+        "  for (let i = 0; i < 6; i++) test('unticketed ' + i, async () => {",
+        "    function never() { test.skip(true, 'inactive #27') }",
+        '  })',
+        '})',
+        "test.skip('outside a', async () => {})",
+        "test.skip('outside b', async () => {})",
+      ],
+      9,
+    ],
+  ])(
+    'rejects the earlier leak through %s',
+    async (_name, lines, total) => {
+      await expect(
+        policy('playwright', ["import { test } from '@playwright/test'", ...lines]),
+      ).rejects.toThrow(`test-policy regression:\n${baselined}: ${total} > 3`)
+    },
+    60_000,
+  )
+
+  it.each([
+    ['vitest', "it.only('focused', () => {})", /focused tests are forbidden/],
+    [
+      'playwright',
+      "test.only('focused', async () => {})",
+      /Playwright discovery failed \(focus forbidden\)/,
+    ],
+  ])(
+    'rejects %s focus',
+    async (runner, line, failure) => {
+      await expect(
+        policy(runner, [...(runner === 'vitest' ? unit : browser), line]),
+      ).rejects.toThrow(failure)
+    },
+    60_000,
+  )
 })
 
 describe('test inventory path boundaries', () => {
@@ -259,20 +299,17 @@ describe('test inventory path boundaries', () => {
     ['app/fixture.spec.ts.vue', false],
   ])('keeps %s out of Playwright discovery', async (file, scan) => {
     const runPlaywright = vi.fn(() => ({}))
-    const scanFile = vi.fn()
+    const unobservedSkips = vi.fn(() => 0)
     options.sourceFiles = () => [file]
     options.ratchet = vi.fn()
     vi.doMock('../../scripts/quality/test-results.mjs', () => ({
       runVitest: () => ({}),
       runPlaywright,
     }))
-    vi.doMock('../../scripts/quality/test-policy-source.mjs', async (importOriginal) => ({
-      ...(await importOriginal()),
-      scanFile,
-    }))
+    vi.doMock('../../scripts/quality/test-policy-source.mjs', () => ({ unobservedSkips }))
     await row('test-policy')
     expect(runPlaywright).toHaveBeenCalledWith([])
-    expect(scanFile.mock.calls.map(([path]) => path)).toEqual(scan ? [file] : [])
+    expect(unobservedSkips.mock.calls.map(([path]) => path)).toEqual(scan ? [file] : [])
   })
 })
 
@@ -311,144 +348,5 @@ describe('quality integration contracts', () => {
   it('documents the default-branch prerequisite for the weekly scan', () => {
     const docs = readFileSync('docs/agents/quality-bar.md', 'utf8')
     expect(docs).toMatch(/schedule runs only (?:once|when) the workflow is on the default branch/)
-  })
-  it.each([
-    ["it.skip('ticketed #23', () => {})", ['it.skip'], {}],
-    ["test.skip('ticketed #27', () => {})", ['test.skip'], {}],
-    ["it.todo('planned #23')", ['it.todo'], {}],
-    ["it.todo('planned')", ['it.todo'], { fixture: 1 }],
-    ["test('body', () => { test.skip(true, 'blocked #27') })", ["test('body"], {}],
-    ["test('body', () => { test.skip(true, 'missing setup') })", [], { fixture: 1 }],
-    [
-      "for (let i = 0; i < 4; i++) test('body ' + i, () => { test.skip(true, 'missing setup') })",
-      Array(4).fill("test('body"),
-      { fixture: 4 },
-    ],
-    ["test.skip('unticketed', () => {})", ['test.skip', 'test.skip', 'test.skip'], { fixture: 3 }],
-    [
-      "test('body #27', () => { test.skip(true, 'blocked') }); test('other', () => {})",
-      ["test('body"],
-      {},
-    ],
-    [
-      "test.describe('group', () => { test.skip(true, 'blocked'); test('a', () => {}); test('b', () => {}) })",
-      ["test('a'", "test('b'"],
-      { fixture: 2 },
-    ],
-    [
-      "test.describe('group', () => { test('a #27', () => { test.skip(true, 'blocked') }); test('b', () => {}) })",
-      ["test('a", "test('b'"],
-      { fixture: 1 },
-    ],
-    [
-      "it.skip('a #23', (ctx) => { ctx.skip() }); it('b', () => {})",
-      ["skip('a", "it('b'"],
-      { fixture: 1 },
-    ],
-    [
-      "test('a', () => { test.skip(false, 'inactive #27') }); test.skip('b', () => {})",
-      ["skip('b"],
-      { fixture: 1 },
-    ],
-    [
-      "test('a', () => { helper(() => test.skip(true, 'blocked #27')) })",
-      ["test('a"],
-      { fixture: 1 },
-    ],
-    // #23 amendment (2026-11-21): group-level skips earn no ticket credit.
-    [
-      "describe.skip('group #23', () => { it('a', () => {}); it('b', () => {}) })",
-      ["it('a'", "it('b'"],
-      { fixture: 2 },
-    ],
-    [
-      "test.describe.skip('group #27', () => { test('a', () => {}); test('b', () => {}) })",
-      ["test('a'", "test('b'"],
-      { fixture: 2 },
-    ],
-    [
-      "test.describe('group', () => { test.skip(true, 'blocked #27'); test('a', () => {}); test('b', () => {}) })",
-      ["test('a'", "test('b'"],
-      { fixture: 2 },
-    ],
-    [
-      "describe.skip('group #23', () => { describe('inner', () => { it('a', () => {}); it.each([1])('b', () => {}) }); it.skip('c #23', () => {}) })",
-      ["it('a'", ")('b'", "skip('c"],
-      { fixture: 2 },
-    ],
-    [
-      "test.skip(true, 'blocked #27'); test('a', () => {}); test('b', () => {})",
-      ["test('a'", "test('b'"],
-      { fixture: 2 },
-    ],
-    [
-      "describe.skip('group #23', () => { it('a', () => {}); it('b', () => {}) })",
-      ["it('a'", "it('b'", null],
-      { fixture: 3 },
-    ],
-    [
-      "describe.skip('group #23', () => { it('a', () => {}) }); it('outside', () => {})",
-      ["it('a'", "it('outside'"],
-      { fixture: 2 },
-    ],
-    [
-      "test.describe('group', () => { test.skip(() => true, 'blocked #27'); test('a', async () => {}); test('b', async () => {}) })",
-      ["test('a'", "test('b'"],
-      { fixture: 2 },
-    ],
-    [
-      "describe.skip('group #23', () => { it.todo('a'); it('b', () => {}) })",
-      ['it.todo', "it('b'"],
-      { fixture: 2 },
-    ],
-    [
-      "describe.skip('group #23', () => { it('a', () => {}); it.skip('b #23', () => {}) })",
-      ["it('a'", "skip('b", null],
-      { fixture: 2 },
-    ],
-    [
-      "test.describe('active', () => { test.skip(false, 'inactive #27'); test('a', async () => {}); test('b', async () => {}); test('c', async () => {}) }); for (let i = 0; i < 6; i++) test.skip('unticketed ' + i, async () => {})",
-      Array(6).fill("skip('unticketed"),
-      { fixture: 6 },
-    ],
-    [
-      "test.describe('active', () => { test.skip(false, 'inactive #27'); for (let i = 0; i < 6; i++) test.skip('unticketed inside ' + i, async () => {}) }); test.skip('unticketed outside a', async () => {}); test.skip('unticketed outside b', async () => {})",
-      [
-        ...Array(6).fill("skip('unticketed inside"),
-        "skip('unticketed outside a",
-        "skip('unticketed outside b",
-      ],
-      { fixture: 8 },
-    ],
-    [
-      "describe.skipIf(false)('active #23', () => { it('a', () => {}); it('b', () => {}) }); it.skip('c', () => {}); it.skip('d', () => {})",
-      ["skip('c", "skip('d"],
-      { fixture: 3 },
-    ],
-  ])('combines runtime and source skips for %s', async (text, markers, expected) => {
-    const directory = mkdtempSync(resolve(common.outputDir, 'composition-'))
-    const file = join(directory, 'fixture.spec.mjs')
-    writeFileSync(file, text)
-    const runtime = markers.map((marker) => {
-      if (marker === null) return null
-      const index = text.indexOf(marker)
-      if (index < 0) throw new Error(`Missing runtime marker ${marker}`)
-      return { line: 1, column: index + 1 }
-    })
-    const ratchet = vi.fn()
-    options.sourceFiles = () => [file]
-    options.ratchet = ratchet
-    vi.doMock('../../scripts/quality/test-results.mjs', () => ({
-      runVitest: () => (runtime.length ? { [file]: runtime } : {}),
-      runPlaywright: () => ({}),
-    }))
-    try {
-      await row('test-policy')
-      expect(ratchet.mock.calls).toEqual([
-        ['test-policy', expected.fixture ? { [file]: expected.fixture } : {}],
-      ])
-    } finally {
-      rmSync(directory, { recursive: true, force: true })
-    }
   })
 })
