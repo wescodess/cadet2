@@ -47,13 +47,18 @@ describe('baseline policy public entry point', () => {
   it('accepts unchanged manifests and checks the integration merge-base', async () => {
     vi.stubEnv('QUALITY_BASE_REF', 'integration')
     await expect(policy()).resolves.toBeUndefined()
-    expect(git.mock.calls[0]).toEqual(['merge-base', 'integration', 'HEAD'])
+    expect(git.mock.calls.slice(0, 2)).toEqual([
+      ['merge-base', 'integration', 'HEAD'],
+      ['merge-base', 'origin/dev', 'HEAD'],
+    ])
     expect(run).toHaveBeenCalledTimes(7)
   })
   it('accepts initial adoption when no prior manifests exist', async () => {
     git.mockImplementation((...args) => (args[0] === 'merge-base' ? 'base' : ''))
     await expect(policy()).resolves.toBeUndefined()
-    expect(run).not.toHaveBeenCalled()
+    expect(new Set(run.mock.calls.map(([, args]) => args.join(' ')))).toEqual(
+      new Set([`merge-base --is-ancestor ${common.baselineCommit} base`]),
+    )
   })
   it('rejects inaccessible prior contents', async () => {
     run.mockReturnValue({ status: 1, stdout: '', stderr: 'missing baseline object' })
@@ -225,4 +230,66 @@ describe('secret identity anchoring', () => {
 it('rejects an all-zero push base instead of comparing against the pushed head', async () => {
   vi.stubEnv('QUALITY_BASE_REF', '0'.repeat(40))
   await expect(policy()).rejects.toThrow(/First push has no prior quality base/)
+})
+
+describe('baseline comparison bases', () => {
+  const mergeBases = { 'origin/main': 'main-base', 'origin/dev': 'dev-base' }
+  let manifests
+  let adopted
+  beforeEach(() => {
+    vi.stubEnv('QUALITY_BASE_REF', 'origin/main')
+    manifests = new Set(['dev-base'])
+    adopted = new Set()
+    git.mockImplementation((...args) => {
+      if (args[0] === 'merge-base') return mergeBases[args[1]]
+      return manifests.has(args[2]) ? args.at(-1) : ''
+    })
+    run.mockImplementation((_command, args) => {
+      if (args[0] === 'show')
+        return {
+          status: 0,
+          stdout: JSON.stringify(prior[args[1].slice(args[1].indexOf(':') + 1)]),
+          stderr: '',
+        }
+      return { status: adopted.has(args.at(-1)) ? 0 : 1, stdout: '', stderr: '' }
+    })
+  })
+  it('rejects an increase against origin/dev when the pull request base has no manifests', async () => {
+    const counts = current[path('types')].counts
+    counts[Object.keys(counts)[0]] += 1
+    await expect(policy()).rejects.toThrow(`Baseline count increased: ${path('types')}`)
+    expect(git.mock.calls.slice(0, 2)).toEqual([
+      ['merge-base', 'origin/main', 'HEAD'],
+      ['merge-base', 'origin/dev', 'HEAD'],
+    ])
+  })
+  it('compares against every base that has manifests', async () => {
+    manifests.add('main-base')
+    await expect(policy()).resolves.toBeUndefined()
+    const shown = run.mock.calls.map(([, args]) => args[1].split(':')[0])
+    expect(shown.filter((base) => base === 'main-base')).toHaveLength(7)
+    expect(shown.filter((base) => base === 'dev-base')).toHaveLength(7)
+  })
+  it('fails closed when no base has manifests and none descends from the adoption commit', async () => {
+    manifests.clear()
+    await expect(policy()).rejects.toThrow(
+      `No prior baseline manifest at a base descending from ${common.baselineCommit}: ${path('types')}`,
+    )
+  })
+  it('accepts initial adoption when a base descends from the adoption commit', async () => {
+    manifests.clear()
+    adopted.add('dev-base')
+    await expect(policy()).resolves.toBeUndefined()
+    expect(run).toHaveBeenCalledWith('git', [
+      'merge-base',
+      '--is-ancestor',
+      common.baselineCommit,
+      'dev-base',
+    ])
+  })
+  it('rejects an unreadable ancestry check', async () => {
+    manifests.clear()
+    run.mockReturnValue({ status: 128, stdout: '', stderr: 'bad object' })
+    await expect(policy()).rejects.toThrow('bad object')
+  })
 })

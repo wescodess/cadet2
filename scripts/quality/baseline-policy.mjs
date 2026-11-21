@@ -46,6 +46,12 @@ function validate(schema, value, path) {
   return parsed.data
 }
 
+function descendsFromAdoption(base) {
+  const result = run('git', ['merge-base', '--is-ancestor', baselineCommit, base])
+  if (![0, 1].includes(result.status)) throw new Error(result.stderr)
+  return result.status === 0
+}
+
 function previous(path, base) {
   const exists = git('ls-tree', '--name-only', base, '--', path)
   if (!exists) return null
@@ -72,7 +78,8 @@ function assertSubset(current, prior, path) {
 }
 
 main(() => {
-  const base = git('merge-base', qualityBaseRef(), 'HEAD')
+  const refs = new Set([qualityBaseRef(), 'origin/dev'])
+  const bases = [...new Set([...refs].map((ref) => git('merge-base', ref, 'HEAD')))]
   const directory = 'scripts/quality/baselines/'
   for (const path of files().filter((path) => path.startsWith(directory))) {
     if (!Object.hasOwn(schemas, path.slice(directory.length)))
@@ -81,11 +88,15 @@ main(() => {
   for (const [name, schema] of Object.entries(schemas)) {
     const path = `${directory}${name}`
     const current = validate(schema, json(path), path)
-    const prior = previous(path, base)
-    if (prior !== null) {
-      const validated = validate(schema, prior, `${base}:${path}`)
-      assertSubset(current, validated, path)
-    }
+    const priors = bases
+      .map((base) => [base, previous(path, base)])
+      .filter(([, prior]) => prior !== null)
+    if (!priors.length && !bases.some(descendsFromAdoption))
+      throw new Error(
+        `No prior baseline manifest at a base descending from ${baselineCommit}: ${path}`,
+      )
+    for (const [base, prior] of priors)
+      assertSubset(current, validate(schema, prior, `${base}:${path}`), path)
   }
-  console.log('baselines: PASS (valid schemas; no increases against integration merge-base)')
+  console.log('baselines: PASS (valid schemas; no increases against integration merge-bases)')
 })
