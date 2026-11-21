@@ -133,11 +133,10 @@ describe('test policy composition', () => {
 })
 
 describe('ticketed skip credit', () => {
-  it('credits only runtime skips that a ticketed skip covers, not tests an inactive skip leaves runnable', async () => {
-    const directory = mkdtempSync(resolve(common.outputDir, 'inactive-skip-'))
-    const file = join(directory, 'fixture.spec.ts')
-    writeFileSync(
-      file,
+  const baselined = 'tests/e2e/workspace-recommendation-run-comparison.red.atdd.spec.ts'
+  it.each([
+    [
+      'an inactive group ticket beside unticketed skips',
       [
         "import { test } from '@playwright/test'",
         "test.describe('active tests', () => {",
@@ -147,23 +146,70 @@ describe('ticketed skip credit', () => {
         "  test('c', async () => {})",
         '})',
         "for (let i = 0; i < 6; i++) test.skip('unticketed ' + i, async () => {})",
-        '',
-      ].join('\n'),
-    )
+      ],
+      [
+        ...['a', 'b', 'c'].map((title) => [title, `test('${title}'`, 'passed']),
+        ...Array.from({ length: 6 }, (_, index) => [
+          `unticketed ${index}`,
+          "skip('unticketed",
+          'skipped',
+        ]),
+      ],
+      /: 6 > 3$/m,
+    ],
+    [
+      'an inactive group ticket around unticketed skips',
+      [
+        "import { test } from '@playwright/test'",
+        "test.describe('active group', () => {",
+        "  test.skip(false, 'inactive #27')",
+        "  for (let i = 0; i < 6; i++) test.skip('unticketed inside ' + i, async () => {})",
+        '})',
+        "test.skip('unticketed outside a', async () => {})",
+        "test.skip('unticketed outside b', async () => {})",
+      ],
+      [
+        ...Array.from({ length: 6 }, (_, index) => [
+          `unticketed inside ${index}`,
+          "skip('unticketed inside",
+          'skipped',
+        ]),
+        ['unticketed outside a', "skip('unticketed outside a", 'skipped'],
+        ['unticketed outside b', "skip('unticketed outside b", 'skipped'],
+      ],
+      /: 8 > 3$/m,
+    ],
+    [
+      'per-test tickets',
+      [
+        "import { test } from '@playwright/test'",
+        "for (let i = 0; i < 6; i++) test.skip('blocked #27', async () => {})",
+        "test('runs', async () => { test.skip(true, 'blocked #27') })",
+      ],
+      [
+        ...Array.from({ length: 6 }, (_, index) => [
+          `blocked ${index}`,
+          "skip('blocked",
+          'skipped',
+        ]),
+        ['runs', "test('runs'", 'passed'],
+      ],
+      null,
+    ],
+  ])('ratchets %s through the Playwright list', async (_name, lines, listed, failure) => {
+    const directory = mkdtempSync(resolve(common.outputDir, 'skip-credit-'))
+    const file = join(directory, 'fixture.spec.ts')
+    writeFileSync(file, [...lines, ''].join('\n'))
+    const locate = (marker) => {
+      const line = lines.findIndex((text) => text.includes(marker))
+      if (line < 0) throw new Error(`Missing list marker ${marker}`)
+      return { line: line + 1, column: lines[line].indexOf(marker) + 1 }
+    }
     const input = JSON.parse(
       readFileSync(new URL('./quality-parsers/playwright-list.json', import.meta.url), 'utf8'),
     ).valid
     const report = JSON.parse(input.stdout)
     const [template] = report.suites[0].specs
-    const spec = (title, line, column, expectedStatus) => ({
-      ...template,
-      title,
-      id: `fixture-${title}`,
-      file: 'fixture.spec.ts',
-      line,
-      column,
-      tests: [{ ...template.tests[0], expectedStatus }],
-    })
     report.config.rootDir = directory
     report.suites = [
       {
@@ -171,35 +217,35 @@ describe('ticketed skip credit', () => {
         file: 'fixture.spec.ts',
         line: 0,
         column: 0,
-        specs: Array.from({ length: 6 }, (_, index) =>
-          spec(`unticketed ${index}`, 8, 34, 'skipped'),
-        ),
-        suites: [
-          {
-            title: 'active tests',
-            file: 'fixture.spec.ts',
-            line: 2,
-            column: 6,
-            specs: ['a', 'b', 'c'].map((title, index) => spec(title, 4 + index, 3, 'passed')),
-          },
-        ],
+        specs: listed.map(([title, marker, expectedStatus]) => ({
+          ...template,
+          title,
+          id: `fixture-${title}`,
+          file: 'fixture.spec.ts',
+          ...locate(marker),
+          tests: [{ ...template.tests[0], expectedStatus }],
+        })),
       },
     ]
-    report.stats.skipped = 9
+    report.stats.skipped = listed.length
     run.mockImplementation(() => {
       writeFileSync(join(common.outputDir, 'playwright-list.json'), JSON.stringify(report))
       return { status: 0, stdout: '', stderr: '' }
     })
-    const ratchet = vi.fn()
     options.sourceFiles = () => [common.localPath(file)]
-    options.ratchet = ratchet
+    options.ratchet = (name, counts) =>
+      common.ratchet(
+        name,
+        Object.fromEntries(Object.values(counts).map((value) => [baselined, value])),
+        { full: false },
+      )
     vi.doMock('../../scripts/quality/test-results.mjs', async (importOriginal) => {
       const actual = await importOriginal()
       return { runVitest: () => ({}), runPlaywright: () => actual.runPlaywright([file]) }
     })
     try {
-      await row('test-policy')
-      expect(ratchet.mock.calls).toEqual([['test-policy', { [common.localPath(file)]: 6 }]])
+      if (failure) await expect(row('test-policy')).rejects.toThrow(failure)
+      else await expect(row('test-policy')).resolves.toBeUndefined()
     } finally {
       rmSync(directory, { recursive: true, force: true })
     }
@@ -269,42 +315,20 @@ describe('quality integration contracts', () => {
   it.each([
     ["it.skip('ticketed #23', () => {})", ['it.skip'], {}],
     ["test.skip('ticketed #27', () => {})", ['test.skip'], {}],
+    ["it.todo('planned #23')", ['it.todo'], {}],
+    ["it.todo('planned')", ['it.todo'], { fixture: 1 }],
+    ["test('body', () => { test.skip(true, 'blocked #27') })", ["test('body"], {}],
     ["test('body', () => { test.skip(true, 'missing setup') })", [], { fixture: 1 }],
+    [
+      "for (let i = 0; i < 4; i++) test('body ' + i, () => { test.skip(true, 'missing setup') })",
+      Array(4).fill("test('body"),
+      { fixture: 4 },
+    ],
     ["test.skip('unticketed', () => {})", ['test.skip', 'test.skip', 'test.skip'], { fixture: 3 }],
-    [
-      "describe.skip('group #23', () => { it('a', () => {}); it('b', () => {}) })",
-      ["it('a'", "it('b'"],
-      {},
-    ],
-    [
-      "test.describe.skip('group #27', () => { test('a', () => {}); test('b', () => {}) })",
-      ["test('a'", "test('b'"],
-      {},
-    ],
-    [
-      "test.describe('group', () => { test.skip(true, 'blocked #27'); test('a', () => {}); test('b', () => {}) })",
-      ["test('a'", "test('b'"],
-      {},
-    ],
-    [
-      "describe.skip('group #23', () => { describe('inner', () => { it('a', () => {}); it.each([1])('b', () => {}) }); it.skip('c #23', () => {}) })",
-      ["it('a'", ")('b'", "skip('c"],
-      {},
-    ],
-    [
-      "test.skip(true, 'blocked #27'); test('a', () => {}); test('b', () => {})",
-      ["test('a'", "test('b'"],
-      {},
-    ],
     [
       "test('body #27', () => { test.skip(true, 'blocked') }); test('other', () => {})",
       ["test('body"],
       {},
-    ],
-    [
-      "describe.skip('group #23', () => { it('a', () => {}); it('b', () => {}) })",
-      ["it('a'", "it('b'", null],
-      { fixture: 1 },
     ],
     [
       "test.describe('group', () => { test.skip(true, 'blocked'); test('a', () => {}); test('b', () => {}) })",
@@ -317,29 +341,70 @@ describe('quality integration contracts', () => {
       { fixture: 1 },
     ],
     [
-      "describe.skip('group #23', () => { it('a', () => {}) }); it('outside', () => {})",
-      ["it('a'", "it('outside'"],
-      { fixture: 1 },
-    ],
-    [
       "it.skip('a #23', (ctx) => { ctx.skip() }); it('b', () => {})",
       ["skip('a", "it('b'"],
       { fixture: 1 },
     ],
     [
+      "test('a', () => { test.skip(false, 'inactive #27') }); test.skip('b', () => {})",
+      ["skip('b"],
+      { fixture: 1 },
+    ],
+    [
+      "test('a', () => { helper(() => test.skip(true, 'blocked #27')) })",
+      ["test('a"],
+      { fixture: 1 },
+    ],
+    // #23 amendment (2026-11-21): group-level skips earn no ticket credit.
+    [
+      "describe.skip('group #23', () => { it('a', () => {}); it('b', () => {}) })",
+      ["it('a'", "it('b'"],
+      { fixture: 2 },
+    ],
+    [
+      "test.describe.skip('group #27', () => { test('a', () => {}); test('b', () => {}) })",
+      ["test('a'", "test('b'"],
+      { fixture: 2 },
+    ],
+    [
+      "test.describe('group', () => { test.skip(true, 'blocked #27'); test('a', () => {}); test('b', () => {}) })",
+      ["test('a'", "test('b'"],
+      { fixture: 2 },
+    ],
+    [
+      "describe.skip('group #23', () => { describe('inner', () => { it('a', () => {}); it.each([1])('b', () => {}) }); it.skip('c #23', () => {}) })",
+      ["it('a'", ")('b'", "skip('c"],
+      { fixture: 2 },
+    ],
+    [
+      "test.skip(true, 'blocked #27'); test('a', () => {}); test('b', () => {})",
+      ["test('a'", "test('b'"],
+      { fixture: 2 },
+    ],
+    [
+      "describe.skip('group #23', () => { it('a', () => {}); it('b', () => {}) })",
+      ["it('a'", "it('b'", null],
+      { fixture: 3 },
+    ],
+    [
+      "describe.skip('group #23', () => { it('a', () => {}) }); it('outside', () => {})",
+      ["it('a'", "it('outside'"],
+      { fixture: 2 },
+    ],
+    [
       "test.describe('group', () => { test.skip(() => true, 'blocked #27'); test('a', async () => {}); test('b', async () => {}) })",
       ["test('a'", "test('b'"],
-      {},
+      { fixture: 2 },
     ],
     [
       "describe.skip('group #23', () => { it.todo('a'); it('b', () => {}) })",
       ['it.todo', "it('b'"],
-      {},
+      { fixture: 2 },
     ],
     [
       "describe.skip('group #23', () => { it('a', () => {}); it.skip('b #23', () => {}) })",
       ["it('a'", "skip('b", null],
-      { fixture: 1 },
+      { fixture: 2 },
     ],
     [
       "test.describe('active', () => { test.skip(false, 'inactive #27'); test('a', async () => {}); test('b', async () => {}); test('c', async () => {}) }); for (let i = 0; i < 6; i++) test.skip('unticketed ' + i, async () => {})",
@@ -347,9 +412,18 @@ describe('quality integration contracts', () => {
       { fixture: 6 },
     ],
     [
+      "test.describe('active', () => { test.skip(false, 'inactive #27'); for (let i = 0; i < 6; i++) test.skip('unticketed inside ' + i, async () => {}) }); test.skip('unticketed outside a', async () => {}); test.skip('unticketed outside b', async () => {})",
+      [
+        ...Array(6).fill("skip('unticketed inside"),
+        "skip('unticketed outside a",
+        "skip('unticketed outside b",
+      ],
+      { fixture: 8 },
+    ],
+    [
       "describe.skipIf(false)('active #23', () => { it('a', () => {}); it('b', () => {}) }); it.skip('c', () => {}); it.skip('d', () => {})",
       ["skip('c", "skip('d"],
-      { fixture: 2 },
+      { fixture: 3 },
     ],
   ])('combines runtime and source skips for %s', async (text, markers, expected) => {
     const directory = mkdtempSync(resolve(common.outputDir, 'composition-'))

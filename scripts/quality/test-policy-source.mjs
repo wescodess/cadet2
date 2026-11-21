@@ -60,12 +60,6 @@ function isFunction(node) {
   return ts.isArrowFunction(node) || ts.isFunctionExpression(node)
 }
 
-function isGroup(node, roots) {
-  return canonical(chain(node.expression), roots).some((name) =>
-    ['describe', 'suite'].includes(name),
-  )
-}
-
 function isDeclaration(node, roots) {
   const [root, ...rest] = canonical(chain(node.expression), roots)
   return (
@@ -76,29 +70,18 @@ function isDeclaration(node, roots) {
   )
 }
 
-function declarations(node, roots) {
-  const found = []
-  function visit(child) {
-    if (ts.isCallExpression(child) && isDeclaration(child, roots)) found.push(child)
-    ts.forEachChild(child, visit)
-  }
-  visit(node)
-  return found
-}
-
-function skippedTests(node, roots, source) {
-  if (isGroup(node, roots))
-    return node.arguments.filter(isFunction).flatMap((callback) => declarations(callback, roots))
-  if (isDeclaration(node, roots)) return [node]
+function ownTest(node, roots) {
+  if (isDeclaration(node, roots)) return node
   let scope = node.parent
   while (scope && !isFunction(scope)) scope = scope.parent
-  if (!scope) return declarations(source, roots)
-  const owner = scope.parent
-  if (ts.isCallExpression(owner) && owner.arguments.includes(scope)) {
-    if (isGroup(owner, roots)) return declarations(scope, roots)
-    if (isDeclaration(owner, roots)) return [owner]
-  }
-  return [node]
+  const owner = scope?.parent
+  if (
+    owner &&
+    ts.isCallExpression(owner) &&
+    owner.arguments.includes(scope) &&
+    isDeclaration(owner, roots)
+  )
+    return owner
 }
 
 function isInnerCall(node) {
@@ -112,18 +95,11 @@ function isInnerCall(node) {
   return ts.isCallExpression(current.parent) && current.parent.expression === current
 }
 
-function hasTicket(node, roots, source) {
-  for (let current = node; current; current = current.parent) {
-    if (!ts.isCallExpression(current)) continue
-    if (current !== node && !roots.has(chain(current.expression)[0])) continue
-    const preceding = source.text.slice(Math.max(0, current.getFullStart()), current.getStart())
-    const title = current.arguments.find((arg) => ts.isStringLiteralLike(arg))?.text ?? ''
-    if (ticket.test(preceding) || ticket.test(title)) return true
-  }
-  return false
+function hasTicket(node) {
+  return ticket.test(node.arguments.find((arg) => ts.isStringLiteralLike(arg))?.text ?? '')
 }
 
-function inspectSkip(node, roots, source, file, counts, credited) {
+function inspectSkip(node, roots, source, file, counts, ticketed) {
   const names = chain(node.expression)
   if (isInnerCall(node)) return
   const modifier = names.some((name) => ['skip', 'fixme', 'todo', 'skipIf', 'runIf'].includes(name))
@@ -137,8 +113,9 @@ function inspectSkip(node, roots, source, file, counts, credited) {
       ),
   )
   if (!(roots.has(names[0]) && (modifier || options)) && names.at(-1) !== 'skip') return
-  if (!hasTicket(node, roots, source)) count(counts, file)
-  else for (const test of skippedTests(node, roots, source)) credited.add(test)
+  const test = ownTest(node, roots)
+  if (test && (hasTicket(node) || hasTicket(test))) ticketed.add(test)
+  else count(counts, file)
 }
 
 function span(node, source) {
@@ -153,21 +130,30 @@ function compare(left, right) {
   return left[0] - right[0] || left[1] - right[1]
 }
 
-export function covers(spans = [], location) {
+export function credited(tests = [], location) {
   if (!location) return false
   const at = [location.line, location.column]
-  return spans.some(([from, to]) => compare(from, at) <= 0 && compare(at, to) < 0)
+  const matches = tests.filter(
+    ({ span: [from, to] }) => compare(from, at) <= 0 && compare(at, to) < 0,
+  )
+  return matches.length === 1 && matches[0].ticketed
 }
 
-export function scanFile(file, counts, ticketed = {}) {
+export function scanFile(file, counts, tests = {}) {
   const source = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
   const roots = testRoots(source)
-  const credited = new Set()
+  const declared = []
+  const ticketed = new Set()
   function visit(node) {
-    if (ts.isCallExpression(node)) inspectSkip(node, roots, source, file, counts, credited)
+    if (ts.isCallExpression(node)) {
+      if (isDeclaration(node, roots)) declared.push(node)
+      inspectSkip(node, roots, source, file, counts, ticketed)
+    }
     ts.forEachChild(node, visit)
   }
   visit(source)
-  if (credited.size)
-    ticketed[file] = [...(ticketed[file] ?? []), ...[...credited].map((test) => span(test, source))]
+  tests[file] = [
+    ...(tests[file] ?? []),
+    ...declared.map((test) => ({ span: span(test, source), ticketed: ticketed.has(test) })),
+  ]
 }

@@ -1,10 +1,10 @@
 import { main, ratchet, sourceFiles } from './common.mjs'
 import { runPlaywright, runVitest } from './test-results.mjs'
-import { covers, scanFile } from './test-policy-source.mjs'
+import { credited, scanFile } from './test-policy-source.mjs'
 
 main(() => {
   const counts = {}
-  const ticketed = {}
+  const tests = {}
   const files = sourceFiles()
   const runtime = {
     ...runVitest(),
@@ -15,11 +15,11 @@ main(() => {
   for (const file of files.filter(
     (file) => file.startsWith('tests/') || /\.(?:spec|test)\.[cm]?[jt]s$/.test(file),
   ))
-    scanFile(file, counts, ticketed)
+    scanFile(file, counts, tests)
   for (const [file, skips] of Object.entries(runtime)) {
     const unticketed = Math.max(
       counts[file] ?? 0,
-      skips.filter((location) => !covers(ticketed[file], location)).length,
+      skips.filter((location) => !credited(tests[file], location)).length,
     )
     if (unticketed > 0) counts[file] = unticketed
   }
