@@ -1,10 +1,14 @@
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { cp, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:net'
-import { tmpdir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
+import { clearInterval, setInterval } from 'node:timers'
+import { chromium } from '@playwright/test'
 import { inspectAdminSources, inspectBuiltAdminRoutes } from './admin-surfaces.mjs'
 import { readBoundaryResult } from './boundary-results.mjs'
+import { acquireStartupLock } from './startup-lock.mjs'
 
 const root = resolve(import.meta.dirname, '../..')
 const sources = await inspectAdminSources(root)
@@ -28,6 +32,8 @@ const evidence = process.env.QUALITY_OUTPUT_DIR
   : await mkdtemp(join(root, '.quality-output/run-admin-'))
 const directory = await mkdtemp(join(tmpdir(), 'cadet2-containment-'))
 const resultFile = join(directory, 'boundary-results.json')
+const cliHome = join(directory, 'home')
+await mkdir(cliHome, { mode: 0o700 })
 console.log(`Isolated boundary workspace: ${directory}`)
 await mkdir(join(directory, 'backend/convex'), { recursive: true })
 await writeFile(
@@ -53,6 +59,9 @@ async function availablePort() {
 
 const ports = await Promise.all([availablePort(), availablePort(), availablePort()])
 const quote = (value) => `'${value.replaceAll("'", "'\\''")}'`
+const releaseStartup = await acquireStartupLock(
+  join(homedir(), '.cache/cadet2-containment-startup'),
+)
 const child = spawn(
   process.execPath,
   [
@@ -78,6 +87,11 @@ const child = spawn(
     stdio: 'inherit',
     env: {
       ...isolatedEnv,
+      HOME: cliHome,
+      USERPROFILE: cliHome,
+      LOCALAPPDATA: join(cliHome, 'AppData/Local'),
+      XDG_CACHE_HOME: join(cliHome, '.cache'),
+      CONTAINMENT_BROWSER_EXECUTABLE: chromium.executablePath(),
       CONVEX_AGENT_MODE: 'anonymous',
       CONTAINMENT_DIRECTORY: directory,
       CONTAINMENT_ORIGIN: `http://127.0.0.1:${ports[2]}`,
@@ -86,7 +100,14 @@ const child = spawn(
     },
   },
 )
+const startupMonitor = setInterval(() => {
+  if (!existsSync(join(directory, 'backend-ready'))) return
+  clearInterval(startupMonitor)
+  releaseStartup()
+}, 50)
 child.once('error', (error) => {
+  clearInterval(startupMonitor)
+  releaseStartup()
   throw error
 })
 child.once('exit', async (code) => {
@@ -99,6 +120,8 @@ child.once('exit', async (code) => {
     console.error(error)
     process.exitCode = 1
   } finally {
+    clearInterval(startupMonitor)
+    releaseStartup()
     await cp(join(directory, 'nitro.log'), join(evidence, 'nitro.log')).catch(() => {})
     if (process.env.CONTAINMENT_RETAIN !== '1')
       await rm(directory, { recursive: true, force: true })

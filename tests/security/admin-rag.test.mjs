@@ -14,14 +14,23 @@ import { anyApi } from 'convex/server'
 import { chromium } from '@playwright/test'
 
 const group = process.env.CONTAINMENT_TEST_GROUP ?? 'all'
-if (!['all', 'core', 'design', 'navigation'].includes(group))
+if (
+  ![
+    'all',
+    'admission',
+    'source-audit',
+    'sql-rollback',
+    'source-rollback',
+    'audit-success',
+    'audit-consistency',
+    'design',
+    'navigation',
+  ].includes(group)
+)
   throw new Error('Invalid mandatory boundary group')
-function groupOf(name) {
-  if (name.startsWith('#166')) return 'design'
-  return name.startsWith('denied ') ? 'navigation' : 'core'
-}
+let registrationGroup = 'admission'
 function test(name, ...args) {
-  if (group === 'all' || groupOf(name) === group) return registerTest(name, ...args)
+  if (group === 'all' || registrationGroup === group) return registerTest(name, ...args)
 }
 
 const root = resolve(import.meta.dirname, '../..')
@@ -290,7 +299,7 @@ before(
     CREATE TABLE verification (id text PRIMARY KEY, identifier text NOT NULL, value text NOT NULL, "expiresAt" timestamp NOT NULL, "createdAt" timestamp NOT NULL DEFAULT now(), "updatedAt" timestamp NOT NULL DEFAULT now());
     CREATE TABLE jwks (id text PRIMARY KEY, "publicKey" text NOT NULL, "privateKey" text NOT NULL, "createdAt" timestamp NOT NULL, "expiresAt" timestamp);
   `)
-    if (group === 'design') {
+    if (!['admission', 'navigation', 'all'].includes(group)) {
       for (const name of [
         '0004_pathway_definitions.sql',
         '0005_pathway_rules.sql',
@@ -342,7 +351,7 @@ before(
     ])
     operator = new ConvexHttpClient(backend, { logger: false })
     operator.setAdminAuth(config.adminKey)
-    if (group !== 'core' && group !== 'all') return
+    if (group !== 'admission' && group !== 'all') return
     await fixture('sources', [
       {
         type: 'youtube_channel',
@@ -775,6 +784,8 @@ async function assertCleanDenial(page, problems, { actor, destination, landmark,
   )
 }
 
+registrationGroup = 'navigation'
+
 test('denied page documents redirect while payloads and admin APIs keep their denial status', async () => {
   for (const [actor, status, location] of [
     [null, 401, '/auth'],
@@ -805,7 +816,9 @@ test('denied page documents redirect while payloads and admin APIs keep their de
 
 test('denied admin pages land on a clean safe page for direct loads and client navigation', async () => {
   const desktop = { width: 1440, height: 900 }
-  const browser = await chromium.launch()
+  const browser = await chromium.launch({
+    executablePath: process.env.CONTAINMENT_BROWSER_EXECUTABLE,
+  })
   try {
     for (const { actor, destination, landmark, paths, viewports } of [
       {
@@ -844,6 +857,8 @@ test('denied admin pages land on a clean safe page for direct loads and client n
     await browser.close()
   }
 })
+
+registrationGroup = 'admission'
 
 test('bootstrap and allowlist-sync registrations are absent', async () => {
   for (const actor of [null, ordinary, emailMatch, admin]) {
@@ -1111,6 +1126,8 @@ async function assertRecordedDeletion(sourceId, history, since) {
   const summary = await successful('/api/admin/audit-trail/summary')
   assert.equal(summary.eventsToday, unfiltered.totalCount)
 }
+
+registrationGroup = 'source-audit'
 
 test('direct source deletion preserves approval history and records one actor-bound event', async () => {
   const { sourceId, history } = await reviewedSource('Direct deletion audit probe')
@@ -1544,6 +1561,8 @@ async function recordAtomicObservation(name, observation) {
   )
 }
 
+registrationGroup = 'sql-rollback'
+
 for (const [name, action] of sqlWrites) {
   test(`${name} rolls back state, parent timestamp and audit on audit failure`, async () => {
     const { pathwayId, path, operation } = await prepareSqlWrite(name, 'rollback')
@@ -1610,6 +1629,8 @@ async function sourceSnapshot(sourceId, name) {
   return result.items.filter((source) => source.name === name)
 }
 
+registrationGroup = 'source-rollback'
+
 for (const [action, actionType] of sourceWrites) {
   test(`source-${action} rolls back its mutation and approval history on audit failure`, async () => {
     const name = `Rollback governance ${action}`
@@ -1656,6 +1677,8 @@ async function assertAuditDetail(event, actionType, before, after) {
   const detail = await successful(`/api/admin/audit-trail/${event.eventId}`)
   assert.deepEqual(detail.event.changeContext, { before, after })
 }
+
+registrationGroup = 'audit-success'
 
 for (const [name, action] of sqlWrites) {
   test(`${name} commits exactly one actor-bound audit with its domain change`, async () => {
@@ -1711,6 +1734,8 @@ for (const [action, actionType] of sourceWrites) {
     await recordAtomicObservation(`source-${action}-success`, { before, after, events })
   })
 }
+
+registrationGroup = 'audit-consistency'
 
 test('bulk failures and cross-parent rule identifiers leave both parents and all audits unchanged', async () => {
   const first = await prepareSqlWrite('rule-update', 'binding-first')
@@ -1868,6 +1893,8 @@ test('concurrent pathway, rule and source writes serialize snapshots and duplica
   await assertSnapshotChain(sourceEvents, sourceBefore, (await sourceSnapshot(sourceId)).source)
 })
 
+registrationGroup = 'admission'
+
 test('unavailable recommendation-review and ingestion routes reject before any write', async () => {
   const auditBefore = await successful('/api/admin/audit-trail?pageSize=100')
   const sourcesBefore = await admin.client.query(anyApi.ragSources.listSources, {
@@ -1914,6 +1941,8 @@ function auditStateHash(value) {
   )
   return createHash('sha256').update(json).digest('hex')
 }
+
+registrationGroup = 'design'
 
 test('#166 F1: capped submissions and digest-audited legacy records remain maintainable', async () => {
   const oversized = {
@@ -2472,6 +2501,8 @@ test('#166 F4: concurrent inserts never repeat or skip the original traversal', 
   )
   assert.deepEqual(new Set(ids), new Set(originalIds))
 })
+
+registrationGroup = 'admission'
 
 test('a removed current admin grant immediately denies the same real session and JWT', async () => {
   assert.equal((await request('/api/admin/access', admin)).status, 200)

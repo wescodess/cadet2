@@ -1,4 +1,5 @@
 import { resolve } from 'node:path'
+import { performance } from 'node:perf_hooks'
 import { createServer } from 'node:net'
 import { writeFileSync } from 'node:fs'
 import {
@@ -9,6 +10,7 @@ import {
 
 const resultFile = process.env.CONTAINMENT_RESULTS
 if (!resultFile) throw new Error('Missing isolated boundary result path')
+writeFileSync(resolve(process.env.CONTAINMENT_DIRECTORY, 'backend-ready'), '')
 const children = []
 const evidence = process.env.QUALITY_OUTPUT_DIR
 
@@ -22,13 +24,19 @@ async function availableOrigin() {
 
 try {
   for (const [name, expectedTests] of [
-    ['core', 58],
+    ['admission', 21],
+    ['source-audit', 9],
+    ['sql-rollback', 7],
+    ['source-rollback', 6],
+    ['audit-success', 13],
+    ['audit-consistency', 2],
     ['design', 10],
     ['navigation', 2],
   ]) {
     const file = evidence
       ? resolve(evidence, `admin-boundaries-${name}.json`)
       : `${resultFile}.${name}`
+    const started = performance.now()
     captureBoundaryResult(
       resolve(import.meta.dirname, '../../tests/security/admin-rag.test.mjs'),
       file,
@@ -38,6 +46,9 @@ try {
         CONTAINMENT_TEST_GROUP: name,
         CONTAINMENT_ORIGIN: await availableOrigin(),
       },
+    )
+    console.log(
+      `Admin boundary group ${name}: ${(performance.now() - started).toFixed(0)}ms (limit 120000ms)`,
     )
     children.push({ name, file, expectedTests })
     readBoundaryResult(file, expectedTests)
