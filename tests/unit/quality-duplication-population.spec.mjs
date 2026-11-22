@@ -4,6 +4,7 @@ import {
   cpSync,
   mkdirSync,
   mkdtempSync,
+  realpathSync,
   readdirSync,
   rmSync,
   symlinkSync,
@@ -29,7 +30,7 @@ for (const kind of ['empty', 'partial', 'vue-empty']) {
   it(
     'rejects a valid ' + kind + ' clone report after native scanning and restores a native control',
     () => {
-      const directory = mkdtempSync(join(tmpdir(), 'duplication-population-'))
+      const directory = realpathSync(mkdtempSync(join(tmpdir(), 'duplication-population-')))
       temporary.push(directory)
       cpSync(join(root, 'scripts/quality'), join(directory, 'scripts/quality'), { recursive: true })
       mkdirSync(join(directory, 'node_modules/.bin'), { recursive: true })
