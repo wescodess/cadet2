@@ -869,7 +869,7 @@ test('denied admin pages land on a clean safe page for direct loads and client n
       {
         actor: ordinary,
         destination: '/',
-        landmark: (page) => page.getByTestId('home-hero'),
+        landmark: (page) => page.getByRole('heading', { level: 1, name: 'cadet2', exact: true }),
         paths: [...adminPages, '/ai-search'],
         viewports: [desktop, { width: 390, height: 844 }],
       },
