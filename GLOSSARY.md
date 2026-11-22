@@ -48,6 +48,22 @@ _Avoid_: Draft assessment, automated advice, Verified Plan
 A Client's permission to share information for a particular Case, revocable by the Client. Revocation does not erase the Practice's retained Signed plans and audit record.
 _Avoid_: Blanket permission, permanent access
 
+**Practice-retained record**:
+The fixed Signed plan and limited evidence of its preparation, signature, disclosure and subsequent custody that a Practice keeps after Consent ends. It is separate from the Client's live profile, vault and unfinished Case work.
+_Avoid_: Entire Case archive, live Client record, permanent profile access
+
+**Record custodian**:
+A Practice member explicitly entrusted with specified Practice-retained records. This responsibility gives no access to live Client information or authority to sign.
+_Avoid_: Practice administrator, Case assignee, owner of the Client
+
+**Dependant authority attestation**:
+A Client's statement that they have authority to provide specified information about a dependant for a stated purpose. It does not make the Client that person's Representative or permit consent for another adult's Case.
+_Avoid_: Household consent, family account, presumed spousal permission
+
+**Retention hold**:
+A documented requirement to preserve specified records while a legal or rights matter is resolved. It does not authorize their use for new Case work.
+_Avoid_: Indefinite archive, restored Consent
+
 **Verified representative**:
 A Representative whose licence a cadet2 admin has checked against the CICC register or the relevant law society.
 _Avoid_: Verified account, platform-endorsed expert
