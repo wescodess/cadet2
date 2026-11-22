@@ -39,7 +39,7 @@ for (const row of ['boundaries', 'dead-code', 'duplication']) {
           status: 127,
           stdout: JSON.parse(
             readFileSync(new URL(`./quality-parsers/${row}.json`, import.meta.url), 'utf8'),
-          ).valid.stdout,
+          ).valid.stdout.replaceAll('shared/a.ts', 'package.json'),
         }
       }
       if (kind === 'truncated') result.stdout = '{"truncated":'

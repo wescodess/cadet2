@@ -11,11 +11,13 @@ cases=[
  ('duplication','duplication',{'shared/original.ts':block},{'shared/copy.ts':'console.log("unique")'}),
 ]
 for name,row,files,control in cases:
- d=scratch/name;d.mkdir(exist_ok=True)
+ d=scratch/name
+ if d.exists():shutil.rmtree(d)
+ d.mkdir(exist_ok=True)
  def put(file,text):
   p=d/file;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text)
  put('.gitignore','node_modules/\n.quality-output/\n');put('package.json','{"name":"fixture","type":"module","private":true}')
- for r in ['boundaries','dead-code','duplication']:put(f'scripts/quality/baselines/{r}.json',json.dumps({'date':'2026-11-21','commit':'d7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501','counts':{}}))
+ for r in ['boundaries','dead-code','duplication']:put(f'scripts/quality/baselines/{r}.json',json.dumps({'date':'2026-11-21','commit':'1b335bface0686641850ea8cd23aa5c5dea4e45c','counts':{}}))
  for file,text in files.items():put(file,text)
  (d/'node_modules').symlink_to(root/'node_modules',target_is_directory=True)
  for args in [['init','-q'],['add','.'],['-c','user.name=Fixture','-c','user.email=fixture@example.invalid','commit','-qm','fixture']]:subprocess.run(['git',*args],cwd=d,check=True,capture_output=True)
@@ -25,7 +27,8 @@ for name,row,files,control in cases:
  for phase in ['deliberate-red','positive']:
   if phase=='positive':
    for file,text in control.items():put(file,text)
-  start=time.time();p=subprocess.run(['node',str(root/f'scripts/quality/{row}.mjs')],cwd=d,env=env,text=True,capture_output=True)
+  evidence=d/'.quality-output'/phase;evidence.mkdir(parents=True,exist_ok=True)
+  start=time.time();p=subprocess.run(['node',str(root/f'scripts/quality/{row}.mjs')],cwd=d,env={**env,'QUALITY_OUTPUT_DIR':str(evidence)},text=True,capture_output=True)
   output=(p.stdout+p.stderr).replace(str(d),'<fixture>').replace(str(root),'<repository>')
   artifact=f'{name}-{phase}.txt';(scratch/artifact).write_text(output)
   entry['runs'].append({'phase':phase,'command':f'node scripts/quality/{row}.mjs','exit':p.returncode,'seconds':round(time.time()-start,3),'artifact':artifact})

@@ -144,7 +144,20 @@ export const parse = parser(
       const summary = value.summary
       const sources = value.modules.map((item) => item.source)
       const dependencies = value.modules.flatMap((item) => item.dependencies)
+      const reportedEdges = summary.violations.every((violation) =>
+        value.modules.some(
+          (module) =>
+            module.source === violation.from &&
+            module.dependencies.some(
+              (dependency) =>
+                dependency.resolved === violation.to &&
+                dependency.rules?.some((rule) => rule.name === violation.rule.name),
+            ),
+        ),
+      )
       const valid =
+        reportedEdges &&
+        summary.error > 0 === dependencies.some((dependency) => !dependency.valid) &&
         summary.totalCruised === sources.length &&
         summary.totalDependenciesCruised === dependencies.length &&
         selected.every((file) => sources.includes(file)) &&

@@ -1,6 +1,7 @@
 import pathlib,subprocess,os,json,time
 root=pathlib.Path('/private/tmp/impl-24');out=pathlib.Path('/private/tmp/impl-24-scratch/mutations');out.mkdir(exist_ok=True)
 mutants=[
+('boundaries-ignore-graph','scripts/quality/boundaries.parser.mjs',"summary.error > 0 === dependencies.some((dependency) => !dependency.valid) &&","true &&"),
 ('boundaries-empty','scripts/quality/boundaries.mjs',"for (const violation of report.summary.violations)","for (const violation of [])"),
 ('dead-files','scripts/quality/dead-code.mjs',"for (const symbol of symbols)","for (const symbol of kind === 'files' ? [] : symbols)"),
 ('dead-exports','scripts/quality/dead-code.mjs',"for (const symbol of symbols)","for (const symbol of kind === 'exports' ? [] : symbols)"),
@@ -9,9 +10,9 @@ mutants=[
 ('duplication-changed-only','scripts/quality/duplication.mjs',"...selected,","...selected.filter((file) => changed.has(file)),"),
 ('new-files-allowance','scripts/quality/common.mjs',"if (!legacy.has(key.split('|')[0]))", "if (false && !legacy.has(key.split('|')[0]))"),
 ('paid-down-dead-code','scripts/quality/common.mjs',"if (full) {", "if (full && name !== 'dead-code') {"),
-('paid-down-duplication','scripts/quality/common.mjs',"if (!scope(key)) continue", "if (!scope(key) || name === 'duplication') continue"),
-('boundaries-no-ratchet','scripts/quality/boundaries.mjs',"ratchet('boundaries', counts, { commit: structuralCommit })", "console.log('boundaries: PASS')"),
-('dead-code-no-ratchet','scripts/quality/dead-code.mjs',"ratchet('dead-code', counts, { commit: structuralCommit })", "console.log('dead-code: PASS')"),
+('paid-down-duplication','scripts/quality/common.mjs',"scope(key)", "(scope(key) && name !== 'duplication')"),
+('boundaries-no-ratchet','scripts/quality/boundaries.mjs',"ratchet('boundaries', counts, { commit: structuralCommit, date: '2026-11-21' })", "console.log('boundaries: PASS')"),
+('dead-code-no-ratchet','scripts/quality/dead-code.mjs',"ratchet('dead-code', counts, { commit: structuralCommit, date: '2026-11-21' })", "console.log('dead-code: PASS')"),
 ('duplication-no-ratchet','scripts/quality/duplication.mjs',"ratchet('duplication', counts, {", "console.log('duplication: PASS', {"),
 ('boundaries-permissive','scripts/quality/boundaries.parser.mjs',".strict()", ".passthrough()"),
 ('dead-code-permissive','scripts/quality/dead-code.parser.mjs',".strict()", ".passthrough()"),

@@ -22,7 +22,7 @@ function fixture(files) {
     'scripts/quality/baselines/boundaries.json',
     JSON.stringify({
       date: '2026-11-21',
-      commit: 'd7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501',
+      commit: '1b335bface0686641850ea8cd23aa5c5dea4e45c',
       counts: {},
     }),
   )
@@ -30,7 +30,7 @@ function fixture(files) {
     'scripts/quality/baselines/dead-code.json',
     JSON.stringify({
       date: '2026-11-21',
-      commit: 'd7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501',
+      commit: '1b335bface0686641850ea8cd23aa5c5dea4e45c',
       counts: {},
     }),
   )
@@ -38,7 +38,7 @@ function fixture(files) {
     'scripts/quality/baselines/duplication.json',
     JSON.stringify({
       date: '2026-11-21',
-      commit: 'd7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501',
+      commit: '1b335bface0686641850ea8cd23aa5c5dea4e45c',
       counts: {},
     }),
   )
@@ -184,7 +184,7 @@ it('requires paid-down inherited dead-code allowances to be lowered', () => {
       'scripts/quality/baselines/dead-code.json',
       JSON.stringify({
         date: '2026-11-21',
-        commit: 'd7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501',
+        commit: '1b335bface0686641850ea8cd23aa5c5dea4e45c',
         counts,
       }),
     )
@@ -234,7 +234,7 @@ it('rejects a new file even if a local dead-code allowance was added', () => {
     'scripts/quality/baselines/dead-code.json',
     JSON.stringify({
       date: '2026-11-21',
-      commit: 'd7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501',
+      commit: '1b335bface0686641850ea8cd23aa5c5dea4e45c',
       counts: { [`${file}|files|${file}`]: 1 },
     }),
   )
@@ -267,7 +267,7 @@ it('requires removed duplication debt to lower both affected file allowances', (
     'scripts/quality/baselines/duplication.json',
     JSON.stringify({
       date: '2026-11-21',
-      commit: 'd7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501',
+      commit: '1b335bface0686641850ea8cd23aa5c5dea4e45c',
       counts: {},
     }),
   )

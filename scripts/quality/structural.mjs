@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { sourceFiles } from './common.mjs'
 
-export const structuralCommit = 'd7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501'
+export const structuralCommit = '1b335bface0686641850ea8cd23aa5c5dea4e45c'
 export const configuration = (name) => fileURLToPath(new URL(name, import.meta.url))
 export function structuralFiles() {
   return sourceFiles().filter(
