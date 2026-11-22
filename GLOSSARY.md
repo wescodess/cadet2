@@ -80,6 +80,18 @@ _Avoid_: Practice administrator, Case assignee, owner of the Client
 A Client's statement that they have authority to provide specified information about a dependant for a stated purpose. It does not make the Client that person's Representative or permit consent for another adult's Case.
 _Avoid_: Household consent, family account, presumed spousal permission
 
+**Intake**:
+A Client's facts supplied for one Case or a chosen solo utility, with a stated purpose for each question. It is neither an immigration application nor a professional conclusion.
+_Avoid_: Eligibility application, complete immigration profile
+
+**Language result**:
+The reported scores from one attempt at a specified language test, including any identified correction to its report. Scores from different attempts are separate results.
+_Avoid_: Overall CLB, best combined scores
+
+**Language conversion**:
+The mapping of one language ability's reported test score to an English CLB or French NCLC level or published band under an identified official equivalency chart. It does not establish program eligibility or the result's authenticity.
+_Avoid_: Language eligibility, overall language score, French CLB
+
 **Retention hold**:
 A documented requirement to preserve specified records while a legal or rights matter is resolved. It does not authorize their use for new Case work.
 _Avoid_: Indefinite archive, restored Consent
