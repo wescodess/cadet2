@@ -18,7 +18,7 @@ const originalArgv = process.argv
 beforeEach(() => {
   vi.resetModules()
   options = {}
-  directory = mkdtempSync(resolve(common.outputDir, 'row-fixture-'))
+  directory = mkdtempSync(resolve('.quality-output', 'row-fixture-'))
   source = join(directory, 'fixture.ts')
   writeFileSync(source, 'export const fixture = 1\n')
   run = vi.fn(() => success)

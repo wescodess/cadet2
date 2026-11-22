@@ -108,7 +108,7 @@ function outcome(name, record, signal) {
   return record.status
 }
 
-function observe(child, request) {
+function observe(child, request, captureBudget) {
   return new Promise((resolve) => {
     const chunks = { stdout: [], stderr: [] },
       ended = { stdout: false, stderr: false }
@@ -237,7 +237,8 @@ function observe(child, request) {
     for (const name of ['stdout', 'stderr']) {
       child[name].on('data', (data) => {
         bytes += data.length
-        if (bytes > maxBytes) stop('exceeded its 64 MiB output budget')
+        captureBudget.bytes += data.length
+        if (captureBudget.bytes > maxBytes) stop('exceeded its 64 MiB output budget')
         else chunks[name].push(data)
       })
       child[name].once('end', () => {
@@ -253,7 +254,11 @@ export async function runScanner(
   name,
   command,
   args,
-  { budgetMs = scannerBudgets[name], deadlineMs = now() + budgetMs } = {},
+  {
+    budgetMs = scannerBudgets[name],
+    deadlineMs = now() + budgetMs,
+    captureBudget = { bytes: 0 },
+  } = {},
 ) {
   if (
     !/^[a-z][a-z0-9-]*$/.test(name) ||
@@ -261,7 +266,10 @@ export async function runScanner(
     budgetMs <= 0 ||
     !Number.isFinite(deadlineMs) ||
     !Array.isArray(args) ||
-    args.some((arg) => typeof arg !== 'string')
+    args.some((arg) => typeof arg !== 'string') ||
+    !Number.isSafeInteger(captureBudget.bytes) ||
+    captureBudget.bytes < 0 ||
+    captureBudget.bytes > maxBytes
   )
     throw new Error(
       'A scanner requires a finite positive execution budget and a valid name/arguments',
@@ -293,7 +301,7 @@ export async function runScanner(
     scope: 'process_group',
     state: 'running',
   })
-  const observed = await observe(child, request)
+  const observed = await observe(child, request, captureBudget)
   let record
   try {
     record = terminalRecord(request, child)
@@ -316,6 +324,7 @@ export async function runScanner(
     error,
     groupTerminated: observed.gone,
     outputBytes: observed.bytes,
+    rowOutputBytes: captureBudget.bytes,
     streamsDrained: observed.ended.stdout && observed.ended.stderr,
     supervisorStatus: observed.supervisorStatus,
     supervisorSignal: observed.supervisorSignal,

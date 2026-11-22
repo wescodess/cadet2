@@ -15,13 +15,14 @@ beforeEach(() => {
     ...common,
     outputDir: directory,
     sourceFiles: () => population,
-    git: () => 'base',
+    git: (...args) =>
+      ['ls-files', 'rev-parse', 'write-tree'].includes(args[0]) ? common.git(...args) : 'base',
     main: (fn) => {
       completion = Promise.resolve().then(fn)
     },
   }))
   vi.doMock('../../scripts/quality/scanner.mjs', () => ({
-    scannerBudgets: { duplication: 120000 },
+    scannerBudgets: { duplication: 120000, 'dead-code': 120000 },
     runScanner: (name) => {
       if (name === 'duplication-token-census' && result.status === 0) {
         writeFileSync(

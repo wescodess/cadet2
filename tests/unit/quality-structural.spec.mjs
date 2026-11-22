@@ -1,23 +1,35 @@
 // @vitest-environment node
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { afterEach, expect, it, vi } from 'vitest'
+import { authorityFixture } from '../support/quality-authority-fixture.mjs'
 
 vi.setConfig({ testTimeout: 30000 })
 
 const root = resolve('.')
 const directories = []
 function fixture(files) {
-  const directory = mkdtempSync(join(tmpdir(), 'structural-'))
+  const canonical = Object.keys(files).some((file) => file.startsWith('convex/'))
+    ? authorityFixture({})
+    : null
+  const directory = canonical?.directory ?? mkdtempSync(join(tmpdir(), 'structural-'))
   directories.push(directory)
   const put = (file, content) => {
     mkdirSync(dirname(join(directory, file)), { recursive: true })
     writeFileSync(join(directory, file), content)
   }
   put('.gitignore', 'node_modules/\n.quality-output/\n')
-  put('package.json', '{"name":"fixture","type":"module","private":true}')
+  put(
+    'package.json',
+    JSON.stringify({
+      name: 'fixture',
+      type: 'module',
+      private: true,
+      ...(canonical ? { dependencies: { convex: '^1.32.0' } } : {}),
+    }),
+  )
   put(
     'scripts/quality/baselines/boundaries.json',
     JSON.stringify({
@@ -42,8 +54,14 @@ function fixture(files) {
       counts: {},
     }),
   )
+  if (
+    canonical &&
+    Object.hasOwn(files, 'convex/_generated/server.ts') &&
+    !Object.hasOwn(files, 'convex/_generated/server.js')
+  )
+    rmSync(join(directory, 'convex/_generated/server.js'))
   for (const [file, content] of Object.entries(files)) put(file, content)
-  symlinkSync(join(root, 'node_modules'), join(directory, 'node_modules'), 'dir')
+  if (!canonical) symlinkSync(join(root, 'node_modules'), join(directory, 'node_modules'), 'dir')
   for (const args of [
     ['init', '-q'],
     ['add', '.'],
@@ -78,6 +96,10 @@ function row(name, directory, extra = {}, args = []) {
     maxBuffer: 16 * 1024 * 1024,
   })
   return { status: result.status, output: result.stdout + result.stderr }
+}
+function track(directory, ...files) {
+  const result = spawnSync('git', ['add', ...files], { cwd: directory, encoding: 'utf8' })
+  expect(result.status, result.stderr).toBe(0)
 }
 afterEach(() => {
   for (const directory of directories.splice(0)) rmSync(directory, { recursive: true, force: true })
@@ -199,7 +221,7 @@ for (const location of ['shared', 'convex', 'convex/helpers']) {
   it('reports ordinary unused helpers under ' + location + ' and admits an actual consumer', () => {
     const file = `${location}/helper.ts`
     const { directory, put } = fixture({
-      'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+      'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
       'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
       [file]: 'export const value = 7',
     })
@@ -223,7 +245,7 @@ it('admits registered Convex exports and framework defaults but checks their unr
     'httpAction',
   ]
   const { directory, put } = fixture({
-    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
     'index.ts': 'console.log(1)',
     'convex/_generated/server.ts': `export { ${registrations.map((r) => `${r}Generic as ${r}`).join(', ')} } from 'convex/server'`,
     'convex/functions.ts': `import { ${registrations.join(', ')} } from './_generated/server'\n${registrations.map((r, i) => `export const entry${i} = ${r}(${r === 'httpAction' ? 'async () => new Response("control")' : '{ args: {}, handler: () => null }'})`).join('\n')}\nexport const unused = 1`,
@@ -250,7 +272,7 @@ it('admits registered Convex exports and framework defaults but checks their unr
 
 it('rejects identical unused defaults outside the actual Convex component root', () => {
   const { directory, put } = fixture({
-    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
     'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
   })
   for (const [name, source] of [
@@ -264,6 +286,7 @@ it('rejects identical unused defaults outside the actual Convex component root',
   ]) {
     const file = `convex/unmounted/${name}`
     put(file, source)
+    track(directory, file)
     const denied = row('dead-code', directory)
     expect(denied.output).toContain(`${file}|files|${file}`)
     expect(denied.status).toBe(1)
@@ -275,7 +298,7 @@ it('rejects identical unused defaults outside the actual Convex component root',
 it('admits direct registrar aliases but rejects local lookalikes, wrappers and skipped modules', () => {
   const file = 'convex/functions.ts'
   const { directory, put } = fixture({
-    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
     'index.ts': 'console.log(1)',
     [file]:
       "import { queryGeneric as ask } from 'convex/server'; export const entry = ask({ args: {}, handler: () => null })",
@@ -305,13 +328,13 @@ it('admits direct registrar aliases but rejects local lookalikes, wrappers and s
 
 it('checks canonical generated mappings and rejects unsupported functions-root configuration', () => {
   const { directory, put } = fixture({
-    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
     'index.ts': 'console.log(1)',
     'convex/_generated/server.js': 'export const query = (value) => value',
     'convex/functions.ts':
       "import { query } from './_generated/server'; export const entry = query({})",
   })
-  expect(row('dead-code', directory).output).toContain('generated builder mapping')
+  expect(row('dead-code', directory).output).toContain('generated_mapping')
   const builders = [
     'query',
     'internalQuery',
@@ -329,6 +352,7 @@ it('checks canonical generated mappings and rejects unsupported functions-root c
   rmSync(join(directory, 'convex/_generated/server.js'))
   rmSync(join(directory, 'convex/functions.ts'))
   put('convex.json', '{"functions":"other"}')
+  track(directory, 'convex.json')
   expect(row('dead-code', directory).output).toContain('functions root')
 })
 
@@ -346,7 +370,7 @@ it('rejects an unused dependency and admits an actual dependency import', () => 
 
 it('rejects TypeScript configuration that substitutes a local lookalike for canonical registrars', () => {
   const { directory, put } = fixture({
-    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
     'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
     'tsconfig.json':
       '{"compilerOptions":{"baseUrl":".","paths":{"convex/server":["shared/lookalike.ts"]}}}',
@@ -357,7 +381,7 @@ it('rejects TypeScript configuration that substitutes a local lookalike for cano
   const denied = row('dead-code', directory)
   expect(denied.output).toContain('Unsupported Convex 1.32.0 authority')
   expect(denied.status).toBe(1)
-  put('tsconfig.json', '{"compilerOptions":{"strict":true}}')
+  put('tsconfig.json', readFileSync(join(root, 'tsconfig.json')))
   put(
     'index.ts',
     "import { v } from 'convex/values'; import { queryGeneric } from './shared/lookalike'; console.log(v.string(), queryGeneric(1))",
@@ -376,7 +400,7 @@ it('refuses ignored untracked component configuration that changes discovery of 
     'httpAction',
   ]
   const { directory, put } = fixture({
-    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
     'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
     'convex/_generated/server.ts': `export { ${builders.map((name) => `${name}Generic as ${name}`).join(', ')} } from 'convex/server'`,
     'convex/nested/functions.ts':
@@ -389,7 +413,9 @@ it('refuses ignored untracked component configuration that changes discovery of 
     'convex/nested/convex.config.ts',
     "import { defineComponent } from 'convex/server'; export default defineComponent('unmounted')",
   )
-  expect(row('dead-code', directory).output).toContain('outside the trusted Git source population')
+  expect(row('dead-code', directory).output).toContain(
+    'source_identity default/component outside tracked source population',
+  )
 })
 
 it.each(
@@ -407,9 +433,8 @@ it.each(
     'httpAction',
   ]
   const { directory, put } = fixture({
-    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
     'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
-    'convex/tsconfig.json': '{}',
     'convex/_generated/server.js': `export { ${builders.map((name) => `${name}Generic as ${name}`).join(', ')} } from 'convex/server'`,
     'convex/nested/functions.ts':
       scope === '_generated'
@@ -432,7 +457,7 @@ it.each(
 
 it('validates .js root defaults, rejects ambiguous slots and refuses undeclared component installation', () => {
   const { directory, put } = fixture({
-    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"^1.32.0"}}',
     'index.ts': 'console.log(1)',
     'convex/schema.js':
       "import { defineSchema as schema } from 'convex/server'; export default schema({})",
@@ -440,10 +465,10 @@ it('validates .js root defaults, rejects ambiguous slots and refuses undeclared 
   })
   expect(row('dead-code', directory).status).toBe(0)
   put('convex/auth.config.ts', 'export default { providers: [] }')
-  expect(row('dead-code', directory).output).toContain('ambiguous .ts/.js authority')
+  expect(row('dead-code', directory).output).toContain('source_identity ambiguous default siblings')
   rmSync(join(directory, 'convex/auth.config.ts'))
   put('convex/auth.config.js', 'export default { unrelated: true }')
-  expect(row('dead-code', directory).output).toContain('providers array')
+  expect(row('dead-code', directory).output).toContain('value_role auth providers')
   put('convex/auth.config.js', 'export default { providers: [] }')
   put(
     'convex/convex.config.ts',
@@ -453,7 +478,10 @@ it('validates .js root defaults, rejects ambiguous slots and refuses undeclared 
     'convex/local/convex.config.ts',
     "import { defineComponent } from 'convex/server'; export default defineComponent('local')",
   )
-  expect(row('dead-code', directory).output).toContain('component installation requires')
+  track(directory, 'convex/convex.config.ts', 'convex/local/convex.config.ts')
+  const installed = row('dead-code', directory)
+  expect(installed.status).toBe(1)
+  expect(installed.output).toContain('import_binding')
 })
 
 it('accounts for the declared QA executable without admitting adjacent unused helpers or exports', () => {

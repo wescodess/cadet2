@@ -4,6 +4,7 @@
     "app/auth.config.ts",
     "server/auth.config.ts",
     "scripts/quality/knip.scanner.mjs",
+    "scripts/quality/convex-authority.scanner.mjs",
     "scripts/quality/scanner-supervisor.mjs",
     "qa/acceptance/28/accounts.mjs",
     "qa/acceptance/28/app-runtime.mjs",

@@ -1,16 +1,21 @@
 // @vitest-environment node
-import { spawn } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 import { clearTimeout } from 'node:timers'
 import { afterEach, expect, it } from 'vitest'
-import { scannerTestResources, writeScannerWorker } from '../support/quality-scanner-worker.mjs'
+import {
+  scannerSettled,
+  scannerReady,
+  scannerTestResources,
+  writeScannerWorker,
+} from '../support/quality-scanner-worker.mjs'
 
 const verifier = new URL('../../scripts/quality/verify.mjs', import.meta.url)
 const scanner = new URL('../../scripts/quality/scanner.mjs', import.meta.url).href
-const { temporary, owned, descendants, cleanup } = scannerTestResources()
+const resources = scannerTestResources()
+const { temporary, cleanup } = resources
 const rows = [
   'typecheck',
   'lint',
@@ -30,15 +35,6 @@ async function until(fn) {
   const end = Date.now() + 5000
   while (!fn() && Date.now() < end) await delay(20)
   expect(fn()).toBe(true)
-}
-function alive(pid) {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    if (error.code === 'ESRCH') return false
-    throw error
-  }
 }
 
 for (const mode of ['timeout', 'SIGTERM']) {
@@ -71,12 +67,11 @@ for (const mode of ['timeout', 'SIGTERM']) {
           ),
         }),
       )
-      const child = spawn(process.execPath, [verifier.pathname], {
+      const child = resources.spawn(process.execPath, [verifier.pathname], {
         detached: true,
         cwd: directory,
         env: { ...process.env, QUALITY_OUTPUT_DIR: join(directory, 'evidence') },
       })
-      owned.push(child)
       let output = ''
       child.stdout.on('data', (data) => {
         output += data
@@ -86,18 +81,12 @@ for (const mode of ['timeout', 'SIGTERM']) {
       })
       const completion = new Promise((resolve) => child.once('close', resolve))
       const watchdog = setTimeout(() => {
-        try {
-          process.kill(-child.pid, 'SIGKILL')
-        } catch (error) {
-          if (error.code !== 'ESRCH') throw error
-        }
+        resources.stop(child).catch(() => {})
       }, 9000)
       try {
-        await until(() => existsSync(join(directory, '2.pid')))
-        const pids = [0, 1, 2].map((depth) =>
-          Number(readFileSync(join(directory, depth + '.pid'), 'utf8')),
-        )
-        descendants.push(...pids)
+        await until(() => Boolean(scannerReady(directory)))
+        const records = scannerReady(directory)
+        const pids = records.map((record) => record.pid)
         if (mode === 'SIGTERM') child.kill('SIGTERM')
         await completion
         const record = JSON.parse(
@@ -112,7 +101,7 @@ for (const mode of ['timeout', 'SIGTERM']) {
           mode === 'timeout' ? 'pass' : 'not_run',
         )
         await until(() => existsSync(join(directory, 'evidence/aggregate-hang-execution.json')))
-        await until(() => pids.every((pid) => !alive(pid)))
+        await until(() => scannerSettled(directory))
         console.info(
           JSON.stringify({ mode, record, pids, cleanup: 'all scanner descendants exited', output }),
         )

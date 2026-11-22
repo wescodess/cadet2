@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { count, json, main, outputDir, ratchet, writeJSON } from './common.mjs'
-import { runScanner } from './scanner.mjs'
+import { runScanner, scannerBudgets } from './scanner.mjs'
 import {
   configuration,
   ignoredStructuralFiles,
@@ -8,14 +8,21 @@ import {
   structuralFiles,
 } from './structural.mjs'
 import { rejectKnipSuppressions } from './structural-preflight.mjs'
-import { convexEntries } from './convex-entries.mjs'
+import { convexEntries, verifyConvexEntries } from './convex-entries.mjs'
 import { executableDefaults } from './executable-entries.mjs'
 import { parse } from './dead-code.parser.mjs'
 
 main(async () => {
+  const budgetMs = scannerBudgets['dead-code']
+  const execution = {
+    budgetMs,
+    deadlineMs: Number(process.hrtime.bigint()) / 1e6 + budgetMs,
+    captureBudget: { bytes: 0 },
+  }
   const selected = structuralFiles().filter((file) => !file.startsWith('docs/'))
   rejectKnipSuppressions(selected)
-  const framework = [...convexEntries(selected), ...executableDefaults(selected)]
+  const authority = await convexEntries(selected, execution)
+  const framework = [...authority.entries, ...executableDefaults(selected)]
   const admitted = new Set(framework.map(({ file, name }) => `${file}|${name}`))
   for (const file of ['app/auth.config.ts', 'server/auth.config.ts'])
     admitted.add(`${file}|default`)
@@ -33,14 +40,16 @@ main(async () => {
     ],
     project: selected.map((file) => file.replace(/([*?[\]{}()!+@])/g, '\\$1')),
   })
-  const result = await runScanner('dead-code', process.execPath, [
-    configuration('knip.scanner.mjs'),
-    config,
-    inventory,
-  ])
+  const result = await runScanner(
+    'dead-code',
+    process.execPath,
+    [configuration('knip.scanner.mjs'), config, inventory],
+    execution,
+  )
   if (!result.stdout.trim() && result.stderr) throw new Error(result.stderr.trim())
   const report = parse({ status: result.status, stdout: result.stdout })
   writeJSON(`${outputDir}/dead-code.json`, report)
+  verifyConvexEntries(authority)
   const counts = {}
   for (const { file, ...issues } of report.issues)
     for (const [kind, symbols] of Object.entries(issues))
