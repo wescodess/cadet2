@@ -2,7 +2,9 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync, writeFileSync, mkdirSync, mkdtempSync } from 'node:fs'
 import { relative } from 'node:path'
 
-export const baselineCommit = 'fe2b4a4e4f8b4b861fb5c92661b9e411a84ef0b3'
+import { baselineCommit } from './baseline-commit.mjs'
+
+export { baselineCommit }
 export const writingBaseline = process.argv.includes('--write-baseline')
 if (
   (Object.hasOwn(process.env, 'CI') || Object.hasOwn(process.env, 'GITHUB_ACTIONS')) &&

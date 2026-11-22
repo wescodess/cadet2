@@ -2,8 +2,20 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import vue from 'eslint-plugin-vue'
 import sonarjs from 'eslint-plugin-sonarjs'
+import { spawnSync } from 'node:child_process'
+
+import { baselineCommit } from './scripts/quality/baseline-commit.mjs'
+import relay from './scripts/quality/design-rule.mjs'
 
 const typedFiles = ['**/*.{ts,tsx,mts,cts,vue}']
+
+function appFilesAt(commit) {
+  const result = spawnSync('git', ['ls-tree', '-r', '--name-only', commit, '--', 'app'], {
+    encoding: 'utf8',
+  })
+  if (result.status !== 0) throw new Error(`Design ratchet needs ${commit}: ${result.stderr}`)
+  return result.stdout.split('\n').filter(Boolean)
+}
 
 export default [
   {
@@ -64,5 +76,11 @@ export default [
         setTimeout: 'readonly',
       },
     },
+  },
+  {
+    files: ['app/**/*.{vue,ts,js}'],
+    ignores: appFilesAt(baselineCommit),
+    plugins: { relay },
+    rules: { 'relay/design': 'error' },
   },
 ]
