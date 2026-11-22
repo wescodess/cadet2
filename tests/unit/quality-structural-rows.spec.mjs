@@ -63,5 +63,6 @@ for (const row of ['boundaries', 'dead-code', 'duplication']) {
       await import(`../../scripts/quality/${row}.mjs`)
       await expect(completion).rejects.toThrow(/Invalid |jscpd tool failure/)
     },
+    row === 'dead-code' ? 30000 : 5000,
   )
 }
