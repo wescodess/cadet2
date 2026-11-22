@@ -5,9 +5,9 @@ import { resolve } from 'node:path'
 export function designAuthority(root = process.cwd()) {
   const expected = {
     'docs/design/system/tokens.css':
-      'acc25cac68559c71f669972364760ed5e62f529003bf8e2888d0db2b8e331f69',
+      'bd309a16d78c9fb2b57a757dbe8fa7e3f7de268c20656273e1ddb1c85363d5e0',
     'docs/design/system/tokens.json':
-      '086751bb520eb659e1fb137c7507f715a611d752bcccfe6ce64aa35feadecc49',
+      '35ab9564dc6a7e51f86ed79561cb4f53c08e73666e38faa1c0cd5dc457dc4bca',
   }
   for (const [file, hash] of Object.entries(expected)) {
     const bytes = readFileSync(resolve(root, file))

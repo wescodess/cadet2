@@ -80,6 +80,13 @@ describe('the app theme matches the approved record value for value', () => {
     expect(pick(app, selector, Object.keys(expected))).toEqual(expected)
   })
 
+  it('records the approved button and input base shadows identically in both themes', () => {
+    for (const theme of [record.theme.light, record.theme.dark]) {
+      expect(theme['shadow-button-base']).toBe('0 1px 0 rgba(0,0,0,.04)')
+      expect(theme['shadow-input-base']).toBe('inset 0 1px 1px rgba(0,0,0,.03)')
+    }
+  })
+
   it('declares the four turn aliases in both spellings, pointing at their roles', () => {
     const inline = block(app, selectors.inline)
     for (const [turn, role] of Object.entries(record.turn)) {

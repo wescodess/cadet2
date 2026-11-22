@@ -2,7 +2,7 @@
 
 Date: 2026-11-17
 Gate: UI design gate, system creation (round 1: five options; round 2: three variations)
-Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)), 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19)) and 2026-11-22 (see [Proof timing amendment](#proof-timing-amendment-2026-11-22))
+Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)), 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19)) and 2026-11-22 (see [Proof timing amendment](#proof-timing-amendment-2026-11-22) and [Shadow alias amendment](#shadow-alias-amendment-2026-11-22))
 Approved specimen: [approved.html](approved.html)
 Implementer guide: [DESIGN.md](../../../DESIGN.md)
 Tokens: [tokens.css](tokens.css), [tokens.json](tokens.json) (not yet wired into the app)
@@ -215,6 +215,18 @@ Before each UI merge, the final-head browser comparison, actual 200% browser zoo
 A required platform session that cannot yet be provided stays blocked/unrun on the ticket, naming the exact head, missing resource and follow-up owner. VoiceOver on macOS and iOS, NVDA on Windows and TalkBack on Android all remain mandatory before the first private pilot activation and release sign-off. Neither gate may proceed with a missing or failed required session.
 
 This changes proof timing only. It does not change tokens, appearance, anatomy, semantics, the required platform set or the accessibility behavior above. On the same date, the owner selected “Mac VoiceOver only (Recommended)” for standing QA access to VoiceOver in Safari on this Mac, using synthetic owned sessions, an exclusive browser lock and restoration of its prior state. The owner handles any required macOS permission prompts. No additional platform availability is implied.
+
+## Shadow alias amendment 2026-11-22
+
+The owner was asked:
+
+> Approve the two token names --shadow-button-base: 0 1px 0 rgba(0,0,0,.04) and --shadow-input-base: inset 0 1px 1px rgba(0,0,0,.03), in both themes, adding names to the locked token records and updating their authority check to restore the already-approved shadows.
+
+The owner answered with these exact words:
+
+> Approve both exact aliases and record update (Recommended)
+
+`tokens.css` and `tokens.json` now carry `--shadow-button-base: 0 1px 0 rgba(0,0,0,.04)` and `--shadow-input-base: inset 0 1px 1px rgba(0,0,0,.03)` in both the light and dark themes, and the token authority check pins the updated bytes of both files. These are the base shadows already specified in `DESIGN.md` section 7 and `approved.html` (lines 288 and 296), now named so the app can reference them under the token-only colour rule. `approved.html`, every other token value, the palette, the earlier approvals and the Holder rules are unchanged, and no other raw-colour exemption is granted.
 
 ## Discrepancies between the approved specimen and the critiques
 

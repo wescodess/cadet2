@@ -152,6 +152,14 @@
     border-color: transparent;
   }
 
+  &[data-slot='button']:not([data-variant]),
+  &[data-slot='button'][data-variant='default'],
+  &[data-slot='button'][data-variant='secondary'],
+  &[data-slot='button'][data-variant='ghost'],
+  &[data-slot='button'][data-variant='destructive'] {
+    box-shadow: var(--shadow-button-base);
+  }
+
   &[data-slot='button']:not([data-size^='icon']):has(> svg) {
     padding-inline: var(--c-px);
   }
@@ -207,6 +215,7 @@
 
   &:not([data-slot='input-group-control']) {
     background-color: var(--card);
+    box-shadow: var(--shadow-input-base);
   }
 
   &[aria-invalid='true'] {

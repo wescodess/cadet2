@@ -215,8 +215,8 @@ A 4 px base with 2 px steps for dense rows: **2, 4, 6, 8, 12, 16, 20, 24, 32**. 
 
 Flat surfaces separated by 1 px hairlines (`--border`). One elevation shadow, `--shadow-overlay`, for anything that floats: popovers, menus, dialogs and toasts. Dialogs also carry a 1 px `--border` and sit on `--scrim`. Cards and rows never get a drop shadow. The specimen uses `box-shadow` for exactly these other things:
 
-- Buttons: a 1 px base line, `0 1px 0 rgba(0,0,0,.04)`.
-- Inputs: `inset 0 1px 1px rgba(0,0,0,.03)`; an invalid input instead gets a 3 px halo of `--destructive` at 18%.
+- Buttons: a 1 px base line, `0 1px 0 rgba(0,0,0,.04)`, exposed as `--shadow-button-base`.
+- Inputs: `inset 0 1px 1px rgba(0,0,0,.03)`, exposed as `--shadow-input-base`; an invalid input instead gets a 3 px halo of `--destructive` at 18%.
 - Edge rules, drawn as inset shadows: 3 px on the left for the signed-plan header (`--seal`), deadline items (`--urgent` within 90 days, `--caution` within 180 days or date unknown) and changed facts (`--caution`); 3 px at the bottom of turn-bar segments (turn colour); 2 px on the left of the selected queue row (`--primary`, graphite; never `--ring`).
 
 ## 8. Focus

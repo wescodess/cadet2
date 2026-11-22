@@ -57,6 +57,32 @@ describe('Relay focus, motion and edges', () => {
     expect(edge).not.toContain('--ring')
   })
 
+  it('gives the four specimen button variants the approved base shadow, leaving outline and link alone', () => {
+    const button = relay.slice(relay.indexOf('@utility relay-button {'))
+    const shadowed = button.slice(0, button.indexOf('box-shadow: var(--shadow-button-base);'))
+    const selector = shadowed.slice(shadowed.lastIndexOf('}') + 1)
+    for (const variant of [
+      ':not([data-variant])',
+      "[data-variant='default']",
+      "[data-variant='secondary']",
+      "[data-variant='ghost']",
+      "[data-variant='destructive']",
+    ])
+      expect(selector).toContain(`&[data-slot='button']${variant}`)
+    expect(selector).not.toMatch(/outline|link/)
+  })
+
+  it('gives standalone inputs the approved inset base and keeps the invalid halo on top', () => {
+    const block = relay.slice(relay.indexOf('@utility relay-input {'))
+    const base = block.slice(block.indexOf("&:not([data-slot='input-group-control']) {"))
+    expect(base.slice(0, base.indexOf('}'))).toContain('box-shadow: var(--shadow-input-base);')
+    const halo = block.indexOf(
+      'box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 18%, transparent);',
+    )
+    expect(halo).toBeGreaterThan(block.indexOf('box-shadow: var(--shadow-input-base);'))
+    expect(rule(relay, '@utility relay-textarea')).not.toContain('--shadow-input-base')
+  })
+
   it('maps every turn and the no-turn style onto existing tokens only', () => {
     for (const [turn, role] of [
       ['client', 'caution'],
