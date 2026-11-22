@@ -220,7 +220,7 @@ This changes proof timing only. It does not change tokens, appearance, anatomy, 
 
 The owner was asked:
 
-> Approve the two token names --shadow-button-base: 0 1px 0 rgba(0,0,0,.04) and --shadow-input-base: inset 0 1px 1px rgba(0,0,0,.03), in both themes, adding names to the locked token records and updating their authority check to restore the already-approved shadows.
+> Separately, approve the two token names shown in the shadow comparison: `--shadow-button-base: 0 1px 0 rgba(0,0,0,.04)` and `--shadow-input-base: inset 0 1px 1px rgba(0,0,0,.03)`, in both themes? These values are already approved. Adding the names requires updating the locked token records and their authority check so the app can restore those shadows.
 
 The owner answered with these exact words:
 
