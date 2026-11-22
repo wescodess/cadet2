@@ -392,6 +392,44 @@ it('refuses ignored untracked component configuration that changes discovery of 
   expect(row('dead-code', directory).output).toContain('outside the trusted Git source population')
 })
 
+it.each(
+  ['nested', '_generated'].flatMap((scope) =>
+    ['tracked', 'untracked', 'ignored'].map((population) => [scope, population]),
+  ),
+)('rejects effective nested TypeScript configuration at %s scope (%s)', (scope, population) => {
+  const builders = [
+    'query',
+    'internalQuery',
+    'mutation',
+    'internalMutation',
+    'action',
+    'internalAction',
+    'httpAction',
+  ]
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
+    'convex/tsconfig.json': '{}',
+    'convex/_generated/server.js': `export { ${builders.map((name) => `${name}Generic as ${name}`).join(', ')} } from 'convex/server'`,
+    'convex/nested/functions.ts':
+      scope === '_generated'
+        ? "import { query as ask } from '../_generated/server'; export const entry = ask({ args: {}, handler: () => null })"
+        : "import { queryGeneric as ask } from 'convex/server'; export const entry = ask({ args: {}, handler: () => null })",
+  })
+  const admitted = row('dead-code', directory)
+  expect(admitted.status, admitted.output).toBe(0)
+  const config = `convex/${scope}/tsconfig.json`
+  put(config, '{}')
+  if (population === 'tracked') {
+    const added = spawnSync('git', ['add', config], { cwd: directory, encoding: 'utf8' })
+    expect(added.status, added.stderr).toBe(0)
+  }
+  if (population === 'ignored') put('.gitignore', `node_modules/\n.quality-output/\n${config}\n`)
+  const denied = row('dead-code', directory)
+  expect(denied.status, denied.output).toBe(1)
+  expect(denied.output).toContain(`Unsupported Convex 1.32.0 authority in ${config}`)
+})
+
 it('validates .js root defaults, rejects ambiguous slots and refuses undeclared component installation', () => {
   const { directory, put } = fixture({
     'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',

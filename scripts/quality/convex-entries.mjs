@@ -118,23 +118,32 @@ function appRoot() {
     )
 }
 function compilerAuthority(files) {
-  if (!files.some((file) => file.startsWith(`${root}/`))) return
-  const configPath = ts.findConfigFile(resolve(root), existsSync)
-  if (!configPath) return
-  const file = relative(process.cwd(), configPath)
-  if (!['convex/tsconfig.json', 'tsconfig.json'].includes(file) || !gitFiles().includes(file))
-    unsupported(file, 'compiler authority must be an exact Git-selected app configuration')
-  if (!lstatSync(file).isFile() || realpathSync(file) !== resolve(file))
-    unsupported(file, 'compiler authority cannot use symlink aliases')
-  const { config, error } = ts.readConfigFile(file, (path) => readFileSync(path, 'utf8'))
-  if (error) unsupported(file, 'invalid TypeScript configuration')
-  const options = config.compilerOptions ?? {}
-  const substitutions = ['paths', 'baseUrl', 'rootDirs', 'moduleSuffixes', 'customConditions']
-  if (config.extends !== undefined || substitutions.some((key) => options[key] !== undefined))
-    unsupported(
-      file,
-      'canonical registrar imports require compiler configuration without inheritance or module substitutions',
-    )
+  const configurations = new Set(
+    files
+      .filter((file) => file.startsWith(`${root}/`))
+      .map((file) =>
+        ts.findConfigFile(dirname(resolve(file)), (path) =>
+          Boolean(lstatSync(path, { throwIfNoEntry: false })),
+        ),
+      )
+      .filter(Boolean),
+  )
+  for (const configPath of configurations) {
+    const file = relative(process.cwd(), configPath)
+    if (!['convex/tsconfig.json', 'tsconfig.json'].includes(file) || !gitFiles().includes(file))
+      unsupported(file, 'compiler authority must be an exact Git-selected app configuration')
+    if (!lstatSync(file).isFile() || realpathSync(file) !== resolve(file))
+      unsupported(file, 'compiler authority cannot use symlink aliases')
+    const { config, error } = ts.readConfigFile(file, (path) => readFileSync(path, 'utf8'))
+    if (error) unsupported(file, 'invalid TypeScript configuration')
+    const options = config.compilerOptions ?? {}
+    const substitutions = ['paths', 'baseUrl', 'rootDirs', 'moduleSuffixes', 'customConditions']
+    if (config.extends !== undefined || substitutions.some((key) => options[key] !== undefined))
+      unsupported(
+        file,
+        'canonical registrar imports require compiler configuration without inheritance or module substitutions',
+      )
+  }
 }
 function generatedExport(file, name, binding, verified) {
   if (
@@ -198,6 +207,7 @@ function generatedStatement(file, statement, imported, verified) {
 function generatedBuilders() {
   const file = choose(`${root}/_generated/server`, new Set(gitFiles()))
   if (!file) return new Set()
+  compilerAuthority([file])
   const ast = source(file),
     imported = imports(ast)
   const verified = new Set()
