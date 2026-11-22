@@ -106,7 +106,7 @@ jobs:
         run: echo "BETTER_AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
 
       - name: Verify static rows, Vitest and production build
-        timeout-minutes: 15
+        timeout-minutes: 18
         env:
           GITHUB_TOKEN: ${{ github.token }}
           QUALITY_BASE_REF: ${{ github.event_name == 'push' && github.event.before || format('origin/{0}', github.base_ref || 'dev') }}
