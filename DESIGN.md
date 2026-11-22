@@ -390,6 +390,8 @@ Build requirements (details in `decision.md`):
 - **200% zoom** of the desk; the stacked FactsAndConclusion layout is the fallback.
 - **Reduced motion** respected (section 9).
 
+**Proof timing amendment, 2026-11-22.** Before each UI merge, the final-head browser comparison, actual 200% browser zoom, keyboard, axe, reflow, reduced-motion checks and every available required real screen-reader session must pass. At least one real screen-reader session is required. An unavailable platform stays explicitly blocked/unrun on the ticket, with the exact head, missing resource and follow-up owner. VoiceOver on macOS and iOS, NVDA on Windows and TalkBack on Android all remain mandatory before the first private pilot activation and release sign-off. A missing or failed required session blocks those gates; an observed accessibility defect still blocks the UI merge. The owner approved this timing change in [decision.md](docs/design/system/decision.md#proof-timing-amendment-2026-11-22); the design and accessibility requirements are unchanged.
+
 ## 15. Content
 
 Plain words, sentence case, the client addressed as “you” and the representative by first name on the client side. Dates as “14 Mar 2027” (day, short month, year). Times as “2:41 pm”. Say what really happened (“Uploaded”, not “Done”). Questions to clients are one question in plain words, with why it is asked. Never imply an outcome.

@@ -2,7 +2,7 @@
 
 Date: 2026-11-17
 Gate: UI design gate, system creation (round 1: five options; round 2: three variations)
-Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)) and 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19))
+Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)), 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19)) and 2026-11-22 (see [Proof timing amendment](#proof-timing-amendment-2026-11-22))
 Approved specimen: [approved.html](approved.html)
 Implementer guide: [DESIGN.md](../../../DESIGN.md)
 Tokens: [tokens.css](tokens.css), [tokens.json](tokens.json) (not yet wired into the app)
@@ -189,7 +189,7 @@ Still open, to be decided at the surface gates (not by implementers):
 
 ## Build requirements recorded in the critiques
 
-These are outside what a static specimen can prove. Every UI ticket that builds on this system must meet them and show the evidence in its build check.
+These are outside what a static specimen can prove. Every UI ticket that builds on this system must meet them and show the evidence in its build check, with platform-proof timing governed by the 2026-11-22 amendment below.
 
 1. **Screen reader output.** Verify in a real assistive technology (VoiceOver on iOS and macOS, NVDA on Windows, TalkBack on Android). Discs and glyphs are `aria-hidden`; the word carries the meaning. Each holder has a visually hidden prefix, "Whose turn:" or "Status:", so it is not read as a bare name. The turn bar is a `nav` landmark labelled "Whose turn". Save state and toasts use `role="status"`; the error summary uses `role="alert"` and takes focus; dialogs use `role="dialog"`, `aria-modal` and `aria-labelledby` with a real focus trap.
 2. **Keyboard order.** Verify traversal order in the built app, not the specimen. Every shortcut has a visible button equivalent. Signing is never a single key: it needs ⌘ Enter (Ctrl Enter) plus a confirm dialog. Single-character shortcuts ("P" preview, "C" ask client) must be possible to turn off or remap, or be active only when the relevant region has focus (WCAG 2.1.4).
@@ -203,6 +203,18 @@ These are outside what a static specimen can prove. Every UI ticket that builds 
 10. **Rails and discs always carry words.** Never a bare dot, never a rail without a label.
 11. **Same turn words on every screen of a portal** (WCAG 3.2.4).
 12. **Research checks** with real applicants and representatives: whether amber "Your turn" reads as "your move" rather than "warning", and whether representatives want the holder column.
+
+## Proof timing amendment 2026-11-22
+
+The owner approved the proposed timing change with these exact words:
+
+> Defer missing platforms to the pilot gate (Recommended)
+
+Before each UI merge, the final-head browser comparison, actual 200% browser zoom, keyboard, axe, reflow, reduced-motion checks and every available required real screen-reader session must pass. At least one real screen-reader session is required. Missing evidence never becomes a pass, and an observed accessibility defect remains blocking.
+
+A required platform session that cannot yet be provided stays blocked/unrun on the ticket, naming the exact head, missing resource and follow-up owner. VoiceOver on macOS and iOS, NVDA on Windows and TalkBack on Android all remain mandatory before the first private pilot activation and release sign-off. Neither gate may proceed with a missing or failed required session.
+
+This changes proof timing only. It does not change tokens, appearance, anatomy, semantics, the required platform set or the accessibility behavior above. On the same date, the owner selected “Mac VoiceOver only (Recommended)” for standing QA access to VoiceOver in Safari on this Mac, using synthetic owned sessions, an exclusive browser lock and restoration of its prior state. The owner handles any required macOS permission prompts. No additional platform availability is implied.
 
 ## Discrepancies between the approved specimen and the critiques
 
