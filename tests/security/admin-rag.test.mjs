@@ -3022,103 +3022,194 @@ for (const count of [513, 2101]) {
   })
 }
 
-test('actor and action filters find matches behind more than a page of newer source events', async () => {
-  const marker = `sparse-filter-${randomBytes(4).toString('hex')}`
-  const actorId = `${marker}-actor`
-  const base = Date.now() - 60000
-  const sourceEvent = (index, actionType, entityLabel) => {
-    const eventId = `rag-approval:${marker}-${String(index).padStart(2, '0')}`
-    const timestamp = base + index
-    return {
-      eventId,
-      timestamp,
-      orderKey: `${String(timestamp).padStart(16, '0')}:${eventId}`,
-      actorId,
-      entityType: 'EVIDENCE_SOURCE',
-      actionType,
-      entityId: marker,
-      entityLabel,
-      changeSummary: 'Synthetic sparse filter fixture',
+for (const count of [600, 2100]) {
+  test(`every indexed audit filter finds its match behind ${count} newer non-matching source events`, async () => {
+    const marker = `sb3-filter-${count}-${randomBytes(4).toString('hex')}`
+    const base = Date.now()
+    let clock = 0
+    const rows = []
+    const event = (actorId, entityId, actionType, label) => {
+      const timestamp = base + clock++
+      const eventId = `rag-approval:${marker}-${String(rows.length).padStart(4, '0')}`
+      const row = {
+        eventId,
+        timestamp,
+        orderKey: `${String(timestamp).padStart(16, '0')}:${eventId}`,
+        actorId,
+        entityType: 'EVIDENCE_SOURCE',
+        actionType,
+        entityId,
+        entityLabel: `${marker} ${label}`,
+        changeSummary: 'Synthetic indexed filter fixture',
+      }
+      rows.push(row)
+      return row
     }
-  }
-  const rejected = sourceEvent(1, 'EVIDENCE_SOURCE_REJECTED', `${marker} rejected source`)
-  const newer = Array.from({ length: 40 }, (_, index) =>
-    sourceEvent(index + 2, 'EVIDENCE_SOURCE_UPDATED', `${marker} newer ${index}`),
-  )
-  await fixture('rag_audit_events', [rejected, ...newer])
-  await fixture(
-    'rag_audit_details',
-    [rejected, ...newer].map(({ eventId, entityLabel }) => ({
-      eventId,
-      changeContext: { before: null, after: { name: entityLabel } },
-      stateDigests: { before: 'none', after: 'none' },
-      truncated: false,
-    })),
-  )
-  const pathway = { eventId: `audit-${marker}-pathway`, entityLabel: `${marker} pathway` }
-  await sqlFixture((db) =>
-    db.query(
-      `INSERT INTO governance_audit_log (event_id, actor_id, action_type, entity_type, entity_id, entity_label, timestamp_ms) VALUES ($1, $2, 'PATHWAY_CREATED', 'PATHWAY', $3, $4, $5)`,
-      [pathway.eventId, actorId, `${marker}-pathway`, pathway.entityLabel, base],
-    ),
-  )
-  const cases = [
-    [{ actorId, actionType: 'EVIDENCE_SOURCE_REJECTED' }, rejected],
-    [{ actorId, actionType: 'PATHWAY_CREATED' }, pathway],
-    [{ actorId, entityId: marker, actionType: 'EVIDENCE_SOURCE_REJECTED' }, rejected],
-    [{ search: marker, actorId, actionType: 'EVIDENCE_SOURCE_REJECTED' }, rejected],
-  ]
-  const observations = []
-  for (const [filters, expected] of cases) {
-    const page = await successful(
-      `/api/admin/audit-trail?${new URLSearchParams({ ...filters, pageSize: '25' })}`,
+    const [actorA, actorB, actorC, entityA, entityB, entityC] = [
+      'actor-a',
+      'actor-b',
+      'actor-c',
+      'entity-a',
+      'entity-b',
+      'entity-c',
+    ].map((name) => `${marker}-${name}`)
+    const rejected = 'EVIDENCE_SOURCE_REJECTED'
+    const updated = 'EVIDENCE_SOURCE_UPDATED'
+    const lone = event(actorC, entityC, rejected, 'lone entity')
+    const pair = event(actorB, entityB, rejected, 'actor entity pair')
+    for (let index = 0; index < count; index++)
+      event(`${marker}-other-${index % 7}`, entityB, updated, `other actor ${index}`)
+    const target = event(actorA, entityA, rejected, 'rejected target')
+    let pathway
+    for (let index = 0; index < count; index++) {
+      if (index === count / 2)
+        pathway = {
+          eventId: `audit-${marker}-pathway`,
+          entityLabel: `${marker} pathway`,
+          timestamp: base + clock++,
+        }
+      event(actorA, entityA, updated, `same actor and entity ${index}`)
+    }
+    await fixture('rag_audit_events', rows)
+    await fixture(
+      'rag_audit_details',
+      rows.map(({ eventId, entityLabel }) => ({
+        eventId,
+        changeContext: { before: null, after: { name: entityLabel } },
+        stateDigests: { before: 'none', after: 'none' },
+        truncated: false,
+      })),
     )
-    observations.push({ filters, ids: page.items.map((item) => item.eventId) })
-    assert.deepEqual(
-      page.items.map((item) => item.eventId),
-      [expected.eventId],
-      `${JSON.stringify(filters)} must return its match on the first page`,
+    await sqlFixture((db) =>
+      db.query(
+        `INSERT INTO governance_audit_log (event_id, actor_id, action_type, entity_type, entity_id, entity_label, timestamp_ms) VALUES ($1, $2, 'PATHWAY_CREATED', 'PATHWAY', $3, $4, $5)`,
+        [pathway.eventId, actorA, `${marker}-pathway`, pathway.entityLabel, pathway.timestamp],
+      ),
     )
-  }
-  const browser = await chromium.launch({
-    executablePath: process.env.CONTAINMENT_BROWSER_EXECUTABLE,
-  })
-  try {
-    for (const [actionType, expected] of [
-      ['EVIDENCE_SOURCE_REJECTED', rejected],
-      ['PATHWAY_CREATED', pathway],
-    ]) {
-      const { context, page, problems } = await openAuditTrail(browser)
-      const actor = page.getByPlaceholder('Actor user id')
-      await applyAuditFilter(
-        page,
-        async () => {
-          await actor.fill(actorId)
-          await actor.press('Enter')
-          await actor.blur()
+    const ids = (events) => events.map((row) => row.eventId)
+    const cases = [
+      [{ actorId: actorB }, [pair]],
+      [{ entityId: entityC }, [lone]],
+      [{ actorId: actorA, actionType: rejected }, [target]],
+      [{ entityId: entityA, actionType: rejected }, [target]],
+      [{ entityId: entityB, actorId: actorB }, [pair]],
+      [{ entityId: entityA, actorId: actorA, actionType: rejected }, [target]],
+      [{ entityType: 'EVIDENCE_SOURCE', actorId: actorA, actionType: rejected }, [target]],
+      [{ search: 'rejected target', actorId: actorA, actionType: rejected }, [target]],
+      [{ actorId: actorA, actionType: 'PATHWAY_CREATED' }, [pathway]],
+      [
+        {
+          actorId: actorA,
+          actionType: rejected,
+          dateFrom: new Date(base).toISOString(),
+          dateTo: new Date(base + clock).toISOString(),
         },
-        { actorId },
+        [target],
+      ],
+    ]
+    const observations = []
+    const newest = await successful(
+      `/api/admin/audit-trail?${new URLSearchParams({ actionType: rejected, pageSize: '25' })}`,
+    )
+    observations.push({ filters: { actionType: rejected }, ids: ids(newest.items).slice(0, 3) })
+    assert.deepEqual(ids(newest.items).slice(0, 3), ids([target, pair, lone]))
+    for (const [filters, expected] of cases) {
+      const page = await successful(
+        `/api/admin/audit-trail?${new URLSearchParams({ ...filters, pageSize: '25' })}`,
       )
-      await applyAuditFilter(
-        page,
-        () =>
-          page.getByTestId('admin-audit-filter-ribbon').locator('select').selectOption(actionType),
-        { actorId, actionType },
+      observations.push({ filters, ids: ids(page.items), totalCount: page.totalCount })
+      assert.deepEqual(
+        ids(page.items),
+        ids(expected),
+        `${JSON.stringify(filters)} must return its match on the first page`,
       )
-      const row = page.getByRole('button', { name: new RegExp(expected.entityLabel) })
-      await row.first().waitFor({ timeout: 10_000 })
-      assert.equal(await row.count(), 1)
-      assert.equal(
-        await page.getByText('No audit events matched the current filters.').count(),
-        0,
-        `${actionType} must be visible on the first page`,
-      )
-      observations.push({ ui: actionType, visible: true })
-      assert.deepEqual(problems, [])
-      await context.close()
+      assert.equal(page.nextCursor, null)
+      if (filters.dateFrom) {
+        assert.equal(page.totalCount, 1)
+        assert.equal(page.totalCountCapped, false)
+      }
     }
-  } finally {
-    await browser.close()
-  }
-  await recordAtomicObservation('sb2-sparse-filters', observations)
-})
+    async function traverse(filters) {
+      const events = []
+      const cursors = new Set()
+      let cursor
+      do {
+        const page = await successful(
+          `/api/admin/audit-trail?${new URLSearchParams({
+            ...filters,
+            pageSize: '100',
+            ...(cursor ? { cursor } : {}),
+          })}`,
+        )
+        assert.ok(page.items.length > 0 || !page.nextCursor, 'indexed pages must not be empty')
+        events.push(...page.items)
+        cursor = page.nextCursor
+        if (cursor) {
+          assert.ok(!cursors.has(cursor))
+          cursors.add(cursor)
+        }
+      } while (cursor)
+      observations.push({ traversal: filters, pages: cursors.size + 1, items: events.length })
+      return ids(events)
+    }
+    const order = (events) =>
+      ids([...events].sort((a, b) => b.timestamp - a.timestamp || (a.eventId < b.eventId ? 1 : -1)))
+    assert.deepEqual(
+      await traverse({ actorId: actorA }),
+      order([...rows.filter((row) => row.actorId === actorA), pathway]),
+    )
+    assert.deepEqual(
+      await traverse({ entityId: entityB }),
+      order(rows.filter((row) => row.entityId === entityB)),
+    )
+    const browser = await chromium.launch({
+      executablePath: process.env.CONTAINMENT_BROWSER_EXECUTABLE,
+    })
+    try {
+      for (const [actorId, actionType, expected] of [
+        [null, rejected, target],
+        [actorB, null, pair],
+        [actorA, rejected, target],
+        [actorA, 'PATHWAY_CREATED', pathway],
+      ]) {
+        const { context, page, problems } = await openAuditTrail(browser)
+        if (actionType)
+          await applyAuditFilter(
+            page,
+            () =>
+              page
+                .getByTestId('admin-audit-filter-ribbon')
+                .locator('select')
+                .selectOption(actionType),
+            { actionType },
+          )
+        if (actorId) {
+          const actor = page.getByPlaceholder('Actor user id')
+          await applyAuditFilter(
+            page,
+            async () => {
+              await actor.fill(actorId)
+              await actor.press('Enter')
+              await actor.blur()
+            },
+            { actorId, ...(actionType ? { actionType } : {}) },
+          )
+        }
+        const row = page.getByRole('button', { name: new RegExp(expected.entityLabel) })
+        await row.first().waitFor({ timeout: 10_000 })
+        assert.equal(await row.count(), 1)
+        assert.equal(
+          await page.getByText('No audit events matched the current filters.').count(),
+          0,
+          `${actorId} ${actionType} must be visible on the first page`,
+        )
+        observations.push({ ui: { actorId, actionType }, visible: expected.eventId })
+        assert.deepEqual(problems, [])
+        await context.close()
+      }
+    } finally {
+      await browser.close()
+    }
+    await recordAtomicObservation(`sb3-filters-${count}`, observations)
+  })
+}

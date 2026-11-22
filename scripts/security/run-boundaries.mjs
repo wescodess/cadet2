@@ -133,7 +133,7 @@ try {
   if (code !== 0) throw new Error(`Convex boundary launcher exited ${code}`)
   await cp(resultFile, join(evidence, 'admin-boundary-results.json'))
   readBoundaryResult(resultFile)
-  console.log('Admin boundary result: PASS (84 passed; zero failures, skips or cancellations)')
+  console.log('Admin boundary result: PASS (85 passed; zero failures, skips or cancellations)')
 } catch (error) {
   console.error(error)
   process.exitCode ||= 1

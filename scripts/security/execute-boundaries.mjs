@@ -31,7 +31,7 @@ try {
     ['audit-success', 13],
     ['audit-consistency', 2],
     ['design', 11],
-    ['audit-search', 3],
+    ['audit-search', 4],
     ['navigation', 2],
     ['network', 4],
   ]) {
