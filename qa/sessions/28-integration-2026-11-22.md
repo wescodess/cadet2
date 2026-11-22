@@ -108,8 +108,8 @@ the native TAP reporter without changing any test.
 
 - Types: passed the existing 32 Nuxt / 10 Convex diagnostic ratchets.
 - Lint, format, secrets, dependencies and test policy: passed their adopted ratchets.
-  Seven baseline manifests remain byte-identical; the 52 legacy Playwright skips
-  remain the existing allowance, with no new skips or exceptions.
+  Seven baseline manifests remain byte-identical; the 10 remaining Playwright skips
+  across two files remain the existing allowance, with no new skips or exceptions.
 - Components: **29 files / 652 tests passed**.
 - Production build: passed.
 - Legacy access: **233 tests passed**, zero failed/cancelled/skipped/todo.
