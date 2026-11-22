@@ -118,16 +118,16 @@ describe('test policy composition', () => {
 })
 
 describe('no new skips', () => {
-  const baselined = 'tests/e2e/workspace-recommendation-run-comparison.red.atdd.spec.ts'
+  const baselined = 'tests/e2e/admin-pathway-inventory.red.atdd.spec.ts'
   const legacy = common.json('scripts/quality/baselines/test-policy.json').counts
   const unit = [
     "import { describe, it } from 'vitest'",
-    ...[1, 2, 3].map((index) => `it.skip('legacy ${index}', () => {})`),
+    ...[1, 2, 3, 4, 5].map((index) => `it.skip('legacy ${index}', () => {})`),
     "it('runs', () => {})",
   ]
   const browser = [
     "import { test } from '@playwright/test'",
-    ...[1, 2, 3].map((index) => `test.skip('legacy ${index}', async () => {})`),
+    ...[1, 2, 3, 4, 5].map((index) => `test.skip('legacy ${index}', async () => {})`),
     "test('runs', async () => {})",
   ]
 
@@ -168,11 +168,11 @@ describe('no new skips', () => {
     ['vitest', unit],
     ['playwright', browser],
   ])(
-    'passes the unchanged %s legacy skips at 52/52',
+    'passes the unchanged %s legacy skips at 10/10',
     async (runner, lines) => {
       const log = vi.spyOn(console, 'log').mockImplementation(() => {})
       await expect(policy(runner, lines)).resolves.toBeUndefined()
-      expect(log).toHaveBeenCalledWith('test-policy: PASS (52 current; 52 baseline)')
+      expect(log).toHaveBeenCalledWith('test-policy: PASS (10 current; 10 baseline)')
     },
     60_000,
   )
@@ -186,29 +186,29 @@ describe('no new skips', () => {
       await expect(
         policy(
           runner,
-          lines.filter((line) => !line.includes('legacy 3')),
+          lines.filter((line) => !line.includes('legacy 5')),
         ),
-      ).rejects.toThrow(`test-policy regression:\n${baselined}: lower allowance to 2`)
+      ).rejects.toThrow(`test-policy regression:\n${baselined}: lower allowance to 4`)
     },
     60_000,
   )
 
   it.each(
     ['', ' #23'].flatMap((ticket) => [
-      ['vitest', `it.skip('new${ticket}', () => {})`, 4],
-      ['playwright', `test.skip('new${ticket}', async () => {})`, 4],
-      ['vitest', `describe.skip('new${ticket}', () => { it('a', () => {}) })`, 4],
-      ['playwright', `test.describe.skip('new${ticket}', () => { test('a', async () => {}) })`, 4],
-      ['playwright', `test('new', async () => { test.skip(true, 'blocked${ticket}') })`, 4],
-      ['vitest', `it.todo('new${ticket}')`, 4],
-      ['vitest', `it('new', (ctx) => { ctx.skip('blocked${ticket}') })`, 5],
+      ['vitest', `it.skip('new${ticket}', () => {})`, 6],
+      ['playwright', `test.skip('new${ticket}', async () => {})`, 6],
+      ['vitest', `describe.skip('new${ticket}', () => { it('a', () => {}) })`, 6],
+      ['playwright', `test.describe.skip('new${ticket}', () => { test('a', async () => {}) })`, 6],
+      ['playwright', `test('new', async () => { test.skip(true, 'blocked${ticket}') })`, 6],
+      ['vitest', `it.todo('new${ticket}')`, 6],
+      ['vitest', `it('new', (ctx) => { ctx.skip('blocked${ticket}') })`, 7],
     ]),
   )(
     'rejects a new %s skip: %s',
     async (runner, line, total) => {
       await expect(
         policy(runner, [...(runner === 'vitest' ? unit : browser), line]),
-      ).rejects.toThrow(`test-policy regression:\n${baselined}: ${total} > 3`)
+      ).rejects.toThrow(`test-policy regression:\n${baselined}: ${total} > 5`)
     },
     60_000,
   )
@@ -270,7 +270,7 @@ describe('no new skips', () => {
     async (_name, lines, total) => {
       await expect(
         policy('playwright', ["import { test } from '@playwright/test'", ...lines]),
-      ).rejects.toThrow(`test-policy regression:\n${baselined}: ${total} > 3`)
+      ).rejects.toThrow(`test-policy regression:\n${baselined}: ${total} > 5`)
     },
     60_000,
   )
