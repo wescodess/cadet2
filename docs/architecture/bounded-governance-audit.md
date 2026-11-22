@@ -8,9 +8,11 @@ Source input limits apply independently at HTTP and direct Convex create/update 
 
 - Name: 255 UTF-16 code units; description: 4,000 UTF-16 code units.
 - Each config: 16,384 UTF-8 bytes of canonical JSON.
-- Complete submitted create/update input: 32,768 UTF-8 bytes of canonical JSON, including other arrays and strings.
+- Complete submitted source payload: 32,768 UTF-8 bytes of canonical JSON, including other arrays and strings. The separately bounded receipt key and validated resource ID are transport metadata, excluded from this payload budget at both seams.
 - Decision notes and rejection reasons: 500 UTF-16 code units.
 - Schedule intervals: integers from 1 to 168 hours; tags: at most 24 entries; linked pathways: at most 16 entries; each entry: 1–120 trimmed characters.
+
+HTTP checks submitted values before trimming or deduplication, then checks the normalized payload independently. A body at the payload maximum remains valid when its receipt key or resource ID is forwarded to Convex; those metadata fields do not reduce the source payload budget.
 
 Legacy HTTP projections clamp out-of-range schedule intervals and omit invalid tag/pathway entries without rewriting stored history or truncating identifiers.
 

@@ -2276,6 +2276,73 @@ test('#166 SQL pathway and rule creates replay their original receipts without a
   }
 })
 
+function maximumSourcePayload() {
+  const body = {
+    ...websiteSubmission,
+    name: '166 payload maximum',
+    description: '甲'.repeat(4000),
+    trustScore: 72,
+    tenantId: 'default',
+    enabled: true,
+    linkedPathwayIds: [],
+    tags: Array.from({ length: 12 }, (_, index) => `${index}${'甲'.repeat(118)}`),
+    websiteConfig: {
+      ...websiteSubmission.websiteConfig,
+      seedUrls: Array.from(
+        { length: 130 },
+        (_, index) => `https://www.canada.ca/${String(index).padStart(3, '0')}/${'p'.repeat(90)}`,
+      ),
+    },
+  }
+  delete body.idempotencyKey
+  while (Buffer.byteLength(JSON.stringify(body)) < 32768) {
+    const remaining = 32768 - Buffer.byteLength(JSON.stringify(body))
+    const overhead = body.linkedPathwayIds.length ? 3 : 2
+    if (remaining < overhead + 1) {
+      body.name += 'x'.repeat(remaining)
+      break
+    }
+    const length = Math.min(120, remaining - overhead)
+    body.linkedPathwayIds.push(String(body.linkedPathwayIds.length).padStart(length, 'p'))
+  }
+  assert.ok(body.linkedPathwayIds.length <= 16)
+  assert.ok(Buffer.byteLength(JSON.stringify(body.websiteConfig)) <= 16384)
+  assert.equal(Buffer.byteLength(JSON.stringify(body)), 32768)
+  return body
+}
+
+function sourcePayloadWithByteOffset(body, delta) {
+  return { ...body, name: delta < 0 ? body.name.slice(0, -1) : `${body.name}${'x'.repeat(delta)}` }
+}
+
+async function assertCreateSizeBoundary(body, delta) {
+  assert.equal(Buffer.byteLength(JSON.stringify(body)), 32768 + delta)
+  const response = await request('/api/admin/rag/sources', admin, 'POST', body, {
+    'Idempotency-Key': `166-http-size-${delta}-`.padEnd(128, 'k'),
+  })
+  assert.equal(response.status, delta > 0 ? 400 : 200)
+  await response.arrayBuffer()
+  const direct = admin.client.mutation(anyApi.ragSources.createSourceSubmission, {
+    ...body,
+    idempotencyKey: `166-direct-size-${delta}-`.padEnd(128, 'k'),
+  })
+  if (delta > 0) await assert.rejects(direct, /32768 byte limit/)
+  else assert.ok((await direct).sourceId)
+}
+
+async function assertUpdateSizeBoundary(sourceId, body, delta) {
+  assert.equal(Buffer.byteLength(JSON.stringify(body)), 32768 + delta)
+  const snapshot = await sourceSnapshot(sourceId)
+  const response = await request(`/api/admin/rag/sources/${sourceId}`, admin, 'PATCH', body)
+  assert.equal(response.status, delta > 0 ? 400 : 200)
+  await response.arrayBuffer()
+  const direct = admin.client.mutation(anyApi.ragSources.updateSourceConfig, { sourceId, ...body })
+  if (delta > 0) {
+    await assert.rejects(direct, /32768 byte limit/)
+    assert.deepEqual(await sourceSnapshot(sourceId), snapshot)
+  } else assert.equal((await direct).ok, true)
+}
+
 test('#166 source caps cover create and update at HTTP and direct Convex seams', async () => {
   const { sourceId } = await successful('/api/admin/rag/sources', 'POST', {
     ...websiteSubmission,
@@ -2283,6 +2350,8 @@ test('#166 source caps cover create and update at HTTP and direct Convex seams',
   })
   const changes = [
     { name: 'n'.repeat(256) },
+    { name: `${' '.repeat(256)}Source` },
+    { description: `${' '.repeat(4000)}x` },
     { schedule: { frequency: 'interval', intervalHours: 169 } },
     { schedule: { frequency: 'interval', intervalHours: 0 } },
     { schedule: { frequency: 'interval', intervalHours: 1.5 } },
@@ -2299,6 +2368,18 @@ test('#166 source caps cover create and update at HTTP and direct Convex seams',
       },
     },
     { tags: Array.from({ length: 300 }, () => 't'.repeat(120)) },
+    ...[700, 2000].map((count) => ({
+      websiteConfig: {
+        ...websiteSubmission.websiteConfig,
+        seedUrls: Array(count).fill('https://www.canada.ca/en.html'),
+      },
+    })),
+    {
+      description: '甲'.repeat(4000),
+      websiteConfig: maximumSourcePayload().websiteConfig,
+      tags: Array(24).fill('甲'.repeat(120)),
+      linkedPathwayIds: Array(16).fill('p'.repeat(120)),
+    },
   ]
   const before = await sourceSnapshot(sourceId)
   for (const change of changes) {
@@ -2337,6 +2418,31 @@ test('#166 source caps cover create and update at HTTP and direct Convex seams',
   const detail = await successful(`/api/admin/audit-trail/${events.items[0].eventId}`)
   assert.equal(detail.event.truncated, true)
   assert.equal(detail.event.changeContext.after.description.truncated, true)
+
+  const maximum = maximumSourcePayload()
+  for (const delta of [-1, 0, 1]) {
+    await assertCreateSizeBoundary(sourcePayloadWithByteOffset(maximum, delta), delta)
+  }
+
+  const patch = { ...maximum }
+  delete patch.type
+  patch.name += 'x'.repeat(32768 - Buffer.byteLength(JSON.stringify(patch)))
+  for (const delta of [-1, 0, 1]) {
+    await assertUpdateSizeBoundary(sourceId, sourcePayloadWithByteOffset(patch, delta), delta)
+  }
+  const invalidKey = 'k'.repeat(129)
+  const invalid = await request('/api/admin/rag/sources', admin, 'POST', maximum, {
+    'Idempotency-Key': invalidKey,
+  })
+  assert.equal(invalid.status, 400)
+  await invalid.arrayBuffer()
+  await assert.rejects(
+    admin.client.mutation(anyApi.ragSources.createSourceSubmission, {
+      ...maximum,
+      idempotencyKey: invalidKey,
+    }),
+    /idempotency key/i,
+  )
 })
 
 test('source schedule approval rejects invalid input and legacy bounds cannot break HTTP reads', async () => {

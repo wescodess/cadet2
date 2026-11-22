@@ -123,7 +123,35 @@ const evidenceSourceEditableFieldsSchema = {
   youtubeConfig: evidenceYoutubeConfigSchema.optional(),
 }
 
-export const createEvidenceSourceSchema = z
+const submittedSourceSizeSchema = z
+  .object({
+    name: z.string().optional(),
+    description: z.string().nullable().optional(),
+    websiteConfig: z.unknown().optional(),
+    youtubeConfig: z.unknown().optional(),
+    schedule: z.object({ intervalHours: z.number().optional() }).passthrough().optional(),
+    tags: z.array(z.string()).optional(),
+    linkedPathwayIds: z.array(z.string()).optional(),
+  })
+  .passthrough()
+
+function validateSubmittedSourceInput(value: unknown, context: z.RefinementCtx) {
+  const submitted = submittedSourceSizeSchema.safeParse(value)
+  if (submitted.success) {
+    try {
+      validateSourceSizes(submitted.data)
+    } catch (error) {
+      context.addIssue({
+        code: 'custom',
+        message: error instanceof Error ? error.message : 'Source input exceeds its size limit',
+      })
+      return z.NEVER
+    }
+  }
+  return value
+}
+
+const createEvidenceSourceBodySchema = z
   .object({
     type: evidenceSourceTypeSchema,
     name: controlFreeString(z.string().trim().min(1).max(255)),
@@ -147,7 +175,7 @@ export const createEvidenceSourceSchema = z
     }
   }, 'Source input exceeds its size limit')
 
-export const updateEvidenceSourceSchema = z
+const updateEvidenceSourceBodySchema = z
   .object(evidenceSourceEditableFieldsSchema)
   .strict()
   .refine((value) => {
@@ -161,6 +189,15 @@ export const updateEvidenceSourceSchema = z
   .refine((value) => Object.keys(value).length > 0, {
     message: 'At least one editable field is required.',
   })
+
+export const createEvidenceSourceSchema = z.preprocess(
+  validateSubmittedSourceInput,
+  createEvidenceSourceBodySchema,
+)
+export const updateEvidenceSourceSchema = z.preprocess(
+  validateSubmittedSourceInput,
+  updateEvidenceSourceBodySchema,
+)
 
 const optionalNoteSchema = z
   .object({

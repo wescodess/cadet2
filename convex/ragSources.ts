@@ -237,8 +237,9 @@ export const createSourceSubmission = mutation({
     if (hasControlCharacters([args.name, args.websiteConfig, args.youtubeConfig])) {
       throw new Error('Source names and config must not contain control characters')
     }
-    validateSourceSizes(args)
-    if (!/^[A-Za-z0-9:_-]{8,128}$/.test(args.idempotencyKey))
+    const { idempotencyKey, ...sourceInput } = args
+    validateSourceSizes(sourceInput)
+    if (!/^[A-Za-z0-9:_-]{8,128}$/.test(idempotencyKey))
       throw new ConvexError({
         code: 'INVALID_INPUT',
         message: 'A valid idempotency key is required',
@@ -246,9 +247,7 @@ export const createSourceSubmission = mutation({
     const payloadDigest = await sourcePayloadDigest(args)
     const receipt = await ctx.db
       .query('rag_create_receipts')
-      .withIndex('by_actor_key', (q) =>
-        q.eq('actorId', identity.userId).eq('key', args.idempotencyKey),
-      )
+      .withIndex('by_actor_key', (q) => q.eq('actorId', identity.userId).eq('key', idempotencyKey))
       .unique()
     if (receipt) {
       if (receipt.payloadDigest !== payloadDigest)
@@ -307,7 +306,7 @@ export const createSourceSubmission = mutation({
     const result = { ok: true as const, sourceId, status: 'pending_approval' as const }
     await ctx.db.insert('rag_create_receipts', {
       actorId: identity.userId,
-      key: args.idempotencyKey,
+      key: idempotencyKey,
       payloadDigest,
       receipt: result,
     })
@@ -334,8 +333,9 @@ export const updateSourceConfig = mutation({
     if (hasControlCharacters([args.name, args.websiteConfig, args.youtubeConfig])) {
       throw new Error('Source names and config must not contain control characters')
     }
-    validateSourceSizes(args)
-    const source = await ctx.db.get(args.sourceId)
+    const { sourceId, ...sourceInput } = args
+    validateSourceSizes(sourceInput)
+    const source = await ctx.db.get(sourceId)
 
     if (!source) {
       throw new Error('Source not found')
