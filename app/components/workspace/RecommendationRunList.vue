@@ -12,16 +12,19 @@ type RecommendationRunListItem = {
   updatedAt: string
 }
 
-const props = withDefaults(defineProps<{
-  runs: RecommendationRunListItem[]
-  isLoading?: boolean
-  errorMessage?: string | null
-  activeRunId?: string | null
-}>(), {
-  isLoading: false,
-  errorMessage: null,
-  activeRunId: null,
-})
+const props = withDefaults(
+  defineProps<{
+    runs: RecommendationRunListItem[]
+    isLoading?: boolean
+    errorMessage?: string | null
+    activeRunId?: string | null
+  }>(),
+  {
+    isLoading: false,
+    errorMessage: null,
+    activeRunId: null,
+  },
+)
 
 const emit = defineEmits<{
   'select-run': [runId: string]
@@ -59,12 +62,8 @@ function isActiveRun(runId: string) {
     aria-live="polite"
   >
     <div class="mb-4 flex flex-col gap-1">
-      <h3 class="text-lg font-semibold text-slate-900">
-        Recommendation run continuity
-      </h3>
-      <p class="text-sm text-slate-500">
-        Only you can view these runs in your account workspace.
-      </p>
+      <h3 class="text-lg font-semibold text-slate-900">Recommendation run continuity</h3>
+      <p class="text-sm text-slate-500">Only you can view these runs in your account workspace.</p>
     </div>
 
     <div
@@ -81,16 +80,17 @@ function isActiveRun(runId: string) {
       {{ props.errorMessage }}
     </div>
 
-    <ul
-      v-else-if="props.runs.length > 0"
-      class="space-y-3"
-    >
+    <ul v-else-if="props.runs.length > 0" class="space-y-3">
       <li
         v-for="run in props.runs"
         :key="run.runId"
         data-testid="workspace-run-item"
         class="rounded-xl border"
-        :class="isActiveRun(run.runId) ? 'border-[var(--trust,#2563eb)]/35 bg-[var(--trust-soft,#dbeafe)]/60' : 'border-slate-200 bg-slate-50/70'"
+        :class="
+          isActiveRun(run.runId)
+            ? 'border-primary/35 bg-accent/60'
+            : 'border-slate-200 bg-slate-50/70'
+        "
       >
         <button
           type="button"
@@ -102,11 +102,16 @@ function isActiveRun(runId: string) {
             <p class="text-sm font-semibold text-slate-900">
               {{ shortRunId(run.runId) }}
             </p>
-            <p class="text-xs text-slate-500">
-              Submitted {{ formatTimestamp(run.createdAt) }}
-            </p>
-            <p class="mt-1 text-xs font-medium" :class="isActiveRun(run.runId) ? 'text-[var(--trust,#2563eb)]' : 'text-slate-600'">
-              {{ isActiveRun(run.runId) ? 'Viewing pathways for this run' : 'View results and pathways' }}
+            <p class="text-xs text-slate-500">Submitted {{ formatTimestamp(run.createdAt) }}</p>
+            <p
+              class="mt-1 text-xs font-medium"
+              :class="isActiveRun(run.runId) ? 'text-primary' : 'text-slate-600'"
+            >
+              {{
+                isActiveRun(run.runId)
+                  ? 'Viewing pathways for this run'
+                  : 'View results and pathways'
+              }}
             </p>
           </div>
           <span

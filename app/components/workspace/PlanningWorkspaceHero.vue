@@ -25,7 +25,9 @@ const emit = defineEmits<{
   action: [key: WorkspaceSummaryActionKey]
 }>()
 
-const lastActivity = computed(() => props.summary ? getWorkspaceLastActivity(props.summary) : null)
+const lastActivity = computed(() =>
+  props.summary ? getWorkspaceLastActivity(props.summary) : null,
+)
 
 function handlePrimaryAction() {
   if (!props.primaryAction) {
@@ -38,26 +40,20 @@ function handlePrimaryAction() {
 
 <template>
   <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-    <div
-      v-if="!summary"
-      class="space-y-4"
-    >
+    <div v-if="!summary" class="space-y-4">
       <Skeleton class="h-6 w-36 rounded-full" />
       <Skeleton class="h-10 w-full rounded-2xl" />
       <Skeleton class="h-20 w-full rounded-3xl" />
       <Skeleton class="h-12 w-56 rounded-xl" />
     </div>
 
-    <div
-      v-else
-      class="space-y-6"
-    >
+    <div v-else class="space-y-6">
       <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div class="space-y-4">
           <div class="flex flex-wrap items-center gap-3">
             <Badge
               variant="outline"
-              class="rounded-full border-[var(--trust-soft,#e7eef6)] bg-[var(--trust-soft,#e7eef6)] px-3 py-1 text-[var(--trust,#2563eb)]"
+              class="rounded-full border-accent bg-accent px-3 py-1 text-primary"
             >
               <Sparkles class="mr-2 size-3.5" />
               {{ getWorkspaceStateLabel(summary) }}
@@ -83,7 +79,7 @@ function handlePrimaryAction() {
 
         <Button
           v-if="primaryAction"
-          class="min-h-[48px] rounded-2xl bg-[var(--trust,#2563eb)] px-5 text-white hover:bg-[var(--trust,#2563eb)]/90"
+          class="min-h-[48px] rounded-2xl bg-primary px-5 text-white hover:bg-primary/90"
           @click="handlePrimaryAction"
         >
           {{ primaryAction.label }}
@@ -94,7 +90,9 @@ function handlePrimaryAction() {
       <div class="grid gap-4 md:grid-cols-3">
         <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
           <div class="flex items-center gap-3">
-            <div class="flex size-10 items-center justify-center rounded-2xl bg-[var(--trust-soft,#e7eef6)] text-[var(--trust,#2563eb)]">
+            <div
+              class="flex size-10 items-center justify-center rounded-2xl bg-accent text-primary"
+            >
               <History class="size-4" />
             </div>
             <div>
@@ -110,7 +108,9 @@ function handlePrimaryAction() {
 
         <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
           <div class="flex items-center gap-3">
-            <div class="flex size-10 items-center justify-center rounded-2xl bg-[var(--success-soft,#e7f0ee)] text-[var(--success,#4d7a72)]">
+            <div
+              class="flex size-10 items-center justify-center rounded-2xl bg-positive-soft text-positive"
+            >
               <Sparkles class="size-4" />
             </div>
             <div>
@@ -126,7 +126,9 @@ function handlePrimaryAction() {
 
         <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
           <div class="flex items-center gap-3">
-            <div class="flex size-10 items-center justify-center rounded-2xl bg-[var(--warning-soft,#faf1df)] text-[var(--warning,#c89b52)]">
+            <div
+              class="flex size-10 items-center justify-center rounded-2xl bg-caution-soft text-caution"
+            >
               <GitCompareArrows class="size-4" />
             </div>
             <div>
@@ -141,10 +143,7 @@ function handlePrimaryAction() {
         </div>
       </div>
 
-      <div
-        v-if="lastActivity"
-        class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
-      >
+      <div v-if="lastActivity" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
         <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
           {{ lastActivity.label }}
         </p>

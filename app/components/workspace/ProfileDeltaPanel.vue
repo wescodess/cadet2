@@ -15,9 +15,7 @@ const props = defineProps<{
       <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
         Profile changes
       </p>
-      <h3 class="text-lg font-semibold text-slate-950">
-        What changed in your saved profile
-      </h3>
+      <h3 class="text-lg font-semibold text-slate-950">What changed in your saved profile</h3>
     </div>
 
     <div
@@ -43,10 +41,14 @@ const props = defineProps<{
               {{ field.label }}
             </p>
             <div class="grid gap-3 md:grid-cols-2">
-              <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+              <div
+                class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700"
+              >
                 Before: {{ field.beforeValue }}
               </div>
-              <div class="rounded-2xl border border-[var(--trust,#2563eb)]/15 bg-[var(--trust-soft,#dbeafe)]/35 px-4 py-3 text-sm text-slate-700">
+              <div
+                class="rounded-2xl border border-primary/15 bg-accent/35 px-4 py-3 text-sm text-slate-700"
+              >
                 After: {{ field.afterValue }}
               </div>
             </div>

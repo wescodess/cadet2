@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Input } from "~/components/ui/input"
-import { Textarea } from "~/components/ui/textarea"
+import { Input } from '~/components/ui/input'
+import { Textarea } from '~/components/ui/textarea'
 
 type IntakeFieldOption = {
   label: string
@@ -45,10 +45,7 @@ function getFieldDescriptionId(fieldKey: string) {
       class="space-y-2"
       :class="field.width === 'half' ? 'col-span-1' : 'col-span-1 md:col-span-2'"
     >
-      <label
-        class="block text-sm font-semibold text-slate-700"
-        :for="`intake-${field.key}`"
-      >
+      <label class="block text-sm font-semibold text-slate-700" :for="`intake-${field.key}`">
         {{ field.label }}
       </label>
       <select
@@ -57,7 +54,7 @@ function getFieldDescriptionId(fieldKey: string) {
         v-model="model[field.key]"
         :aria-invalid="getFieldError(field.key) ? 'true' : 'false'"
         :aria-describedby="getFieldDescriptionId(field.key)"
-        class="h-12 w-full rounded-md border border-slate-200 bg-slate-50 px-4 text-slate-900 transition-all focus-visible:border-[var(--trust)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--trust)]/20"
+        class="h-12 w-full rounded-md border border-slate-200 bg-slate-50 px-4 text-slate-900 transition-all focus-visible:outline-none focus-visible:ring-2"
       >
         <option disabled value="">
           {{ field.placeholder }}
@@ -77,7 +74,7 @@ function getFieldDescriptionId(fieldKey: string) {
         :placeholder="field.placeholder"
         :aria-invalid="getFieldError(field.key) ? 'true' : 'false'"
         :aria-describedby="getFieldDescriptionId(field.key)"
-        class="min-h-24 border-slate-200 bg-slate-50 text-slate-900 transition-all focus-visible:border-[var(--trust)] focus-visible:ring-2 focus-visible:ring-[var(--trust)]/20"
+        class="min-h-24 border-slate-200 bg-slate-50 text-slate-900 transition-all focus-visible:ring-2"
       />
       <Input
         v-else
@@ -87,12 +84,9 @@ function getFieldDescriptionId(fieldKey: string) {
         :placeholder="field.placeholder"
         :aria-invalid="getFieldError(field.key) ? 'true' : 'false'"
         :aria-describedby="getFieldDescriptionId(field.key)"
-        class="h-12 border-slate-200 bg-slate-50 text-slate-900 transition-all focus-visible:border-[var(--trust)] focus-visible:ring-2 focus-visible:ring-[var(--trust)]/20 px-4"
+        class="h-12 border-slate-200 bg-slate-50 text-slate-900 transition-all focus-visible:ring-2 px-4"
       />
-      <p
-        :id="`${field.key}-helper`"
-        class="text-xs text-slate-500 mt-1.5"
-      >
+      <p :id="`${field.key}-helper`" class="text-xs text-slate-500 mt-1.5">
         {{ field.helper }}
       </p>
       <p
