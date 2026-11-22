@@ -44,6 +44,14 @@ _Avoid_: Client recommendation, approved plan, Signed plan
 The personalized output a Client receives after a Representative reviews and signs it under their licence.
 _Avoid_: Draft assessment, automated advice, Verified Plan
 
+**Plan signature**:
+A Representative's recorded adoption of one exact plan revision and its stated basis for one Case. It identifies the signer and preserves what they signed even when their later licence status changes.
+_Avoid_: Admin approval, Client consent, eligibility verification
+
+**Superseding plan**:
+A newly signed revision that explicitly replaces an earlier Signed plan for the same Case. The earlier plan remains part of the historical record.
+_Avoid_: Overwritten plan, refreshed signature, silent correction
+
 **Consent**:
 A Client's permission to share information for a particular Case, revocable by the Client. Revocation does not erase the Practice's retained Signed plans and audit record.
 _Avoid_: Blanket permission, permanent access
@@ -67,6 +75,10 @@ _Avoid_: Indefinite archive, restored Consent
 **Verified representative**:
 A Representative whose licence a cadet2 admin has checked against the CICC register or the relevant law society.
 _Avoid_: Verified account, platform-endorsed expert
+
+**Representative verification**:
+A cadet2 admin's recorded check of a named Representative's identity and professional licence against the responsible regulator. It is separate from Case authority, the review of advice and the verification of a rule or source.
+_Avoid_: Email verification, advice approval, source verification
 
 **Escalation**:
 Routing of an urgent or sensitive situation to a human Representative instead of automated strategy, including status expiring within 90 days, refusals, removal, criminality, or health concerns.
