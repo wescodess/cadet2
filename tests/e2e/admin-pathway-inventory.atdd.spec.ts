@@ -61,7 +61,9 @@ async function ensureAuthenticatedPage(page: Page, appBaseUrl: string, label: st
 
   const storageState = await page.request.storageState()
   if (storageState.cookies.length === 0) {
-    throw new Error('Authenticated browser session did not return Better Auth cookies for admin pathway inventory tests.')
+    throw new Error(
+      'Authenticated browser session did not return Better Auth cookies for admin pathway inventory tests.',
+    )
   }
 
   await page.context().addCookies(storageState.cookies)
@@ -104,19 +106,22 @@ async function mockAdminPathwayInventoryUi(
   await page.route('**/api/admin/pathways/*/status', async (route) => {
     latestStatusUpdate = route.request().postDataJSON() as { status?: string }
     const pathwayId = decodeURIComponent(route.request().url().split('/').slice(-2)[0] || '')
-    const updatedItem = items.find(item => item.pathwayId === pathwayId)
-    const status = latestStatusUpdate.status === 'inactive' || latestStatusUpdate.status === 'draft'
-      ? latestStatusUpdate.status
-      : 'active'
+    const updatedItem = items.find((item) => item.pathwayId === pathwayId)
+    const status =
+      latestStatusUpdate.status === 'inactive' || latestStatusUpdate.status === 'draft'
+        ? latestStatusUpdate.status
+        : 'active'
 
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify(createPathwayDefinitionRecord({
-        ...updatedItem,
-        pathwayId,
-        status,
-      })),
+      body: JSON.stringify(
+        createPathwayDefinitionRecord({
+          ...updatedItem,
+          pathwayId,
+          status,
+        }),
+      ),
     })
   })
 
@@ -143,7 +148,14 @@ test.describe('Story 5.1 Admin Pathway Inventory E2E ATDD', () => {
 
   test(
     '[P0][AC1] standard authenticated users are redirected away from the admin pathway inventory route',
-    { annotation: [{ type: 'skipNetworkMonitoring', description: 'Expected 403 from /api/admin/access for non-admin users.' }] },
+    {
+      annotation: [
+        {
+          type: 'skipNetworkMonitoring',
+          description: 'Expected 403 from /api/admin/access for non-admin users.',
+        },
+      ],
+    },
     async ({ page, appBaseUrl }) => {
       const routeProbe = createPathwayInventoryRouteProbe(appBaseUrl)
 
@@ -152,12 +164,7 @@ test.describe('Story 5.1 Admin Pathway Inventory E2E ATDD', () => {
 
       await expect(page).not.toHaveURL(/\/admin\/pathways$/)
 
-      if (/\/workspace$/.test(page.url())) {
-        await expect(page.getByRole('navigation', { name: 'Workspace navigation' }).first()).toBeVisible()
-      }
-      else {
-        await expect(page).toHaveURL(/\/auth/)
-      }
+      await expect(page).toHaveURL(`${appBaseUrl}/`)
     },
   )
 
@@ -177,8 +184,12 @@ test.describe('Story 5.1 Admin Pathway Inventory E2E ATDD', () => {
     await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.search)).toBeVisible()
     await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.statusFilter)).toBeVisible()
     await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.addButton)).toBeVisible()
-    await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.table)).toContainText('Pathway ID')
-    await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.table)).toContainText('Display name')
+    await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.table)).toContainText(
+      'Pathway ID',
+    )
+    await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.table)).toContainText(
+      'Display name',
+    )
     await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.table)).toContainText('Status')
   })
 
@@ -189,7 +200,11 @@ test.describe('Story 5.1 Admin Pathway Inventory E2E ATDD', () => {
     await ensureAuthenticatedPage(page, appBaseUrl, 'admin-pathway-admin-edit')
     const items = createSeededPathwayDefinitions()
     const targetItem = items[2]!
-    const { routeProbe, latestStatusUpdate } = await mockAdminPathwayInventoryUi(page, appBaseUrl, items)
+    const { routeProbe, latestStatusUpdate } = await mockAdminPathwayInventoryUi(
+      page,
+      appBaseUrl,
+      items,
+    )
 
     await page.goto(routeProbe.adminPath, { waitUntil: 'domcontentloaded' })
 
@@ -205,7 +220,9 @@ test.describe('Story 5.1 Admin Pathway Inventory E2E ATDD', () => {
     await page.getByRole('button', { name: 'Confirm status change' }).click()
 
     expect(latestStatusUpdate()).toEqual({ status: 'inactive' })
-    await expect(row.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.statusBadge)).toContainText('Inactive')
+    await expect(row.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.statusBadge)).toContainText(
+      'Inactive',
+    )
   })
 
   test('[P1][AC1][AC2] mobile admin pathway inventory collapses into cards while preserving add and status controls', async ({
@@ -219,8 +236,12 @@ test.describe('Story 5.1 Admin Pathway Inventory E2E ATDD', () => {
 
     await page.goto(routeProbe.adminPath, { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.mobileCard)).toHaveCount(items.length)
+    await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.mobileCard)).toHaveCount(
+      items.length,
+    )
     await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.addButton)).toBeVisible()
-    await expect(page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.mobileCard).first()).toContainText('Skilled Worker pathway')
+    await expect(
+      page.getByTestId(PATHWAY_INVENTORY_ATDD_TEST_IDS.mobileCard).first(),
+    ).toContainText('Skilled Worker pathway')
   })
 })

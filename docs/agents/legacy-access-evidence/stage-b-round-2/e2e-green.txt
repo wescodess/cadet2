@@ -1,0 +1,16 @@
+SSR landing <main> at http://127.0.0.1:51671:
+<main class="mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-6 px-6 py-16"><h1 class="text-3xl font-semibold">cadet2</h1><p>Client and Representative portals are currently unavailable.</p><a href="/auth" class="underline">Sign in or create an account</a></main>
+
+[dotenv@17.3.1] injecting env (0) from node_modules/.pnpm/@seontechnologies+playwright-utils@3.14.0_@playwright+test@1.58.2_typescript@5.9.3_zod@3.25.76/node_modules/@seontechnologies/playwright-utils/dist/esm/.env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+Running 1 test using 1 worker
+
+[dotenv@17.3.1] injecting env (0) from node_modules/.pnpm/@seontechnologies+playwright-utils@3.14.0_@playwright+test@1.58.2_typescript@5.9.3_zod@3.25.76/node_modules/@seontechnologies/playwright-utils/dist/esm/.env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[02:43:54] ℹ Auth session disabled - skipping token application to browser context
+  ✓  1 [chromium] › tests/e2e/example.spec.ts:3:1 › guest can reach the public authentication entry (175ms)
+
+  1 passed (2.7s)
+
+
+playwright exit=0
+exit=0

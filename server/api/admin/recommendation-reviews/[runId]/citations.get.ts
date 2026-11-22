@@ -4,9 +4,7 @@ import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { getRecommendationReviewDetail } from '../../../../utils/recommendations/recommendationReviewService'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  await requireAdminSession(event)
   const runId = getRouterParam(event, 'runId')?.trim() || ''
 
   if (!runId) {

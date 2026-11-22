@@ -1,0 +1,55 @@
+✔ a signed-out visitor is not offered Sign out (7686.11375ms)
+✖ every admin page and the AI search page offer Sign out to a signed-in admin (30606.553958ms)
+✖ a signed-in user signs out from the landing page with the keyboard (34329.793167ms)
+✖ a failed sign-out reports an error and keeps the user signed in (30089.503459ms)
+✖ a signed-in admin signs out from an admin page and loses admin access (30528.209792ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 1
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 138728.594458
+
+✖ failing tests:
+
+test at tests/security/sign-out.test.mjs:90:1
+✖ every admin page and the AI search page offer Sign out to a signed-in admin (30606.553958ms)
+  locator.waitFor: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for getByRole('button', { name: 'Sign out', exact: true }) to be visible
+
+      at TestContext.<anonymous> (<repo>/tests/security/sign-out.test.mjs:96:33) {
+    name: 'TimeoutError'
+  }
+
+test at tests/security/sign-out.test.mjs:104:1
+✖ a signed-in user signs out from the landing page with the keyboard (34329.793167ms)
+  locator.waitFor: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for getByRole('button', { name: 'Sign out', exact: true }) to be visible
+
+      at TestContext.<anonymous> (<repo>/tests/security/sign-out.test.mjs:110:31) {
+    name: 'TimeoutError'
+  }
+
+test at tests/security/sign-out.test.mjs:123:1
+✖ a failed sign-out reports an error and keeps the user signed in (30089.503459ms)
+  locator.press: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for getByRole('button', { name: 'Sign out', exact: true })
+
+      at TestContext.<anonymous> (<repo>/tests/security/sign-out.test.mjs:131:31) {
+    name: 'TimeoutError'
+  }
+
+test at tests/security/sign-out.test.mjs:144:1
+✖ a signed-in admin signs out from an admin page and loses admin access (30528.209792ms)
+  locator.waitFor: Timeout 30000ms exceeded.
+  Call log:
+    - waiting for getByRole('button', { name: 'Sign out', exact: true }) to be visible
+
+      at TestContext.<anonymous> (<repo>/tests/security/sign-out.test.mjs:152:31) {
+    name: 'TimeoutError'
+  }

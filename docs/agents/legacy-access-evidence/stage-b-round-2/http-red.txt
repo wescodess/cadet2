@@ -1,0 +1,80 @@
+✔ /workspace is unavailable to every caller and method (4946.012ms)
+✔ /workspace/intake is unavailable to every caller and method (55.394875ms)
+✔ /workspace/recommendations is unavailable to every caller and method (55.278667ms)
+✔ /workspace/recommendations/legacy-private-run is unavailable to every caller and method (53.607125ms)
+✔ /workspace/recommendations/legacy-private-run/pathways/private-pathway-canary is unavailable to every caller and method (58.460541ms)
+✔ /workspace/history is unavailable to every caller and method (54.548542ms)
+✔ /workspace/compare is unavailable to every caller and method (57.208292ms)
+✔ /workspace/settings is unavailable to every caller and method (51.920792ms)
+✔ /workspace/unknown is unavailable to every caller and method (52.538833ms)
+✔ /tasks is unavailable to every caller and method (55.235125ms)
+✔ /api/workspace is unavailable to every caller and method (51.712583ms)
+✔ /api/workspace/me is unavailable to every caller and method (54.136083ms)
+✔ /api/workspace/summary is unavailable to every caller and method (54.145416ms)
+✔ /api/workspace/recommendation-runs is unavailable to every caller and method (53.389084ms)
+✔ /api/workspace/runs is unavailable to every caller and method (57.257542ms)
+✔ /api/workspace/runs/legacy-private-run is unavailable to every caller and method (51.948708ms)
+✔ /api/workspace/runs/compare is unavailable to every caller and method (48.8985ms)
+✔ /api/workspace/unknown is unavailable to every caller and method (51.478417ms)
+✔ /api/intake is unavailable to every caller and method (52.67375ms)
+✔ /api/intake/draft is unavailable to every caller and method (47.702459ms)
+✔ /api/intake/submit is unavailable to every caller and method (48.77825ms)
+✔ /api/intake/unknown is unavailable to every caller and method (49.063417ms)
+✔ /api/recommendations/runs is unavailable to every caller and method (47.353458ms)
+✔ /api/recommendations/runs/legacy-private-run/status is unavailable to every caller and method (48.399167ms)
+✔ /api/recommendations/runs/legacy-private-run/pathways is unavailable to every caller and method (47.195917ms)
+✔ /api/recommendations/runs/legacy-private-run/results is unavailable to every caller and method (50.130958ms)
+✔ /api/recommendations/runs/legacy-private-run/start is unavailable to every caller and method (48.169167ms)
+✔ /api/recommendations/runs/legacy-private-run/refresh is unavailable to every caller and method (45.414541ms)
+✔ /api/recommendations/runs/legacy-private-run/unknown is unavailable to every caller and method (49.62225ms)
+✔ SSR payloads, encoded paths and prefetches cannot reach a retired loader (179.862334ms)
+✔ JSON, malformed bodies and extension methods are rejected before reading input (116.118958ms)
+✔ the shipped browser chunks contain no legacy navigation, polling or automatic starts (14.485208ms)
+✔ public entry preserves authentication without advertising retired navigation (389.720916ms)
+✔ real sign-in, session and backend admission still work after denied requests (44.3835ms)
+▶ missing operator credentials return 503 for both review readers
+  ✔ list (95.471708ms)
+  ✔ /legacy-private-run (52.440708ms)
+✔ missing operator credentials return 503 for both review readers (3576.486ms)
+▶ review boundaries consistently require a stored grant before reads or actions
+  ✔ GET /api/admin/access (64.87675ms)
+  ✔ GET /api/admin/recommendation-reviews (82.940125ms)
+  ✔ GET /api/admin/recommendation-reviews/legacy-private-run (123.543084ms)
+  ✔ GET /api/admin/recommendation-reviews/legacy-private-run/citations (90.262ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/citations/legacy-private-run-private-pathway-canary-1/flag (102.979708ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/flag (77.337583ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/dismiss (76.593875ms)
+  ✔ POST /api/admin/recommendation-reviews/legacy-private-run/resolve (57.109917ms)
+✔ review boundaries consistently require a stored grant before reads or actions (744.426541ms)
+✖ raw dot-segment requests stop before routing, including encoded and mixed-case forms (420.664792ms)
+ℹ tests 47
+ℹ suites 0
+ℹ pass 46
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17012.459041
+
+✖ failing tests:
+
+test at tests/security/legacy-http.test.mjs:268:1
+✖ raw dot-segment requests stop before routing, including encoded and mixed-case forms (420.664792ms)
+  AssertionError [ERR_ASSERTION]: /workspace\..
+  + actual - expected
+
+  + 'no-cache'
+  - 'private, no-store'
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:274:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'no-cache',
+    expected: 'private, no-store',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+exit=1

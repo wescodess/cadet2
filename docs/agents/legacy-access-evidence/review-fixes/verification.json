@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "signal": null,
+  "baselinePolicy": {
+    "status": "pass",
+    "seconds": "0.4"
+  },
+  "rows": [
+    {
+      "row": "typecheck",
+      "status": "pass",
+      "seconds": "20.4"
+    },
+    {
+      "row": "lint",
+      "status": "pass",
+      "seconds": "44.5"
+    },
+    {
+      "row": "format:check",
+      "status": "pass",
+      "seconds": "6.2"
+    },
+    {
+      "row": "secrets:check",
+      "status": "pass",
+      "seconds": "5.7"
+    },
+    {
+      "row": "dependencies:check",
+      "status": "pass",
+      "seconds": "54.0"
+    },
+    {
+      "row": "test:policy",
+      "status": "pass",
+      "seconds": "0.4"
+    },
+    {
+      "row": "test:components",
+      "status": "pass",
+      "seconds": "19.1"
+    },
+    {
+      "row": "build",
+      "status": "pass",
+      "seconds": "34.1"
+    },
+    {
+      "row": "test:legacy-access",
+      "status": "pass",
+      "seconds": "37.6"
+    }
+  ]
+}

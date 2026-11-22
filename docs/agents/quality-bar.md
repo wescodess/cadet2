@@ -1,6 +1,6 @@
 # Quality bar
 
-`pnpm verify` runs the seven static rows owned by #23. CI runs it on every PR and push to `dev` (and retains the existing `main`, scheduled and manual triggers). Pre-commit checks formatting and lint on staged files, then runs the complete type ratchet. `pnpm install` installs the hook; linked worktrees get their own `core.hooksPath` setting.
+`pnpm verify` runs the seven static rows owned by #23, the existing Vitest tests and production build, and #28's real legacy-access boundary suite after the build. CI runs it on every PR and push to `dev` (and retains the existing `main`, scheduled and manual triggers). Pre-commit checks formatting and lint on staged files, then runs the complete type ratchet. `pnpm install` installs the hook; linked worktrees get their own `core.hooksPath` setting.
 
 Use Node 24 from `.nvmrc`, pnpm 9.12.3 from `packageManager`, and a frozen lockfile:
 
@@ -51,6 +51,8 @@ Playwright's list never runs test bodies, hooks or fixtures, so a TypeScript sca
 Initial CI calibration: [run 44026799450](https://github.com/wescodess/cadet2/actions/runs/44026799450) passed every command except lint. The inherited Nitro lint project used WebWorker libraries, leaving browser DOM types unresolved in CI. The dedicated lint project now explicitly loads ESNext, DOM and DOM.Iterable. The initial measurement was 1,736 findings; the corrected measurement is 1,688. Its initial adoption baseline was recaptured with those libraries: two already-existing optional-chain findings became visible while spurious unsafe DOM findings disappeared. Both affected component files are byte-identical to `fe2b4a4`; no application code was changed to clear the baseline. This correction is part of the initial adoption inventory; subsequent integration changes remain subject to the no-increase ratchet.
 
 ## Tool pins and upstream checks
+
+Issue #28 adds the mandatory `pnpm test:legacy-access` command after the build. It starts the built Nitro server and an isolated actual Convex backend, with real signup/session/JWT calls and operator-owned fixtures. It proves retired HTTP and direct-Convex denial with preserved session/admin controls; it is not the replacement portal journey suite or #75's complete built-surface guard. See the [scope and retained red/green evidence](legacy-access-closure.md). The verifier now records nine commands; the earlier eight-command ledgers below describe their original adoption heads.
 
 Official documentation/release pages and registry versions were checked on 2026-11-17 before installing. New direct tooling is exact-pinned in `package.json`; transitives are frozen in `pnpm-lock.yaml`.
 

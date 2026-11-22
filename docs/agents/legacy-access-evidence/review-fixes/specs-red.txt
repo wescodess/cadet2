@@ -1,0 +1,68 @@
+✖ Playwright specs and their helpers contain no retired demo route assertions (124.568042ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 173.248375
+
+✖ failing tests:
+
+test at tests/security/obsolete-specs.test.mjs:14:1
+✖ Playwright specs and their helpers contain no retired demo route assertions (124.568042ms)
+  AssertionError [ERR_ASSERTION]: retired success assertions belong in the closure suite as denials
+  + actual - expected
+
+  + [
+  +   'tests/e2e/admin-audit-trail.red.atdd.spec.ts',
+  +   'tests/e2e/admin-pathway-inventory.atdd.spec.ts',
+  +   'tests/e2e/admin-pathway-inventory.red.atdd.spec.ts',
+  +   'tests/e2e/admin-recommendation-reviews.red.atdd.spec.ts',
+  +   'tests/e2e/intake-constraints-context.atdd.spec.ts',
+  +   'tests/e2e/intake-draft.atdd.spec.ts',
+  +   'tests/e2e/intake-draft.spec.ts',
+  +   'tests/e2e/intake-submit.atdd.spec.ts',
+  +   'tests/e2e/workspace-auth.spec.ts',
+  +   'tests/e2e/workspace-continuity-hub.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-citations.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-citations.red.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-comparison.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-explanations.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-next-step-plan.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-run-comparison.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-run-comparison.red.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-run-history.red.atdd.spec.ts',
+  +   'tests/e2e/workspace-recommendation-status.atdd.spec.ts',
+  +   'tests/api/admin-recommendation-reviews.red.atdd.spec.ts',
+  +   'tests/api/intake-submit.atdd.spec.ts',
+  +   'tests/api/recommendation-citations.atdd.spec.ts',
+  +   'tests/api/recommendation-citations.red.atdd.spec.ts',
+  +   'tests/api/recommendation-comparison.atdd.spec.ts',
+  +   'tests/api/recommendation-next-step-plan.atdd.spec.ts',
+  +   'tests/api/recommendation-run-history.red.atdd.spec.ts',
+  +   'tests/api/run-comparison.red.atdd.spec.ts',
+  +   'tests/api/run-comparison.spec.ts',
+  +   'tests/api/workspace-summary.atdd.spec.ts',
+  +   'tests/support/fixtures/factories/intake-draft-factory.ts',
+  +   'tests/support/fixtures/factories/intake-submit-factory.ts',
+  +   'tests/support/fixtures/factories/pathway-inventory-factory.ts',
+  +   'tests/support/fixtures/factories/recommendation-lifecycle-factory.ts',
+  +   'tests/support/fixtures/factories/recommendation-run-comparison-factory.ts',
+  +   'tests/support/fixtures/factories/recommendation-run-history-factory.ts',
+  +   'tests/support/fixtures/factories/workspace-access-factory.ts',
+  +   'tests/support/fixtures/factories/workspace-summary-factory.ts'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/obsolete-specs.test.mjs:22:10)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'tests/e2e/admin-audit-trail.red.atdd.spec.ts', 'tests/e2e/admin-pathway-inventory.atdd.spec.ts', 'tests/e2e/admin-pathway-inventory.red.atdd.spec.ts', 'tests/e2e/admin-recommendation-reviews.red.atdd.spec.ts', 'tests/e2e/intake-constraints-context.atdd.spec.ts', 'tests/e2e/intake-draft.atdd.spec.ts', 'tests/e2e/intake-draft.spec.ts', 'tests/e2e/intake-submit.atdd.spec.ts', 'tests/e2e/workspace-auth.spec.ts', 'tests/e2e/workspace-continuity-hub.atdd.spec.ts', 'tests/e2e/workspace-recommendation-citations.atdd.spec.ts', 'tests/e2e/workspace-recommendation-citations.red.atdd.spec.ts', 'tests/e2e/workspace-recommendation-comparison.atdd.spec.ts', 'tests/e2e/workspace-recommendation-explanations.atdd.spec.ts', 'tests/e2e/workspace-recommendation-next-step-plan.atdd.spec.ts', 'tests/e2e/workspace-recommendation-run-comparison.atdd.spec.ts', 'tests/e2e/workspace-recommendation-run-comparison.red.atdd.spec.ts', 'tests/e2e/workspace-recommendation-run-history.red.atdd.spec.ts', 'tests/e2e/workspace-recommendation-status.atdd.spec.ts', 'tests/api/admin-recommendation-reviews.red.atdd.spec.ts', 'tests/api/intake-submit.atdd.spec.ts', 'tests/api/recommendation-citations.atdd.spec.ts', 'tests/api/recommendation-citations.red.atdd.spec.ts', 'tests/api/recommendation-comparison.atdd.spec.ts', 'tests/api/recommendation-next-step-plan.atdd.spec.ts', 'tests/api/recommendation-run-history.red.atdd.spec.ts', 'tests/api/run-comparison.red.atdd.spec.ts', 'tests/api/run-comparison.spec.ts', 'tests/api/workspace-summary.atdd.spec.ts', 'tests/support/fixtures/factories/intake-draft-factory.ts', 'tests/support/fixtures/factories/intake-submit-factory.ts', 'tests/support/fixtures/factories/pathway-inventory-factory.ts', 'tests/support/fixtures/factories/recommendation-lifecycle-factory.ts', 'tests/support/fixtures/factories/recommendation-run-comparison-factory.ts', 'tests/support/fixtures/factories/recommendation-run-history-factory.ts', 'tests/support/fixtures/factories/workspace-access-factory.ts', 'tests/support/fixtures/factories/workspace-summary-factory.ts' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,7 @@
+"/workspaces-help" -> 404 cc=no-cache gate=false
+"/workspace-help" -> 404 cc=no-cache gate=false
+"/tasks2" -> 404 cc=no-cache gate=false
+"/workspace.json" -> 404 cc=private, no-store gate=true
+"/workspace\\.." -> 404 cc=private, no-store gate=true
+"/auth" -> 200 cc=- gate=false
+exit=0

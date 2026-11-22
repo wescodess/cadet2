@@ -1,0 +1,2055 @@
+✔ an admitted admin still reads governance review through the real HTTP guard (5446.490958ms)
+▶ anonymous cannot call any of the 19 former public registrations
+  ✖ recommendationRuns:listForUser (2.88875ms)
+  ✖ recommendationRuns:readStatusForUser (2.519667ms)
+  ✖ recommendationRuns:readPathwayEvaluationForUser (3.490916ms)
+  ✖ recommendationRuns:readRankedRecommendationsForUser (3.023625ms)
+  ✖ recommendationRuns:listForAdmin (2.180042ms)
+  ✖ recommendationRuns:readRankedRecommendationsForAdmin (3.020125ms)
+  ✖ recommendationRuns:listRunsForUserTesting (3.524917ms)
+  ✖ recommendationRuns:createQueuedRun (6.937166ms)
+  ✖ recommendationRuns:writePathwayEvaluationForUser (4.897125ms)
+  ✖ recommendationRuns:writeRankedRecommendationsForUser (3.158125ms)
+  ✖ recommendationRuns:startProcessingForUser (5.15175ms)
+  ✖ recommendationRuns:setTerminalStatusForUser (4.527625ms)
+  ✖ recommendationRuns:seedRunForUser (3.26525ms)
+  ✖ recommendationRuns:resetRunsForUser (4.36225ms)
+  ✖ tasks:list (2.77475ms)
+  ✖ auditLog:listAuditEvents (3.3665ms)
+  ✖ auditLog:getAuditEvent (1.714958ms)
+  ✖ auditLog:getAuditSummary (2.862958ms)
+  ✖ auditLog:recordAuditEvent (4.306375ms)
+✖ anonymous cannot call any of the 19 former public registrations (69.356417ms)
+▶ ordinary cannot call any of the 19 former public registrations
+  ✖ recommendationRuns:listForUser (5.157875ms)
+  ✖ recommendationRuns:readStatusForUser (5.482125ms)
+  ✖ recommendationRuns:readPathwayEvaluationForUser (4.990916ms)
+  ✖ recommendationRuns:readRankedRecommendationsForUser (3.784667ms)
+  ✖ recommendationRuns:listForAdmin (4.799084ms)
+  ✖ recommendationRuns:readRankedRecommendationsForAdmin (4.670833ms)
+  ✖ recommendationRuns:listRunsForUserTesting (4.526791ms)
+  ✖ recommendationRuns:createQueuedRun (5.204625ms)
+  ✖ recommendationRuns:writePathwayEvaluationForUser (6.158583ms)
+  ✖ recommendationRuns:writeRankedRecommendationsForUser (6.153375ms)
+  ✖ recommendationRuns:startProcessingForUser (5.686291ms)
+  ✖ recommendationRuns:setTerminalStatusForUser (5.3385ms)
+  ✖ recommendationRuns:seedRunForUser (6.243667ms)
+  ✖ recommendationRuns:resetRunsForUser (5.594ms)
+  ✖ tasks:list (4.091917ms)
+  ✖ auditLog:listAuditEvents (4.384042ms)
+  ✖ auditLog:getAuditEvent (4.181959ms)
+  ✖ auditLog:getAuditSummary (4.262708ms)
+  ✖ auditLog:recordAuditEvent (4.828417ms)
+✖ ordinary cannot call any of the 19 former public registrations (96.66625ms)
+▶ foreign-user cannot call any of the 19 former public registrations
+  ✖ recommendationRuns:listForUser (3.440875ms)
+  ✖ recommendationRuns:readStatusForUser (3.486292ms)
+  ✖ recommendationRuns:readPathwayEvaluationForUser (1.851375ms)
+  ✖ recommendationRuns:readRankedRecommendationsForUser (1.763ms)
+  ✖ recommendationRuns:listForAdmin (4.579958ms)
+  ✖ recommendationRuns:readRankedRecommendationsForAdmin (3.270667ms)
+  ✖ recommendationRuns:listRunsForUserTesting (4.604542ms)
+  ✖ recommendationRuns:createQueuedRun (6.195083ms)
+  ✖ recommendationRuns:writePathwayEvaluationForUser (5.774042ms)
+  ✖ recommendationRuns:writeRankedRecommendationsForUser (5.63525ms)
+  ✖ recommendationRuns:startProcessingForUser (5.236542ms)
+  ✖ recommendationRuns:setTerminalStatusForUser (6.219125ms)
+  ✖ recommendationRuns:seedRunForUser (5.687583ms)
+  ✖ recommendationRuns:resetRunsForUser (5.847125ms)
+  ✖ tasks:list (4.268917ms)
+  ✖ auditLog:listAuditEvents (4.421875ms)
+  ✖ auditLog:getAuditEvent (3.086667ms)
+  ✖ auditLog:getAuditSummary (4.454833ms)
+  ✖ auditLog:recordAuditEvent (6.574167ms)
+✖ foreign-user cannot call any of the 19 former public registrations (87.524292ms)
+▶ own-client cannot call any of the 19 former public registrations
+  ✖ recommendationRuns:listForUser (4.667833ms)
+  ✖ recommendationRuns:readStatusForUser (3.181167ms)
+  ✖ recommendationRuns:readPathwayEvaluationForUser (3.019542ms)
+  ✖ recommendationRuns:readRankedRecommendationsForUser (3.173625ms)
+  ✖ recommendationRuns:listForAdmin (4.592083ms)
+  ✖ recommendationRuns:readRankedRecommendationsForAdmin (3.112958ms)
+  ✖ recommendationRuns:listRunsForUserTesting (4.031791ms)
+  ✖ recommendationRuns:createQueuedRun (5.909958ms)
+  ✖ recommendationRuns:writePathwayEvaluationForUser (6.537792ms)
+  ✖ recommendationRuns:writeRankedRecommendationsForUser (5.725959ms)
+  ✖ recommendationRuns:startProcessingForUser (4.27675ms)
+  ✖ recommendationRuns:setTerminalStatusForUser (5.942334ms)
+  ✖ recommendationRuns:seedRunForUser (6.005042ms)
+  ✖ recommendationRuns:resetRunsForUser (5.669291ms)
+  ✖ tasks:list (2.565875ms)
+  ✖ auditLog:listAuditEvents (4.265833ms)
+  ✖ auditLog:getAuditEvent (4.426375ms)
+  ✖ auditLog:getAuditSummary (4.728209ms)
+  ✖ auditLog:recordAuditEvent (6.023041ms)
+✖ own-client cannot call any of the 19 former public registrations (88.869208ms)
+▶ admin cannot call any of the 19 former public registrations
+  ✖ recommendationRuns:listForUser (4.388167ms)
+  ✖ recommendationRuns:readStatusForUser (3.184709ms)
+  ✖ recommendationRuns:readPathwayEvaluationForUser (1.894833ms)
+  ✖ recommendationRuns:readRankedRecommendationsForUser (1.619375ms)
+  ✖ recommendationRuns:listForAdmin (4.317958ms)
+  ✖ recommendationRuns:readRankedRecommendationsForAdmin (1.812708ms)
+  ✖ recommendationRuns:listRunsForUserTesting (5.446583ms)
+  ✖ recommendationRuns:createQueuedRun (8.515458ms)
+  ✖ recommendationRuns:writePathwayEvaluationForUser (5.02375ms)
+  ✖ recommendationRuns:writeRankedRecommendationsForUser (4.275166ms)
+  ✖ recommendationRuns:startProcessingForUser (5.603625ms)
+  ✖ recommendationRuns:setTerminalStatusForUser (4.473292ms)
+  ✖ recommendationRuns:seedRunForUser (6.023833ms)
+  ✖ recommendationRuns:resetRunsForUser (6.029ms)
+  ✖ tasks:list (3.841541ms)
+  ✖ auditLog:listAuditEvents (4.575417ms)
+  ✖ auditLog:getAuditEvent (4.261708ms)
+  ✖ auditLog:getAuditSummary (4.420667ms)
+  ✖ auditLog:recordAuditEvent (4.186334ms)
+✖ admin cannot call any of the 19 former public registrations (84.89875ms)
+✖ denied direct calls leave the nonempty run and audit stores unchanged (441.174958ms)
+✔ genuine session and admin admission remain usable after the probes (9.792458ms)
+ℹ tests 103
+ℹ suites 0
+ℹ pass 2
+ℹ fail 101
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11454.841208
+
+✖ failing tests:
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForUser (2.88875ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readStatusForUser (2.519667ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readPathwayEvaluationForUser (3.490916ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForUser (3.023625ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForAdmin (2.180042ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForAdmin (3.020125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listRunsForUserTesting (3.524917ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:createQueuedRun (6.937166ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writePathwayEvaluationForUser (4.897125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writeRankedRecommendationsForUser (3.158125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:startProcessingForUser (5.15175ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 2133b7e2b38a1a32] Server Error\n' +
+    'Uncaught Error: INVALID_STATUS_TRANSITION:completed->evaluating\n' +
+    '    at handler (../convex/recommendationRuns.ts:1196:22)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 2133b7e2b38a1a32] Server Error
+    Uncaught Error: INVALID_STATUS_TRANSITION:completed->evaluating
+        at handler (../convex/recommendationRuns.ts:1196:22)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:setTerminalStatusForUser (4.527625ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: c05fab495eb4d98e] Server Error\n' +
+    'Uncaught Error: INVALID_STATUS_TRANSITION:completed->failed\n' +
+    '    at handler (../convex/recommendationRuns.ts:1246:16)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: c05fab495eb4d98e] Server Error
+    Uncaught Error: INVALID_STATUS_TRANSITION:completed->failed
+        at handler (../convex/recommendationRuns.ts:1246:16)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:seedRunForUser (3.26525ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:resetRunsForUser (4.36225ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ tasks:list (2.77475ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:listAuditEvents (3.3665ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditEvent (1.714958ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditSummary (2.862958ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:recordAuditEvent (4.306375ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForUser (5.157875ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readStatusForUser (5.482125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readPathwayEvaluationForUser (4.990916ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForUser (3.784667ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForAdmin (4.799084ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForAdmin (4.670833ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listRunsForUserTesting (4.526791ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:createQueuedRun (5.204625ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writePathwayEvaluationForUser (6.158583ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 387e30f5df398b5e] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1043:29)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 387e30f5df398b5e] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1043:29)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writeRankedRecommendationsForUser (6.153375ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 749fde6fb5b0481a] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1134:29)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 749fde6fb5b0481a] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1134:29)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:startProcessingForUser (5.686291ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 99d2b4a3e9989b17] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1187:47)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 99d2b4a3e9989b17] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1187:47)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:setTerminalStatusForUser (5.3385ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 37b9032671be91f5] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1242:27)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 37b9032671be91f5] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1242:27)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:seedRunForUser (6.243667ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:resetRunsForUser (5.594ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ tasks:list (4.091917ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:listAuditEvents (4.384042ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditEvent (4.181959ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditSummary (4.262708ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:recordAuditEvent (4.828417ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForUser (3.440875ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readStatusForUser (3.486292ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readPathwayEvaluationForUser (1.851375ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForUser (1.763ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForAdmin (4.579958ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForAdmin (3.270667ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listRunsForUserTesting (4.604542ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:createQueuedRun (6.195083ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writePathwayEvaluationForUser (5.774042ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: bad754fabfef791b] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1043:29)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: bad754fabfef791b] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1043:29)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writeRankedRecommendationsForUser (5.63525ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: ad0b5f76962b8af0] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1134:29)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: ad0b5f76962b8af0] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1134:29)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:startProcessingForUser (5.236542ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 8a881a06938de92c] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1187:47)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 8a881a06938de92c] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1187:47)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:setTerminalStatusForUser (6.219125ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 2f99d6441fe3b519] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1242:27)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 2f99d6441fe3b519] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1242:27)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:seedRunForUser (5.687583ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:resetRunsForUser (5.847125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ tasks:list (4.268917ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:listAuditEvents (4.421875ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditEvent (3.086667ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditSummary (4.454833ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:recordAuditEvent (6.574167ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForUser (4.667833ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readStatusForUser (3.181167ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readPathwayEvaluationForUser (3.019542ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForUser (3.173625ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForAdmin (4.592083ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForAdmin (3.112958ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listRunsForUserTesting (4.031791ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:createQueuedRun (5.909958ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writePathwayEvaluationForUser (6.537792ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 55580cc752252ded] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1043:29)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 55580cc752252ded] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1043:29)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writeRankedRecommendationsForUser (5.725959ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 5147b5dd045117e9] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1134:29)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 5147b5dd045117e9] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1134:29)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:startProcessingForUser (4.27675ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: f70a03a8e984410d] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1187:47)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: f70a03a8e984410d] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1187:47)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:setTerminalStatusForUser (5.942334ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: aec7cb15611e688d] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1242:27)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: aec7cb15611e688d] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1242:27)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:seedRunForUser (6.005042ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:resetRunsForUser (5.669291ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ tasks:list (2.565875ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:listAuditEvents (4.265833ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditEvent (4.426375ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditSummary (4.728209ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:recordAuditEvent (6.023041ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForUser (4.388167ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readStatusForUser (3.184709ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readPathwayEvaluationForUser (1.894833ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForUser (1.619375ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listForAdmin (4.317958ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:readRankedRecommendationsForAdmin (1.812708ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:listRunsForUserTesting (5.446583ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:createQueuedRun (8.515458ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writePathwayEvaluationForUser (5.02375ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 433a7bc564e79259] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1043:29)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 433a7bc564e79259] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1043:29)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:writeRankedRecommendationsForUser (4.275166ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: b871bc7e7b51b723] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1134:29)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: b871bc7e7b51b723] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1134:29)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:startProcessingForUser (5.603625ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 0ef6c52d1ff4dd48] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1187:47)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 0ef6c52d1ff4dd48] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1187:47)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:setTerminalStatusForUser (4.473292ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Could not find public function/. Input:
+
+  'Error: [Request ID: 5a6ce4e79a1c7a25] Server Error\n' +
+    'Uncaught Error: RUN_NOT_FOUND\n' +
+    '    at handler (../convex/recommendationRuns.ts:1242:27)\n'
+
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: [Request ID: 5a6ce4e79a1c7a25] Server Error
+    Uncaught Error: RUN_NOT_FOUND
+        at handler (../convex/recommendationRuns.ts:1242:27)
+
+        at ConvexHttpClient.mutationInner (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:297:15)
+        at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async ConvexHttpClient.processMutationQueue (file://<repo>/node_modules/.pnpm/convex@1.32.0_react@19.2.4/node_modules/convex/dist/esm/browser/http_client.js:310:24),
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:seedRunForUser (6.023833ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ recommendationRuns:resetRunsForUser (6.029ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ tasks:list (3.841541ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:listAuditEvents (4.575417ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditEvent (4.261708ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:getAuditSummary (4.420667ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:103:21
+✖ auditLog:recordAuditEvent (4.186334ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:104:9)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:103:7)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /Could not find public function/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-convex.test.mjs:110:1
+✖ denied direct calls leave the nonempty run and audit stores unchanged (441.174958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+
+    {
+      auditLog: [
+        {
+          _creationTime: 1794957076801.416,
+          _id: 'jd74562gj4xwj3s7cfdgybpqed8jc4kq',
+  ...
+        },
+  -   ],
+  -   recommendation_runs: [
+        {
+  +       _creationTime: 1794957077465.415,
+  +       _id: 'jd7cf4e3csd7ah4605s3k0kyp58jdky1',
+  +       actionType: 'RECOMMENDATION_FLAGGED',
+  +       actorId: 'SuCAzbUpf3svianJ2iPVCr3Vi4gZ6TuA',
+  +       changeContext: {
+  +         after: null,
+  +         before: null
+  -       _creationTime: 1794957076537.323,
+  -       _id: 'js74482j8t9ce9fp7km0sgekgn8jc4h9',
+  -       createdAt: 1,
+  -       profileSnapshotId: 'legacy-private-snapshot',
+  -       recommendationResults: {
+  -         blocked: [],
+  -         composed: [],
+  -         direct: [
+  -           {
+  -             pathwayId: 'private-pathway-canary',
+  -             rank: 1,
+  -             rationale: 'PRIVATE_UNSIGNED_RESULT_CANARY',
+  -             score: 91,
+  -             tier: 'strong-fit',
+  -             type: 'direct'
+  -           }
+  -         ],
+  -         rankedAt: 1,
+  -         rankerVersion: 'legacy-unverified-fixture'
+          },
+  +       entityId: 'legacy-private-run',
+  +       entityLabel: 'Forged event',
+  +       entityType: 'RECOMMENDATION_RUN',
+  +       timestamp: 1794957077465
+  -       runId: 'legacy-private-run',
+  -       status: 'completed',
+  -       updatedAt: 1,
+  -       userId: 'SuCAzbUpf3svianJ2iPVCr3Vi4gZ6TuA'
+        },
+  +     {
+  +       _creationTime: 1794957077561.529,
+  +       _id: 'jd733x9k7wzr1y52q1fs8dp8y98jds2z',
+  +       actionType: 'RECOMMENDATION_FLAGGED',
+  +       actorId: 'SuCAzbUpf3svianJ2iPVCr3Vi4gZ6TuA',
+  +       changeContext: {
+  +         after: null,
+  +         before: null
+  +       },
+  +       entityId: 'legacy-private-run',
+  +       entityLabel: 'Forged event',
+  +       entityType: 'RECOMMENDATION_RUN',
+  +       timestamp: 1794957077561
+  +     },
+  +     {
+  +       _creationTime: 1794957077649.172,
+  +       _id: 'jd777taxbm0dh8d83t598f2pr58jc7k1',
+  +       actionType: 'RECOMMENDATION_FLAGGED',
+  +       actorId: 'SuCAzbUpf3svianJ2iPVCr3Vi4gZ6TuA',
+  +       changeContext: {
+  +         after: null,
+  +         before: null
+  +       },
+  +       entityId: 'legacy-private-run',
+  +       entityLabel: 'Forged event',
+  +       entityType: 'RECOMMENDATION_RUN',
+  +       timestamp: 1794957077649
+  +     },
+  +     {
+  +       _creationTime: 1794957077738.199,
+  +       _id: 'jd7dhaahh12d477e2xf327m9r18jdqrz',
+  +       actionType: 'RECOMMENDATION_FLAGGED',
+  +       actorId: 'SuCAzbUpf3svianJ2iPVCr3Vi4gZ6TuA',
+  +       changeContext: {
+  +         after: null,
+  +         before: null
+  +       },
+  +       entityId: 'legacy-private-run',
+  +       entityLabel: 'Forged event',
+  +       entityType: 'RECOMMENDATION_RUN',
+  +       timestamp: 1794957077738
+  +     },
+  +     {
+  +       _creationTime: 1794957077823.589,
+  +       _id: 'jd7b4ccn6x1pa8r5vcdcrkz17x8jc1v4',
+  +       actionType: 'RECOMMENDATION_FLAGGED',
+  +       actorId: 'SuCAzbUpf3svianJ2iPVCr3Vi4gZ6TuA',
+  +       changeContext: {
+  +         after: null,
+  +         before: null
+  +       },
+  +       entityId: 'legacy-private-run',
+  +       entityLabel: 'Forged event',
+  +       entityType: 'RECOMMENDATION_RUN',
+  +       timestamp: 1794957077823
+  +     }
+      ],
+  +   recommendation_runs: []
+    }
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-convex.test.mjs:111:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { recommendation_runs: [], auditLog: [ [Object], [Object], [Object], [Object], [Object], [Object] ] },
+    expected: { recommendation_runs: [ [Object] ], auditLog: [ [Object] ] },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

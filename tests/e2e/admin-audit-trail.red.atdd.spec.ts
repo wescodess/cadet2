@@ -10,10 +10,7 @@ import {
   type AuditTrailEventSummary,
 } from '../support/fixtures/factories/audit-trail-factory'
 import { createAdminAccessResponse } from '../support/fixtures/factories/pathway-inventory-factory'
-import {
-  AUDIT_TRAIL_ATDD_TEST_IDS,
-  AUDIT_TRAIL_FILTER_LABELS,
-} from '../support/fixtures/test-data'
+import { AUDIT_TRAIL_ATDD_TEST_IDS, AUDIT_TRAIL_FILTER_LABELS } from '../support/fixtures/test-data'
 import { getTestEnvironment } from '../support/helpers/env'
 
 function uniqueAuthEmail(label: string) {
@@ -64,7 +61,9 @@ async function ensureAuthenticatedPage(page: Page, appBaseUrl: string, label: st
 
   const storageState = await page.request.storageState()
   if (storageState.cookies.length === 0) {
-    throw new Error('Authenticated browser session did not return Better Auth cookies for Story 5.4 audit trail red-phase E2E tests.')
+    throw new Error(
+      'Authenticated browser session did not return Better Auth cookies for Story 5.4 audit trail red-phase E2E tests.',
+    )
   }
 
   await page.context().addCookies(storageState.cookies)
@@ -81,7 +80,8 @@ async function mockAdminAuditTrailUi(
   const routeProbe = createAuditTrailRouteProbe(appBaseUrl)
   const events = input.events || createAuditTrailListResponse().items
   let latestListQuery = ''
-  let selectedEventId = input.selectedEventId || events[0]?.eventId || createAuditTrailEventSummary().eventId
+  let selectedEventId =
+    input.selectedEventId || events[0]?.eventId || createAuditTrailEventSummary().eventId
 
   await page.route('**/api/admin/access', async (route) => {
     await route.fulfill({
@@ -99,16 +99,24 @@ async function mockAdminAuditTrailUi(
     })
   })
 
-  await page.route(/\/api\/admin\/audit-trail\/(?!summary(?:\?|$))[^/?]+(?:\?.*)?$/, async (route) => {
-    selectedEventId = decodeURIComponent(route.request().url().split('/').slice(-1)[0] || selectedEventId)
-    const event = events.find(item => item.eventId === selectedEventId) || events[0] || createAuditTrailEventSummary()
+  await page.route(
+    /\/api\/admin\/audit-trail\/(?!summary(?:\?|$))[^/?]+(?:\?.*)?$/,
+    async (route) => {
+      selectedEventId = decodeURIComponent(
+        route.request().url().split('/').slice(-1)[0] || selectedEventId,
+      )
+      const event =
+        events.find((item) => item.eventId === selectedEventId) ||
+        events[0] ||
+        createAuditTrailEventSummary()
 
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(createAuditTrailEventDetail(event)),
-    })
-  })
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(createAuditTrailEventDetail(event)),
+      })
+    },
+  )
 
   await page.route(/\/api\/admin\/audit-trail(?:\?.*)?$/, async (route) => {
     const url = new URL(route.request().url())
@@ -128,7 +136,8 @@ async function mockAdminAuditTrailUi(
       }
 
       if (search) {
-        const haystack = `${event.entityLabel} ${event.actorEmail} ${event.changeSummary}`.toLowerCase()
+        const haystack =
+          `${event.entityLabel} ${event.actorEmail} ${event.changeSummary}`.toLowerCase()
         return haystack.includes(search)
       }
 
@@ -166,10 +175,7 @@ test.describe('Story 5.4 Admin Audit Trail E2E RED ATDD', () => {
   test(
     '[P0][AC3] standard authenticated users are redirected away from the admin audit trail route',
     { annotation: [{ type: 'skipNetworkMonitoring' }] },
-    async ({
-      page,
-      appBaseUrl,
-    }) => {
+    async ({ page, appBaseUrl }) => {
       const routeProbe = createAuditTrailRouteProbe(appBaseUrl)
 
       await ensureAuthenticatedPage(page, appBaseUrl, 'admin-audit-trail-standard-user-red')
@@ -177,12 +183,7 @@ test.describe('Story 5.4 Admin Audit Trail E2E RED ATDD', () => {
 
       await expect(page).not.toHaveURL(/\/admin\/audit-trail$/)
 
-      if (/\/workspace$/.test(page.url())) {
-        await expect(page.getByRole('navigation', { name: 'Workspace navigation' }).first()).toBeVisible()
-      }
-      else {
-        await expect(page).toHaveURL(/\/auth/)
-      }
+      await expect(page).toHaveURL(`${appBaseUrl}/`)
     },
   )
 
@@ -223,7 +224,9 @@ test.describe('Story 5.4 Admin Audit Trail E2E RED ATDD', () => {
     ]
 
     await ensureAuthenticatedPage(page, appBaseUrl, 'admin-audit-trail-filter-red')
-    const { routeProbe, latestListQuery } = await mockAdminAuditTrailUi(page, appBaseUrl, { events })
+    const { routeProbe, latestListQuery } = await mockAdminAuditTrailUi(page, appBaseUrl, {
+      events,
+    })
 
     await page.goto(routeProbe.adminPath, { waitUntil: 'domcontentloaded' })
 
@@ -236,8 +239,12 @@ test.describe('Story 5.4 Admin Audit Trail E2E RED ATDD', () => {
     await expect(eventRows).toHaveCount(1)
     await eventRows.first().click()
 
-    await expect(page.getByTestId(AUDIT_TRAIL_ATDD_TEST_IDS.detailPanel)).toContainText('IRCC policy bulletin source')
-    await expect(page.getByTestId(AUDIT_TRAIL_ATDD_TEST_IDS.diffPanel)).toContainText(/before|after/i)
+    await expect(page.getByTestId(AUDIT_TRAIL_ATDD_TEST_IDS.detailPanel)).toContainText(
+      'IRCC policy bulletin source',
+    )
+    await expect(page.getByTestId(AUDIT_TRAIL_ATDD_TEST_IDS.diffPanel)).toContainText(
+      /before|after/i,
+    )
   })
 
   test('[P1][AC4][AC5] mobile audit trail collapses into Events and Details tabs while preserving the summary strip', async ({

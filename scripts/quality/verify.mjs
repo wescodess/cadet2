@@ -18,6 +18,7 @@ const record = {
     'test:policy',
     'test:components',
     'build',
+    'test:legacy-access',
   ].map((row) => ({ row, status: 'not_run' })),
 }
 let active

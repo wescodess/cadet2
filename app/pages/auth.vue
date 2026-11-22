@@ -20,7 +20,7 @@ const { signIn, signUp, loggedIn, waitForSession, fetchSession } = useUserSessio
 if (import.meta.client) {
   await waitForSession()
   if (loggedIn.value) {
-    await navigateTo('/workspace')
+    await navigateTo('/')
   }
 }
 
@@ -32,17 +32,16 @@ async function submit() {
     let result: AuthResult | undefined
 
     if (mode.value === 'sign-up') {
-      result = await signUp.email({
+      result = (await signUp.email({
         name: form.name.trim(),
         email: form.email.trim(),
         password: form.password,
-      }) as AuthResult
-    }
-    else {
-      result = await signIn.email({
+      })) as AuthResult
+    } else {
+      result = (await signIn.email({
         email: form.email.trim(),
         password: form.password,
-      }) as AuthResult
+      })) as AuthResult
     }
 
     if (result?.error) {
@@ -51,12 +50,10 @@ async function submit() {
     }
 
     await fetchSession({ force: true })
-    await navigateTo('/workspace')
-  }
-  catch (error) {
+    await navigateTo('/')
+  } catch (error) {
     formError.value = error instanceof Error ? error.message : 'Unexpected error.'
-  }
-  finally {
+  } finally {
     submitting.value = false
   }
 }
@@ -66,22 +63,24 @@ async function submit() {
   <main class="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
     <div class="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-2xl shadow-black/20">
       <div class="mb-6 space-y-2">
-        <NuxtLink to="/" class="text-xs text-slate-400 hover:text-slate-200">
-          ← Back
-        </NuxtLink>
+        <NuxtLink to="/" class="text-xs text-slate-400 hover:text-slate-200"> ← Back </NuxtLink>
         <h1 class="text-2xl font-semibold text-white">
           {{ mode === 'sign-up' ? 'Create account' : 'Sign in' }}
         </h1>
         <p class="text-sm text-slate-400">
-          Uses <code>useUserSession()</code> from Nuxt Better Auth.
+          Client and Representative portals are currently unavailable.
         </p>
       </div>
 
-      <div class="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-slate-800 bg-slate-950 p-1 text-sm">
+      <div
+        class="mb-4 grid grid-cols-2 gap-2 rounded-lg border border-slate-800 bg-slate-950 p-1 text-sm"
+      >
         <button
           type="button"
           class="rounded-md px-3 py-2 transition"
-          :class="mode === 'sign-up' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'"
+          :class="
+            mode === 'sign-up' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'
+          "
           @click="mode = 'sign-up'"
         >
           Sign Up
@@ -89,7 +88,9 @@ async function submit() {
         <button
           type="button"
           class="rounded-md px-3 py-2 transition"
-          :class="mode === 'sign-in' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'"
+          :class="
+            mode === 'sign-in' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-slate-200'
+          "
           @click="mode = 'sign-in'"
         >
           Sign In
@@ -107,7 +108,7 @@ async function submit() {
             required
             class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-slate-500 focus:border-emerald-400"
             placeholder="Ada Lovelace"
-          >
+          />
         </div>
 
         <div class="space-y-1">
@@ -120,7 +121,7 @@ async function submit() {
             required
             class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-slate-500 focus:border-emerald-400"
             placeholder="you@example.com"
-          >
+          />
         </div>
 
         <div class="space-y-1">
@@ -134,10 +135,13 @@ async function submit() {
             minlength="8"
             class="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none ring-0 placeholder:text-slate-500 focus:border-emerald-400"
             placeholder="••••••••"
-          >
+          />
         </div>
 
-        <p v-if="formError" class="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+        <p
+          v-if="formError"
+          class="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"
+        >
           {{ formError }}
         </p>
 

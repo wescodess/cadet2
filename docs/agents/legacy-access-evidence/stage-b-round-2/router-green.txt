@@ -1,0 +1,30 @@
+▶ test-only raw router canaries cannot be reached through dot segments
+  ✔ /workspace/.. (5.606542ms)
+  ✔ /workspace/%2e%2e (0.893458ms)
+  ✔ /workspace/.%2E (0.64175ms)
+  ✔ /api/workspace/.. (0.58675ms)
+  ✔ /api/recommendations/runs/%2e%2e?runId=legacy-private-run (0.730917ms)
+  ✔ /WORKSPACE/%2E. (0.515791ms)
+  ✔ /%77orkspace/%2e%2e (0.416166ms)
+  ✔ /workspace%2f%2e%2e (0.405333ms)
+  ✔ /workspace/./history (0.4825ms)
+  ✔ /api/intake/%2E (0.548709ms)
+  ✔ /tasks/.. (0.372375ms)
+  ✔ /workspace\.. (0.36525ms)
+  ✔ /workspace\..\.. (1.130584ms)
+  ✔ /api/workspace\.. (0.578167ms)
+  ✔ /tasks\.. (0.363291ms)
+  ✔ /workspace%5c.. (0.28175ms)
+  ✔ /workspace;x/.. (0.289708ms)
+  ✔ /workspace%00/.. (0.284375ms)
+✔ test-only raw router canaries cannot be reached through dot segments (24.555958ms)
+✔ non-retired paths that share a retired prefix pass the gate (1.768166ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 256.845458
+exit=0

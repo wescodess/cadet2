@@ -1,0 +1,26 @@
+[h3 app.use prefix mount] "/workspace/.." -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 app.use prefix mount] "/workspace\\.." -> 200 cc=- body="CANARY" canaryReached=true
+[h3 app.use prefix mount] "/workspace\\..\\.." -> 200 cc=- body="CANARY" canaryReached=true
+[h3 app.use prefix mount] "/workspace\\history" -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 app.use prefix mount] "/api/workspace\\.." -> 200 cc=- body="CANARY" canaryReached=true
+[h3 app.use prefix mount] "/tasks\\.." -> 200 cc=- body="CANARY" canaryReached=true
+[h3 app.use prefix mount] "/workspace%5c.." -> 200 cc=- body="CANARY" canaryReached=true
+[h3 app.use prefix mount] "/workspace;x/.." -> 200 cc=- body="CANARY" canaryReached=true
+[h3 app.use prefix mount] "/workspace%00/.." -> 200 cc=- body="CANARY" canaryReached=true
+[h3 app.use prefix mount] "/api//workspace/summary" -> 200 cc=- body="public" canaryReached=false
+[h3 app.use prefix mount] "/api/workspace//summary" -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 app.use prefix mount] "/api/workspace/summary/" -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 app.use prefix mount] "/api/workspace/runs/x%2f..%2f.." -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 radix router mount] "/workspace/.." -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 radix router mount] "/workspace\\.." -> 404 cc=- body="{\n  \"statusCode\": 40" canaryReached=false
+[h3 radix router mount] "/workspace\\..\\.." -> 404 cc=- body="{\n  \"statusCode\": 40" canaryReached=false
+[h3 radix router mount] "/workspace\\history" -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 radix router mount] "/api/workspace\\.." -> 404 cc=- body="{\n  \"statusCode\": 40" canaryReached=false
+[h3 radix router mount] "/tasks\\.." -> 404 cc=- body="{\n  \"statusCode\": 40" canaryReached=false
+[h3 radix router mount] "/workspace%5c.." -> 404 cc=- body="{\n  \"statusCode\": 40" canaryReached=false
+[h3 radix router mount] "/workspace;x/.." -> 404 cc=- body="{\n  \"statusCode\": 40" canaryReached=false
+[h3 radix router mount] "/workspace%00/.." -> 404 cc=- body="{\n  \"statusCode\": 40" canaryReached=false
+[h3 radix router mount] "/api//workspace/summary" -> 404 cc=- body="{\n  \"statusCode\": 40" canaryReached=false
+[h3 radix router mount] "/api/workspace//summary" -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 radix router mount] "/api/workspace/summary/" -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false
+[h3 radix router mount] "/api/workspace/runs/x%2f..%2f.." -> 404 cc=private, no-store body="{\"statusCode\":404,\"s" canaryReached=false

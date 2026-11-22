@@ -1,0 +1,39 @@
+
+ RUN  v4.0.18 <repo>
+
+ ❯ tests/components/auth/SignOutButton.spec.ts (6 tests | 1 failed) 63ms
+     ✓ is absent for a signed-out visitor 11ms
+     ✓ offers a native Sign out button to a signed-in user 20ms
+     ✓ ends the session through the auth client and returns to the landing page 10ms
+     ✓ keeps the user signed in and reports an error when the server rejects sign-out 6ms
+     × keeps the pending button focusable and ignores repeat activation 9ms
+     ✓ keeps the user signed in and reports an error when the request cannot be sent 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/components/auth/SignOutButton.spec.ts > SignOutButton > keeps the pending button focusable and ignores repeat activation
+AssertionError: expected '' to be undefined
+
+- Expected:
+undefined
+
++ Received:
+""
+
+ ❯ tests/components/auth/SignOutButton.spec.ts:79:43
+     77|
+     78|     await button.trigger('click')
+     79|     expect(button.attributes('disabled')).toBeUndefined()
+       |                                           ^
+     80|     expect(button.attributes('aria-disabled')).toBe('true')
+     81|     await button.trigger('click')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  21:25:41
+   Duration  8.21s (transform 681ms, setup 0ms, import 1.64s, tests 63ms, environment 5.73s)
+
+exit=1

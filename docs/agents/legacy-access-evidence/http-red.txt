@@ -1,0 +1,596 @@
+✖ /workspace is unavailable to every caller and method (13268.771833ms)
+✖ /workspace/intake is unavailable to every caller and method (5065.515541ms)
+✖ /workspace/recommendations is unavailable to every caller and method (5023.505417ms)
+✖ /workspace/recommendations/legacy-private-run is unavailable to every caller and method (5024.338208ms)
+✖ /workspace/recommendations/legacy-private-run/pathways/private-pathway-canary is unavailable to every caller and method (5019.474333ms)
+✖ /workspace/history is unavailable to every caller and method (5018.805667ms)
+✖ /workspace/compare is unavailable to every caller and method (5022.184167ms)
+✔ /workspace/settings is unavailable to every caller and method (205.922ms)
+✔ /workspace/unknown is unavailable to every caller and method (195.634917ms)
+✖ /tasks is unavailable to every caller and method (233.177875ms)
+✔ /api/workspace is unavailable to every caller and method (167.009125ms)
+✖ /api/workspace/me is unavailable to every caller and method (155.931208ms)
+✖ /api/workspace/summary is unavailable to every caller and method (165.837292ms)
+✖ /api/workspace/recommendation-runs is unavailable to every caller and method (167.022666ms)
+✖ /api/workspace/runs is unavailable to every caller and method (198.934541ms)
+✖ /api/workspace/runs/legacy-private-run is unavailable to every caller and method (207.288542ms)
+✖ /api/workspace/runs/compare is unavailable to every caller and method (166.963458ms)
+✔ /api/workspace/unknown is unavailable to every caller and method (153.798583ms)
+✔ /api/intake is unavailable to every caller and method (156.298792ms)
+✖ /api/intake/draft is unavailable to every caller and method (164.596541ms)
+✖ /api/intake/submit is unavailable to every caller and method (149.744667ms)
+✔ /api/intake/unknown is unavailable to every caller and method (156.063458ms)
+✔ /api/recommendations/runs is unavailable to every caller and method (144.481625ms)
+✖ /api/recommendations/runs/legacy-private-run/status is unavailable to every caller and method (146.0725ms)
+✖ /api/recommendations/runs/legacy-private-run/pathways is unavailable to every caller and method (202.615542ms)
+✖ /api/recommendations/runs/legacy-private-run/results is unavailable to every caller and method (144.389125ms)
+✖ /api/recommendations/runs/legacy-private-run/start is unavailable to every caller and method (149.541125ms)
+✖ /api/recommendations/runs/legacy-private-run/refresh is unavailable to every caller and method (144.142833ms)
+✔ /api/recommendations/runs/legacy-private-run/unknown is unavailable to every caller and method (141.138208ms)
+✖ public entry preserves authentication without advertising retired navigation (11.36075ms)
+✔ real sign-in, session and backend admission still work after denied requests (19.139ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 9
+ℹ fail 22
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 52393.582458
+
+✖ failing tests:
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /workspace is unavailable to every caller and method (13268.771833ms)
+  AssertionError [ERR_ASSERTION]: no guessed Signed plan or auth redirect
+
+  '/auth' !== null
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:22:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '/auth',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /workspace/intake is unavailable to every caller and method (5065.515541ms)
+  AssertionError [ERR_ASSERTION]: no guessed Signed plan or auth redirect
+
+  '/auth' !== null
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:22:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '/auth',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /workspace/recommendations is unavailable to every caller and method (5023.505417ms)
+  AssertionError [ERR_ASSERTION]: no guessed Signed plan or auth redirect
+
+  '/auth' !== null
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:22:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '/auth',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /workspace/recommendations/legacy-private-run is unavailable to every caller and method (5024.338208ms)
+  AssertionError [ERR_ASSERTION]: no guessed Signed plan or auth redirect
+
+  '/auth' !== null
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:22:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '/auth',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /workspace/recommendations/legacy-private-run/pathways/private-pathway-canary is unavailable to every caller and method (5019.474333ms)
+  AssertionError [ERR_ASSERTION]: no guessed Signed plan or auth redirect
+
+  '/auth' !== null
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:22:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '/auth',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /workspace/history is unavailable to every caller and method (5018.805667ms)
+  AssertionError [ERR_ASSERTION]: no guessed Signed plan or auth redirect
+
+  '/auth' !== null
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:22:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '/auth',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /workspace/compare is unavailable to every caller and method (5022.184167ms)
+  AssertionError [ERR_ASSERTION]: no guessed Signed plan or auth redirect
+
+  '/auth' !== null
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:22:16)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '/auth',
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /tasks is unavailable to every caller and method (233.177875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 200',
+  +   'anonymous HEAD: 200',
+  +   'anonymous POST: 200',
+  +   'anonymous PUT: 200',
+  +   'anonymous PATCH: 200',
+  +   'anonymous DELETE: 200',
+  +   'anonymous OPTIONS: 200',
+  +   'ordinary GET: 200',
+  +   'ordinary HEAD: 200',
+  +   'ordinary POST: 200',
+  +   'ordinary PUT: 200',
+  +   'ordinary PATCH: 200',
+  +   'ordinary DELETE: 200',
+  +   'ordinary OPTIONS: 200',
+  +   'foreign-user GET: 200',
+  +   'foreign-user HEAD: 200',
+  +   'foreign-user POST: 200',
+  +   'foreign-user PUT: 200',
+  +   'foreign-user PATCH: 200',
+  +   'foreign-user DELETE: 200',
+  +   'foreign-user OPTIONS: 200',
+  +   'own-client GET: 200',
+  +   'own-client HEAD: 200',
+  +   'own-client POST: 200',
+  +   'own-client PUT: 200',
+  +   'own-client PATCH: 200',
+  +   'own-client DELETE: 200',
+  +   'own-client OPTIONS: 200',
+  +   'admin GET: 200',
+  +   'admin HEAD: 200',
+  +   'admin POST: 200',
+  +   'admin PUT: 200',
+  +   'admin PATCH: 200',
+  +   'admin DELETE: 200',
+  +   'admin OPTIONS: 200'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [
+      'anonymous GET: 200',        'anonymous HEAD: 200',
+      'anonymous POST: 200',       'anonymous PUT: 200',
+      'anonymous PATCH: 200',      'anonymous DELETE: 200',
+      'anonymous OPTIONS: 200',    'ordinary GET: 200',
+      'ordinary HEAD: 200',        'ordinary POST: 200',
+      'ordinary PUT: 200',         'ordinary PATCH: 200',
+      'ordinary DELETE: 200',      'ordinary OPTIONS: 200',
+      'foreign-user GET: 200',     'foreign-user HEAD: 200',
+      'foreign-user POST: 200',    'foreign-user PUT: 200',
+      'foreign-user PATCH: 200',   'foreign-user DELETE: 200',
+      'foreign-user OPTIONS: 200', 'own-client GET: 200',
+      'own-client HEAD: 200',      'own-client POST: 200',
+      'own-client PUT: 200',       'own-client PATCH: 200',
+      'own-client DELETE: 200',    'own-client OPTIONS: 200',
+      'admin GET: 200',            'admin HEAD: 200',
+      'admin POST: 200',           'admin PUT: 200',
+      'admin PATCH: 200',          'admin DELETE: 200',
+      'admin OPTIONS: 200'
+    ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/workspace/me is unavailable to every caller and method (155.931208ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'ordinary GET: 200',
+  +   'foreign-user GET: 200',
+  +   'own-client GET: 200',
+  +   'admin GET: 200'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'ordinary GET: 200', 'foreign-user GET: 200', 'own-client GET: 200', 'admin GET: 200' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/workspace/summary is unavailable to every caller and method (165.837292ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'ordinary GET: 503',
+  +   'foreign-user GET: 503',
+  +   'own-client GET: 503',
+  +   'admin GET: 503'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'ordinary GET: 503', 'foreign-user GET: 503', 'own-client GET: 503', 'admin GET: 503' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/workspace/recommendation-runs is unavailable to every caller and method (167.022666ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'ordinary GET: 503',
+  +   'foreign-user GET: 503',
+  +   'own-client GET: 503',
+  +   'admin GET: 503'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'ordinary GET: 503', 'foreign-user GET: 503', 'own-client GET: 503', 'admin GET: 503' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/workspace/runs is unavailable to every caller and method (198.934541ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'ordinary GET: 503',
+  +   'foreign-user GET: 503',
+  +   'own-client GET: 503',
+  +   'admin GET: 503'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'ordinary GET: 503', 'foreign-user GET: 503', 'own-client GET: 503', 'admin GET: 503' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/workspace/runs/legacy-private-run is unavailable to every caller and method (207.288542ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'ordinary GET: 503',
+  +   'foreign-user GET: 503',
+  +   'own-client GET: 503',
+  +   'admin GET: 503'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'ordinary GET: 503', 'foreign-user GET: 503', 'own-client GET: 503', 'admin GET: 503' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/workspace/runs/compare is unavailable to every caller and method (166.963458ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'ordinary GET: 503',
+  +   'foreign-user GET: 503',
+  +   'own-client GET: 503',
+  +   'admin GET: 503'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'ordinary GET: 503', 'foreign-user GET: 503', 'own-client GET: 503', 'admin GET: 503' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/intake/draft is unavailable to every caller and method (164.596541ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'anonymous POST: 401',
+  +   'ordinary GET: 200',
+  +   'ordinary POST: 400',
+  +   'foreign-user GET: 200',
+  +   'foreign-user POST: 400',
+  +   'own-client GET: 200',
+  +   'own-client POST: 400',
+  +   'admin GET: 200',
+  +   'admin POST: 400'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'anonymous POST: 401', 'ordinary GET: 200', 'ordinary POST: 400', 'foreign-user GET: 200', 'foreign-user POST: 400', 'own-client GET: 200', 'own-client POST: 400', 'admin GET: 200', 'admin POST: 400' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/intake/submit is unavailable to every caller and method (149.744667ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous POST: 401',
+  +   'ordinary POST: 400',
+  +   'foreign-user POST: 400',
+  +   'own-client POST: 400',
+  +   'admin POST: 400'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous POST: 401', 'ordinary POST: 400', 'foreign-user POST: 400', 'own-client POST: 400', 'admin POST: 400' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/recommendations/runs/legacy-private-run/status is unavailable to every caller and method (146.0725ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'ordinary GET: 503',
+  +   'foreign-user GET: 503',
+  +   'own-client GET: 503',
+  +   'admin GET: 503'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'ordinary GET: 503', 'foreign-user GET: 503', 'own-client GET: 503', 'admin GET: 503' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/recommendations/runs/legacy-private-run/pathways is unavailable to every caller and method (202.615542ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'own-client GET: 409'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'own-client GET: 409' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/recommendations/runs/legacy-private-run/results is unavailable to every caller and method (144.389125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous GET: 401',
+  +   'ordinary GET: 503',
+  +   'foreign-user GET: 503',
+  +   'own-client GET: 503',
+  +   'admin GET: 503'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous GET: 401', 'ordinary GET: 503', 'foreign-user GET: 503', 'own-client GET: 503', 'admin GET: 503' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/recommendations/runs/legacy-private-run/start is unavailable to every caller and method (149.541125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous POST: 401'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous POST: 401' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:14:3
+✖ /api/recommendations/runs/legacy-private-run/refresh is unavailable to every caller and method (144.142833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+  + [
+  +   'anonymous POST: 401',
+  +   'ordinary POST: 503',
+  +   'foreign-user POST: 503',
+  +   'own-client POST: 503',
+  +   'admin POST: 503'
+  + ]
+  - []
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:26:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'anonymous POST: 401', 'ordinary POST: 503', 'foreign-user POST: 503', 'own-client POST: 503', 'admin POST: 503' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/security/legacy-http.test.mjs:31:1
+✖ public entry preserves authentication without advertising retired navigation (11.36075ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /href="\/(?:workspace|tasks)(?:["/?])/. Input:
+
+  '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/_nuxt/entry.SBJm9qQ6.css" crossorigin><link rel="modulepreload" as="script" crossorigin href="/_nuxt/CkFgtT-f.js"><link rel="modulepreload" as="script" crossorigin href="/_nuxt/s2RAUdWI.js"><link rel="modulepreload" as="script" crossorigin href="/_nuxt/B6dQv6Gh.js"><script type="module" src="/_nuxt/CkFgtT-f.js" crossorigin></script></head><body><div id="__nuxt"><div class="min-h-screen bg-slate-950 text-slate-100"><div></div><main data-testid="home-page" class="mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-6 px-6 py-16"><div class="space-y-2"><p class="text-xs uppercase tracking-[0.2em] text-[var(--warning)]"> Cadet secure workspace </p><h1 data-testid="home-hero" class="text-3xl font-semibold text-slate-950"> Protected planning starts in your workspace. </h1><p class="text-sm text-slate-600"> Sign in to enter the secure workspace shell. The legacy tasks demo still exists, but it is no longer the primary post-login destination. </p></div><div class="flex flex-wrap gap-3"><a href="/auth" class="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-100" data-testid="home-open-auth-link"> Open Auth Page </a><a href="/workspace" class="rounded-md border border-slate-200 bg-[var(--trust-soft)] px-4 py-2 text-sm text-[var(--trust)] hover:bg-slate-100" data-testid="home-open-workspace-link"> Open Workspace </a><a href="/tasks" class="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-100" data-testid="home-open-legacy-tasks-link"> Open Legacy Tasks </a><a href="/ai-search" class="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-700 hover:bg-cyan-500/20" data-testid="home-open-ai-search-link"> Open AI Search Playground </a></div><div data-testid="home-auth-status" class="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-900"><p><span class="text-slate-500">Auth ready:</span> yes</p><p><span class="text-slate-500">Logged in:</span> no</p></div></main></div></div><div id="teleports"></div><script>window.__NUXT__={};window.__NUXT__.config={public:{hub:{},convex:{url:"http://127.0.0.1:52034"},siteUrl:"http://127.0.0.1:52033",auth:{redirects:{login:"/login",guest:"/",authenticated:"",logout:""},preserveRedirect:true,redirectQueryKey:"redirect",useDatabase:true,databaseProvider:"nuxthub",clientOnly:false,session:{skipHydratedSsrGetSession:false}}},app:{baseURL:"/",buildId:"c829075d-f730-463e-8cfc-e8c475f79e9a",buildAssetsDir:"/_nuxt/",cdnURL:""}}</script><script type="application/json" data-nuxt-data="nuxt-app" data-ssr="true" id="__NUXT_DATA__">[["ShallowReactive",1],{"data":2,"state":4,"once":8,"_errors":9,"serverRendered":7,"path":11},["ShallowReactive",3],{},["Reactive",5],{"$sauth:session":6,"$sauth:user":6,"$sauth:ready":7},null,true,["Set"],["ShallowReactive",10],{},"/"]</script></body></html>'
+
+      at TestContext.<anonymous> (file://<repo>/tests/security/legacy-http.test.mjs:36:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/_nuxt/entry.SBJm9qQ6.css" crossorigin><link rel="modulepreload" as="script" crossorigin href="/_nuxt/CkFgtT-f.js"><link rel="modulepreload" as="script" crossorigin href="/_nuxt/s2RAUdWI.js"><link rel="modulepreload" as="script" crossorigin href="/_nuxt/B6dQv6Gh.js"><script type="module" src="/_nuxt/CkFgtT-f.js" crossorigin></script></head><body><div id="__nuxt"><div class="min-h-screen bg-slate-950 text-slate-100"><div></div><main data-testid="home-page" class="mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-6 px-6 py-16"><div class="space-y-2"><p class="text-xs uppercase tracking-[0.2em] text-[var(--warning)]"> Cadet secure workspace </p><h1 data-testid="home-hero" class="text-3xl font-semibold text-slate-950"> Protected planning starts in your workspace. </h1><p class="text-sm text-slate-600"> Sign in to enter the secure workspace shell. The legacy tasks demo still exists, but it is no longer the primary post-login destination. </p></div><div class="flex flex-wrap gap-3"><a href="/auth" class="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-100" data-testid="home-open-auth-link"> Open Auth Page </a><a href="/workspace" class="rounded-md border border-slate-200 bg-[var(--trust-soft)] px-4 py-2 text-sm text-[var(--trust)] hover:bg-slate-100" data-testid="home-open-workspace-link"> Open Workspace </a><a href="/tasks" class="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 hover:bg-slate-100" data-testid="home-open-legacy-tasks-link"> Open Legacy Tasks </a><a href="/ai-search" class="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-700 hover:bg-cyan-500/20" data-testid="home-open-ai-search-link"> Open AI Search Playground </a></div><div data-testid="home-auth-status" class="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-900"><p><span class="text-slate-500">Auth ready:</span> yes</p><p><span class="text-slate-500">Logged in:</span> no</p></div></main></div></div><div id="teleports"></div><script>window.__NUXT__={};window.__NUXT__.config={public:{hub:{},convex:{url:"http://127.0.0.1:52034"},siteUrl:"http://127.0.0.1:52033",auth:{redirects:{login:"/login",guest:"/",authenticated:"",logout:""},preserveRedirect:true,redirectQueryKey:"redirect",useDatabase:true,databaseProvider:"nuxthub",clientOnly:false,session:{skipHydratedSsrGetSession:false}}},app:{baseURL:"/",buildId:"c829075d-f730-463e-8cfc-e8c475f79e9a",buildAssetsDir:"/_nuxt/",cdnURL:""}}</script><script type="application/json" data-nuxt-data="nuxt-app" data-ssr="true" id="__NUXT_DATA__">[["ShallowReactive",1],{"data":2,"state":4,"once":8,"_errors":9,"serverRendered":7,"path":11},["ShallowReactive",3],{},["Reactive",5],{"$sauth:session":6,"$sauth:user":6,"$sauth:ready":7},null,true,["Set"],["ShallowReactive",10],{},"/"]</script></body></html>',
+    expected: /href="\/(?:workspace|tasks)(?:["/?])/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }

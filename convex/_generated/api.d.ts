@@ -12,7 +12,6 @@ import type * as ragIngestionInternal from "../ragIngestionInternal.js";
 import type * as ragSources from "../ragSources.js";
 import type * as ragSourcesInternal from "../ragSourcesInternal.js";
 import type * as recommendationRuns from "../recommendationRuns.js";
-import type * as tasks from "../tasks.js";
 
 import type {
   ApiFromModules,
@@ -25,7 +24,6 @@ declare const fullApi: ApiFromModules<{
   ragSources: typeof ragSources;
   ragSourcesInternal: typeof ragSourcesInternal;
   recommendationRuns: typeof recommendationRuns;
-  tasks: typeof tasks;
 }>;
 
 /**

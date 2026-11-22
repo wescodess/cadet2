@@ -1,16 +1,9 @@
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
-
-const canonicalStatusValidator = v.union(
-  v.literal('queued'),
-  v.literal('evaluating'),
-  v.literal('completed'),
-  v.literal('degraded'),
-  v.literal('failed'),
-)
+import { internalMutation, internalQuery } from './_generated/server'
 
 type RecommendationLifecycleStatus = 'queued' | 'evaluating' | 'completed' | 'degraded' | 'failed'
-type RecommendationProcessingMode = 'standard' | 'recoverable-delay' | 'mock-completed' | 'mock-degraded' | 'mock-failed'
+type RecommendationProcessingMode =
+  'standard' | 'recoverable-delay' | 'mock-completed' | 'mock-degraded' | 'mock-failed'
 type DirectPathwayOutcome = {
   pathwayId: string
   status: 'direct'
@@ -255,7 +248,10 @@ const rankedComposedRecommendationValidator = v.object({
 
 const inProgressStatuses = new Set<RecommendationLifecycleStatus>(['queued', 'evaluating'])
 
-const allowedTransitions: Record<RecommendationLifecycleStatus, Set<RecommendationLifecycleStatus>> = {
+const allowedTransitions: Record<
+  RecommendationLifecycleStatus,
+  Set<RecommendationLifecycleStatus>
+> = {
   queued: new Set(['queued', 'evaluating', 'completed', 'degraded', 'failed']),
   evaluating: new Set(['evaluating', 'completed', 'degraded', 'failed']),
   completed: new Set(['completed']),
@@ -301,7 +297,10 @@ function resolveTargetStatus(
   }
 }
 
-function resolveStatusMessage(mode: RecommendationProcessingMode, status: RecommendationLifecycleStatus) {
+function resolveStatusMessage(
+  mode: RecommendationProcessingMode,
+  status: RecommendationLifecycleStatus,
+) {
   if (mode === 'recoverable-delay') {
     return 'Processing is active and resumable while internal services catch up.'
   }
@@ -310,9 +309,9 @@ function resolveStatusMessage(mode: RecommendationProcessingMode, status: Recomm
 }
 
 function normalizeDirectOutcomes(outcomes: DirectPathwayOutcome[]) {
-  return Array.from(new Set(outcomes.map(outcome => outcome.pathwayId)))
+  return Array.from(new Set(outcomes.map((outcome) => outcome.pathwayId)))
     .sort((left, right) => left.localeCompare(right))
-    .map(pathwayId => ({
+    .map((pathwayId) => ({
       pathwayId,
       status: 'direct' as const,
     }))
@@ -387,16 +386,22 @@ function blockedOutcomesEqual(left: BlockedPathwayOutcome[], right: BlockedPathw
   return true
 }
 
-function dedupeAndSortRankedCandidates<T extends {
-  pathwayId: string
-  rank: number
-  score: number
-}>(candidates: T[]) {
+function dedupeAndSortRankedCandidates<
+  T extends {
+    pathwayId: string
+    rank: number
+    score: number
+  },
+>(candidates: T[]) {
   const byPathway = new Map<string, T>()
 
   for (const candidate of candidates) {
     const current = byPathway.get(candidate.pathwayId)
-    if (!current || candidate.rank < current.rank || (candidate.rank === current.rank && candidate.score > current.score)) {
+    if (
+      !current ||
+      candidate.rank < current.rank ||
+      (candidate.rank === current.rank && candidate.score > current.score)
+    ) {
       byPathway.set(candidate.pathwayId, candidate)
     }
   }
@@ -414,7 +419,10 @@ function dedupeAndSortRankedCandidates<T extends {
   })
 }
 
-function normalizeQualification(value: unknown, fallback: RecommendationQualification): RecommendationQualification {
+function normalizeQualification(
+  value: unknown,
+  fallback: RecommendationQualification,
+): RecommendationQualification {
   if (value === 'supported' || value === 'low-confidence' || value === 'withheld') {
     return value
   }
@@ -422,7 +430,10 @@ function normalizeQualification(value: unknown, fallback: RecommendationQualific
   return fallback
 }
 
-function normalizeConfidence(value: unknown, fallback: RecommendationConfidence): RecommendationConfidence {
+function normalizeConfidence(
+  value: unknown,
+  fallback: RecommendationConfidence,
+): RecommendationConfidence {
   if (value === 'high' || value === 'medium' || value === 'low' || value === 'withheld') {
     return value
   }
@@ -430,7 +441,10 @@ function normalizeConfidence(value: unknown, fallback: RecommendationConfidence)
   return fallback
 }
 
-function normalizeFreshness(value: unknown, fallback: RecommendationFreshness): RecommendationFreshness {
+function normalizeFreshness(
+  value: unknown,
+  fallback: RecommendationFreshness,
+): RecommendationFreshness {
   if (value === 'fresh' || value === 'stale' || value === 'unknown') {
     return value
   }
@@ -468,17 +482,23 @@ function normalizeFitSignals(value: unknown): RecommendationFitSignal[] {
   }
 
   return value
-    .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
+    .filter(
+      (entry): entry is Record<string, unknown> =>
+        Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry),
+    )
     .map((entry, index) => {
-      const id = typeof entry.id === 'string' && entry.id.trim().length > 0
-        ? entry.id.trim()
-        : `signal-${index + 1}`
-      const label = typeof entry.label === 'string' && entry.label.trim().length > 0
-        ? entry.label.trim()
-        : 'Fit signal'
-      const detail = typeof entry.detail === 'string' && entry.detail.trim().length > 0
-        ? entry.detail.trim()
-        : 'Profile signal was not available.'
+      const id =
+        typeof entry.id === 'string' && entry.id.trim().length > 0
+          ? entry.id.trim()
+          : `signal-${index + 1}`
+      const label =
+        typeof entry.label === 'string' && entry.label.trim().length > 0
+          ? entry.label.trim()
+          : 'Fit signal'
+      const detail =
+        typeof entry.detail === 'string' && entry.detail.trim().length > 0
+          ? entry.detail.trim()
+          : 'Profile signal was not available.'
 
       return {
         id,
@@ -489,17 +509,22 @@ function normalizeFitSignals(value: unknown): RecommendationFitSignal[] {
     })
 }
 
-function withDefaultFitSignal(signals: RecommendationFitSignal[], detail: string): RecommendationFitSignal[] {
+function withDefaultFitSignal(
+  signals: RecommendationFitSignal[],
+  detail: string,
+): RecommendationFitSignal[] {
   if (signals.length > 0) {
     return signals
   }
 
-  return [{
-    id: 'fit-overview',
-    label: 'Fit overview',
-    detail,
-    state: 'watch',
-  }]
+  return [
+    {
+      id: 'fit-overview',
+      label: 'Fit overview',
+      detail,
+      state: 'watch',
+    },
+  ]
 }
 
 function normalizeBlockerSeverity(value: unknown): RecommendationBlockerSeverity {
@@ -544,29 +569,35 @@ function fallbackBlockersForCandidate(candidate: {
   }
 
   if (candidate.type === 'blocked') {
-    return [{
-      id: 'conditional-readiness-gap',
-      label: 'Conditional readiness gap',
-      detail: `${candidate.pathwayId} remains conditional because key constraints are unresolved.`,
-      severity: 'high',
-    }]
+    return [
+      {
+        id: 'conditional-readiness-gap',
+        label: 'Conditional readiness gap',
+        detail: `${candidate.pathwayId} remains conditional because key constraints are unresolved.`,
+        severity: 'high',
+      },
+    ]
   }
 
   if (candidate.type === 'composed') {
-    return [{
-      id: 'staged-pathway-dependency',
-      label: 'Staged dependency',
-      detail: `${candidate.pathwayId} requires intermediate milestones before direct-fit eligibility is likely.`,
-      severity: 'medium',
-    }]
+    return [
+      {
+        id: 'staged-pathway-dependency',
+        label: 'Staged dependency',
+        detail: `${candidate.pathwayId} requires intermediate milestones before direct-fit eligibility is likely.`,
+        severity: 'medium',
+      },
+    ]
   }
 
-  return [{
-    id: 'profile-evidence-watch',
-    label: 'Profile evidence watch',
-    detail: `${candidate.pathwayId} should be monitored for changing profile constraints.`,
-    severity: 'medium',
-  }]
+  return [
+    {
+      id: 'profile-evidence-watch',
+      label: 'Profile evidence watch',
+      detail: `${candidate.pathwayId} should be monitored for changing profile constraints.`,
+      severity: 'medium',
+    },
+  ]
 }
 
 function normalizeBlockers(
@@ -582,17 +613,23 @@ function normalizeBlockers(
   }
 
   const normalized = value
-    .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
+    .filter(
+      (entry): entry is Record<string, unknown> =>
+        Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry),
+    )
     .map((entry, index) => {
-      const id = typeof entry.id === 'string' && entry.id.trim().length > 0
-        ? entry.id.trim()
-        : `blocker-${index + 1}`
-      const label = typeof entry.label === 'string' && entry.label.trim().length > 0
-        ? entry.label.trim()
-        : 'Pathway constraint'
-      const detail = typeof entry.detail === 'string' && entry.detail.trim().length > 0
-        ? entry.detail.trim()
-        : 'A pathway requirement remains unresolved.'
+      const id =
+        typeof entry.id === 'string' && entry.id.trim().length > 0
+          ? entry.id.trim()
+          : `blocker-${index + 1}`
+      const label =
+        typeof entry.label === 'string' && entry.label.trim().length > 0
+          ? entry.label.trim()
+          : 'Pathway constraint'
+      const detail =
+        typeof entry.detail === 'string' && entry.detail.trim().length > 0
+          ? entry.detail.trim()
+          : 'A pathway requirement remains unresolved.'
 
       return {
         id,
@@ -602,12 +639,12 @@ function normalizeBlockers(
       }
     })
 
-  return normalized.length > 0
-    ? normalized
-    : fallbackBlockersForCandidate(candidate)
+  return normalized.length > 0 ? normalized : fallbackBlockersForCandidate(candidate)
 }
 
-function fallbackTradeoffImpact(candidateType: 'direct' | 'blocked' | 'composed'): RecommendationTradeoffImpact {
+function fallbackTradeoffImpact(
+  candidateType: 'direct' | 'blocked' | 'composed',
+): RecommendationTradeoffImpact {
   if (candidateType === 'blocked' || candidateType === 'composed') {
     return 'high'
   }
@@ -648,27 +685,32 @@ function normalizeTradeoffs(
 ): RecommendationTradeoff[] {
   const parsed = Array.isArray(value)
     ? value
-      .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
-      .map((entry, index) => {
-        const dimension = normalizeTradeoffDimension(entry.dimension)
-        const id = typeof entry.id === 'string' && entry.id.trim().length > 0
-          ? entry.id.trim()
-          : `${candidate.pathwayId}-tradeoff-${dimension}-${index + 1}`
-        const summary = typeof entry.summary === 'string' && entry.summary.trim().length > 0
-          ? entry.summary.trim()
-          : fallbackTradeoffSummary(candidate.pathwayId, dimension, candidate.type)
+        .filter(
+          (entry): entry is Record<string, unknown> =>
+            Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry),
+        )
+        .map((entry, index) => {
+          const dimension = normalizeTradeoffDimension(entry.dimension)
+          const id =
+            typeof entry.id === 'string' && entry.id.trim().length > 0
+              ? entry.id.trim()
+              : `${candidate.pathwayId}-tradeoff-${dimension}-${index + 1}`
+          const summary =
+            typeof entry.summary === 'string' && entry.summary.trim().length > 0
+              ? entry.summary.trim()
+              : fallbackTradeoffSummary(candidate.pathwayId, dimension, candidate.type)
 
-        return {
-          id,
-          dimension,
-          summary,
-          impact: normalizeTradeoffImpact(entry.impact),
-        }
-      })
+          return {
+            id,
+            dimension,
+            summary,
+            impact: normalizeTradeoffImpact(entry.impact),
+          }
+        })
     : []
 
   const requiredDimensions: RecommendationTradeoffDimension[] = ['effort', 'timing', 'complexity']
-  const seenDimensions = new Set(parsed.map(entry => entry.dimension))
+  const seenDimensions = new Set(parsed.map((entry) => entry.dimension))
   const withDefaults = [...parsed]
 
   for (const requiredDimension of requiredDimensions) {
@@ -691,26 +733,31 @@ function fallbackActionsForCandidate(candidate: {
   qualification: RecommendationQualification
 }): RecommendationImprovementAction[] {
   if (candidate.type === 'composed') {
-    return [{
-      id: 'action-sequence-composed-milestones',
-      title: 'Sequence composed milestones',
-      detail: 'Prioritize intermediate milestones in order so the staged route can progress predictably.',
-      priority: 'next',
-      expectedImpact: 'Improves pathway continuity and reduces staging complexity.',
-    }]
+    return [
+      {
+        id: 'action-sequence-composed-milestones',
+        title: 'Sequence composed milestones',
+        detail:
+          'Prioritize intermediate milestones in order so the staged route can progress predictably.',
+        priority: 'next',
+        expectedImpact: 'Improves pathway continuity and reduces staging complexity.',
+      },
+    ]
   }
 
   if (candidate.qualification === 'supported') {
     return []
   }
 
-  return [{
-    id: 'action-refresh-profile-evidence',
-    title: 'Refresh key profile inputs',
-    detail: 'Update profile constraints and rerun recommendations to improve confidence.',
-    priority: 'next',
-    expectedImpact: 'Converts unresolved constraints into actionable readiness improvements.',
-  }]
+  return [
+    {
+      id: 'action-refresh-profile-evidence',
+      title: 'Refresh key profile inputs',
+      detail: 'Update profile constraints and rerun recommendations to improve confidence.',
+      priority: 'next',
+      expectedImpact: 'Converts unresolved constraints into actionable readiness improvements.',
+    },
+  ]
 }
 
 function normalizeImprovementActions(
@@ -722,40 +769,43 @@ function normalizeImprovementActions(
     qualification: RecommendationQualification
   },
 ): RecommendationImprovementAction[] {
-  const blockerIds = new Set(blockers.map(blocker => blocker.id))
+  const blockerIds = new Set(blockers.map((blocker) => blocker.id))
   const parsed = Array.isArray(value)
     ? value
-      .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry))
-      .map((entry, index) => {
-        const normalizedId = typeof entry.id === 'string' && entry.id.trim().length > 0
-          ? entry.id.trim()
-          : `${candidate.pathwayId}-action-${index + 1}`
-        const id = blockerIds.has(normalizedId)
-          ? `action-${normalizedId}`
-          : normalizedId
-        const title = typeof entry.title === 'string' && entry.title.trim().length > 0
-          ? entry.title.trim()
-          : 'Improve pathway readiness'
-        const detail = typeof entry.detail === 'string' && entry.detail.trim().length > 0
-          ? entry.detail.trim()
-          : 'Complete a focused readiness action before rerunning recommendations.'
-        const expectedImpact = typeof entry.expectedImpact === 'string' && entry.expectedImpact.trim().length > 0
-          ? entry.expectedImpact.trim()
-          : 'Improves confidence and reduces unresolved pathway constraints.'
+        .filter(
+          (entry): entry is Record<string, unknown> =>
+            Boolean(entry) && typeof entry === 'object' && !Array.isArray(entry),
+        )
+        .map((entry, index) => {
+          const normalizedId =
+            typeof entry.id === 'string' && entry.id.trim().length > 0
+              ? entry.id.trim()
+              : `${candidate.pathwayId}-action-${index + 1}`
+          const id = blockerIds.has(normalizedId) ? `action-${normalizedId}` : normalizedId
+          const title =
+            typeof entry.title === 'string' && entry.title.trim().length > 0
+              ? entry.title.trim()
+              : 'Improve pathway readiness'
+          const detail =
+            typeof entry.detail === 'string' && entry.detail.trim().length > 0
+              ? entry.detail.trim()
+              : 'Complete a focused readiness action before rerunning recommendations.'
+          const expectedImpact =
+            typeof entry.expectedImpact === 'string' && entry.expectedImpact.trim().length > 0
+              ? entry.expectedImpact.trim()
+              : 'Improves confidence and reduces unresolved pathway constraints.'
 
-        return {
-          id,
-          title,
-          detail,
-          priority: normalizeActionPriority(entry.priority),
-          expectedImpact,
-        }
-      })
+          return {
+            id,
+            title,
+            detail,
+            priority: normalizeActionPriority(entry.priority),
+            expectedImpact,
+          }
+        })
     : []
 
-  return parsed.length > 0
-    ? parsed
-    : fallbackActionsForCandidate(candidate)
+  return parsed.length > 0 ? parsed : fallbackActionsForCandidate(candidate)
 }
 
 function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommendation[]) {
@@ -767,7 +817,10 @@ function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommenda
       rank: Math.max(1, Math.round(candidate.rank)),
       tier: candidate.tier,
       score: Math.max(1, Math.round(candidate.score)),
-      rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} appears based on current direct-fit pathway evaluation.`),
+      rationale: normalizeRationale(
+        candidate.rationale,
+        `${candidate.pathwayId} appears based on current direct-fit pathway evaluation.`,
+      ),
       fitSignals: withDefaultFitSignal(
         normalizeFitSignals(candidate.fitSignals),
         'Direct-fit signal available from pathway scoring and qualification metadata.',
@@ -775,7 +828,10 @@ function normalizeRankedDirectRecommendations(candidates: RankedDirectRecommenda
       qualification,
       confidence: normalizeConfidence(candidate.confidence, 'low'),
       freshness: normalizeFreshness(candidate.freshness, 'unknown'),
-      caveat: normalizeCaveat(candidate.caveat, 'Qualification metadata is unavailable for this recommendation. Treat as low-confidence guidance and rerun for updated evidence.'),
+      caveat: normalizeCaveat(
+        candidate.caveat,
+        'Qualification metadata is unavailable for this recommendation. Treat as low-confidence guidance and rerun for updated evidence.',
+      ),
     }
     const blockers = normalizeBlockers(candidate.blockers, {
       pathwayId: normalized.pathwayId,
@@ -808,7 +864,10 @@ function normalizeRankedBlockedRecommendations(candidates: RankedBlockedRecommen
       rank: Math.max(1, Math.round(candidate.rank)),
       tier: candidate.tier,
       score: Math.max(1, Math.round(candidate.score)),
-      rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} is conditionally shown because key pathway constraints are unresolved.`),
+      rationale: normalizeRationale(
+        candidate.rationale,
+        `${candidate.pathwayId} is conditionally shown because key pathway constraints are unresolved.`,
+      ),
       fitSignals: withDefaultFitSignal(
         normalizeFitSignals(candidate.fitSignals),
         'Conditional signal available because pathway requirements remain partially unmet.',
@@ -816,7 +875,10 @@ function normalizeRankedBlockedRecommendations(candidates: RankedBlockedRecommen
       qualification,
       confidence: normalizeConfidence(candidate.confidence, 'low'),
       freshness: normalizeFreshness(candidate.freshness, 'unknown'),
-      caveat: normalizeCaveat(candidate.caveat, `${candidate.pathwayId} is conditionally usable and should be treated as low-confidence guidance until refreshed evidence is available.`),
+      caveat: normalizeCaveat(
+        candidate.caveat,
+        `${candidate.pathwayId} is conditionally usable and should be treated as low-confidence guidance until refreshed evidence is available.`,
+      ),
     }
     const blockers = normalizeBlockers(candidate.blockers, {
       pathwayId: normalized.pathwayId,
@@ -849,10 +911,15 @@ function normalizeRankedComposedRecommendations(candidates: RankedComposedRecomm
       rank: Math.max(1, Math.round(candidate.rank)),
       tier: candidate.tier,
       score: Math.max(1, Math.round(candidate.score)),
-      composedSteps: Array.from(new Set(candidate.composedSteps
-        .map(step => step.trim())
-        .filter(step => step.length > 0))),
-      rationale: normalizeRationale(candidate.rationale, `${candidate.pathwayId} is presented as a staged route based on composed pathway evaluation.`),
+      composedSteps: Array.from(
+        new Set(
+          candidate.composedSteps.map((step) => step.trim()).filter((step) => step.length > 0),
+        ),
+      ),
+      rationale: normalizeRationale(
+        candidate.rationale,
+        `${candidate.pathwayId} is presented as a staged route based on composed pathway evaluation.`,
+      ),
       fitSignals: withDefaultFitSignal(
         normalizeFitSignals(candidate.fitSignals),
         'Staged fit signal available because this pathway relies on a composed route.',
@@ -860,7 +927,10 @@ function normalizeRankedComposedRecommendations(candidates: RankedComposedRecomm
       qualification,
       confidence: normalizeConfidence(candidate.confidence, 'low'),
       freshness: normalizeFreshness(candidate.freshness, 'unknown'),
-      caveat: normalizeCaveat(candidate.caveat, 'Composed pathway guidance is provisional and should be treated as low-confidence until refreshed evidence is available.'),
+      caveat: normalizeCaveat(
+        candidate.caveat,
+        'Composed pathway guidance is provisional and should be treated as low-confidence until refreshed evidence is available.',
+      ),
     }
     const blockers = normalizeBlockers(candidate.blockers, {
       pathwayId: normalized.pathwayId,
@@ -884,7 +954,7 @@ function normalizeRankedComposedRecommendations(candidates: RankedComposedRecomm
   })
 }
 
-export const createQueuedRun = mutation({
+export const createQueuedRun = internalMutation({
   args: {
     runId: v.string(),
     userId: v.string(),
@@ -930,24 +1000,22 @@ export const createQueuedRun = mutation({
   },
 })
 
-export const listForUser = query({
+export const listForUser = internalQuery({
   args: {
     userId: v.string(),
   },
   handler: async (ctx, args) => {
     const rows = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_userId_createdAt', q => q.eq('userId', args.userId))
+      .withIndex('by_userId_createdAt', (q) => q.eq('userId', args.userId))
       .order('desc')
       .collect()
 
-    return rows.map(row => ({
+    return rows.map((row) => ({
       recommendationCount: row.recommendationResults?.rankedAt
-        ? (
-          (row.recommendationResults?.direct?.length || 0)
-          + (row.recommendationResults?.blocked?.length || 0)
-          + (row.recommendationResults?.composed?.length || 0)
-        )
+        ? (row.recommendationResults?.direct?.length || 0) +
+          (row.recommendationResults?.blocked?.length || 0) +
+          (row.recommendationResults?.composed?.length || 0)
         : 0,
       hasRankedPayload: Boolean(row.recommendationResults?.rankedAt),
       runId: row.runId,
@@ -963,7 +1031,7 @@ export const listForUser = query({
   },
 })
 
-export const readStatusForUser = query({
+export const readStatusForUser = internalQuery({
   args: {
     runId: v.string(),
     userId: v.string(),
@@ -971,7 +1039,7 @@ export const readStatusForUser = query({
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .withIndex('by_runId', (q) => q.eq('runId', args.runId))
       .first()
 
     if (!row || row.userId !== args.userId) {
@@ -987,7 +1055,8 @@ export const readStatusForUser = query({
       refreshSequence: row.refreshSequence,
       status: row.status,
       statusMessage: row.statusMessage || buildDefaultStatusMessage(row.status),
-      resumable: typeof row.resumable === 'boolean' ? row.resumable : inProgressStatuses.has(row.status),
+      resumable:
+        typeof row.resumable === 'boolean' ? row.resumable : inProgressStatuses.has(row.status),
       processingHeartbeatAt: row.processingHeartbeatAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -995,7 +1064,7 @@ export const readStatusForUser = query({
   },
 })
 
-export const readPathwayEvaluationForUser = query({
+export const readPathwayEvaluationForUser = internalQuery({
   args: {
     runId: v.string(),
     userId: v.string(),
@@ -1003,7 +1072,7 @@ export const readPathwayEvaluationForUser = query({
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .withIndex('by_runId', (q) => q.eq('runId', args.runId))
       .first()
 
     if (!row || row.userId !== args.userId) {
@@ -1023,7 +1092,7 @@ export const readPathwayEvaluationForUser = query({
   },
 })
 
-export const writePathwayEvaluationForUser = mutation({
+export const writePathwayEvaluationForUser = internalMutation({
   args: {
     runId: v.string(),
     userId: v.string(),
@@ -1034,7 +1103,7 @@ export const writePathwayEvaluationForUser = mutation({
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .withIndex('by_runId', (q) => q.eq('runId', args.runId))
       .first()
 
     if (!row || row.userId !== args.userId || row.profileSnapshotId !== args.profileSnapshotId) {
@@ -1043,13 +1112,17 @@ export const writePathwayEvaluationForUser = mutation({
 
     const normalizedDirect = normalizeDirectOutcomes(args.direct)
     const normalizedBlocked = normalizeBlockedOutcomes(args.blocked)
-    const existingDirect = normalizeDirectOutcomes((row.pathwayEvaluation?.direct || []) as DirectPathwayOutcome[])
-    const existingBlocked = normalizeBlockedOutcomes((row.pathwayEvaluation?.blocked || []) as BlockedPathwayOutcome[])
+    const existingDirect = normalizeDirectOutcomes(
+      (row.pathwayEvaluation?.direct || []) as DirectPathwayOutcome[],
+    )
+    const existingBlocked = normalizeBlockedOutcomes(
+      (row.pathwayEvaluation?.blocked || []) as BlockedPathwayOutcome[],
+    )
 
     if (
-      row.pathwayEvaluation
-      && directOutcomesEqual(existingDirect, normalizedDirect)
-      && blockedOutcomesEqual(existingBlocked, normalizedBlocked)
+      row.pathwayEvaluation &&
+      directOutcomesEqual(existingDirect, normalizedDirect) &&
+      blockedOutcomesEqual(existingBlocked, normalizedBlocked)
     ) {
       return {
         runId: row.runId,
@@ -1082,7 +1155,7 @@ export const writePathwayEvaluationForUser = mutation({
   },
 })
 
-export const readRankedRecommendationsForUser = query({
+export const readRankedRecommendationsForUser = internalQuery({
   args: {
     runId: v.string(),
     userId: v.string(),
@@ -1090,7 +1163,7 @@ export const readRankedRecommendationsForUser = query({
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .withIndex('by_runId', (q) => q.eq('runId', args.runId))
       .first()
 
     if (!row || row.userId !== args.userId) {
@@ -1112,7 +1185,7 @@ export const readRankedRecommendationsForUser = query({
   },
 })
 
-export const writeRankedRecommendationsForUser = mutation({
+export const writeRankedRecommendationsForUser = internalMutation({
   args: {
     runId: v.string(),
     userId: v.string(),
@@ -1125,7 +1198,7 @@ export const writeRankedRecommendationsForUser = mutation({
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .withIndex('by_runId', (q) => q.eq('runId', args.runId))
       .first()
 
     if (!row || row.userId !== args.userId || row.profileSnapshotId !== args.profileSnapshotId) {
@@ -1163,22 +1236,24 @@ export const writeRankedRecommendationsForUser = mutation({
   },
 })
 
-export const startProcessingForUser = mutation({
+export const startProcessingForUser = internalMutation({
   args: {
     runId: v.string(),
     userId: v.string(),
-    mode: v.optional(v.union(
-      v.literal('standard'),
-      v.literal('recoverable-delay'),
-      v.literal('mock-completed'),
-      v.literal('mock-degraded'),
-      v.literal('mock-failed'),
-    )),
+    mode: v.optional(
+      v.union(
+        v.literal('standard'),
+        v.literal('recoverable-delay'),
+        v.literal('mock-completed'),
+        v.literal('mock-degraded'),
+        v.literal('mock-failed'),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .withIndex('by_runId', (q) => q.eq('runId', args.runId))
       .first()
 
     if (!row || row.userId !== args.userId) {
@@ -1223,7 +1298,7 @@ export const startProcessingForUser = mutation({
   },
 })
 
-export const setTerminalStatusForUser = mutation({
+export const setTerminalStatusForUser = internalMutation({
   args: {
     runId: v.string(),
     userId: v.string(),
@@ -1233,7 +1308,7 @@ export const setTerminalStatusForUser = mutation({
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .withIndex('by_runId', (q) => q.eq('runId', args.runId))
       .first()
 
     if (!row || row.userId !== args.userId) {
@@ -1272,117 +1347,16 @@ export const setTerminalStatusForUser = mutation({
   },
 })
 
-export const seedRunForUser = mutation({
-  args: {
-    userId: v.string(),
-    runId: v.string(),
-    profileSnapshotId: v.string(),
-    refreshedFromRunId: v.optional(v.string()),
-    previousProfileSnapshotId: v.optional(v.string()),
-    refreshRootRunId: v.optional(v.string()),
-    refreshSequence: v.optional(v.number()),
-    status: canonicalStatusValidator,
-    statusMessage: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const now = Date.now()
-
-    await ctx.db.insert('recommendation_runs', {
-      userId: args.userId,
-      runId: args.runId,
-      profileSnapshotId: args.profileSnapshotId,
-      refreshedFromRunId: args.refreshedFromRunId,
-      previousProfileSnapshotId: args.previousProfileSnapshotId,
-      refreshRootRunId: args.refreshRootRunId,
-      refreshSequence: args.refreshSequence,
-      status: args.status,
-      statusMessage: args.statusMessage || buildDefaultStatusMessage(args.status),
-      resumable: inProgressStatuses.has(args.status),
-      processingStartedAt: now,
-      processingHeartbeatAt: now,
-      createdAt: now,
-      updatedAt: now,
-    })
-
-    return {
-      runId: args.runId,
-      profileSnapshotId: args.profileSnapshotId,
-      refreshedFromRunId: args.refreshedFromRunId,
-      previousProfileSnapshotId: args.previousProfileSnapshotId,
-      refreshRootRunId: args.refreshRootRunId,
-      refreshSequence: args.refreshSequence,
-      status: args.status,
-      statusMessage: args.statusMessage || buildDefaultStatusMessage(args.status),
-      resumable: inProgressStatuses.has(args.status),
-      processingHeartbeatAt: now,
-      createdAt: now,
-      updatedAt: now,
-    }
-  },
-})
-
-export const resetRunsForUser = mutation({
-  args: {
-    userId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const rows = await ctx.db
-      .query('recommendation_runs')
-      .withIndex('by_userId', q => q.eq('userId', args.userId))
-      .collect()
-
-    await Promise.all(rows.map(row => ctx.db.delete(row._id)))
-
-    return {
-      deletedCount: rows.length,
-    }
-  },
-})
-
-export const listRunsForUserTesting = query({
-  args: {
-    userId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const rows = await ctx.db
-      .query('recommendation_runs')
-      .withIndex('by_userId_createdAt', q => q.eq('userId', args.userId))
-      .order('desc')
-      .collect()
-
-    return rows.map(row => ({
-      runId: row.runId,
-      profileSnapshotId: row.profileSnapshotId,
-      refreshedFromRunId: row.refreshedFromRunId,
-      previousProfileSnapshotId: row.previousProfileSnapshotId,
-      refreshRootRunId: row.refreshRootRunId,
-      refreshSequence: row.refreshSequence,
-      status: row.status,
-      statusMessage: row.statusMessage,
-      resumable: row.resumable,
-      processingHeartbeatAt: row.processingHeartbeatAt,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-    }))
-  },
-})
-
-/**
- * ADMIN-ONLY — Security boundary: This query MUST only be invoked from
- * server-mediated Nitro endpoints that enforce `requireAdminSession`.
- * It returns cross-user data (userId, profileSnapshotId, full results)
- * and has NO Convex-level authorization. Direct browser access to this
- * query would expose all user recommendation data.
- */
-export const listForAdmin = query({
+export const listForAdmin = internalQuery({
   args: {
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const rows = await ctx.db.query('recommendation_runs').collect()
-    const limit = typeof args.limit === 'number' && Number.isFinite(args.limit)
-      ? Math.max(1, Math.round(args.limit))
-      : null
+    const limit =
+      typeof args.limit === 'number' && Number.isFinite(args.limit)
+        ? Math.max(1, Math.round(args.limit))
+        : null
 
     rows.sort((left, right) => {
       if (left.createdAt !== right.createdAt) {
@@ -1392,41 +1366,35 @@ export const listForAdmin = query({
       return right.updatedAt - left.updatedAt
     })
 
-    return rows
-      .slice(0, limit ?? rows.length)
-      .map(row => ({
-        runId: row.runId,
-        userId: row.userId,
-        profileSnapshotId: row.profileSnapshotId,
-        refreshedFromRunId: row.refreshedFromRunId,
-        previousProfileSnapshotId: row.previousProfileSnapshotId,
-        refreshRootRunId: row.refreshRootRunId,
-        refreshSequence: row.refreshSequence,
-        status: row.status,
-        statusMessage: row.statusMessage || buildDefaultStatusMessage(row.status),
-        resumable: typeof row.resumable === 'boolean' ? row.resumable : inProgressStatuses.has(row.status),
-        processingHeartbeatAt: row.processingHeartbeatAt,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-        pathwayEvaluation: row.pathwayEvaluation,
-        recommendationResults: row.recommendationResults,
-      }))
+    return rows.slice(0, limit ?? rows.length).map((row) => ({
+      runId: row.runId,
+      userId: row.userId,
+      profileSnapshotId: row.profileSnapshotId,
+      refreshedFromRunId: row.refreshedFromRunId,
+      previousProfileSnapshotId: row.previousProfileSnapshotId,
+      refreshRootRunId: row.refreshRootRunId,
+      refreshSequence: row.refreshSequence,
+      status: row.status,
+      statusMessage: row.statusMessage || buildDefaultStatusMessage(row.status),
+      resumable:
+        typeof row.resumable === 'boolean' ? row.resumable : inProgressStatuses.has(row.status),
+      processingHeartbeatAt: row.processingHeartbeatAt,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      pathwayEvaluation: row.pathwayEvaluation,
+      recommendationResults: row.recommendationResults,
+    }))
   },
 })
 
-/**
- * ADMIN-ONLY — Security boundary: This query MUST only be invoked from
- * server-mediated Nitro endpoints that enforce `requireAdminSession`.
- * See listForAdmin for full rationale.
- */
-export const readRankedRecommendationsForAdmin = query({
+export const readRankedRecommendationsForAdmin = internalQuery({
   args: {
     runId: v.string(),
   },
   handler: async (ctx, args) => {
     const row = await ctx.db
       .query('recommendation_runs')
-      .withIndex('by_runId', q => q.eq('runId', args.runId))
+      .withIndex('by_runId', (q) => q.eq('runId', args.runId))
       .first()
 
     if (!row) {

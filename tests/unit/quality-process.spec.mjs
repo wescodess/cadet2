@@ -26,6 +26,7 @@ const rows = [
   'test:policy',
   'test:components',
   'build',
+  'test:legacy-access',
 ]
 function sandbox() {
   const root = mkdtempSync(join(tmpdir(), 'quality-process-'))
@@ -52,7 +53,7 @@ describe('public quality processes', () => {
     { failure: null, code: 0 },
     ...rows.flatMap((failure) => [1, 2, 127].map((code) => ({ failure, code }))),
   ])(
-    'invokes all eight rows and propagates $failure exit $code',
+    'invokes all nine rows and propagates $failure exit $code',
     ({ failure, code }) => {
       const root = sandbox()
       writeFileSync(join(root, 'scripts/quality/baseline-policy.mjs'), 'process.exit(0)\n')

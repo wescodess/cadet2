@@ -1,0 +1,23 @@
+import { defineEventHandler, getRequestURL, setResponseHeader, setResponseStatus } from 'h3'
+
+const retiredPath =
+  /^\/(?:workspace|tasks|api\/workspace|api\/intake|api\/recommendations\/runs)(?![a-z0-9_-])/
+
+function normalizePath(path: string) {
+  try {
+    return decodeURIComponent(path).toLowerCase()
+  } catch {
+    return path.toLowerCase()
+  }
+}
+
+export default defineEventHandler((event) => {
+  const paths = [event.path.split('?', 1)[0] || '/', getRequestURL(event).pathname].flatMap(
+    (path) => [path.toLowerCase(), normalizePath(path)],
+  )
+  if (!paths.some((path) => retiredPath.test(path))) return
+
+  setResponseHeader(event, 'cache-control', 'private, no-store')
+  setResponseStatus(event, 404)
+  return { statusCode: 404, statusMessage: 'Not Found' }
+})

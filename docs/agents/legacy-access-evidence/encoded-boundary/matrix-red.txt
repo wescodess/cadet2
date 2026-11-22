@@ -1,0 +1,474 @@
+$ git rev-parse HEAD
+464494ce0f9862576db998e9b6be38a2a1357365
+$ git diff --stat
+ tests/security/legacy-http.test.mjs    |  6 +++---
+ tests/security/retired-router.test.mjs |  9 ++++++---
+ tests/security/support/raw-paths.mjs   | 22 ++++++++++++++++++++++
+ 3 files changed, 31 insertions(+), 6 deletions(-)
+$ node path-matrix.mjs
+{
+  "passed": 185,
+  "failed": 40,
+  "failures": [
+    {
+      "path": "/workspace%41",
+      "representations": [
+        "/workspace%41",
+        "/workspacea"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/WORKSPACE%41",
+      "representations": [
+        "/workspace%41",
+        "/workspacea"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/workspace%32",
+      "representations": [
+        "/workspace%32",
+        "/workspace2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/WORKSPACE%32",
+      "representations": [
+        "/workspace%32",
+        "/workspace2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/workspace%2dhelp",
+      "representations": [
+        "/workspace%2dhelp",
+        "/workspace-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/WORKSPACE%2dhelp",
+      "representations": [
+        "/workspace%2dhelp",
+        "/workspace-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/workspace%5farchive",
+      "representations": [
+        "/workspace%5farchive",
+        "/workspace_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/WORKSPACE%5farchive",
+      "representations": [
+        "/workspace%5farchive",
+        "/workspace_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/tasks%41",
+      "representations": [
+        "/tasks%41",
+        "/tasksa"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/TASKS%41",
+      "representations": [
+        "/tasks%41",
+        "/tasksa"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/tasks%32",
+      "representations": [
+        "/tasks%32",
+        "/tasks2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/TASKS%32",
+      "representations": [
+        "/tasks%32",
+        "/tasks2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/tasks%2dhelp",
+      "representations": [
+        "/tasks%2dhelp",
+        "/tasks-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/TASKS%2dhelp",
+      "representations": [
+        "/tasks%2dhelp",
+        "/tasks-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/tasks%5farchive",
+      "representations": [
+        "/tasks%5farchive",
+        "/tasks_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/TASKS%5farchive",
+      "representations": [
+        "/tasks%5farchive",
+        "/tasks_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/workspace%41",
+      "representations": [
+        "/api/workspace%41",
+        "/api/workspacea"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/WORKSPACE%41",
+      "representations": [
+        "/api/workspace%41",
+        "/api/workspacea"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/workspace%32",
+      "representations": [
+        "/api/workspace%32",
+        "/api/workspace2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/WORKSPACE%32",
+      "representations": [
+        "/api/workspace%32",
+        "/api/workspace2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/workspace%2dhelp",
+      "representations": [
+        "/api/workspace%2dhelp",
+        "/api/workspace-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/WORKSPACE%2dhelp",
+      "representations": [
+        "/api/workspace%2dhelp",
+        "/api/workspace-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/workspace%5farchive",
+      "representations": [
+        "/api/workspace%5farchive",
+        "/api/workspace_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/WORKSPACE%5farchive",
+      "representations": [
+        "/api/workspace%5farchive",
+        "/api/workspace_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/intake%41",
+      "representations": [
+        "/api/intake%41",
+        "/api/intakea"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/INTAKE%41",
+      "representations": [
+        "/api/intake%41",
+        "/api/intakea"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/intake%32",
+      "representations": [
+        "/api/intake%32",
+        "/api/intake2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/INTAKE%32",
+      "representations": [
+        "/api/intake%32",
+        "/api/intake2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/intake%2dhelp",
+      "representations": [
+        "/api/intake%2dhelp",
+        "/api/intake-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/INTAKE%2dhelp",
+      "representations": [
+        "/api/intake%2dhelp",
+        "/api/intake-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/intake%5farchive",
+      "representations": [
+        "/api/intake%5farchive",
+        "/api/intake_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/INTAKE%5farchive",
+      "representations": [
+        "/api/intake%5farchive",
+        "/api/intake_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/recommendations/runs%41",
+      "representations": [
+        "/api/recommendations/runs%41",
+        "/api/recommendations/runsa"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/RECOMMENDATIONS/RUNS%41",
+      "representations": [
+        "/api/recommendations/runs%41",
+        "/api/recommendations/runsa"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/recommendations/runs%32",
+      "representations": [
+        "/api/recommendations/runs%32",
+        "/api/recommendations/runs2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/RECOMMENDATIONS/RUNS%32",
+      "representations": [
+        "/api/recommendations/runs%32",
+        "/api/recommendations/runs2"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/recommendations/runs%2dhelp",
+      "representations": [
+        "/api/recommendations/runs%2dhelp",
+        "/api/recommendations/runs-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/RECOMMENDATIONS/RUNS%2dhelp",
+      "representations": [
+        "/api/recommendations/runs%2dhelp",
+        "/api/recommendations/runs-help"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/api/recommendations/runs%5farchive",
+      "representations": [
+        "/api/recommendations/runs%5farchive",
+        "/api/recommendations/runs_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    },
+    {
+      "path": "/API/RECOMMENDATIONS/RUNS%5farchive",
+      "representations": [
+        "/api/recommendations/runs%5farchive",
+        "/api/recommendations/runs_archive"
+      ],
+      "expectedStatus": 404,
+      "actualStatus": 200,
+      "cacheControl": null,
+      "body": "PUBLIC_FALLTHROUGH"
+    }
+  ]
+}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: raw OR decoded retired-root boundary contract
+
+40 !== 0
+
+    at file:///<repo>/.scratch/scripts/path-matrix.mjs:40:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 40,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.20.0
+exit 1
