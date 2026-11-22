@@ -1,6 +1,6 @@
 # Quality bar
 
-`pnpm verify` runs the adopted static rows owned by #23 and the three structural rows owned by #24, the existing Vitest tests and production build, and #28's real legacy-access boundary suite after the build. CI runs it on every PR and push to `dev` (and retains the existing `main`, scheduled and manual triggers). Pre-commit checks formatting and lint on staged files, then runs the complete type ratchet. `pnpm install` installs the hook; linked worktrees get their own `core.hooksPath` setting.
+`pnpm verify` runs the adopted static rows owned by #23 and the three structural rows owned by #24, the existing Vitest tests and production build, then both #28's real legacy-access boundary suite and #74's admin/RAG containment suite. CI runs it on every PR and push to `dev` (and retains the existing `main`, scheduled and manual triggers). Pre-commit checks formatting and lint on staged files, then runs the complete type ratchet. `pnpm install` installs the hook; linked worktrees get their own `core.hooksPath` setting.
 
 Use Node 24 from `.nvmrc`, pnpm 9.12.3 from `packageManager`, and a frozen lockfile:
 
@@ -54,7 +54,7 @@ Initial CI calibration: [run 44026799450](https://github.com/wescodess/cadet2/ac
 
 ## Tool pins and upstream checks
 
-Issue #28 adds the mandatory `pnpm test:legacy-access` command after the build. It starts the built Nitro server and an isolated actual Convex backend, with real signup/session/JWT calls and operator-owned fixtures. It proves retired HTTP and direct-Convex denial with preserved session/admin controls; it is not the replacement portal journey suite or #75's complete built-surface guard. See the [scope and retained red/green evidence](legacy-access-closure.md). This added a ninth command before D03 brought the integrated manifest to twelve; the earlier eight-command ledgers below describe their original adoption heads.
+Issue #28 adds the mandatory `pnpm test:legacy-access` command after the build. It starts the built Nitro server and an isolated actual Convex backend, with real signup/session/JWT calls and operator-owned fixtures. It proves retired HTTP and direct-Convex denial with preserved session/admin controls; it is not the replacement portal journey suite or #75's complete built-surface guard. See the [scope and retained red/green evidence](legacy-access-closure.md). Issue #74 adds the independent `pnpm security:admin` command with 85 mandatory cases and complete native TAP/child-exit validation. The legacy command selects its five test files separately from the grouped admin suite. Both use reviewed subject grants; governance review remains unavailable under #74, while pathway reads retain a positive control. The combined verifier records thirteen commands; earlier eight-, nine-, ten- and twelve-command ledgers describe their original adoption heads.
 
 Official documentation/release pages and registry versions were checked on 2026-11-17 before installing. New direct tooling is exact-pinned in `package.json`; transitives are frozen in `pnpm-lock.yaml`.
 

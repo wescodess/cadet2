@@ -592,7 +592,7 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="space-y-1">
           <p class="text-sm text-slate-300">
-            Admin access:
+            Reviewed admin grant:
             <span :class="phase0Ready ? 'text-emerald-300' : 'text-rose-300'">{{
               phase0Ready ? 'ok' : 'failed'
             }}</span>

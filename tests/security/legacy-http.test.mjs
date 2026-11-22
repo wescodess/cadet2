@@ -198,7 +198,7 @@ test('real sign-in, session and backend admission still work after denied reques
   )
 })
 
-test('missing operator credentials return 503 for both review readers', async (context) => {
+test('both review readers remain unavailable with or without operator credentials', async (context) => {
   await stack.restartApp({ CONVEX_ADMIN_KEY: '', CONVEX_DEPLOY_KEY: '' })
   try {
     for (const suffix of ['', `/${stack.fixtureRun.runId}`]) {
@@ -216,16 +216,21 @@ test('missing operator credentials return 503 for both review readers', async (c
     const response = await fetch(`${stack.origin}/api/admin/recommendation-reviews${suffix}`, {
       headers: { cookie: stack.admin.cookie },
     })
-    assert.equal(response.status, 200)
-    assert.match(await response.text(), /legacy-private-run/)
+    assert.equal(response.status, 503)
+    assert.doesNotMatch(
+      await response.text(),
+      /PRIVATE_UNSIGNED_RESULT_CANARY|recommendationResults/,
+    )
   }
+  const access = await fetch(`${stack.origin}/api/admin/access`, {
+    headers: { cookie: stack.admin.cookie },
+  })
+  assert.equal(access.status, 200, 'reviewed admin admission remains available')
 })
 
 test('review boundaries consistently require a stored grant before reads or actions', async (context) => {
   const root = `/api/admin/recommendation-reviews/${stack.fixtureRun.runId}`
-  const detail = await fetch(`${stack.origin}${root}`, { headers: { cookie: stack.admin.cookie } })
-  assert.equal(detail.status, 200)
-  const citationId = (await detail.json()).citations[0].citationId
+  const citationId = 'legacy-private-citation'
   const routes = [
     ['GET', '/api/admin/access'],
     ['GET', '/api/admin/recommendation-reviews'],
@@ -235,17 +240,20 @@ test('review boundaries consistently require a stored grant before reads or acti
     ...['flag', 'dismiss', 'resolve'].map((action) => ['POST', `${root}/${action}`]),
   ]
   const allowlistOnly = stack.users.find((user) => user.role === 'ordinary')
-  assert.equal(
-    (await stack.clientFor(allowlistOnly).query('ragSources:getAdminStatus', {}))
-      .currentUserIsAdmin,
-    false,
+  await assert.rejects(
+    stack.clientFor(allowlistOnly).query('ragSources:getAdminStatus', {}),
+    /Admin access required/,
   )
   for (const [method, path] of routes) {
     await context.test(`${method} ${path}`, async () => {
       const before = await stack.observations()
       const denied = await fetch(`${stack.origin}${path}`, {
         method,
-        headers: { cookie: allowlistOnly.cookie, 'content-type': 'application/json' },
+        headers: {
+          cookie: allowlistOnly.cookie,
+          'content-type': 'application/json',
+          origin: stack.origin,
+        },
         ...(method === 'POST'
           ? { body: JSON.stringify({ reason: 'Synthetic boundary probe' }) }
           : {}),
@@ -253,14 +261,23 @@ test('review boundaries consistently require a stored grant before reads or acti
       assert.equal(denied.status, 403, await denied.text())
       const attempts = (await stack.observations()).slice(before.length)
       assert.doesNotMatch(attempts, /private-sql|\/api\/mutation/)
+      const admittedBefore = await stack.observations()
       const allowed = await fetch(`${stack.origin}${path}`, {
         method,
-        headers: { cookie: stack.admin.cookie, 'content-type': 'application/json' },
+        headers: {
+          cookie: stack.admin.cookie,
+          'content-type': 'application/json',
+          origin: stack.origin,
+        },
         ...(method === 'POST'
           ? { body: JSON.stringify({ reason: 'Synthetic admin positive control' }) }
           : {}),
       })
-      assert.equal(allowed.status, 200, await allowed.text())
+      assert.equal(allowed.status, path === '/api/admin/access' ? 200 : 503, await allowed.text())
+      assert.doesNotMatch(
+        (await stack.observations()).slice(admittedBefore.length),
+        /private-sql|\/api\/mutation/,
+      )
     })
   }
 })

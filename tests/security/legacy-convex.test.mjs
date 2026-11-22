@@ -26,22 +26,25 @@ after(async () => {
   await stack?.close()
 })
 
-test('an admitted admin still reads governance review through the real HTTP guard', async () => {
+test('a reviewed admin reads pathways while governance review remains unavailable', async () => {
+  const before = await stack.observations()
   const response = await fetch(`${stack.origin}/api/admin/recommendation-reviews`, {
     headers: { cookie: stack.admin.cookie },
   })
-  assert.equal(response.status, 200)
-  const body = await response.json()
-  assert.ok(
-    JSON.stringify(body).includes(stack.fixtureRun.runId),
-    'the actual fixture is returned, not fallback emptiness',
-  )
+  assert.equal(response.status, 503)
+  assert.doesNotMatch(await response.text(), /PRIVATE_UNSIGNED_RESULT_CANARY|recommendationResults/)
   const detail = await fetch(
     `${stack.origin}/api/admin/recommendation-reviews/${stack.fixtureRun.runId}`,
     { headers: { cookie: stack.admin.cookie } },
   )
-  assert.equal(detail.status, 200)
-  assert.equal((await detail.json()).run.runId, stack.fixtureRun.runId)
+  assert.equal(detail.status, 503)
+  assert.doesNotMatch(await detail.text(), /PRIVATE_UNSIGNED_RESULT_CANARY|recommendationResults/)
+  assert.doesNotMatch((await stack.observations()).slice(before.length), /private-sql/)
+  const pathways = await fetch(`${stack.origin}/api/admin/pathways`, {
+    headers: { cookie: stack.admin.cookie },
+  })
+  assert.equal(pathways.status, 200)
+  assert.ok((await pathways.json()).items.length > 0, 'the actual pathway fixture is returned')
   assert.equal(
     (await stack.clientFor(stack.admin).query('ragSources:getAdminStatus', {})).currentUserIsAdmin,
     true,

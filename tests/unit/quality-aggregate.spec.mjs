@@ -15,6 +15,7 @@ const rows = [
   'test:components',
   'build',
   'test:legacy-access',
+  'security:admin',
 ]
 let scripts,
   readScripts,
@@ -114,7 +115,7 @@ describe('aggregate orchestration public module', () => {
       baselinePolicy: { status: 'not_run' },
       rows: rows.map((row) => ({ row, status: 'not_run' })),
     })
-    expect(snapshots).toHaveLength(15)
+    expect(snapshots).toHaveLength(16)
     expect(snapshots[1].baselinePolicy.status).toBe('pass')
     for (let index = 0; index < rows.length; index++)
       expect(snapshots[index + 2].rows.map(({ status }) => status)).toEqual(

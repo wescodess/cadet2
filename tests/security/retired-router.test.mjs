@@ -10,7 +10,7 @@ import { rawRequest, retiredDotPaths, retiredEncodedBoundaryPaths } from './supp
 const require = createRequire(import.meta.url)
 const h3Path = require.resolve('h3', { paths: [fileURLToPath(import.meta.resolve('nuxt'))] })
 const { createApp, defineEventHandler, toNodeListener } = require(h3Path)
-const source = await readFile('server/middleware/retired-legacy-surfaces.ts', 'utf8')
+const source = await readFile('server/middleware/00-retired-legacy-surfaces.ts', 'utf8')
 const compiled = ts.transpileModule(
   source.replace("from 'h3'", `from '${pathToFileURL(h3Path).href}'`),
   {
