@@ -18,7 +18,7 @@ useHead({ title: 'Relay primitives specimen' })
       <h1 class="text-4xl font-bold">Relay primitives</h1>
       <p class="mt-3 max-w-prose text-muted-foreground">
         Every shared primitive in both themes and both expressions, for comparison with
-        <code>docs/design/system/approved.html</code>.
+        <code class="wrap-anywhere">docs/design/system/approved.html</code>.
       </p>
     </header>
 

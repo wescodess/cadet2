@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue"
-import { Loader2Icon } from "lucide-vue-next"
-import { cn } from "@/lib/utils"
+import type { HTMLAttributes } from 'vue'
+import { Loader2Icon } from 'lucide-vue-next'
+import { cn } from '@/lib/utils'
 
 const props = defineProps<{
-  class?: HTMLAttributes["class"]
+  class?: HTMLAttributes['class']
 }>()
 </script>
 
@@ -12,6 +12,11 @@ const props = defineProps<{
   <Loader2Icon
     role="status"
     aria-label="Loading"
-    :class="cn('size-4 animate-spin', props.class)"
+    :class="
+      cn(
+        'size-4 animate-spin client:animate-spin-busy representative:animate-spin-busy',
+        props.class,
+      )
+    "
   />
 </template>

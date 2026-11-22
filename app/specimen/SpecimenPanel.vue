@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <div
-    :class="theme === 'dark' ? 'dark' : undefined"
+    :class="['min-w-0', theme === 'dark' ? 'dark' : undefined]"
     :data-expression="expression"
     :data-specimen-panel="`${expression}-${theme}`"
   >

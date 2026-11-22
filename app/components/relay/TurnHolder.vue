@@ -23,7 +23,7 @@ const prefix = computed(() => holderPrefix(props.turn))
     :data-turn="turn"
     :class="
       cn(
-        'grid min-w-14 max-w-18 content-start justify-items-center gap-0.75 text-center',
+        'grid min-w-14 max-w-18 client:max-w-none content-start justify-items-center gap-0.75 text-center',
         props.class,
       )
     "

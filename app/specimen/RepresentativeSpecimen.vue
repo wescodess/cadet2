@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import { CircleAlert } from 'lucide-vue-next'
+
 import { Button } from '~/components/ui/button'
+import { FieldDescription, FieldError } from '~/components/ui/field'
+import { Input } from '~/components/ui/input'
 import { Kbd } from '~/components/ui/kbd'
+import { Label } from '~/components/ui/label'
+import { Spinner } from '~/components/ui/spinner'
 import ErrorSummary from '~/components/relay/ErrorSummary.vue'
 import ProvenanceRow from '~/components/relay/ProvenanceRow.vue'
 import SaveState from '~/components/relay/SaveState.vue'
@@ -49,14 +55,68 @@ const rows = [
 <template>
   <div>
     <SpecimenSpec
-      title="Keyboard hints"
+      title="Buttons"
       note="Keyboard hints sit inside the control at 12 px. Sign is never a single-key shortcut."
     >
-      <div class="flex flex-wrap items-center gap-2.5">
-        <Button>Sign version 3 <Kbd>⌘ Enter</Kbd></Button>
-        <Button variant="outline">Preview client edition <Kbd>P</Kbd></Button>
-        <Button variant="ghost">Ask client <Kbd>C</Kbd></Button>
-        <Kbd>⌘ K</Kbd>
+      <div class="grid gap-3.5">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <Button>Sign version 3 <Kbd aria-hidden="true">⌘ Enter</Kbd></Button>
+          <Button variant="secondary"
+            >Preview client edition <Kbd aria-hidden="true">P</Kbd></Button
+          >
+          <Button variant="ghost">Ask client <Kbd aria-hidden="true">C</Kbd></Button>
+          <Button variant="destructive">Revoke intake link</Button>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <Button disabled>Sign version 3</Button>
+          <span class="text-small text-muted-foreground"
+            >Staff prepare; only a representative can sign.</span
+          >
+          <Button aria-busy="true"><Spinner aria-hidden="true" />Signing</Button>
+        </div>
+      </div>
+    </SpecimenSpec>
+
+    <SpecimenSpec
+      title="Input with hint and error"
+      note="Hint above the control. The error says what to do."
+    >
+      <div class="grid grid-cols-2 gap-4">
+        <div class="grid min-w-0 content-start gap-1.5">
+          <Label :for="id('matter')">External matter ID</Label>
+          <FieldDescription :id="id('matter-hint')"
+            >From your case system. Optional.</FieldDescription
+          >
+          <Input
+            :id="id('matter')"
+            default-value="MAT-2026-0388"
+            :aria-describedby="id('matter-hint')"
+          />
+        </div>
+        <div class="grid min-w-0 content-start gap-1.5">
+          <Label :for="id('licence')">Licence number</Label>
+          <FieldDescription :id="id('licence-hint')"
+            >As shown on the CICC register.</FieldDescription
+          >
+          <FieldError :id="id('licence-error')">
+            <CircleAlert
+              :size="18"
+              :stroke-width="1.75"
+              class="mt-0.5 shrink-0"
+              aria-hidden="true"
+            />
+            <span
+              ><span class="sr-only">Error: </span>Enter the licence number as R followed by 6
+              digits</span
+            >
+          </FieldError>
+          <Input
+            :id="id('licence')"
+            default-value="R12345"
+            aria-invalid="true"
+            :aria-describedby="`${id('licence-hint')} ${id('licence-error')}`"
+          />
+        </div>
       </div>
     </SpecimenSpec>
 

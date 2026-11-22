@@ -55,6 +55,12 @@ const id = (name: string) => `${props.idPrefix}-${name}`
         </Select>
         <Label :for="id('textarea')">Details</Label>
         <Textarea :id="id('textarea')" />
+        <Label :for="id('disabled-input')">Unavailable field</Label>
+        <Input :id="id('disabled-input')" default-value="Not editable" disabled />
+        <Label :for="id('disabled-native')">Unavailable choice</Label>
+        <NativeSelect :id="id('disabled-native')" disabled>
+          <option>First option</option>
+        </NativeSelect>
       </div>
       <div class="flex items-center gap-3">
         <Checkbox :id="id('checkbox')" v-model="checked" />

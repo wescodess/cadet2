@@ -2,6 +2,7 @@
   --radius-panel: 0.5rem;
   --leading-compact: 1.2;
   --animate-spin-save: spin 1.2s linear infinite;
+  --animate-spin-busy: spin 0.8s linear infinite;
 }
 
 @theme inline {
@@ -10,6 +11,7 @@
   --color-role-soft: var(--r-soft);
   --color-role-ink: var(--r-ink);
   --leading-label: var(--t-label-lh);
+  --leading-small: var(--t-small-lh);
   --text-chip: var(--chip-fs);
   --text-chip--line-height: 1.25;
   --spacing-pad: var(--pad);
@@ -133,7 +135,7 @@
 }
 
 @utility relay-button {
-  @apply rounded-control text-ui;
+  @apply rounded-control text-ui leading-compact;
   height: auto;
   min-height: var(--c-h);
   padding: 6px var(--c-px);
@@ -141,8 +143,22 @@
   letter-spacing: -0.005em;
   white-space: normal;
 
-  border: 1px solid transparent;
+  border-width: 1px;
+  border-style: solid;
   cursor: pointer;
+  transition-property: background-color, border-color, color;
+
+  &[data-slot='button']:not([data-variant='outline']) {
+    border-color: transparent;
+  }
+
+  &[data-slot='button']:not([data-size^='icon']):has(> svg) {
+    padding-inline: var(--c-px);
+  }
+
+  &[data-slot='button'][aria-busy='true'] {
+    cursor: progress;
+  }
 
   &[data-slot='button']:not([data-variant]):not(:disabled):hover,
   &[data-slot='button'][data-variant='default']:not(:disabled):hover {
@@ -183,27 +199,59 @@
 
 @utility relay-input {
   @apply rounded-control text-body;
-  height: var(--c-h);
+  height: auto;
+  min-height: var(--c-h);
   padding-block: 0;
   font-family: var(--t-body-family);
-  background-color: var(--card);
   color: var(--foreground);
+
+  &:not([data-slot='input-group-control']) {
+    background-color: var(--card);
+  }
+
+  &[aria-invalid='true'] {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 18%, transparent);
+  }
 }
 
 @utility relay-textarea {
   @apply rounded-control text-body;
   font-family: var(--t-body-family);
+  color: var(--foreground);
+
+  &:not([data-slot='input-group-control']) {
+    background-color: var(--card);
+  }
+
+  &[aria-invalid='true'] {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 18%, transparent);
+  }
+}
+
+@utility relay-field-error {
+  @apply text-small font-medium;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 @utility relay-check {
   width: var(--check-size);
   height: var(--check-size);
   border-radius: var(--check-radius);
+
+  &[data-state='unchecked'] {
+    background-color: var(--card);
+  }
 }
 
 @utility relay-radio {
   width: var(--check-size);
   height: var(--check-size);
+
+  &[data-slot] {
+    background-color: var(--card);
+  }
 }
 
 @utility relay-check-target {
