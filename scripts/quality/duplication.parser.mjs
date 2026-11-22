@@ -19,8 +19,44 @@ const statistics = z
     tokens: natural,
   })
   .strict()
+const summary = z
+  .object({
+    by: z.enum(['tokens', 'lines', 'size', 'complexity']),
+    files: z.array(
+      z
+        .object({
+          path: nonempty,
+          format: nonempty,
+          bytes: natural,
+          lines: natural,
+          tokens: natural,
+          duplicatedLines: natural,
+          duplicatedTokens: natural,
+          complexity: natural,
+        })
+        .strict(),
+    ),
+    folders: z.array(
+      z
+        .object({
+          path: nonempty,
+          files: natural,
+          bytes: natural,
+          lines: natural,
+          tokens: natural,
+          duplicatedLines: natural,
+          complexity: natural,
+        })
+        .strict(),
+    ),
+    totalFiles: natural,
+    totalFolders: natural,
+  })
+  .strict()
+export const parseCensus = parser('jscpd population census', z.object({ summary }).strict())
 const report = z
   .object({
+    summary: summary.optional(),
     duplicates: z.array(
       z
         .object({

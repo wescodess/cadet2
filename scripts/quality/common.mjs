@@ -108,6 +108,6 @@ export function main(fn) {
     .then(fn)
     .catch((error) => {
       console.error(error.message)
-      process.exitCode = 1
+      process.exitCode = error.exitCode ?? 1
     })
 }

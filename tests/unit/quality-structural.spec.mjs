@@ -60,7 +60,12 @@ function fixture(files) {
     const result = spawnSync('git', args, { cwd: directory, encoding: 'utf8' })
     expect(result.status, result.stderr).toBe(0)
   }
-  put('.git/objects/info/alternates', `${join(root, '.git/objects')}\n`)
+  const objects = spawnSync('git', ['rev-parse', '--git-path', 'objects'], {
+    cwd: root,
+    encoding: 'utf8',
+  })
+  expect(objects.status, objects.stderr).toBe(0)
+  put('.git/objects/info/alternates', `${resolve(root, objects.stdout.trim())}\n`)
   return { directory, put }
 }
 function row(name, directory, extra = {}, args = []) {
@@ -117,6 +122,47 @@ it('rejects an unused file and admits a reachable file at the dead-code command'
   expect(row('dead-code', directory).status).toBe(0)
 })
 
+it('keeps tracked source in Knip when gitignored and excludes ignored untracked source', () => {
+  const { directory, put } = fixture({
+    'shared/ignored/value.ts': 'export const value = 1',
+    'index.ts': 'console.log(1)',
+  })
+  expect(row('dead-code', directory).status).toBe(1)
+  put('.gitignore', 'node_modules/\n.quality-output/\nshared/ignored/\n')
+  const denied = row('dead-code', directory)
+  expect(denied.output).toContain('shared/ignored/value.ts')
+  expect(denied.status).toBe(1)
+  put('index.ts', "import { value } from './shared/ignored/value'; console.log(value)")
+  put('shared/ignored/untracked.ts', 'export const untracked = 2')
+  expect(row('dead-code', directory).status).toBe(0)
+  put('shared/literal[route].ts', 'export const unused = 3')
+  const literal = row('dead-code', directory)
+  expect(literal.output).toContain('shared/literal[route].ts')
+  expect(literal.status).toBe(1)
+})
+
+it('rejects an ignored untracked framework entry as a consumer of tracked source', () => {
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"nuxt":"4.3.1"}}',
+    'index.ts': "import { defineNuxtConfig } from 'nuxt/config'; console.log(defineNuxtConfig({}))",
+    'shared/helper.ts': 'export const value = 7',
+  })
+  put('.gitignore', 'node_modules/\n.quality-output/\nserver/api/phantom.get.ts\n')
+  put(
+    'server/api/phantom.get.ts',
+    "import { value } from '../../shared/helper'; export default () => value",
+  )
+  const denied = row('dead-code', directory)
+  expect(denied.output).toMatch(/outside.*source inventory/)
+  expect(denied.status).toBe(1)
+  rmSync(join(directory, 'server/api/phantom.get.ts'))
+  put(
+    'index.ts',
+    "import { defineNuxtConfig } from 'nuxt/config'; import { value } from './shared/helper'; console.log(defineNuxtConfig({}), value)",
+  )
+  expect(row('dead-code', directory).status).toBe(0)
+})
+
 it('rejects an unused export and admits the same exported value when consumed', () => {
   const { directory, put } = fixture({
     'index.ts': "import { used } from './shared/value'; console.log(used)",
@@ -127,6 +173,79 @@ it('rejects an unused export and admits the same exported value when consumed', 
   expect(denied.status).toBe(1)
   put('index.ts', "import { used, unused } from './shared/value'; console.log(used, unused)")
   expect(row('dead-code', directory).status).toBe(0)
+})
+
+for (const tag of ['public', 'beta', 'alias']) {
+  it(
+    'rejects Knip suppression @' + tag + ' and admits source strings and a consumed export',
+    () => {
+      const { directory, put } = fixture({
+        'index.ts': "import { used } from './shared/value'; console.log(used)",
+        'shared/value.ts': `export const used = 1\n/** @${tag} */\nexport const unused = 2`,
+      })
+      const denied = row('dead-code', directory)
+      expect(denied.output).toContain('Knip suppression')
+      expect(denied.status).toBe(1)
+      put('shared/value.ts', `export const used = '/** @${tag} */'\nexport const unused = 2`)
+      put('index.ts', "import { used, unused } from './shared/value'; console.log(used, unused)")
+      expect(row('dead-code', directory).status).toBe(0)
+      put('shared/value.ts', `export const used = 1\n// @${tag}\nexport const unused = 2`)
+      expect(row('dead-code', directory).output).toContain('Knip suppression')
+    },
+  )
+}
+
+for (const location of ['shared', 'convex', 'convex/helpers']) {
+  it('reports ordinary unused helpers under ' + location + ' and admits an actual consumer', () => {
+    const file = `${location}/helper.ts`
+    const { directory, put } = fixture({
+      'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+      'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
+      [file]: 'export const value = 7',
+    })
+    const denied = row('dead-code', directory)
+    expect(denied.output).toContain(`${file}|files|${file}`)
+    expect(denied.status).toBe(1)
+    put('index.ts', `import { value } from './${file}'; console.log(value)`)
+    put(file, "import { v } from 'convex/values'; export const value = v.string()")
+    expect(row('dead-code', directory).status).toBe(0)
+  })
+}
+
+it('admits registered Convex exports and framework defaults but checks their unrelated exports', () => {
+  const registrations = [
+    'query',
+    'mutation',
+    'action',
+    'internalQuery',
+    'internalMutation',
+    'internalAction',
+    'httpAction',
+  ]
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'index.ts': 'console.log(1)',
+    'convex/_generated/server.ts': `export { ${registrations.map((r) => `${r}Generic as ${r}`).join(', ')} } from 'convex/server'`,
+    'convex/functions.ts': `import { ${registrations.join(', ')} } from './_generated/server'\n${registrations.map((r, i) => `export const entry${i} = ${r}(${r === 'httpAction' ? 'async () => new Response("control")' : '{ args: {}, handler: () => null }'})`).join('\n')}\nexport const unused = 1`,
+    'convex/schema.ts':
+      "import { defineSchema } from 'convex/server'; export default defineSchema({})",
+    'convex/auth.config.ts': 'export default { providers: [] }',
+    'convex/convex.config.ts':
+      "import { defineApp } from 'convex/server'; export default defineApp()",
+    'convex/http.ts':
+      "import { httpRouter } from 'convex/server'; const http = httpRouter(); export default http",
+    'convex/crons.ts':
+      "import { cronJobs } from 'convex/server'; const crons = cronJobs(); export default crons",
+  })
+  const denied = row('dead-code', directory)
+  expect(denied.output).toContain('convex/functions.ts|exports|unused')
+  expect(denied.status).toBe(1)
+  put('index.ts', "import { unused } from './convex/functions'; console.log(unused)")
+  const admitted = row('dead-code', directory)
+  expect(admitted.output).toContain('dead-code: PASS')
+  expect(admitted.status).toBe(0)
+  put('convex/auth.config.ts', 'export default { providers: [] }; export const unrelated = 1')
+  expect(row('dead-code', directory).output).toContain('convex/auth.config.ts|exports|unrelated')
 })
 
 it('rejects an unused dependency and admits an actual dependency import', () => {
@@ -152,6 +271,23 @@ it('rejects duplication involving a changed file and admits original code', () =
   expect(denied.output).toMatch(/duplication regression|duplication: new files must be clean/)
   expect(denied.status).toBe(1)
   put('shared/copy.ts', 'console.log("unique")')
+  expect(row('duplication', directory).status).toBe(0)
+})
+
+it('rejects jscpd directives in comments and strings and admits unsuppressed unique source', () => {
+  const marker = (kind) => 'jscpd' + ':ignore-' + kind
+  const block = Array.from(
+    { length: 24 },
+    (_, index) => `console.log('directive operation ${index}', ${index} * 29)`,
+  ).join('\n')
+  const { directory, put } = fixture({ 'shared/original.ts': block })
+  put('shared/copy.ts', `// ${marker('start')}\n${block}\n// ${marker('end')}`)
+  const denied = row('duplication', directory)
+  expect(denied.output).toContain('jscpd suppression')
+  expect(denied.status).toBe(1)
+  put('shared/copy.ts', `const marker = '${marker('start')}'\n${block}\n'${marker('end')}'`)
+  expect(row('duplication', directory).output).toContain('jscpd suppression')
+  put('shared/copy.ts', 'console.log("unique unsuppressed control")')
   expect(row('duplication', directory).status).toBe(0)
 })
 
@@ -271,5 +407,40 @@ it('requires removed duplication debt to lower both affected file allowances', (
       counts: {},
     }),
   )
+  expect(row('duplication', directory).status).toBe(0)
+})
+
+it('retires both clone allowances on an archive rename and rejects their later restoration', () => {
+  const block = Array.from(
+    { length: 24 },
+    (_, index) => `console.log('archive operation ${index}', ${index} * 19)`,
+  ).join('\n')
+  const file = 'shared/types/workspace-summary.ts'
+  const { directory, put } = fixture({
+    [file]: block,
+    'shared/types/recommendation-run-comparison.ts': block,
+  })
+  expect(
+    row('duplication', directory, { CI: undefined, GITHUB_ACTIONS: undefined }, [
+      '--write-baseline',
+    ]).status,
+  ).toBe(0)
+  const move = spawnSync('git', ['mv', file, 'shared/types/archive.txt'], { cwd: directory })
+  expect(move.status).toBe(0)
+  const denied = row('duplication', directory)
+  expect(denied.output).toContain('lower allowance to 0')
+  expect(denied.status).toBe(1)
+  put(
+    'scripts/quality/baselines/duplication.json',
+    JSON.stringify({
+      date: '2026-11-21',
+      commit: '1b335bface0686641850ea8cd23aa5c5dea4e45c',
+      counts: {},
+    }),
+  )
+  expect(row('duplication', directory).status).toBe(0)
+  put(file, block)
+  expect(row('duplication', directory).status).toBe(1)
+  rmSync(join(directory, file))
   expect(row('duplication', directory).status).toBe(0)
 })

@@ -1,0 +1,502 @@
+{
+  "ticket": "https://github.com/wescodess/cadet2/issues/24",
+  "pullRequest": "https://github.com/wescodess/cadet2/pull/170",
+  "riskTier": "Normal",
+  "integrationBase": "1b335bface0686641850ea8cd23aa5c5dea4e45c",
+  "originalHead": "14f57a6b184030abe12350acbbf245e83efea42f",
+  "originalPinReproductions": "Four supplied probe batches replayed; originals preserved",
+  "findings": [
+    {
+      "id": 1,
+      "behavior": "Reject suppressing Knip tags in real comments; keep fixture strings literal",
+      "before": [
+        {
+          "case": "unused-export-red",
+          "exit": 1
+        },
+        {
+          "case": "knip-public-suppression",
+          "exit": 0
+        },
+        {
+          "case": "knip-beta-suppression",
+          "exit": 0
+        },
+        {
+          "case": "knip-alias-suppression",
+          "exit": 0
+        }
+      ],
+      "after": [
+        {
+          "case": "unused-export-native",
+          "exit": 1
+        },
+        {
+          "case": "knip-public-rejected",
+          "exit": 1
+        },
+        {
+          "case": "knip-beta-rejected",
+          "exit": 1
+        },
+        {
+          "case": "knip-alias-rejected",
+          "exit": 1
+        },
+        {
+          "case": "used-exports-native-control",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "behavior": "Reject literal jscpd ignore directives wherever the pinned tokenizer recognizes them",
+      "before": [
+        {
+          "case": "duplication-red",
+          "exit": 1
+        },
+        {
+          "case": "jscpd-comment",
+          "exit": 0
+        }
+      ],
+      "after": [
+        {
+          "case": "clone-native-red",
+          "exit": 1
+        },
+        {
+          "case": "clone-directive-rejected",
+          "exit": 1
+        },
+        {
+          "case": "clone-native-control",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "behavior": "Use tracked plus nonignored untracked source; attest analyzed/unused files and reject ignored untracked framework consumers",
+      "before": [
+        {
+          "case": "knip-tracked-unignored",
+          "exit": 1
+        },
+        {
+          "case": "knip-tracked-gitignored",
+          "exit": 0
+        }
+      ],
+      "after": [
+        {
+          "case": "tracked-unignored-unused",
+          "exit": 1
+        },
+        {
+          "case": "tracked-gitignored-unused",
+          "exit": 1
+        },
+        {
+          "case": "restored-end-dead-code",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "behavior": "Include both rename paths and retire both clone allowances; restoration cannot spend retired debt",
+      "before": [
+        {
+          "case": "duplication-renamed-out-of-source",
+          "exit": 0
+        },
+        {
+          "case": "duplication-deletion-control",
+          "exit": 1
+        }
+      ],
+      "after": [
+        {
+          "case": "archive-rename-retires-pair",
+          "exit": 1
+        },
+        {
+          "case": "deletion-retires-pair",
+          "exit": 1
+        },
+        {
+          "case": "restored-end-duplication",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "behavior": "Attest token-only census inputs and eligible physical/embedded populations independently of clone reports",
+      "before": [
+        {
+          "case": "duplication-empty-population",
+          "exit": 0
+        }
+      ],
+      "regressions": [
+        "Valid empty clone report rejected after native token census",
+        "Valid partial clone report rejected after native token census",
+        "Vue-only valid empty clone report rejected using independently extracted block census",
+        "Native restored controls and all-short valid files admitted"
+      ],
+      "transcript": "f5-vue-final-green.log"
+    },
+    {
+      "id": 6,
+      "behavior": "Trace actual Convex registrations and required defaults; check ordinary helpers and unrelated exports",
+      "before": [
+        {
+          "case": "knip-helper-shared",
+          "exit": 1
+        },
+        {
+          "case": "knip-helper-convex-helpers",
+          "exit": 0
+        },
+        {
+          "case": "knip-convex-unused-helper",
+          "exit": 0
+        }
+      ],
+      "after": [
+        {
+          "case": "helper-shared-unused",
+          "exit": 1
+        },
+        {
+          "case": "helper-shared-used",
+          "exit": 0
+        },
+        {
+          "case": "helper-convex-unused",
+          "exit": 1
+        },
+        {
+          "case": "helper-convex-used",
+          "exit": 0
+        },
+        {
+          "case": "helper-convex-helpers-unused",
+          "exit": 1
+        },
+        {
+          "case": "helper-convex-helpers-used",
+          "exit": 0
+        },
+        {
+          "case": "convex-mixed-unused-export",
+          "exit": 1
+        },
+        {
+          "case": "convex-registered-query-control",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "behavior": "Bound scanner execution and terminate owned descendants, including separate process groups, on deadlines/signals/owner loss",
+      "before": [
+        {
+          "case": "boundaries-hung-tool",
+          "exit": -9,
+          "externalWatchdog": true
+        },
+        {
+          "case": "dead-code-hung-tool",
+          "exit": -9,
+          "externalWatchdog": true
+        },
+        {
+          "case": "duplication-hung-tool",
+          "exit": -9,
+          "externalWatchdog": true
+        }
+      ],
+      "after": [
+        {
+          "row": "boundaries",
+          "exit": 1,
+          "externalWatchdog": false,
+          "remainingOwnedPids": [],
+          "unrelatedSentinelSurvived": true,
+          "execution": [
+            {
+              "name": "boundaries",
+              "budgetMs": 120000,
+              "reason": "timeout",
+              "milliseconds": 120059
+            }
+          ]
+        },
+        {
+          "row": "duplication",
+          "exit": 1,
+          "externalWatchdog": false,
+          "remainingOwnedPids": [],
+          "unrelatedSentinelSurvived": true,
+          "execution": [
+            {
+              "name": "duplication-token-census",
+              "budgetMs": 119869,
+              "reason": "timeout",
+              "milliseconds": 119949
+            }
+          ]
+        },
+        {
+          "row": "dead-code",
+          "exit": 1,
+          "externalWatchdog": false,
+          "remainingOwnedPids": [],
+          "unrelatedSentinelSurvived": true,
+          "execution": [
+            {
+              "name": "dead-code",
+              "budgetMs": 120000,
+              "reason": "timeout",
+              "milliseconds": 120057
+            }
+          ]
+        }
+      ],
+      "regressions": [
+        "Nine real process controls, including detached descendants, completion, nonzero and tool signal",
+        "Aggregate timeout records failed row and all subsequent results",
+        "Aggregate SIGTERM records interrupted/not_run and cleans detached descendants"
+      ]
+    }
+  ],
+  "nativeControlCases": 26,
+  "baselineProof": {
+    "integrationPin": "1b335bface0686641850ea8cd23aa5c5dea4e45c",
+    "originalHead": "14f57a6b184030abe12350acbbf245e83efea42f",
+    "originalIdentities": 556,
+    "correctedIdentities": 556,
+    "identicalDictionaries": true,
+    "captureCorrectionRequired": false,
+    "newAllowances": {},
+    "increasedCounts": {},
+    "removedAllowances": {},
+    "nonLegacyAllowanceFiles": [],
+    "baselineManifests": {
+      "scripts/quality/baselines/boundaries.json": {
+        "before": "e425036391b74abad85e6d4f29e1563dfb6def435ef920f26a2ecbe09720ca55",
+        "after": "e425036391b74abad85e6d4f29e1563dfb6def435ef920f26a2ecbe09720ca55",
+        "identical": true
+      },
+      "scripts/quality/baselines/dead-code.json": {
+        "before": "f42fcd415853675f210039ba1743bd3b42e42af620b63a92cb1d4ebeea113c62",
+        "after": "f42fcd415853675f210039ba1743bd3b42e42af620b63a92cb1d4ebeea113c62",
+        "identical": true
+      },
+      "scripts/quality/baselines/dependencies.json": {
+        "before": "f967520012bc73cd23e114c559c691cc117db083d5ca3d2100cccf09c9d08284",
+        "after": "f967520012bc73cd23e114c559c691cc117db083d5ca3d2100cccf09c9d08284",
+        "identical": true
+      },
+      "scripts/quality/baselines/duplication.json": {
+        "before": "47f2e05bd4dc3c9e489e9a3469516066daf5a47809b77dd9e612e84f671c7b5a",
+        "after": "47f2e05bd4dc3c9e489e9a3469516066daf5a47809b77dd9e612e84f671c7b5a",
+        "identical": true
+      },
+      "scripts/quality/baselines/format.json": {
+        "before": "a12058f398ff13bb2ae6eac6260ec3e148d2d2202b82a9744c3b5cfd3904581f",
+        "after": "a12058f398ff13bb2ae6eac6260ec3e148d2d2202b82a9744c3b5cfd3904581f",
+        "identical": true
+      },
+      "scripts/quality/baselines/lint.json": {
+        "before": "36e38618e1e91482623b42a62a29aa197e964bfb7756fcf1e95736514fb9e898",
+        "after": "36e38618e1e91482623b42a62a29aa197e964bfb7756fcf1e95736514fb9e898",
+        "identical": true
+      },
+      "scripts/quality/baselines/secrets.json": {
+        "before": "41d02b2f3d5a7137cea87949f6735cca0b13bc10288a25f86051451a911ff95b",
+        "after": "41d02b2f3d5a7137cea87949f6735cca0b13bc10288a25f86051451a911ff95b",
+        "identical": true
+      },
+      "scripts/quality/baselines/test-policy.json": {
+        "before": "5bb1b7a3cf78e04a22d4d95469d1102a8f2e784b8eba6762bf27438bdfb55fab",
+        "after": "5bb1b7a3cf78e04a22d4d95469d1102a8f2e784b8eba6762bf27438bdfb55fab",
+        "identical": true
+      },
+      "scripts/quality/baselines/types-convex.json": {
+        "before": "c21cbc5115b4bf646317d9cf94f47e20c998ed553c0afba8baed40ba90e6d54d",
+        "after": "c21cbc5115b4bf646317d9cf94f47e20c998ed553c0afba8baed40ba90e6d54d",
+        "identical": true
+      },
+      "scripts/quality/baselines/types.json": {
+        "before": "feb271d1d3d83def84de7daf34cbbd91c1b0e4c4a4db068e9e61304239ccfc74",
+        "after": "feb271d1d3d83def84de7daf34cbbd91c1b0e4c4a4db068e9e61304239ccfc74",
+        "identical": true
+      }
+    },
+    "categories": {
+      "files": 341,
+      "dependencies": 13,
+      "devDependencies": 2,
+      "exports": 137,
+      "types": 63
+    }
+  },
+  "sourceAttestation": {
+    "capture": "verify-restored prepared-tree run; source hashes retained externally",
+    "knipSelected": 683,
+    "knipAnalyzed": 342,
+    "knipUnusedFiles": 341,
+    "ignoredUntrackedSources": 0,
+    "registeredAndRequiredConvexExports": 45,
+    "duplicationSelected": 687,
+    "eligiblePhysicalFiles": 320,
+    "eligibleFormats": {
+      "typescript": {
+        "sources": 239,
+        "tokens": 163812
+      },
+      "javascript": {
+        "sources": 69,
+        "tokens": 68764
+      },
+      "vue": {
+        "sources": 83,
+        "tokens": 58921
+      },
+      "html": {
+        "sources": 57,
+        "tokens": 33233
+      }
+    },
+    "completeInventories": "Retained in external packet with per-file identities, sizes, source/token counts and native reports"
+  },
+  "externalEvidence": "~/.orchestrate/scratch/cadet2-fix-170-r1-evidence/",
+  "fullVerificationRecord": {
+    "command": "pnpm verify",
+    "node": "24.20.0",
+    "pnpm": "9.12.3",
+    "frozenLockfileInstallExit": 0,
+    "preparedTreeRun": "verify-restored",
+    "preparedTreeStatus": "pass",
+    "preparedTreeRows": [
+      {
+        "row": "typecheck",
+        "status": "pass",
+        "seconds": "29.5"
+      },
+      {
+        "row": "lint",
+        "status": "pass",
+        "seconds": "31.8"
+      },
+      {
+        "row": "format:check",
+        "status": "pass",
+        "seconds": "4.6"
+      },
+      {
+        "row": "secrets:check",
+        "status": "pass",
+        "seconds": "4.3"
+      },
+      {
+        "row": "dependencies:check",
+        "status": "pass",
+        "seconds": "59.3"
+      },
+      {
+        "row": "boundaries:check",
+        "status": "pass",
+        "seconds": "4.1"
+      },
+      {
+        "row": "dead-code:check",
+        "status": "pass",
+        "seconds": "6.9"
+      },
+      {
+        "row": "duplication:check",
+        "status": "pass",
+        "seconds": "8.2"
+      },
+      {
+        "row": "test:policy",
+        "status": "pass",
+        "seconds": "70.9"
+      },
+      {
+        "row": "test:components",
+        "status": "pass",
+        "seconds": "84.2"
+      },
+      {
+        "row": "build",
+        "status": "pass",
+        "seconds": "39.2"
+      },
+      {
+        "row": "test:legacy-access",
+        "status": "pass",
+        "seconds": "61.3"
+      }
+    ],
+    "vitest": {
+      "files": 35,
+      "tests": 725,
+      "passed": 725,
+      "skipped": 0
+    },
+    "native": {
+      "reporter": "default spec",
+      "tests": 233,
+      "passed": 233,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "sourceAndLaunchersStable": true,
+    "committedHeadRecord": "Exact committed-head verification and current-head CI snapshot are retained externally and linked from the PR"
+  },
+  "independentReview": "Pending fresh independent review",
+  "independentQa": "Pending",
+  "merged": false,
+  "environmentIsolation": {
+    "observed": "Convex automatically loaded home-directory ambient types outside the checkout",
+    "diagnosticAggregate": "verify-precommit: typecheck and lint failed on paid-down allowances; other ten rows passed",
+    "implementation": "convex/tsconfig.json typeRoots includes only Convex-local and project-local node_modules/@types",
+    "nativeCompilerControls": [
+      {
+        "case": "before-parent-ambient",
+        "exit": 0,
+        "output": ""
+      },
+      {
+        "case": "fenced-parent-ambient",
+        "exit": 2,
+        "output": "../../../../.orchestrate/scratch/cadet2-fix-170-r1-evidence/ambient-type-control/parent/project/convex/probe.ts(1,1): error TS2304: Cannot find name 'hostAmbientMarker'.\n"
+      },
+      {
+        "case": "approved-local-control",
+        "exit": 0,
+        "output": ""
+      }
+    ],
+    "convexImplementationsChanged": false,
+    "baselineAllowancesChanged": false,
+    "restoredDiagnostics": {
+      "types": 1,
+      "typedLint": 4,
+      "allowanceEntries": 4
+    }
+  },
+  "originalPinCaseCount": 56
+}

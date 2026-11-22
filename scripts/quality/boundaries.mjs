@@ -1,13 +1,14 @@
 import { createHash } from 'node:crypto'
 import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { count, main, outputDir, ratchet, run, writeJSON } from './common.mjs'
+import { count, main, outputDir, ratchet, writeJSON } from './common.mjs'
+import { runScanner } from './scanner.mjs'
 import { configuration, structuralCommit, structuralFiles } from './structural.mjs'
 import config from './boundaries.config.mjs'
 import { parse } from './boundaries.parser.mjs'
 
 const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-main(() => {
+main(async () => {
   const selected = structuralFiles()
   const owners = new Set(
     selected.flatMap((file) => {
@@ -56,13 +57,11 @@ main(() => {
     forbidden,
     options: { ...config.options, tsConfig: { fileName: tsConfig } },
   })
-  const result = run(configuration('../../node_modules/.bin/depcruise'), [
-    '--config',
-    path,
-    '--output-type',
-    'json',
-    ...selected,
-  ])
+  const result = await runScanner(
+    'boundaries',
+    configuration('../../node_modules/.bin/depcruise'),
+    ['--config', path, '--output-type', 'json', ...selected],
+  )
   writeFileSync(`${outputDir}/boundaries-raw.json`, result.stdout)
   writeJSON(`${outputDir}/boundaries-process.json`, {
     status: result.status,

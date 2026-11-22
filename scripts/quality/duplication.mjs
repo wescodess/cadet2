@@ -1,6 +1,4 @@
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import {
   count,
   git,
@@ -9,40 +7,26 @@ import {
   outputDir,
   qualityBaseRef,
   ratchet,
-  run,
   writingBaseline,
   writeJSON,
 } from './common.mjs'
-import { configuration, structuralCommit, structuralFiles } from './structural.mjs'
-import { parse } from './duplication.parser.mjs'
+import { structuralCommit, structuralFiles } from './structural.mjs'
+import { rejectDuplicationSuppressions } from './structural-preflight.mjs'
+import { scanDuplication } from './duplication-population.mjs'
 
-main(() => {
+main(async () => {
   const selected = structuralFiles()
+  rejectDuplicationSuppressions(selected)
   const base = git('merge-base', qualityBaseRef(), 'HEAD')
   const changed = new Set(
     [
-      ...git('diff', '--name-only', '-z', '--diff-filter=ACDMRT', base, '--').split('\0'),
+      ...git('diff', '--no-renames', '--name-only', '-z', '--diff-filter=ACDMRT', base, '--').split(
+        '\0',
+      ),
       ...git('ls-files', '--others', '--exclude-standard', '-z').split('\0'),
     ].filter(Boolean),
   )
-  const result = run(configuration('../../node_modules/.bin/jscpd'), [
-    ...selected,
-    '--config',
-    configuration('jscpd.json'),
-    '--absolute',
-    '--reporters',
-    'json',
-    '--output',
-    resolve(outputDir),
-    '--silent',
-    '--no-tips',
-  ])
-  if (result.status !== 0)
-    throw new Error(`jscpd tool failure: exit ${result.status}: ${result.stderr}`)
-  const report = parse({
-    status: result.status,
-    stdout: readFileSync(`${outputDir}/jscpd-report.json`, 'utf8'),
-  })
+  const report = await scanDuplication(selected)
   const counts = {}
   for (const clone of report.duplicates) {
     const pair = [localPath(clone.firstFile.name), localPath(clone.secondFile.name)].sort()

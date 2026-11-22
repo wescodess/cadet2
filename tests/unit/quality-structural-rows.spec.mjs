@@ -15,17 +15,30 @@ beforeEach(() => {
     outputDir: directory,
     sourceFiles: () => ['package.json'],
     git: () => 'base',
-    run: () => {
-      writeFileSync(join(directory, 'jscpd-report.json'), result.stdout)
-      return result
-    },
     main: (fn) => {
       completion = Promise.resolve().then(fn)
+    },
+  }))
+  vi.doMock('../../scripts/quality/scanner.mjs', () => ({
+    scannerBudgets: { duplication: 120000 },
+    runScanner: (name) => {
+      if (name === 'duplication-token-census' && result.status === 0) {
+        writeFileSync(
+          join(directory, 'token-population/jscpd-complexity.json'),
+          JSON.stringify({
+            summary: { by: 'complexity', files: [], folders: [], totalFiles: 0, totalFolders: 0 },
+          }),
+        )
+        return { status: 0, stdout: '', stderr: '' }
+      }
+      writeFileSync(join(directory, 'jscpd-report.json'), result.stdout)
+      return result
     },
   }))
 })
 afterEach(() => {
   vi.doUnmock('../../scripts/quality/common.mjs')
+  vi.doUnmock('../../scripts/quality/scanner.mjs')
   rmSync(directory, { recursive: true, force: true })
 })
 
