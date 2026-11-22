@@ -15,4 +15,4 @@ _bmad-output/
 .claude/
 .tmp-skills/
 *.md
-docs/design/**/*.html
+docs/design/**
