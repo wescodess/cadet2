@@ -719,8 +719,17 @@ async function settle(page, destination) {
   }, destination)
 }
 
+async function deferredManifestLoaded(page) {
+  await page.waitForFunction(() =>
+    globalThis.performance
+      .getEntriesByType('resource')
+      .some((entry) => entry.name.includes('/_nuxt/builds/meta/')),
+  )
+}
+
 async function deniedPageVisit(page, path, mode) {
   if (mode === 'direct') {
+    await deferredManifestLoaded(page)
     await page.goto(`${origin}${path}`)
     return
   }
@@ -732,7 +741,7 @@ async function deniedPageVisit(page, path, mode) {
   }, path)
 }
 
-async function browserPage(browser, viewport, actor) {
+async function browserContext(browser, viewport, actor) {
   const context = await browser.newContext({ viewport, colorScheme: 'light' })
   if (actor) {
     await context.addCookies(
@@ -752,13 +761,22 @@ async function browserPage(browser, viewport, actor) {
   page.on('response', (response) => {
     if (response.status() >= 400) problems.push({ status: response.status(), url: response.url() })
   })
-  await page.goto(`${origin}/`)
-  await settle(page, '/')
+  page.on('requestfailed', (request) => {
+    if (request.url().includes('/_nuxt/builds/'))
+      problems.push({ failed: request.url(), error: request.failure()?.errorText })
+  })
   return { context, page, problems }
 }
 
+async function browserPage(browser, viewport, actor) {
+  const session = await browserContext(browser, viewport, actor)
+  await session.page.goto(`${origin}/`)
+  await settle(session.page, '/')
+  return session
+}
+
 async function openAuditTrail(browser) {
-  const session = await browserPage(browser, { width: 1440, height: 900 }, admin)
+  const session = await browserContext(browser, { width: 1440, height: 900 }, admin)
   const listed = session.page.waitForResponse(
     (response) => new URL(response.url()).pathname === '/api/admin/audit-trail',
   )
@@ -876,8 +894,8 @@ test('denied admin pages land on a clean safe page for direct loads and client n
             })
           }
         }
-        await context.close()
         assert.deepEqual(problems, [])
+        await context.close()
       }
     }
   } finally {
