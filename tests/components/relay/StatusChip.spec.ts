@@ -116,8 +116,18 @@ describe('StatusChip', () => {
 
   it('names the number in counted states', () => {
     expect(chip('due-90', { count: 12 }).text()).toBe('Expires in 12 days')
+    expect(chip('signed-version', { count: 1 }).text()).toBe('Signed version 1')
     expect(chip('signed-version', { count: 2 }).text()).toBe('Signed version 2')
   })
+
+  it.each(['due-90', 'due-180'] as const)(
+    'uses the singular expiry word only at one for %s',
+    (state) => {
+      expect(chip(state, { count: 1 }).text()).toBe('Expires in 1 day')
+      expect(chip(state, { count: 0 }).text()).toBe('Expires in 0 days')
+      expect(chip(state, { count: 2 }).text()).toBe('Expires in 2 days')
+    },
+  )
 
   it('wraps a long word instead of truncating it', () => {
     const classes = chip('escalate').classes()

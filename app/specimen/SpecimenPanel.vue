@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import SharedControlsSpecimen from './SharedControlsSpecimen.vue'
+
 defineProps<{
   theme: 'light' | 'dark'
   expression: 'client' | 'representative'
@@ -20,6 +22,7 @@ defineProps<{
         <span>{{ tag }}</span>
       </p>
       <slot />
+      <SharedControlsSpecimen :id-prefix="`controls-${expression}-${theme}`" />
     </div>
   </div>
 </template>

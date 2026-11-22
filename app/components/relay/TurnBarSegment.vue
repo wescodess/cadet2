@@ -35,7 +35,7 @@ const props = withDefaults(
     "
   >
     <TurnDisc :turn="turn" :initials="initials" :size="32" />
-    <span class="grid min-w-0">
+    <span class="grid min-w-0 wrap-anywhere">
       <span
         data-slot="turn-label"
         :class="

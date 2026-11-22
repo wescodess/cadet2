@@ -131,3 +131,52 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+@utility relay-button {
+  @apply rounded-control text-ui;
+  height: auto;
+  min-height: var(--c-h);
+  padding: 6px var(--c-px);
+  font-family: var(--t-ui-family);
+  letter-spacing: -0.005em;
+  white-space: normal;
+}
+
+@utility relay-input {
+  @apply rounded-control text-body;
+  height: var(--c-h);
+  padding-block: 0;
+  font-family: var(--t-body-family);
+  background-color: var(--card);
+  color: var(--foreground);
+}
+
+@utility relay-textarea {
+  @apply rounded-control text-body;
+  font-family: var(--t-body-family);
+}
+
+@utility relay-check {
+  width: var(--check-size);
+  height: var(--check-size);
+  border-radius: var(--check-radius);
+}
+
+@utility relay-radio {
+  width: var(--check-size);
+  height: var(--check-size);
+}
+
+@utility relay-check-target {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: max(24px, var(--check-size));
+    height: max(24px, var(--check-size));
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}

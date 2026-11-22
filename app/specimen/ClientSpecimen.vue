@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Input } from '~/components/ui/input'
 import ErrorSummary from '~/components/relay/ErrorSummary.vue'
 import ProvenanceRow from '~/components/relay/ProvenanceRow.vue'
 import SaveState from '~/components/relay/SaveState.vue'
@@ -175,11 +176,7 @@ const id = (name: string) => `${name}-client-${props.theme}`
       />
       <div class="mt-4 grid gap-2">
         <label :for="id('expiry')" class="text-label">Expiry day</label>
-        <input
-          :id="id('expiry')"
-          class="h-control rounded-input border border-input bg-card px-4.5"
-          inputmode="numeric"
-        />
+        <Input :id="id('expiry')" inputmode="numeric" />
         <fieldset :id="id('offer')" tabindex="-1" class="text-small text-muted-foreground">
           Job offer question
         </fieldset>

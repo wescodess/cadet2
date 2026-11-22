@@ -257,5 +257,6 @@ export function relayState(id: RelayStateId): RelayState {
 export function relayStateWord(state: RelayState, count?: number) {
   if (!state.word.includes('{n}')) return state.word
   if (count === undefined) throw new Error(`The "${state.id}" state needs a number`)
-  return state.word.replace('{n}', String(count))
+  const word = state.word.replace('{n}', String(count))
+  return count === 1 ? word.replace(' days', ' day') : word
 }

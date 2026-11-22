@@ -1,0 +1,75 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { Button } from '~/components/ui/button'
+import { Checkbox } from '~/components/ui/checkbox'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { NativeSelect } from '~/components/ui/native-select'
+import { RadioGroup, RadioGroupItem } from '~/components/ui/radio-group'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
+import { Textarea } from '~/components/ui/textarea'
+import SpecimenSpec from './SpecimenSpec.vue'
+
+const props = defineProps<{ idPrefix: string }>()
+const text = ref('Example')
+const checked = ref(false)
+const selection = ref('first')
+const id = (name: string) => `${props.idPrefix}-${name}`
+</script>
+
+<template>
+  <SpecimenSpec
+    title="Shared controls"
+    note="Existing UI primitives read the expression tokens without size overrides."
+  >
+    <div data-specimen-controls class="grid gap-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <Button>Continue</Button>
+        <Button variant="secondary">Save draft</Button>
+        <Button variant="outline">Cancel</Button>
+        <Button variant="ghost">Back</Button>
+        <Button variant="destructive">Remove document</Button>
+        <Button disabled>Unavailable</Button>
+      </div>
+      <div class="grid gap-2">
+        <Label :for="id('input')">Name</Label>
+        <Input :id="id('input')" v-model="text" />
+        <Label :for="id('native')">Native choice</Label>
+        <NativeSelect :id="id('native')" v-model="selection">
+          <option value="first">First option</option>
+          <option value="second">Second option</option>
+        </NativeSelect>
+        <Label :for="id('select')">Choice</Label>
+        <Select v-model="selection">
+          <SelectTrigger :id="id('select')"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="first">First option</SelectItem>
+            <SelectItem value="second">Second option</SelectItem>
+          </SelectContent>
+        </Select>
+        <Label :for="id('textarea')">Details</Label>
+        <Textarea :id="id('textarea')" />
+      </div>
+      <div class="flex items-center gap-3">
+        <Checkbox :id="id('checkbox')" v-model="checked" />
+        <Label :for="id('checkbox')">I have checked these details</Label>
+      </div>
+      <RadioGroup default-value="first" aria-label="Example choices">
+        <div class="flex items-center gap-3">
+          <RadioGroupItem :id="id('radio-first')" value="first" />
+          <Label :for="id('radio-first')">First choice</Label>
+        </div>
+        <div class="flex items-center gap-3">
+          <RadioGroupItem :id="id('radio-second')" value="second" />
+          <Label :for="id('radio-second')">Second choice</Label>
+        </div>
+      </RadioGroup>
+    </div>
+  </SpecimenSpec>
+</template>

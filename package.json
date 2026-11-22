@@ -70,6 +70,7 @@
     "@tailwindcss/vite": "^4.2.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/test-utils": "^2.4.6",
+    "css-tree": "3.1.0",
     "dependency-cruiser": "18.8.0",
     "dom-accessibility-api": "0.7.0",
     "drizzle-kit": "^0.31.9",
@@ -94,7 +95,8 @@
   "packageManager": "pnpm@9.12.3",
   "pnpm": {
     "overrides": {
-      "@prisma/config>effect": "3.22.5"
+      "@prisma/config>effect": "3.22.5",
+      "source-map-js": "1.2.2"
     }
   }
 }
