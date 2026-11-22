@@ -9,12 +9,13 @@ import {
 } from './structural.mjs'
 import { rejectKnipSuppressions } from './structural-preflight.mjs'
 import { convexEntries } from './convex-entries.mjs'
+import { executableDefaults } from './executable-entries.mjs'
 import { parse } from './dead-code.parser.mjs'
 
 main(async () => {
   const selected = structuralFiles().filter((file) => !file.startsWith('docs/'))
   rejectKnipSuppressions(selected)
-  const framework = convexEntries(selected)
+  const framework = [...convexEntries(selected), ...executableDefaults(selected)]
   const admitted = new Set(framework.map(({ file, name }) => `${file}|${name}`))
   for (const file of ['app/auth.config.ts', 'server/auth.config.ts'])
     admitted.add(`${file}|default`)

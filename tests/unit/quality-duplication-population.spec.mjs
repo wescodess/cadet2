@@ -105,7 +105,8 @@ for (const kind of ['empty', 'partial', 'vue-empty']) {
         )
         return { status: result.status, output: result.stdout + result.stderr }
       }
-      expect(row('native-unique').status).toBe(0)
+      const unique = row('native-unique')
+      expect(unique.status, unique.output).toBe(0)
       writeFileSync(
         join(directory, vue ? 'second.vue' : 'second.ts'),
         vue ? component('original') : block('original'),

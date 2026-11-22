@@ -248,6 +248,90 @@ it('admits registered Convex exports and framework defaults but checks their unr
   expect(row('dead-code', directory).output).toContain('convex/auth.config.ts|exports|unrelated')
 })
 
+it('rejects identical unused defaults outside the actual Convex component root', () => {
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
+  })
+  for (const [name, source] of [
+    ['helper.ts', 'export default { unused: 197 }'],
+    ['auth.config.ts', 'export default { unused: 197 }'],
+    ['schema.ts', "import { defineSchema } from 'convex/server'; export default defineSchema({})"],
+    [
+      'convex.config.ts',
+      "import { defineComponent } from 'convex/server'; export default defineComponent('unmounted')",
+    ],
+  ]) {
+    const file = `convex/unmounted/${name}`
+    put(file, source)
+    const denied = row('dead-code', directory)
+    expect(denied.output).toContain(`${file}|files|${file}`)
+    expect(denied.status).toBe(1)
+    rmSync(join(directory, file))
+  }
+  expect(row('dead-code', directory).status).toBe(0)
+})
+
+it('admits direct registrar aliases but rejects local lookalikes, wrappers and skipped modules', () => {
+  const file = 'convex/functions.ts'
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'index.ts': 'console.log(1)',
+    [file]:
+      "import { queryGeneric as ask } from 'convex/server'; export const entry = ask({ args: {}, handler: () => null })",
+  })
+  expect(row('dead-code', directory).status).toBe(0)
+  put(
+    file,
+    'function ask(value) { return value }; export const entry = ask({ args: {}, handler: () => null })',
+  )
+  expect(row('dead-code', directory).output).toContain(`${file}|files|${file}`)
+  put(
+    file,
+    "import { queryGeneric as ask } from 'convex/server'; const alias = ask; export const entry = alias({ args: {}, handler: () => null })",
+  )
+  const unsupported = row('dead-code', directory)
+  expect(unsupported.output).toContain('Unsupported Convex 1.32.0 authority')
+  expect(unsupported.status).toBe(1)
+  rmSync(join(directory, file))
+  put(
+    'convex/functions.test.ts',
+    "import { queryGeneric as ask } from 'convex/server'; export const entry = ask({ args: {}, handler: () => null })",
+  )
+  expect(row('dead-code', directory).output).toContain(
+    'convex/functions.test.ts|files|convex/functions.test.ts',
+  )
+})
+
+it('checks canonical generated mappings and rejects unsupported functions-root configuration', () => {
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'index.ts': 'console.log(1)',
+    'convex/_generated/server.js': 'export const query = (value) => value',
+    'convex/functions.ts':
+      "import { query } from './_generated/server'; export const entry = query({})",
+  })
+  expect(row('dead-code', directory).output).toContain('generated builder mapping')
+  const builders = [
+    'query',
+    'internalQuery',
+    'mutation',
+    'internalMutation',
+    'action',
+    'internalAction',
+    'httpAction',
+  ]
+  put(
+    'convex/_generated/server.js',
+    `import { ${builders.map((name) => `${name}Generic`).join(', ')} } from 'convex/server'; ${builders.map((name) => `export let ${name} = ${name}Generic`).join('; ')}; query = (value) => value`,
+  )
+  expect(row('dead-code', directory).output).toContain('Unsupported Convex 1.32.0 authority')
+  rmSync(join(directory, 'convex/_generated/server.js'))
+  rmSync(join(directory, 'convex/functions.ts'))
+  put('convex.json', '{"functions":"other"}')
+  expect(row('dead-code', directory).output).toContain('functions root')
+})
+
 it('rejects an unused dependency and admits an actual dependency import', () => {
   const { directory, put } = fixture({
     'index.ts': 'console.log(1)',
@@ -258,6 +342,101 @@ it('rejects an unused dependency and admits an actual dependency import', () => 
   expect(denied.status).toBe(1)
   put('index.ts', "import { z } from 'zod'; console.log(z.string())")
   expect(row('dead-code', directory).status).toBe(0)
+})
+
+it('rejects TypeScript configuration that substitutes a local lookalike for canonical registrars', () => {
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
+    'tsconfig.json':
+      '{"compilerOptions":{"baseUrl":".","paths":{"convex/server":["shared/lookalike.ts"]}}}',
+    'convex/functions.ts':
+      "import { queryGeneric as ask } from 'convex/server'; export const unused = ask({ args: {}, handler: () => null })",
+    'shared/lookalike.ts': 'export const queryGeneric = (value) => value',
+  })
+  const denied = row('dead-code', directory)
+  expect(denied.output).toContain('Unsupported Convex 1.32.0 authority')
+  expect(denied.status).toBe(1)
+  put('tsconfig.json', '{"compilerOptions":{"strict":true}}')
+  put(
+    'index.ts',
+    "import { v } from 'convex/values'; import { queryGeneric } from './shared/lookalike'; console.log(v.string(), queryGeneric(1))",
+  )
+  expect(row('dead-code', directory).status).toBe(0)
+})
+
+it('refuses ignored untracked component configuration that changes discovery of selected registrations', () => {
+  const builders = [
+    'query',
+    'internalQuery',
+    'mutation',
+    'internalMutation',
+    'action',
+    'internalAction',
+    'httpAction',
+  ]
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'index.ts': "import { v } from 'convex/values'; console.log(v.string())",
+    'convex/_generated/server.ts': `export { ${builders.map((name) => `${name}Generic as ${name}`).join(', ')} } from 'convex/server'`,
+    'convex/nested/functions.ts':
+      "import { query } from '../_generated/server'; export const entry = query({ args: {}, handler: () => null })",
+  })
+  const native = row('dead-code', directory)
+  expect(native.status, native.output).toBe(0)
+  put('.gitignore', 'node_modules/\n.quality-output/\nconvex/nested/convex.config.ts\n')
+  put(
+    'convex/nested/convex.config.ts',
+    "import { defineComponent } from 'convex/server'; export default defineComponent('unmounted')",
+  )
+  expect(row('dead-code', directory).output).toContain('outside the trusted Git source population')
+})
+
+it('validates .js root defaults, rejects ambiguous slots and refuses undeclared component installation', () => {
+  const { directory, put } = fixture({
+    'package.json': '{"name":"fixture","type":"module","dependencies":{"convex":"1.32.0"}}',
+    'index.ts': 'console.log(1)',
+    'convex/schema.js':
+      "import { defineSchema as schema } from 'convex/server'; export default schema({})",
+    'convex/auth.config.js': 'export default { providers: [] }',
+  })
+  expect(row('dead-code', directory).status).toBe(0)
+  put('convex/auth.config.ts', 'export default { providers: [] }')
+  expect(row('dead-code', directory).output).toContain('ambiguous .ts/.js authority')
+  rmSync(join(directory, 'convex/auth.config.ts'))
+  put('convex/auth.config.js', 'export default { unrelated: true }')
+  expect(row('dead-code', directory).output).toContain('providers array')
+  put('convex/auth.config.js', 'export default { providers: [] }')
+  put(
+    'convex/convex.config.ts',
+    "import { defineApp } from 'convex/server'; import component from './local/convex.config'; const app = defineApp(); app.use(component); export default app",
+  )
+  put(
+    'convex/local/convex.config.ts',
+    "import { defineComponent } from 'convex/server'; export default defineComponent('local')",
+  )
+  expect(row('dead-code', directory).output).toContain('component installation requires')
+})
+
+it('accounts for the declared QA executable without admitting adjacent unused helpers or exports', () => {
+  const { directory, put } = fixture({
+    'package.json':
+      '{"name":"fixture","type":"module","dependencies":{"@playwright/test":"1.58.2"}}',
+    'index.ts': 'console.log(1)',
+    'qa/acceptance/28/digest.mjs': "import { value } from './helper.mjs'; console.log(value)",
+    'qa/acceptance/28/helper.mjs': 'export const value = 73',
+    'qa/acceptance/28/playwright.config.ts':
+      "import { defineConfig } from '@playwright/test'; export default defineConfig({ testDir: '.', testMatch: /journeys\\.spec\\.ts/ })",
+    'qa/acceptance/28/journeys.spec.ts': 'console.log(1)',
+  })
+  expect(row('dead-code', directory).status).toBe(0)
+  put('qa/acceptance/28/helper.mjs', 'export const value = 73; export const unused = 79')
+  expect(row('dead-code', directory).output).toContain('qa/acceptance/28/helper.mjs|exports|unused')
+  put('qa/acceptance/28/helper.mjs', 'export const value = 73')
+  put('qa/acceptance/28/unmounted.mjs', 'export const unused = 83')
+  expect(row('dead-code', directory).output).toContain(
+    'qa/acceptance/28/unmounted.mjs|files|qa/acceptance/28/unmounted.mjs',
+  )
 })
 
 it('rejects duplication involving a changed file and admits original code', () => {

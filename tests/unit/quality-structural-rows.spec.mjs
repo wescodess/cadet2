@@ -5,15 +5,16 @@ import { tmpdir } from 'node:os'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import * as common from '../../scripts/quality/common.mjs'
 
-let directory, completion, result
+let directory, completion, result, population
 beforeEach(() => {
   vi.resetModules()
   directory = mkdtempSync(join(tmpdir(), 'structural-report-'))
   result = { status: 0, stdout: '{}', stderr: '' }
+  population = ['package.json']
   vi.doMock('../../scripts/quality/common.mjs', () => ({
     ...common,
     outputDir: directory,
-    sourceFiles: () => ['package.json'],
+    sourceFiles: () => population,
     git: () => 'base',
     main: (fn) => {
       completion = Promise.resolve().then(fn)
@@ -46,6 +47,7 @@ for (const row of ['boundaries', 'dead-code', 'duplication']) {
   it.each(['malformed', 'failed', 'truncated', 'unknown'])(
     'rejects %s tool output at the ' + row + ' row',
     async (kind) => {
+      if (row === 'dead-code') population = common.sourceFiles()
       if (kind === 'failed') {
         result = {
           ...result,

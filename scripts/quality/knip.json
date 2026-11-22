@@ -4,7 +4,22 @@
     "app/auth.config.ts",
     "server/auth.config.ts",
     "scripts/quality/knip.scanner.mjs",
-    "scripts/quality/scanner-supervisor.mjs"
+    "scripts/quality/scanner-supervisor.mjs",
+    "qa/acceptance/28/accounts.mjs",
+    "qa/acceptance/28/app-runtime.mjs",
+    "qa/acceptance/28/compare-digests.mjs",
+    "qa/acceptance/28/digest.mjs",
+    "qa/acceptance/28/grant-admin.mjs",
+    "qa/acceptance/28/init-db.mjs",
+    "qa/acceptance/28/integration-fixture.mjs",
+    "qa/acceptance/28/legacy-fixture.mjs",
+    "qa/acceptance/28/local-backend.mjs",
+    "qa/acceptance/28/probes.mjs",
+    "qa/acceptance/28/record.mjs",
+    "qa/acceptance/28/refresh-probes.mjs",
+    "qa/acceptance/28/retain-legacy.mjs",
+    "qa/acceptance/28/journeys.spec.ts",
+    "qa/acceptance/28/playwright.config.ts"
   ],
   "ignore": ["convex/_generated/**"],
   "ignoreDependencies": ["dependency-cruiser", "jscpd"],
@@ -13,5 +28,8 @@
     "@/*": ["app/*"],
     "~~/*": ["*"],
     "@@/*": ["*"]
+  },
+  "eslint": {
+    "config": ["eslint.config.mjs", "qa/eslint.config.mjs"]
   }
 }

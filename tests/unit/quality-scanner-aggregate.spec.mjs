@@ -59,7 +59,7 @@ for (const mode of ['timeout', 'SIGTERM']) {
         join(directory, 'hang.mjs'),
         `
       import { runScanner } from ${JSON.stringify(scanner)};
-      try { await runScanner('aggregate-hang', process.execPath, [${JSON.stringify(worker)}, '0', ${JSON.stringify(directory)}, 'yes'], { budgetMs: 2000 }); }
+      try { await runScanner('aggregate-hang', process.execPath, [${JSON.stringify(worker)}, '0', ${JSON.stringify(directory)}, 'no'], { budgetMs: 2000 }); }
       catch (error) { console.error(error.message); process.exitCode = error.exitCode ?? 1; }
     `,
       )
