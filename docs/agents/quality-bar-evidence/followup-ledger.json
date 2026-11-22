@@ -1,0 +1,66 @@
+[
+  {
+    "name": "test-namespace-focus",
+    "command": ["pnpm", "test:policy"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 1.99,
+    "source": "910eb561293b2617c73d702a509e494825347be5"
+  },
+  {
+    "name": "test-focus-reference",
+    "command": ["pnpm", "test:policy"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.51,
+    "source": "910eb561293b2617c73d702a509e494825347be5"
+  },
+  {
+    "name": "test-alias-skip",
+    "command": ["pnpm", "test:policy"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.61,
+    "source": "910eb561293b2617c73d702a509e494825347be5"
+  },
+  {
+    "name": "test-ticketed-conditional",
+    "command": ["pnpm", "test:policy"],
+    "exit": 0,
+    "expected": 0,
+    "seconds": 0.52,
+    "source": "910eb561293b2617c73d702a509e494825347be5"
+  },
+  {
+    "name": "lint-inline-ticket",
+    "command": ["node", "scripts/quality/lint.mjs", "scripts/quality/quality-lint-probe.mjs"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 8.2,
+    "source": "910eb561293b2617c73d702a509e494825347be5"
+  },
+  {
+    "name": "lint-ticketed-inline",
+    "command": ["node", "scripts/quality/lint.mjs", "scripts/quality/quality-lint-probe.mjs"],
+    "exit": 0,
+    "expected": 0,
+    "seconds": 0.94,
+    "source": "910eb561293b2617c73d702a509e494825347be5"
+  },
+  {
+    "name": "allowlist-invalid-date",
+    "command": ["pnpm", "dependencies:check"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 64.68,
+    "source": "910eb561293b2617c73d702a509e494825347be5"
+  },
+  {
+    "name": "secrets-uncommitted",
+    "command": ["pnpm", "secrets:check"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 11.62,
+    "source": "910eb561293b2617c73d702a509e494825347be5"
+  }
+]

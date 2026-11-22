@@ -1,0 +1,4 @@
+$ node scripts/quality/lint.mjs scripts/quality/quality-lint-probe.mjs
+lint: PASS (0 current; 1736 baseline)
+
+Exit: 0

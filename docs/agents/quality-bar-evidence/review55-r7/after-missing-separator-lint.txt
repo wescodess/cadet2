@@ -1,0 +1,1 @@
+scripts/review-ticketed-suppression.mjs: eslint-disable requires a description with a ticket (#23)

@@ -1,0 +1,16 @@
+node scripts/quality/baseline-policy.mjs
+QUALITY_BASE_REF=HEAD
+exit=1
+Invalid baseline schema: scripts/quality/baselines/types.json
+[
+  {
+    "code": "invalid_type",
+    "expected": "number",
+    "received": "string",
+    "path": [
+      "counts",
+      "app/components/admin/EvidenceSourceDetail.vue|TS2322"
+    ],
+    "message": "Expected number, received string"
+  }
+]

@@ -1,0 +1,9 @@
+pnpm lint convex/qualityReview55.ts
+QUALITY_BASE_REF=HEAD
+exit=1
+
+> cadet2@ lint /private/tmp/fix-pr55
+> node scripts/quality/lint.mjs "convex/qualityReview55.ts"
+
+ ELIFECYCLE  Command failed with exit code 1.
+lint: new files must be clean: convex/qualityReview55.ts|@typescript-eslint/require-await

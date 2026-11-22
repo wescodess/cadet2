@@ -1,0 +1,153 @@
+[
+  {
+    "name": "types-count",
+    "command": ["pnpm", "typecheck"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 34.42,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "types-new-file",
+    "command": ["pnpm", "typecheck"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 26.14,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "lint",
+    "command": ["pnpm", "lint"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 51.46,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "complexity",
+    "command": ["pnpm", "lint"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 78.01,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "lint-disable-ticket",
+    "command": ["pnpm", "lint"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 44.2,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "format",
+    "command": ["pnpm", "format:check"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 16.98,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "test-skip",
+    "command": ["pnpm", "test:policy"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.63,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "test-focus",
+    "command": ["pnpm", "test:policy"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.54,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "vitest",
+    "command": ["pnpm", "test:components"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 32.22,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "baseline-increase",
+    "command": ["node", "scripts/quality/baseline-policy.mjs"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.28,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "lockfile",
+    "command": ["pnpm", "dependencies:check"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.46,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "allowlist-expiry",
+    "command": ["pnpm", "dependencies:check"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 50.93,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "dependency-probe-install",
+    "command": [
+      "pnpm",
+      "add",
+      "-D",
+      "--save-exact",
+      "--ignore-scripts",
+      "--package-import-method=hardlink",
+      "lodash@4.17.20",
+      "jschardet@3.1.4"
+    ],
+    "exit": 0,
+    "expected": 0,
+    "seconds": 5.68,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "advisories-and-licenses",
+    "command": ["pnpm", "dependencies:check"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 52.69,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "dependency-probe-remove",
+    "command": [
+      "pnpm",
+      "install",
+      "--frozen-lockfile",
+      "--ignore-scripts",
+      "--package-import-method=hardlink"
+    ],
+    "exit": 0,
+    "expected": 0,
+    "seconds": 1.47,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "build",
+    "command": ["pnpm", "build"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 28.31,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  },
+  {
+    "name": "secrets-history-diff",
+    "command": ["pnpm", "secrets:check"],
+    "exit": 1,
+    "expected": 1,
+    "seconds": 13.21,
+    "source": "f126e70a170e550e05880f2d229c2032cd967981"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "probe": "reviewer-race-interleaving",
+    "exits": [0, 0],
+    "passed": true,
+    "publisher": {
+      "binary": ".quality-output/run-IZWTiu/gitleaks-6setPh/gitleaks",
+      "before": 0,
+      "after": 0,
+      "version": "8.30.1"
+    }
+  },
+  {
+    "probe": "interrupted-download",
+    "reachedBody": true,
+    "publishedAtKill": false,
+    "retry": {
+      "binary": ".quality-output/run-vSUvG7/gitleaks-Ut0xr8/gitleaks",
+      "before": 0,
+      "after": 0,
+      "version": "8.30.1"
+    },
+    "passed": true
+  },
+  {
+    "probe": "immutable-cache-private-binaries",
+    "passed": true,
+    "first": ".quality-output/run-vSUvG7/gitleaks-Ut0xr8/gitleaks",
+    "second": ".quality-output/run-UpDqw5/gitleaks-kC9UZX/gitleaks"
+  },
+  {
+    "probe": "corrupted-cache-entry",
+    "passed": true,
+    "repaired": {
+      "binary": ".quality-output/run-HJwG31/gitleaks-ucYLWH/gitleaks",
+      "before": 0,
+      "after": 0,
+      "version": "8.30.1"
+    },
+    "priorBinaryExit": 0
+  }
+]

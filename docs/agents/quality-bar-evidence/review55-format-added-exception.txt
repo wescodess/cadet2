@@ -1,0 +1,4 @@
+node scripts/quality/baseline-policy.mjs
+QUALITY_BASE_REF=HEAD
+exit=1
+Baseline entry added: scripts/quality/baselines/format.json convex/qualityReview55.ts

@@ -1,0 +1,52 @@
+[
+  {
+    "probe": "test.skip",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "options skip",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "skipIf",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "runIf false",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "todo",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "describe.skip child",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "concurrent.skip",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "dynamic ctx.skip",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "options only",
+    "exit": 1,
+    "rejected": true
+  },
+  {
+    "probe": "modifier only",
+    "exit": 1,
+    "rejected": true
+  }
+]

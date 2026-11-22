@@ -1,0 +1,37 @@
+[
+  {
+    "file": "scripts/quality/baselines/dependencies.json",
+    "sha256": "0d040f3ba7fdf864af0059ddbffce636b3c347d48db240cbb40cfd7ca8a3e9d0",
+    "unchanged": true
+  },
+  {
+    "file": "scripts/quality/baselines/format.json",
+    "sha256": "6f55e1dad88ed8de4a07292e647e8e9ae86fb77d98d87a79dc48638aa587bd34",
+    "unchanged": true
+  },
+  {
+    "file": "scripts/quality/baselines/lint.json",
+    "sha256": "024276619819d84f2c6a852bbff7272a7841977ac2bcd75bca265387533e464b",
+    "unchanged": true
+  },
+  {
+    "file": "scripts/quality/baselines/secrets.json",
+    "sha256": "41d02b2f3d5a7137cea87949f6735cca0b13bc10288a25f86051451a911ff95b",
+    "unchanged": true
+  },
+  {
+    "file": "scripts/quality/baselines/test-policy.json",
+    "sha256": "a69d424e3116840bca4269744c7e6f8b3f6498e4a425b1fc19d36e4b384d2fda",
+    "unchanged": true
+  },
+  {
+    "file": "scripts/quality/baselines/types-convex.json",
+    "sha256": "c21cbc5115b4bf646317d9cf94f47e20c998ed553c0afba8baed40ba90e6d54d",
+    "unchanged": true
+  },
+  {
+    "file": "scripts/quality/baselines/types.json",
+    "sha256": "ca4182c84ec59f0af5945aeab69acc28ac172cd5d613afa95fe13edb70c4d80d",
+    "unchanged": true
+  }
+]

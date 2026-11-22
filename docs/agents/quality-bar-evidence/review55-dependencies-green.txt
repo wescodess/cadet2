@@ -1,0 +1,6 @@
+
+> cadet2@ dependencies:check /private/tmp/fix-pr55
+> node scripts/quality/dependencies.mjs
+
+advisories: PASS (140 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (20 existing exceptions, zero new; expire 2027-01-16)

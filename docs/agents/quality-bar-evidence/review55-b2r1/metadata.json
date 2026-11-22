@@ -1,0 +1,15 @@
+{
+  "base": "7cff4ee6728a78996ff1ddcd8561e3162ddda0ca",
+  "cleanFrozenInstallExit": 0,
+  "verifyExit": 0,
+  "verifyRowsPassed": 8,
+  "testFilesPassed": 19,
+  "testsPassed": 94,
+  "sharedParserTestsPassed": 54,
+  "installedIdentities": 1368,
+  "auditPopulationNodes": 1620,
+  "auditPopulationIdentities": 1617,
+  "baselinesUnchanged": true,
+  "baselineFiles": 7,
+  "source": "clean install; official network scanners; no baseline writers"
+}

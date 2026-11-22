@@ -1,0 +1,14 @@
+[
+  {
+    "name": "complete-real-report",
+    "status": 1,
+    "stdout": "advisories: PASS (140 existing exceptions, zero new; expire 2027-01-16)\n",
+    "stderr": "licenses: new unallowlisted findings:\neslint-plugin-sonarjs@4.2.2|LGPL-3.0-only\n"
+  },
+  {
+    "name": "incomplete-mit-only",
+    "status": 0,
+    "stdout": "advisories: PASS (140 existing exceptions, zero new; expire 2027-01-16)\nlicenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)\n",
+    "stderr": ""
+  }
+]

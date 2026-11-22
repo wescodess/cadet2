@@ -1,0 +1,5 @@
+
+> cadet2@ test:policy /private/tmp/fix-pr55-b2r2
+> node scripts/quality/test-policy.mjs
+
+test-policy: PASS (52 current; 52 baseline)

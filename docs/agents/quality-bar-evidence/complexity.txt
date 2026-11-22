@@ -1,0 +1,10 @@
+$ pnpm lint
+
+> cadet2@ lint /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> node scripts/quality/lint.mjs
+
+lint: new files must be clean: scripts/quality/quality-lint-probe.mjs|sonarjs/cognitive-complexity
+ ELIFECYCLE  Command failed with exit code 1.
+
+scripts/quality/quality-lint-probe.mjs:1: sonarjs/cognitive-complexity: Refactor this function to reduce its Cognitive Complexity from 21 to the 15 allowed.
+Exit: 1

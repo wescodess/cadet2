@@ -5,9 +5,10 @@ set -euo pipefail
 MODE="${1:-full}"
 BASE_URL="${BASE_URL:-http://127.0.0.1:3000}"
 
-pnpm exec nuxi typecheck
+pnpm typecheck
 pnpm build
-pnpm preview --host 127.0.0.1 --port 3000 > /tmp/cadet2-ci-local-preview.log 2>&1 &
+mkdir -p .data/db
+NITRO_HOST=127.0.0.1 NITRO_PORT=3000 node .output/server/index.mjs > /tmp/cadet2-ci-local-preview.log 2>&1 &
 SERVER_PID=$!
 
 cleanup() {

@@ -1,0 +1,22 @@
+node scripts/quality/baseline-policy.mjs
+QUALITY_BASE_REF=HEAD
+exit=1
+Invalid baseline schema: scripts/quality/baselines/format.json
+[
+  {
+    "code": "custom",
+    "message": "Invalid input",
+    "path": [
+      "counts"
+    ]
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "object",
+    "path": [
+      "counts"
+    ],
+    "message": "Expected string, received object"
+  }
+]

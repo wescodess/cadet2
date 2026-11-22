@@ -1,0 +1,1 @@
+Invalid pnpm audit report: stdout: Unresolved advisory: 1113540

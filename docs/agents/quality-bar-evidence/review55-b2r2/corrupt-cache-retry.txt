@@ -1,0 +1,1 @@
+{"binary":".quality-output/run-HJwG31/gitleaks-ucYLWH/gitleaks","before":0,"after":0,"version":"8.30.1"}

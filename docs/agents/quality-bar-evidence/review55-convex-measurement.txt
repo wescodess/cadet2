@@ -1,0 +1,26 @@
+pnpm exec tsc --noEmit --project convex/tsconfig.json --pretty false
+exit=2
+convex/auth.config.ts(4,27): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+convex/recommendationRuns.ts(355,9): error TS2532: Object is possibly 'undefined'.
+convex/recommendationRuns.ts(355,35): error TS2532: Object is possibly 'undefined'.
+convex/recommendationRuns.ts(372,9): error TS18048: 'leftOutcome' is possibly 'undefined'.
+convex/recommendationRuns.ts(372,35): error TS18048: 'rightOutcome' is possibly 'undefined'.
+convex/recommendationRuns.ts(376,9): error TS18048: 'leftOutcome' is possibly 'undefined'.
+convex/recommendationRuns.ts(376,48): error TS18048: 'rightOutcome' is possibly 'undefined'.
+convex/recommendationRuns.ts(380,43): error TS18048: 'leftOutcome' is possibly 'undefined'.
+convex/recommendationRuns.ts(381,11): error TS18048: 'leftOutcome' is possibly 'undefined'.
+convex/recommendationRuns.ts(381,55): error TS18048: 'rightOutcome' is possibly 'undefined'.
+
+Convex source comparison with adoption inventory:
+diff --git a/convex/tsconfig.json b/convex/tsconfig.json
+index 7374127..c424bb3 100644
+--- a/convex/tsconfig.json
++++ b/convex/tsconfig.json
+@@ -7,6 +7,7 @@
+     /* These settings are not required by Convex and can be modified. */
+     "allowJs": true,
+     "strict": true,
++    "noUncheckedIndexedAccess": true,
+     "moduleResolution": "Bundler",
+     "jsx": "react-jsx",
+     "skipLibCheck": true,

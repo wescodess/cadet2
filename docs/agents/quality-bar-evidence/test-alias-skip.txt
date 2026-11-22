@@ -1,0 +1,9 @@
+$ pnpm test:policy
+
+> cadet2@ test:policy /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> node scripts/quality/test-policy.mjs
+
+test-policy: new files must be clean: tests/unit/quality-bar-probe.spec.ts
+ ELIFECYCLE  Command failed with exit code 1.
+
+Exit: 1

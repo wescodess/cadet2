@@ -1,0 +1,5 @@
+Observed in run https://github.com/wescodess/cadet2/actions/runs/44029938944
+Verify: success
+Playwright shards: failed before tests during browser installation
+Error: ERROR: Playwright does not support chromium on ubuntu26.04-x64
+Correction: pin Playwright and burn-in jobs to ubuntu-24.04. Suites and retry configuration remain unchanged.

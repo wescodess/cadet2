@@ -1,0 +1,8 @@
+pnpm lint
+QUALITY_BASE_REF=HEAD
+exit=0
+
+> cadet2@ lint /private/tmp/fix-pr55
+> node scripts/quality/lint.mjs
+
+lint: PASS (1692 current; 1692 baseline)

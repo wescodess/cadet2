@@ -1,0 +1,27 @@
+{
+  "audit": {
+    "command": [
+      "node",
+      "--require",
+      "/Users/wesleyukadike/.orchestrate/scratch/cadet2-fix-pr55-r7-evidence/orphan-audit-shim.cjs",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "exit": 1
+  },
+  "ticketed-lint": {
+    "command": ["node", "scripts/quality/lint.mjs", "scripts/review-ticketed-suppression.mjs"],
+    "exit": 0
+  },
+  "unticketed-lint": {
+    "command": ["node", "scripts/quality/lint.mjs", "scripts/review-ticketed-suppression.mjs"],
+    "exit": 1
+  },
+  "malformed-ticket-lint": {
+    "command": ["node", "scripts/quality/lint.mjs", "scripts/review-ticketed-suppression.mjs"],
+    "exit": 1
+  },
+  "missing-separator-lint": {
+    "command": ["node", "scripts/quality/lint.mjs", "scripts/review-ticketed-suppression.mjs"],
+    "exit": 1
+  }
+}

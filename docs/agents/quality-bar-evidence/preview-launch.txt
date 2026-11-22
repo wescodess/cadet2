@@ -1,0 +1,18 @@
+Observed at efad0ca241e677255a1509d27bb40ac47c66912d, 2026-11-17.
+CI run: https://github.com/wescodess/cadet2/actions/runs/44031096812
+Both shards installed browsers and built successfully, then readiness curl exited 7 after 120 seconds; tests did not start.
+
+Local reproduction:
+$ pnpm preview --host 127.0.0.1 --port 33023
+Cannot find nitro.json. Did you run nuxi build first?
+Search path: <worktree>/127.0.0.1/.output/nitro.json
+Exit: 1
+
+Corrected launch with throwaway auth configuration:
+$ mkdir -p .data/db
+$ NITRO_HOST=127.0.0.1 NITRO_PORT=33023 node .output/server/index.mjs
+Listening on http://127.0.0.1:33023
+$ curl --silent --show-error --fail --output <temporary file> --write-out %{http_code} http://127.0.0.1:33023
+200
+Exit: 0
+The local server was stopped after the check.

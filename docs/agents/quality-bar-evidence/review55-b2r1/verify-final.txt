@@ -1,0 +1,741 @@
+
+> cadet2@ verify /private/tmp/fix-pr55-b2r1
+> exec node scripts/quality/verify.mjs
+
+Quality evidence: .quality-output/run-cBQ99G
+baselines: PASS (valid schemas; no increases against integration merge-base)
+
+>>> typecheck
+types: PASS (47 current; 47 baseline)
+types-convex: PASS (10 current; 10 baseline)
+
+>>> lint
+lint: PASS (1692 current; 1692 baseline)
+
+>>> format:check
+format: PASS (661 unchanged legacy files)
+
+>>> secrets:check
+secrets history: PASS (8 existing findings; zero new)
+secrets diff: PASS (0 existing findings; zero new)
+secrets working: PASS (8 existing findings; zero new)
+
+>>> dependencies:check
+advisories: PASS (140 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (20 existing exceptions, zero new; expire 2027-01-16)
+
+>>> test:policy
+test-policy: PASS (52 current; 52 baseline)
+
+>>> test:components
+
+ RUN  v4.0.18 /private/tmp/fix-pr55-b2r1
+
+ ✓ tests/unit/buildRunComparison.spec.ts (3 tests) 11ms
+ ✓ tests/components/admin/EvidenceSourceDetail.spec.ts (2 tests) 28ms
+ ✓ tests/unit/quality-parsers.spec.mjs (54 tests) 23ms
+ ✓ tests/components/admin/PathwayDefinitionTable.spec.ts (4 tests) 81ms
+ ✓ tests/components/workspace/RecommendationRunCard.spec.ts (4 tests) 38ms
+ ✓ tests/components/workspace/PathwayChangeCard.spec.ts (4 tests) 24ms
+ ✓ tests/components/admin/PathwayRuleAccordion.spec.ts (2 tests) 26ms
+ ✓ tests/components/admin/EvidenceSourceList.spec.ts (2 tests) 18ms
+ ✓ tests/unit/eligibilityDslEvaluator.spec.ts (4 tests) 2ms
+ ✓ tests/components/workspace/TrustEvidencePanel.spec.ts (1 test) 15ms
+ ✓ tests/unit/quality-inventory.spec.mjs (3 tests) 236ms
+ ✓ tests/components/workspace/PlanningWorkspaceActionPanel.spec.ts (1 test) 17ms
+ ✓ tests/components/workspace/CaveatChangesPanel.spec.ts (1 test) 16ms
+ ✓ tests/components/workspace/RunHistoryFilterBar.spec.ts (2 tests) 15ms
+ ✓ tests/components/workspace/PlanningWorkspaceHero.spec.ts (1 test) 29ms
+ ✓ tests/unit/recommendation-run-comparison.spec.ts (1 test) 1ms
+ ✓ tests/components/workspace/ProfileDeltaPanel.spec.ts (1 test) 12ms
+ ✓ tests/components/workspace/PlanningProgressTimeline.spec.ts (1 test) 16ms
+ ✓ tests/components/workspace/ComparisonStatCard.spec.ts (3 tests) 16ms
+ ✓ tests/components/workspace/RunStatusBadge.spec.ts (3 tests) 15ms
+
+ Test Files  20 passed (20)
+      Tests  97 passed (97)
+   Start at  18:51:53
+   Duration  8.04s (transform 1.44s, setup 0ms, import 4.45s, tests 638ms, environment 8.99s)
+
+
+>>> build
+┌  Building Nuxt for production...
+│
+●  Nuxt 4.3.1 (with Nitro 2.13.1, Vite 7.3.1 and Vue 3.5.28)
+[nuxt:hub] ℹ hub:db using postgresql database with pglite driver
+[nuxt-better-auth] ℹ Generated postgresql schema (.ts + .mjs)
+
+ WARN  Component directory does not exist: /private/tmp/fix-pr55-b2r1/components/ui
+
+
+[nuxt:convex]  WARN  Convex URL not configured. Set CONVEX_URL or NUXT_PUBLIC_CONVEX_URL
+
+│
+●  Nitro preset: node-server
+
+ WARN  Duplicated imports "toIsoString", the one from "/private/tmp/fix-pr55-b2r1/server/utils/recommendations/lifecycle.ts" has been ignored and "/private/tmp/fix-pr55-b2r1/server/utils/recommendations/reviewDateUtils.ts" is used
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAccordion:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/accordion/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/accordion/Accordion.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAlertDialog:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/alert-dialog/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/alert-dialog/AlertDialog.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAlert:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/alert/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/alert/Alert.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAspectRatio:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/aspect-ratio/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/aspect-ratio/AspectRatio.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAvatar:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/avatar/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/avatar/Avatar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiBadge:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/badge/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/badge/Badge.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiBreadcrumb:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/breadcrumb/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/breadcrumb/Breadcrumb.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiButtonGroup:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/button-group/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/button-group/ButtonGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiButton:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/button/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/button/Button.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCalendar:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/calendar/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/calendar/Calendar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCard:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/card/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/card/Card.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCarousel:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/carousel/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/carousel/Carousel.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCheckbox:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/checkbox/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/checkbox/Checkbox.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCollapsible:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/collapsible/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/collapsible/Collapsible.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCombobox:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/combobox/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/combobox/Combobox.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCommand:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/command/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/command/Command.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiContextMenu:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/context-menu/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/context-menu/ContextMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDialog:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/dialog/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/dialog/Dialog.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDrawer:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/drawer/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/drawer/Drawer.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDropdownMenu:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/dropdown-menu/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/dropdown-menu/DropdownMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiEmpty:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/empty/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/empty/Empty.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiField:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/field/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/field/Field.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiHoverCard:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/hover-card/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/hover-card/HoverCard.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiInputGroup:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/input-group/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/input-group/InputGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiInput:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/input/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/input/Input.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiItem:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/item/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/item/Item.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiKbd:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/kbd/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/kbd/Kbd.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiLabel:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/label/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/label/Label.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiMenubar:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/menubar/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/menubar/Menubar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNativeSelect:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/native-select/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/native-select/NativeSelect.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNavigationMenu:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/navigation-menu/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/navigation-menu/NavigationMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNumberField:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/number-field/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/number-field/NumberField.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPagination:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/pagination/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/pagination/Pagination.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPinInput:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/pin-input/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/pin-input/PinInput.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPopover:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/popover/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/popover/Popover.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiProgress:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/progress/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/progress/Progress.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiRadioGroup:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/radio-group/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/radio-group/RadioGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiRangeCalendar:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/range-calendar/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/range-calendar/RangeCalendar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiScrollArea:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/scroll-area/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/scroll-area/ScrollArea.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSelect:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/select/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/select/Select.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSeparator:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/separator/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/separator/Separator.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSheet:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/sheet/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/sheet/Sheet.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSidebar:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/sidebar/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/sidebar/Sidebar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSkeleton:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/skeleton/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/skeleton/Skeleton.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSlider:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/slider/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/slider/Slider.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSonner:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/sonner/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/sonner/Sonner.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSpinner:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/spinner/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/spinner/Spinner.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiStepper:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/stepper/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/stepper/Stepper.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSwitch:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/switch/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/switch/Switch.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTable:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/table/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/table/Table.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTabs:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/tabs/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/tabs/Tabs.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTagsInput:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/tags-input/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/tags-input/TagsInput.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTextarea:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/textarea/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/textarea/Textarea.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiToggleGroup:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/toggle-group/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/toggle-group/ToggleGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiToggle:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/toggle/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/toggle/Toggle.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTooltip:
+
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/tooltip/index.ts
+ - /private/tmp/fix-pr55-b2r1/app/components/ui/tooltip/Tooltip.vue
+
+
+ WARN  Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+ℹ Building client...
+ℹ vite v7.3.1 building client environment for production...
+ℹ transforming...
+ℹ ✓ 2765 modules transformed.
+ℹ rendering chunks...
+ℹ computing gzip size...
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/manifest.json                  19.09 kB │ gzip:  2.25 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/error-500.Cf8vnx1l.css    1.91 kB │ gzip:  0.73 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/error-404.CEQH5KJc.css    2.43 kB │ gzip:  0.86 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/entry.SBJm9qQ6.css      159.17 kB │ gzip: 24.69 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BeZkFe6Y.js               0.12 kB │ gzip:  0.13 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BoWS4ae8.js               0.14 kB │ gzip:  0.15 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/IvWB3wSg.js               0.16 kB │ gzip:  0.16 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Cdui0ibJ.js               0.16 kB │ gzip:  0.15 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/23PzO56C.js               0.16 kB │ gzip:  0.16 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/C7pmHPGU.js               0.16 kB │ gzip:  0.15 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BPdTwGHd.js               0.16 kB │ gzip:  0.16 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BWG3Dp4o.js               0.16 kB │ gzip:  0.16 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Bzbe-O8l.js               0.21 kB │ gzip:  0.18 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Boc5DVFN.js               0.21 kB │ gzip:  0.18 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/l0MGBxlT.js               0.23 kB │ gzip:  0.19 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CZnBzevH.js               0.24 kB │ gzip:  0.18 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CS-WI06b.js               0.26 kB │ gzip:  0.20 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/mGjglO33.js               0.31 kB │ gzip:  0.22 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/ogAf8Pu_.js               0.37 kB │ gzip:  0.27 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CCZYJWIS.js               0.37 kB │ gzip:  0.25 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/C3qf9y--.js               0.41 kB │ gzip:  0.19 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DC527CU0.js               0.45 kB │ gzip:  0.29 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DJ97tm3_.js               0.49 kB │ gzip:  0.27 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Bk8odG16.js               0.89 kB │ gzip:  0.51 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BQGmbHYk.js               0.99 kB │ gzip:  0.58 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/B8Ewmofo.js               1.12 kB │ gzip:  0.47 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Cp2iRm6g.js               1.16 kB │ gzip:  0.64 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BxksgAGc.js               1.24 kB │ gzip:  0.71 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BOmn8rHV.js               1.72 kB │ gzip:  0.86 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Chlwelgu.js               2.06 kB │ gzip:  1.04 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/s2RAUdWI.js               2.19 kB │ gzip:  0.92 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/VqS4XeBc.js               2.33 kB │ gzip:  1.23 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BnCyfEef.js               2.96 kB │ gzip:  1.24 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CtULjiAN.js               3.05 kB │ gzip:  1.32 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/D3wziZw9.js               3.45 kB │ gzip:  1.54 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CX5_Pxk5.js               3.76 kB │ gzip:  1.70 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BBTxSvwd.js               4.03 kB │ gzip:  1.62 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Dm2oRHbw.js               4.05 kB │ gzip:  1.80 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DG8P4X2s.js               4.59 kB │ gzip:  2.08 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CLPj_VV6.js               4.98 kB │ gzip:  2.05 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DYPhYSs2.js               5.02 kB │ gzip:  2.06 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/B6dQv6Gh.js               5.28 kB │ gzip:  2.09 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/GYfLdxo3.js               6.07 kB │ gzip:  2.41 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/2-meG9Ib.js               7.02 kB │ gzip:  2.75 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Cslt_Igt.js               7.09 kB │ gzip:  2.46 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CwFX_qB2.js               7.88 kB │ gzip:  3.07 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CHIdgW3V.js               8.66 kB │ gzip:  3.70 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DJsF3GcD.js               8.91 kB │ gzip:  2.96 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Cfx4olGC.js              11.10 kB │ gzip:  3.36 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BAnsg4Tr.js              12.93 kB │ gzip:  4.55 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/D9cgd6jo.js              21.71 kB │ gzip:  5.96 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BDTz_dOH.js              22.08 kB │ gzip:  6.43 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DGnYhggf.js              22.99 kB │ gzip:  6.67 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CoY5OUEW.js              25.72 kB │ gzip:  6.75 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CrQ2oRXN.js              26.78 kB │ gzip:  7.46 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/OFZL7F8m.js              28.27 kB │ gzip:  7.78 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CTqln5s9.js              28.77 kB │ gzip:  8.54 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/D9DpwaW1.js              30.43 kB │ gzip: 10.11 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/D1kAW48p.js              30.76 kB │ gzip:  7.43 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BqL5BmbZ.js              41.82 kB │ gzip: 11.80 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Dw_qhl4X.js              84.46 kB │ gzip: 21.21 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/C1MN7MVg.js              94.32 kB │ gzip: 24.42 kB
+ℹ ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CkFgtT-f.js             283.53 kB │ gzip: 99.37 kB
+ℹ ✓ built in 4.96s
+✔ Client built in 4963ms
+ℹ Building server...
+ℹ vite v7.3.1 building ssr environment for production...
+ℹ transforming...
+ℹ ✓ 396 modules transformed.
+ℹ rendering chunks...
+
+ WARN  [plugin @tailwindcss/vite:generate:build] Sourcemap is likely to be incorrect: a plugin (@tailwindcss/vite:generate:build) was used to transform files, but didn't generate a sourcemap for the transformation. Consult the plugin documentation for help
+
+
+ WARN  [plugin @tailwindcss/vite:generate:build] Sourcemap is likely to be incorrect: a plugin (@tailwindcss/vite:generate:build) was used to transform files, but didn't generate a sourcemap for the transformation. Consult the plugin documentation for help (x2)
+
+ℹ ✓ built in 2.01s
+✔ Server built in 2017ms
+[nitro] ✔ Generated public .output/public
+[nuxt:hub] ℹ No local database queries found
+[nuxt:hub] ℹ Database migrations included in build
+Duplicated imports "toIsoString", the one from "/private/tmp/fix-pr55-b2r1/server/utils/recommendations/lifecycle.ts" has been ignored and "/private/tmp/fix-pr55-b2r1/server/utils/recommendations/reviewDateUtils.ts" is used
+[nitro] ℹ Building Nuxt Nitro server (preset: node-server, compatibility date: 2025-07-07)
+Duplicated imports "toIsoString", the one from "/private/tmp/fix-pr55-b2r1/server/utils/recommendations/lifecycle.ts" has been ignored and "/private/tmp/fix-pr55-b2r1/server/utils/recommendations/reviewDateUtils.ts" is used
+[nitro] ✔ Nuxt Nitro server built
+  ├─ .output/server/chunks/_/error-500.mjs (5.09 kB) (2.07 kB gzip)
+  ├─ .output/server/chunks/_/error-500.mjs.map (253 B) (195 B gzip)
+  ├─ .output/server/chunks/build/_pathwayId_-CNK8XKJA.mjs (37.3 kB) (7.82 kB gzip)
+  ├─ .output/server/chunks/build/_pathwayId_-CNK8XKJA.mjs.map (197 B) (165 B gzip)
+  ├─ .output/server/chunks/build/_runId_-DkdXa2IN.mjs (1.36 kB) (598 B gzip)
+  ├─ .output/server/chunks/build/_runId_-DkdXa2IN.mjs.map (189 B) (159 B gzip)
+  ├─ .output/server/chunks/build/admin-ChoMW6gY.mjs (787 B) (351 B gzip)
+  ├─ .output/server/chunks/build/admin-ChoMW6gY.mjs.map (185 B) (157 B gzip)
+  ├─ .output/server/chunks/build/ai-search-DKNzyhxD.mjs (6.73 kB) (2.29 kB gzip)
+  ├─ .output/server/chunks/build/ai-search-DKNzyhxD.mjs.map (193 B) (161 B gzip)
+  ├─ .output/server/chunks/build/AlertDialogTrigger-BhTLlJlc.mjs (16.8 kB) (2.66 kB gzip)
+  ├─ .output/server/chunks/build/AlertDialogTrigger-BhTLlJlc.mjs.map (211 B) (166 B gzip)
+  ├─ .output/server/chunks/build/audit-trail.client-wi81ev-S.mjs (47 kB) (7.53 kB gzip)
+  ├─ .output/server/chunks/build/audit-trail.client-wi81ev-S.mjs.map (211 B) (164 B gzip)
+  ├─ .output/server/chunks/build/auth-D9aqNvS_.mjs (5.2 kB) (1.77 kB gzip)
+  ├─ .output/server/chunks/build/auth-D9aqNvS_.mjs.map (183 B) (156 B gzip)
+  ├─ .output/server/chunks/build/auth-QrL3mXKN.mjs (1.14 kB) (489 B gzip)
+  ├─ .output/server/chunks/build/auth-QrL3mXKN.mjs.map (183 B) (156 B gzip)
+  ├─ .output/server/chunks/build/client-component-djU5T90-.mjs (934 B) (432 B gzip)
+  ├─ .output/server/chunks/build/client-component-djU5T90-.mjs.map (207 B) (164 B gzip)
+  ├─ .output/server/chunks/build/client.precomputed.mjs (41.4 kB) (3.71 kB gzip)
+  ├─ .output/server/chunks/build/client.precomputed.mjs.map (188 B) (150 B gzip)
+  ├─ .output/server/chunks/build/compare-D82MR-ty.mjs (145 kB) (13.9 kB gzip)
+  ├─ .output/server/chunks/build/compare-D82MR-ty.mjs.map (189 B) (158 B gzip)
+  ├─ .output/server/chunks/build/comparison-CkDny-JW.mjs (4.29 kB) (1.54 kB gzip)
+  ├─ .output/server/chunks/build/comparison-CkDny-JW.mjs.map (195 B) (161 B gzip)
+  ├─ .output/server/chunks/build/composables-N0aoythh.mjs (732 B) (385 B gzip)
+  ├─ .output/server/chunks/build/composables-N0aoythh.mjs.map (197 B) (159 B gzip)
+  ├─ .output/server/chunks/build/error-404-CjxTFMZZ.mjs (6.01 kB) (2.4 kB gzip)
+  ├─ .output/server/chunks/build/error-404-CjxTFMZZ.mjs.map (193 B) (162 B gzip)
+  ├─ .output/server/chunks/build/error-404-styles.BHtBFkWO.mjs (2.72 kB) (988 B gzip)
+  ├─ .output/server/chunks/build/error-404-styles.BHtBFkWO.mjs.map (317 B) (191 B gzip)
+  ├─ .output/server/chunks/build/error-500-DN5GTNrh.mjs (5.19 kB) (2.12 kB gzip)
+  ├─ .output/server/chunks/build/error-500-DN5GTNrh.mjs.map (193 B) (162 B gzip)
+  ├─ .output/server/chunks/build/error-500-styles.Cr0WJ09t.mjs (2.19 kB) (859 B gzip)
+  ├─ .output/server/chunks/build/error-500-styles.Cr0WJ09t.mjs.map (317 B) (192 B gzip)
+  ├─ .output/server/chunks/build/evidence-sources.client-DRHJwKd7.mjs (76.2 kB) (11.4 kB gzip)
+  ├─ .output/server/chunks/build/evidence-sources.client-DRHJwKd7.mjs.map (221 B) (168 B gzip)
+  ├─ .output/server/chunks/build/history-kJLW-Nm4.mjs (25 kB) (5.53 kB gzip)
+  ├─ .output/server/chunks/build/history-kJLW-Nm4.mjs.map (189 B) (159 B gzip)
+  ├─ .output/server/chunks/build/index-2FhJ0qDk.mjs (4.75 kB) (1.47 kB gzip)
+  ├─ .output/server/chunks/build/index-2FhJ0qDk.mjs.map (185 B) (158 B gzip)
+  ├─ .output/server/chunks/build/index-aCoIRDhw.mjs (3.29 kB) (1.29 kB gzip)
+  ├─ .output/server/chunks/build/index-aCoIRDhw.mjs.map (185 B) (157 B gzip)
+  ├─ .output/server/chunks/build/index-Bw7Cv8cj.mjs (13.3 kB) (3.61 kB gzip)
+  ├─ .output/server/chunks/build/index-Bw7Cv8cj.mjs.map (185 B) (157 B gzip)
+  ├─ .output/server/chunks/build/index-D0g33nSu.mjs (15 kB) (4.08 kB gzip)
+  ├─ .output/server/chunks/build/index-D0g33nSu.mjs.map (185 B) (155 B gzip)
+  ├─ .output/server/chunks/build/index-DGFqhpE-.mjs (36.2 kB) (7.15 kB gzip)
+  ├─ .output/server/chunks/build/index-DGFqhpE-.mjs.map (185 B) (157 B gzip)
+  ├─ .output/server/chunks/build/Input-n_4HlCi-.mjs (2.06 kB) (956 B gzip)
+  ├─ .output/server/chunks/build/Input-n_4HlCi-.mjs.map (185 B) (157 B gzip)
+  ├─ .output/server/chunks/build/intake-D1ERGyaH.mjs (44.2 kB) (9.01 kB gzip)
+  ├─ .output/server/chunks/build/intake-D1ERGyaH.mjs.map (187 B) (158 B gzip)
+  ├─ .output/server/chunks/build/NativeSelectOption-hB0XshWz.mjs (6.05 kB) (1.61 kB gzip)
+  ├─ .output/server/chunks/build/NativeSelectOption-hB0XshWz.mjs.map (211 B) (167 B gzip)
+  ├─ .output/server/chunks/build/navigation-D-4LwiFx.mjs (557 B) (257 B gzip)
+  ├─ .output/server/chunks/build/navigation-D-4LwiFx.mjs.map (195 B) (161 B gzip)
+  ├─ .output/server/chunks/build/nuxt-link-Dc8HUWJv.mjs (9.57 kB) (2.5 kB gzip)
+  ├─ .output/server/chunks/build/nuxt-link-Dc8HUWJv.mjs.map (193 B) (162 B gzip)
+  ├─ .output/server/chunks/build/pathway-rules.client-DxuGbgh-.mjs (73.6 kB) (10.1 kB gzip)
+  ├─ .output/server/chunks/build/pathway-rules.client-DxuGbgh-.mjs.map (215 B) (167 B gzip)
+  ├─ .output/server/chunks/build/pathways.client-Cch8ZZDD.mjs (192 kB) (17.5 kB gzip)
+  ├─ .output/server/chunks/build/pathways.client-Cch8ZZDD.mjs.map (205 B) (164 B gzip)
+  ├─ .output/server/chunks/build/PathwayStatusBadge-Buy1mUwK.mjs (3.08 kB) (1.21 kB gzip)
+  ├─ .output/server/chunks/build/PathwayStatusBadge-Buy1mUwK.mjs.map (211 B) (168 B gzip)
+  ├─ .output/server/chunks/build/rag-phase0.client-DPct8_3Y.mjs (7.67 kB) (2.45 kB gzip)
+  ├─ .output/server/chunks/build/rag-phase0.client-DPct8_3Y.mjs.map (209 B) (165 B gzip)
+  ├─ .output/server/chunks/build/rag-sources.client-BKe7LPfT.mjs (37.9 kB) (6.51 kB gzip)
+  ├─ .output/server/chunks/build/rag-sources.client-BKe7LPfT.mjs.map (211 B) (165 B gzip)
+  ├─ .output/server/chunks/build/recommendation-lifecycle-7jCv373x.mjs (1.92 kB) (635 B gzip)
+  ├─ .output/server/chunks/build/recommendation-lifecycle-7jCv373x.mjs.map (223 B) (168 B gzip)
+  ├─ .output/server/chunks/build/recommendation-reviews.client-DPprUMmG.mjs (67.1 kB) (9.97 kB gzip)
+  ├─ .output/server/chunks/build/recommendation-reviews.client-DPprUMmG.mjs.map (233 B) (173 B gzip)
+  ├─ .output/server/chunks/build/RecommendationResultsPanel-DQ6BsOjI.mjs (15 kB) (3.59 kB gzip)
+  ├─ .output/server/chunks/build/RecommendationResultsPanel-DQ6BsOjI.mjs.map (227 B) (173 B gzip)
+  ├─ .output/server/chunks/build/server.mjs (39.5 kB) (10.4 kB gzip)
+  ├─ .output/server/chunks/build/server.mjs.map (164 B) (140 B gzip)
+  ├─ .output/server/chunks/build/styles.mjs (980 B) (336 B gzip)
+  ├─ .output/server/chunks/build/styles.mjs.map (164 B) (142 B gzip)
+  ├─ .output/server/chunks/build/TabsTrigger-CG8edbBZ.mjs (6.79 kB) (1.5 kB gzip)
+  ├─ .output/server/chunks/build/TabsTrigger-CG8edbBZ.mjs.map (197 B) (163 B gzip)
+  ├─ .output/server/chunks/build/tasks.client-B48aGNV9.mjs (5.26 kB) (1.93 kB gzip)
+  ├─ .output/server/chunks/build/tasks.client-B48aGNV9.mjs.map (199 B) (163 B gzip)
+  ├─ .output/server/chunks/build/Textarea-DCJRABze.mjs (1.81 kB) (883 B gzip)
+  ├─ .output/server/chunks/build/Textarea-DCJRABze.mjs.map (191 B) (161 B gzip)
+  ├─ .output/server/chunks/build/useDisplayName-DlAGRITV.mjs (915 B) (423 B gzip)
+  ├─ .output/server/chunks/build/useDisplayName-DlAGRITV.mjs.map (203 B) (166 B gzip)
+  ├─ .output/server/chunks/build/useUserSession-CjnxMYs1.mjs (11.1 kB) (2.76 kB gzip)
+  ├─ .output/server/chunks/build/useUserSession-CjnxMYs1.mjs.map (203 B) (163 B gzip)
+  ├─ .output/server/chunks/build/useWorkspaceRecommendationReview-Dyt7nzMz.mjs (10.5 kB) (2.84 kB gzip)
+  ├─ .output/server/chunks/build/useWorkspaceRecommendationReview-Dyt7nzMz.mjs.map (239 B) (179 B gzip)
+  ├─ .output/server/chunks/build/utils-H80jjgLf.mjs (196 B) (166 B gzip)
+  ├─ .output/server/chunks/build/utils-H80jjgLf.mjs.map (185 B) (156 B gzip)
+  ├─ .output/server/chunks/build/workspace-GnOzoVSn.mjs (32.5 kB) (4.87 kB gzip)
+  ├─ .output/server/chunks/build/workspace-GnOzoVSn.mjs.map (238 B) (179 B gzip)
+  ├─ .output/server/chunks/nitro/nitro.mjs (505 kB) (109 kB gzip)
+  ├─ .output/server/chunks/nitro/nitro.mjs.map (11.4 kB) (1.98 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/access.get.mjs (997 B) (444 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/access.get.mjs.map (510 B) (226 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/audit-trail/_eventId_.get.mjs (1.28 kB) (557 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/audit-trail/_eventId_.get.mjs.map (702 B) (264 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/audit-trail/summary.get.mjs (861 B) (399 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/audit-trail/summary.get.mjs.map (316 B) (192 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/index.get.mjs (1.96 kB) (743 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/index.get.mjs.map (1.46 kB) (358 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/index.get2.mjs (1.34 kB) (624 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/index.get2.mjs.map (779 B) (294 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/index.get3.mjs (868 B) (405 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/index.get3.mjs.map (326 B) (197 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/index.post.mjs (2.21 kB) (892 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/index.post.mjs.map (1.5 kB) (408 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId_.get.mjs (1.32 kB) (570 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId_.get.mjs.map (703 B) (263 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId_.patch.mjs (2.23 kB) (882 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId_.patch.mjs.map (1.55 kB) (402 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules.get.mjs (1.21 kB) (572 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules.get.mjs.map (651 B) (269 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules.post.mjs (2.31 kB) (945 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules.post.mjs.map (1.7 kB) (455 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules.put.mjs (3.24 kB) (1.16 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules.put.mjs.map (2.64 kB) (555 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules/_ruleId_.delete.mjs (2 kB) (812 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules/_ruleId_.delete.mjs.map (1.43 kB) (377 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules/_ruleId_.patch.mjs (2.94 kB) (1.08 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/rules/_ruleId_.patch.mjs.map (2.32 kB) (511 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/status.patch.mjs (2.27 kB) (912 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/pathways/_pathwayId/status.patch.mjs.map (1.62 kB) (409 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/convex-admin/sync-current-user.post.mjs (1.52 kB) (629 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/convex-admin/sync-current-user.post.mjs.map (936 B) (317 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/index.get.mjs (2.27 kB) (939 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/index.get.mjs.map (1.74 kB) (449 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/index.post.mjs (2.31 kB) (937 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/index.post.mjs.map (1.75 kB) (438 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/ingestion/batches/_batchId_.get.mjs (1.35 kB) (571 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/ingestion/batches/_batchId_.get.mjs.map (792 B) (285 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/ingestion/index.get.mjs (1.39 kB) (624 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/ingestion/index.get.mjs.map (906 B) (313 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/ingestion/run.post.mjs (3.23 kB) (1.27 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/ingestion/run.post.mjs.map (2.65 kB) (594 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/phase0-readiness.get.mjs (1.23 kB) (538 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/phase0-readiness.get.mjs.map (633 B) (260 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId_.delete.mjs (2.1 kB) (829 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId_.delete.mjs.map (1.39 kB) (395 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId_.get.mjs (1.81 kB) (727 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId_.get.mjs.map (1.14 kB) (343 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId_.patch.mjs (2.96 kB) (1.09 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId_.patch.mjs.map (2.23 kB) (505 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId/approve.post.mjs (2.98 kB) (1.08 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId/approve.post.mjs.map (2.3 kB) (524 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId/pause.post.mjs (2.89 kB) (1.06 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId/pause.post.mjs.map (2.22 kB) (506 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId/reject.post.mjs (2.9 kB) (1.06 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId/reject.post.mjs.map (2.22 kB) (508 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId/resume.post.mjs (2.89 kB) (1.06 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/_sourceId/resume.post.mjs.map (2.22 kB) (510 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/admin-status.get.mjs (1.22 kB) (521 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/rag/sources/admin-status.get.mjs.map (691 B) (259 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId_.get.mjs (1.31 kB) (569 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId_.get.mjs.map (719 B) (273 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/citations.get.mjs (1.41 kB) (601 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/citations.get.mjs.map (829 B) (295 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/citations/_citationId/flag.post.mjs (2.72 kB) (974 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/citations/_citationId/flag.post.mjs.map (2.07 kB) (475 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/dismiss.post.mjs (2.77 kB) (1.05 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/dismiss.post.mjs.map (2.06 kB) (510 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/flag.post.mjs (2.75 kB) (1.05 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/flag.post.mjs.map (2.05 kB) (504 B gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/resolve.post.mjs (2.76 kB) (1.05 kB gzip)
+  ├─ .output/server/chunks/routes/api/admin/recommendation-reviews/_runId/resolve.post.mjs.map (2.06 kB) (508 B gzip)
+  ├─ .output/server/chunks/routes/api/ai-search/query.post.mjs (3.96 kB) (1.28 kB gzip)
+  ├─ .output/server/chunks/routes/api/ai-search/query.post.mjs.map (3.02 kB) (619 B gzip)
+  ├─ .output/server/chunks/routes/api/intake/draft.get.mjs (3.7 kB) (1.21 kB gzip)
+  ├─ .output/server/chunks/routes/api/intake/draft.get.mjs.map (2.79 kB) (557 B gzip)
+  ├─ .output/server/chunks/routes/api/intake/draft.post.mjs (3.06 kB) (1.18 kB gzip)
+  ├─ .output/server/chunks/routes/api/intake/draft.post.mjs.map (2.15 kB) (490 B gzip)
+  ├─ .output/server/chunks/routes/api/intake/submit.post.mjs (6.73 kB) (2.23 kB gzip)
+  ├─ .output/server/chunks/routes/api/intake/submit.post.mjs.map (5.36 kB) (934 B gzip)
+  ├─ .output/server/chunks/routes/api/internal/scheduler/daily-ingestion.post.mjs (3.51 kB) (1.29 kB gzip)
+  ├─ .output/server/chunks/routes/api/internal/scheduler/daily-ingestion.post.mjs.map (2.77 kB) (613 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/pathways.get.mjs (2.69 kB) (953 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/pathways.get.mjs.map (1.84 kB) (460 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/refresh.post.mjs (5.12 kB) (1.6 kB gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/refresh.post.mjs.map (3.73 kB) (768 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/results.get.mjs (1.5 kB) (617 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/results.get.mjs.map (886 B) (276 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/start.post.mjs (9.77 kB) (2.52 kB gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/start.post.mjs.map (7.1 kB) (1.2 kB gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/status.get.mjs (2.16 kB) (816 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/runs/_runId/status.get.mjs.map (1.35 kB) (357 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/testing/reset.post.mjs (1.47 kB) (619 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/testing/reset.post.mjs.map (729 B) (285 B gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/testing/seed.post.mjs (4.35 kB) (1.57 kB gzip)
+  ├─ .output/server/chunks/routes/api/recommendations/testing/seed.post.mjs.map (3.42 kB) (731 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/index.get.mjs (2.25 kB) (891 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/index.get.mjs.map (1.45 kB) (411 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/me.get.mjs (901 B) (419 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/me.get.mjs.map (428 B) (208 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/recommendation-runs.get.mjs (1.88 kB) (718 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/recommendation-runs.get.mjs.map (1.38 kB) (358 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/runs/_runId_.get.mjs (4.21 kB) (1.25 kB gzip)
+  ├─ .output/server/chunks/routes/api/workspace/runs/_runId_.get.mjs.map (3.05 kB) (599 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/runs/compare.get.mjs (5.24 kB) (1.65 kB gzip)
+  ├─ .output/server/chunks/routes/api/workspace/runs/compare.get.mjs.map (4.02 kB) (735 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/summary.get.mjs (862 B) (388 B gzip)
+  ├─ .output/server/chunks/routes/api/workspace/summary.get.mjs.map (314 B) (181 B gzip)
+  ├─ .output/server/chunks/routes/renderer.mjs (16.1 kB) (5.15 kB gzip)
+  ├─ .output/server/chunks/routes/renderer.mjs.map (1.32 kB) (342 B gzip)
+  ├─ .output/server/chunks/virtual/_virtual_spa-template.mjs (94 B) (100 B gzip)
+  ├─ .output/server/chunks/virtual/_virtual_spa-template.mjs.map (90 B) (98 B gzip)
+  ├─ .output/server/db/migrations/postgresql/0000_bouncy_mother_askani.sql (2.21 kB) (564 B gzip)
+  ├─ .output/server/db/migrations/postgresql/0001_guided_intake_draft.sql (508 B) (301 B gzip)
+  ├─ .output/server/db/migrations/postgresql/0002_recommendation_profiles.sql (605 B) (307 B gzip)
+  ├─ .output/server/db/migrations/postgresql/0003_intake_draft_source_run.sql (58 B) (78 B gzip)
+  ├─ .output/server/db/migrations/postgresql/0004_pathway_definitions.sql (1.08 kB) (492 B gzip)
+  ├─ .output/server/db/migrations/postgresql/0005_pathway_rules.sql (2.21 kB) (715 B gzip)
+  ├─ .output/server/index.mjs (667 B) (311 B gzip)
+  └─ .output/server/package.json (2.09 kB) (775 B gzip)
+Σ Total size: 27.3 MB (7.88 MB gzip)
+[nitro] ✔ You can preview this build using node .output/server/index.mjs
+│
+└  ✨ Build complete!
+
+Verification summary
+PASS typecheck (18.1s)
+PASS lint (31.4s)
+PASS format:check (2.7s)
+PASS secrets:check (4.5s)
+PASS dependencies:check (47.8s)
+PASS test:policy (0.5s)
+PASS test:components (9.3s)
+PASS build (25.1s)

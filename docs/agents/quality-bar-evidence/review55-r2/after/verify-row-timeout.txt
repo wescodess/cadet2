@@ -1,0 +1,29 @@
+Quality evidence: .quality-output/run-N6T4k9
+baselines: PASS (valid schemas; no increases against integration merge-base)
+
+>>> typecheck
+pnpm timed out after 1500ms
+
+>>> lint
+
+>>> format:check
+
+>>> secrets:check
+
+>>> dependencies:check
+
+>>> test:policy
+
+>>> test:components
+
+>>> build
+
+Verification summary
+FAIL typecheck (1.5s)
+PASS lint (0.0s)
+PASS format:check (0.0s)
+PASS secrets:check (0.0s)
+PASS dependencies:check (0.0s)
+PASS test:policy (0.0s)
+PASS test:components (0.0s)
+PASS build (0.0s)

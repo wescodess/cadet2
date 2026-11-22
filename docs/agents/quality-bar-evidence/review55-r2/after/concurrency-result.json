@@ -1,0 +1,98 @@
+{
+  "A_exit": 1,
+  "B_exit": 0,
+  "runs": {
+    "A": {
+      "directory": "/tmp/fix-pr55-r2/.quality-output/run-ID5MLn",
+      "verification": [
+        {
+          "row": "typecheck",
+          "status": "FAIL",
+          "seconds": "0.2"
+        },
+        {
+          "row": "lint",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "format:check",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "secrets:check",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "test:policy",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "test:components",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "build",
+          "status": "PASS",
+          "seconds": "0.6"
+        }
+      ],
+      "types": "Run A: failed typecheck diagnostics\n"
+    },
+    "B": {
+      "directory": "/tmp/fix-pr55-r2/.quality-output/run-ne8h2g",
+      "verification": [
+        {
+          "row": "typecheck",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "format:check",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "secrets:check",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "test:policy",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "test:components",
+          "status": "PASS",
+          "seconds": "0.0"
+        },
+        {
+          "row": "build",
+          "status": "PASS",
+          "seconds": "0.0"
+        }
+      ],
+      "types": "Run B: passed typecheck diagnostics\n"
+    }
+  }
+}

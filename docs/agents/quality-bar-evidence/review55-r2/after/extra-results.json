@@ -1,0 +1,403 @@
+[
+  {
+    "probe": "scanner-missing-report",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "missing-report"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.17
+  },
+  {
+    "probe": "scanner-malformed-report",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "malformed-report"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.1
+  },
+  {
+    "probe": "scanner-inconsistent-report",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "inconsistent-report"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.11
+  },
+  {
+    "probe": "scanner-fresh-report",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "fresh-report"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.15
+  },
+  {
+    "probe": "types-signal",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "signal"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.14
+  },
+  {
+    "probe": "types-trailing-garbage",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "trailing-garbage"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.09
+  },
+  {
+    "probe": "types-incomplete-line",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "incomplete-line"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.09
+  },
+  {
+    "probe": "types-clean",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "clean"
+    },
+    "exit": 0,
+    "expected": 0,
+    "seconds": 0.15
+  },
+  {
+    "probe": "types-exit-1",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "diagnostic",
+      "FIX_EXIT": "1"
+    },
+    "exit": 0,
+    "expected": 0,
+    "seconds": 0.15
+  },
+  {
+    "probe": "types-exit-2",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "diagnostic",
+      "FIX_EXIT": "2"
+    },
+    "exit": 0,
+    "expected": 0,
+    "seconds": 0.15
+  },
+  {
+    "probe": "types-exit-137",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_MODE": "diagnostic",
+      "FIX_EXIT": "137"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.09
+  },
+  {
+    "probe": "audit-metadata-mismatch",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.17
+  },
+  {
+    "probe": "audit-unknown-severity",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.17
+  },
+  {
+    "probe": "audit-missing-severity",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.19
+  },
+  {
+    "probe": "audit-extra-severity",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.18
+  },
+  {
+    "probe": "audit-negative-count",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.19
+  },
+  {
+    "probe": "audit-unmatched-path",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.19
+  },
+  {
+    "probe": "audit-empty-paths",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.19
+  },
+  {
+    "probe": "audit-identity-mismatch",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.17
+  },
+  {
+    "probe": "audit-empty-advisories",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.14
+  },
+  {
+    "probe": "audit-valid",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "FIX_AUDIT_FILE": "/tmp/review-pr55-r2-evidence/fix-after/audit-fixture.json"
+    },
+    "exit": 0,
+    "expected": 0,
+    "seconds": 0.21
+  },
+  {
+    "probe": "ci-flag-write-baseline",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/test-policy.mjs",
+      "--write-baseline"
+    ],
+    "env": {
+      "GITHUB_ACTIONS": "true"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.16
+  },
+  {
+    "probe": "ci-flag-write",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/test-policy.mjs",
+      "--write"
+    ],
+    "env": {
+      "GITHUB_ACTIONS": "true"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.15
+  },
+  {
+    "probe": "ci-flag-fix",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/test-policy.mjs",
+      "--fix"
+    ],
+    "env": {
+      "GITHUB_ACTIONS": "true"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.16
+  },
+  {
+    "probe": "ci-flag-update-baseline",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/test-policy.mjs",
+      "--update-baseline"
+    ],
+    "env": {
+      "GITHUB_ACTIONS": "true"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.16
+  },
+  {
+    "probe": "download-timeout-headers",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "--require",
+      "/tmp/review-pr55-r2-evidence/fix-after/stall-download.cjs",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/download-bin",
+      "QUALITY_TIMEOUT_MS": "100",
+      "FIX_DOWNLOAD_URL": "http://127.0.0.1:61568/headers"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.15
+  },
+  {
+    "probe": "download-timeout-body",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "--require",
+      "/tmp/review-pr55-r2-evidence/fix-after/stall-download.cjs",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/download-bin",
+      "QUALITY_TIMEOUT_MS": "100",
+      "FIX_DOWNLOAD_URL": "http://127.0.0.1:61568/body"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 0.16
+  },
+  {
+    "probe": "verify-row-timeout",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/verify.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-after/extra-bin:$PATH",
+      "QUALITY_TIMEOUT_MS": "1500"
+    },
+    "exit": 1,
+    "expected": 1,
+    "seconds": 1.96
+  }
+]

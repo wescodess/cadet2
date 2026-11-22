@@ -1,0 +1,109 @@
+{
+  "date": "2026-11-17",
+  "head": "80d3cd7a2ae32e30d9f2507978735aa16c9f84a0",
+  "results": [
+    {
+      "name": "convex-new-file",
+      "command": ["pnpm", "typecheck"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 14.434
+    },
+    {
+      "name": "convex-typed-lint",
+      "command": ["pnpm", "lint", "convex/qualityReview55.ts"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 3.135
+    },
+    {
+      "name": "format-counts-bypass",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 0.209
+    },
+    {
+      "name": "format-added-exception",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 0.227
+    },
+    {
+      "name": "types-missing-counts",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 0.091
+    },
+    {
+      "name": "types-unknown-key",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 0.089
+    },
+    {
+      "name": "types-invalid-count",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 0.095
+    },
+    {
+      "name": "dependency-missing-expiry",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 0.277
+    },
+    {
+      "name": "dependency-unknown-key",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 0.272
+    },
+    {
+      "name": "dependency-new-path",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 1,
+      "actual": 1,
+      "seconds": 0.31
+    },
+    {
+      "name": "baseline-policy-green",
+      "command": ["node", "scripts/quality/baseline-policy.mjs"],
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.316
+    },
+    {
+      "name": "types-green",
+      "command": ["pnpm", "typecheck"],
+      "expected": 0,
+      "actual": 0,
+      "seconds": 14.63
+    },
+    {
+      "name": "lint-green",
+      "command": ["pnpm", "lint"],
+      "expected": 0,
+      "actual": 0,
+      "seconds": 26.223
+    }
+  ],
+  "beforeFix": {
+    "head": "01a31fe0c04c6558cdca00e7d923c4e2f46021ab",
+    "command": ["pnpm", "dependencies:check"],
+    "actual": 1,
+    "output": "review55-dependencies-red.txt"
+  },
+  "dependencyGreen": {
+    "head": "80d3cd7a2ae32e30d9f2507978735aa16c9f84a0",
+    "command": ["pnpm", "dependencies:check"],
+    "actual": 0,
+    "output": "review55-dependencies-green.txt"
+  }
+}

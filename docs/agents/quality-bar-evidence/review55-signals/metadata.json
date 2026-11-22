@@ -1,0 +1,18 @@
+{
+  "base_head": "b0ca51634a507df08610d32c996d701dff867fd4",
+  "node": "v24.20.0",
+  "pnpm": "9.12.3",
+  "red_command": "python3 /tmp/pr55-signal-evidence/probes.py /tmp/pr55-signal-evidence/before",
+  "green_command": "python3 /tmp/pr55-signal-evidence/probes.py /tmp/pr55-signal-evidence/final --real-rows",
+  "source_sha256": "47dba7812802cb89293cb98dd09b0b755811207cc525f5b5636c8bf5b6cb7b6b",
+  "asserted_green_signal_cases": 13,
+  "controls": [
+    "complete pass exits 0",
+    "ordinary row failure exits 1 and remaining rows run",
+    "concurrent runs use distinct evidence directories"
+  ],
+  "clean_install_exit": 0,
+  "verify_exit": 0,
+  "verify_run_directory": ".quality-output/run-18vX8e",
+  "verify_command": "BETTER_AUTH_SECRET=$(openssl rand -hex 32) NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3000 CONVEX_SITE_URL=http://127.0.0.1:3000 pnpm verify"
+}

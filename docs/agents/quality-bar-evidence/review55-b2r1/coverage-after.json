@@ -1,0 +1,34 @@
+[
+  {
+    "mode": "complete",
+    "status": 0,
+    "expected": 0,
+    "passed": true,
+    "stdout": "advisories: PASS (140 existing exceptions, zero new; expire 2027-01-16)\nlicenses: PASS (20 existing exceptions, zero new; expire 2027-01-16)\n",
+    "stderr": ""
+  },
+  {
+    "mode": "licenses",
+    "status": 1,
+    "expected": 1,
+    "passed": true,
+    "stdout": "",
+    "stderr": "Invalid pnpm licenses report: : License report does not cover installed packages exactly\n"
+  },
+  {
+    "mode": "audit",
+    "status": 1,
+    "expected": 1,
+    "passed": true,
+    "stdout": "",
+    "stderr": "Invalid pnpm audit report: : Audit population does not match frozen lockfile\n"
+  },
+  {
+    "mode": "complete-tightened-baseline",
+    "status": 1,
+    "expected": 1,
+    "passed": true,
+    "stdout": "advisories: PASS (140 existing exceptions, zero new; expire 2027-01-16)\n",
+    "stderr": "licenses: new unallowlisted findings:\neslint-plugin-sonarjs@4.2.2|LGPL-3.0-only\n"
+  }
+]

@@ -1,0 +1,10 @@
+$ pnpm dependencies:check
+
+> cadet2@ dependencies:check /Users/wesleyukadike/.t3/worktrees/cadet2/t3-582c6887
+> node scripts/quality/dependencies.mjs
+
+licenses: PASS (20 existing exceptions, zero new; expire 2027-01-16)
+advisories allowance expired or invalid: GHSA-22cc-p3c6-wpvm|h3@1.15.5
+ ELIFECYCLE  Command failed with exit code 1.
+
+Exit: 1

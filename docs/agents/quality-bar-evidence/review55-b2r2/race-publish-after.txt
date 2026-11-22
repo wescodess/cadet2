@@ -1,0 +1,1 @@
+{"binary":".quality-output/run-IZWTiu/gitleaks-6setPh/gitleaks","before":0,"after":0,"version":"8.30.1"}

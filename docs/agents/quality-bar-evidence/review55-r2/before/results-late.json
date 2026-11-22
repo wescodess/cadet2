@@ -1,0 +1,119 @@
+[
+  {
+    "probe": "audit-garbage",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-before/fake-pnpm:$PATH",
+      "REVIEW_PROBE": "garbage"
+    },
+    "exit": 1
+  },
+  {
+    "probe": "audit-malformed",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-before/fake-pnpm:$PATH",
+      "REVIEW_PROBE": "malformed"
+    },
+    "exit": 0
+  },
+  {
+    "probe": "audit-offline",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-before/fake-pnpm:$PATH",
+      "REVIEW_PROBE": "offline"
+    },
+    "exit": 1
+  },
+  {
+    "probe": "audit-hang",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/dependencies.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-before/fake-pnpm:$PATH",
+      "REVIEW_PROBE": "hang"
+    },
+    "exit": "EXTERNAL_TIMEOUT"
+  },
+  {
+    "probe": "type-crash",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-before/fake-pnpm:$PATH",
+      "REVIEW_PROBE": "type-crash"
+    },
+    "exit": 0
+  },
+  {
+    "probe": "type-garbage",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/types.mjs"
+    ],
+    "env": {
+      "PATH": "/tmp/review-pr55-r2-evidence/fix-before/fake-pnpm:$PATH",
+      "REVIEW_PROBE": "type-garbage"
+    },
+    "exit": 0
+  },
+  {
+    "probe": "scanner-real-invalid-config",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/secrets.mjs"
+    ],
+    "env": {
+      "GITLEAKS_CONFIG": "/tmp/review-pr55-r2-evidence/fix-before/invalid-gitleaks.toml"
+    },
+    "exit": 0
+  },
+  {
+    "probe": "ci-policy-before-writer",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/test-policy.mjs"
+    ],
+    "env": {
+      "CI": "true"
+    },
+    "exit": 1
+  },
+  {
+    "probe": "ci-write-baseline",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/test-policy.mjs",
+      "--write-baseline"
+    ],
+    "env": {
+      "CI": "true"
+    },
+    "exit": 0
+  },
+  {
+    "probe": "ci-policy-after-writer",
+    "command": [
+      "/Users/wesleyukadike/.nvm/versions/node/v24.20.0/bin/node",
+      "scripts/quality/test-policy.mjs"
+    ],
+    "env": {
+      "CI": "true"
+    },
+    "exit": 0
+  }
+]

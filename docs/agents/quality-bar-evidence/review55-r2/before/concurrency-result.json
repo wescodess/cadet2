@@ -1,0 +1,47 @@
+{
+  "A_exit": 1,
+  "B_exit": 0,
+  "final_verification": [
+    {
+      "row": "typecheck",
+      "status": "FAIL",
+      "seconds": "0.3"
+    },
+    {
+      "row": "lint",
+      "status": "PASS",
+      "seconds": "0.0"
+    },
+    {
+      "row": "format:check",
+      "status": "PASS",
+      "seconds": "0.0"
+    },
+    {
+      "row": "secrets:check",
+      "status": "PASS",
+      "seconds": "0.0"
+    },
+    {
+      "row": "dependencies:check",
+      "status": "PASS",
+      "seconds": "0.0"
+    },
+    {
+      "row": "test:policy",
+      "status": "PASS",
+      "seconds": "0.0"
+    },
+    {
+      "row": "test:components",
+      "status": "PASS",
+      "seconds": "0.0"
+    },
+    {
+      "row": "build",
+      "status": "PASS",
+      "seconds": "0.7"
+    }
+  ],
+  "final_types_report": "Run B: passed typecheck diagnostics\n"
+}

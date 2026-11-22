@@ -1,0 +1,28 @@
+Quality evidence: .quality-output/run-ID5MLn
+baselines: PASS (valid schemas; no increases against integration merge-base)
+
+>>> typecheck
+
+>>> lint
+
+>>> format:check
+
+>>> secrets:check
+
+>>> dependencies:check
+
+>>> test:policy
+
+>>> test:components
+
+>>> build
+
+Verification summary
+FAIL typecheck (0.2s)
+PASS lint (0.0s)
+PASS format:check (0.0s)
+PASS secrets:check (0.0s)
+PASS dependencies:check (0.0s)
+PASS test:policy (0.0s)
+PASS test:components (0.0s)
+PASS build (0.6s)

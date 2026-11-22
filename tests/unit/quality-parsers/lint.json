@@ -1,0 +1,1158 @@
+{
+  "valid": {
+    "files": ["/quality-fixture.js"],
+    "results": [
+      {
+        "filePath": "/quality-fixture.js",
+        "messages": [],
+        "suppressedMessages": [],
+        "errorCount": 0,
+        "fatalErrorCount": 0,
+        "warningCount": 0,
+        "fixableErrorCount": 0,
+        "fixableWarningCount": 0,
+        "usedDeprecatedRules": []
+      }
+    ]
+  },
+  "invalid": [
+    {
+      "files": ["/quality-fixture.js"],
+      "results": []
+    },
+    {
+      "files": [],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": [],
+          "suppressedMessages": [],
+          "errorCount": 0,
+          "fatalErrorCount": 0,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    },
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": [],
+          "suppressedMessages": [],
+          "errorCount": 1,
+          "fatalErrorCount": 0,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    },
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": [],
+          "suppressedMessages": [],
+          "errorCount": 0,
+          "fatalErrorCount": 1,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    },
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": null,
+          "suppressedMessages": [],
+          "errorCount": 0,
+          "fatalErrorCount": 0,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    },
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/wrong.js",
+          "messages": [],
+          "suppressedMessages": [],
+          "errorCount": 0,
+          "fatalErrorCount": 0,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    },
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": [],
+          "suppressedMessages": [],
+          "errorCount": 0,
+          "fatalErrorCount": 0,
+          "warningCount": -1,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    },
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": [],
+          "suppressedMessages": [],
+          "errorCount": 0,
+          "fatalErrorCount": 0,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": [],
+          "unknown": true
+        }
+      ]
+    },
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": [
+            {
+              "ruleId": "fixture-rule",
+              "severity": 2,
+              "message": "Fixture diagnostic",
+              "line": 1,
+              "column": 1,
+              "suggestions": [
+                {
+                  "desc": "Fixture suggestion",
+                  "fix": {
+                    "range": [0, 1],
+                    "text": "fixture"
+                  },
+                  "data": {
+                    "type": {}
+                  }
+                }
+              ]
+            }
+          ],
+          "suppressedMessages": [],
+          "errorCount": 1,
+          "fatalErrorCount": 0,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    }
+  ],
+  "alsoValid": [
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": [
+            {
+              "ruleId": "fixture-rule",
+              "severity": 2,
+              "message": "Fixture diagnostic",
+              "line": 1,
+              "column": 1,
+              "suggestions": [
+                {
+                  "desc": "Fixture suggestion",
+                  "fix": {
+                    "range": [0, 1],
+                    "text": "fixture"
+                  },
+                  "data": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          ],
+          "suppressedMessages": [],
+          "errorCount": 1,
+          "fatalErrorCount": 0,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "name": "ticketed directive with real ESLint suppression metadata",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "#23 review probe"
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      },
+      "expected": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "#23 review probe"
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "unticketed suppression justification",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "review probe"
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "empty suppression justification",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": ""
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "issue URL suppression justification",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "https://github.com/wescodess/cadet2/issues/23 review probe"
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      },
+      "expected": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "https://github.com/wescodess/cadet2/issues/23 review probe"
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing suppression entries",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": []
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "malformed suppression entries",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": 23
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown suppression metadata",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [
+              {
+                "ruleId": "no-unused-vars",
+                "severity": 2,
+                "message": "'unused' is assigned a value but never used.",
+                "line": 2,
+                "column": 7,
+                "messageId": "unusedVar",
+                "endLine": 2,
+                "endColumn": 13,
+                "suggestions": [
+                  {
+                    "messageId": "removeVar",
+                    "data": {
+                      "varName": "unused"
+                    },
+                    "fix": {
+                      "range": [63, 79],
+                      "text": ""
+                    },
+                    "desc": "Remove unused variable 'unused'."
+                  }
+                ],
+                "suppressions": [
+                  {
+                    "kind": "directive",
+                    "justification": "#23",
+                    "unknown": true
+                  }
+                ]
+              }
+            ],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "fatal fixable warning and zero-width fix",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 1,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fatal": true,
+                "fix": {
+                  "range": [1, 1],
+                  "text": ""
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 1,
+            "warningCount": 1,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 1,
+            "usedDeprecatedRules": []
+          }
+        ]
+      },
+      "expected": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 1,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fatal": true,
+                "fix": {
+                  "range": [1, 1],
+                  "text": ""
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 1,
+            "warningCount": 1,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 1,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "reversed fix range",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 1,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fatal": true,
+                "fix": {
+                  "range": [2, 1],
+                  "text": ""
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 1,
+            "warningCount": 1,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 1,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "fixable error",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 2,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fix": {
+                  "range": [0, 1],
+                  "text": "x"
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 1,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 1,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      },
+      "expected": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [
+              {
+                "ruleId": "fixture-rule",
+                "severity": 2,
+                "message": "Fixture diagnostic",
+                "line": 1,
+                "column": 1,
+                "suggestions": [
+                  {
+                    "desc": "Fixture suggestion",
+                    "fix": {
+                      "range": [0, 1],
+                      "text": "fixture"
+                    },
+                    "data": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "fix": {
+                  "range": [0, 1],
+                  "text": "x"
+                }
+              }
+            ],
+            "suppressedMessages": [],
+            "errorCount": 1,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 1,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate files",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing result",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate result",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "mixed result population",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/unknown.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "two distinct files",
+      "valid": true,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/second.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      },
+      "expected": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/second.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "extra duplicate result",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicated file identity",
+      "valid": false,
+      "input": {
+        "files": ["/quality-fixture.js", "/second.js"],
+        "results": [
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          },
+          {
+            "filePath": "/quality-fixture.js",
+            "messages": [],
+            "suppressedMessages": [],
+            "errorCount": 0,
+            "fatalErrorCount": 0,
+            "warningCount": 0,
+            "fixableErrorCount": 0,
+            "fixableWarningCount": 0,
+            "usedDeprecatedRules": []
+          }
+        ]
+      }
+    }
+  ],
+  "incomplete": {
+    "files": ["/quality-fixture.js", "/fixture/omitted.ts"],
+    "results": [
+      {
+        "filePath": "/quality-fixture.js",
+        "messages": [],
+        "suppressedMessages": [],
+        "errorCount": 0,
+        "fatalErrorCount": 0,
+        "warningCount": 0,
+        "fixableErrorCount": 0,
+        "fixableWarningCount": 0,
+        "usedDeprecatedRules": []
+      }
+    ]
+  },
+  "expected": {
+    "files": ["/quality-fixture.js"],
+    "results": [
+      {
+        "filePath": "/quality-fixture.js",
+        "messages": [],
+        "suppressedMessages": [],
+        "errorCount": 0,
+        "fatalErrorCount": 0,
+        "warningCount": 0,
+        "fixableErrorCount": 0,
+        "fixableWarningCount": 0,
+        "usedDeprecatedRules": []
+      }
+    ]
+  },
+  "alsoExpected": [
+    {
+      "files": ["/quality-fixture.js"],
+      "results": [
+        {
+          "filePath": "/quality-fixture.js",
+          "messages": [
+            {
+              "ruleId": "fixture-rule",
+              "severity": 2,
+              "message": "Fixture diagnostic",
+              "line": 1,
+              "column": 1,
+              "suggestions": [
+                {
+                  "desc": "Fixture suggestion",
+                  "fix": {
+                    "range": [0, 1],
+                    "text": "fixture"
+                  },
+                  "data": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          ],
+          "suppressedMessages": [],
+          "errorCount": 1,
+          "fatalErrorCount": 0,
+          "warningCount": 0,
+          "fixableErrorCount": 0,
+          "fixableWarningCount": 0,
+          "usedDeprecatedRules": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+
+> cadet2@ dependencies:check /private/tmp/fix-pr55
+> node scripts/quality/dependencies.mjs
+
+licenses: PASS (20 existing exceptions, zero new; expire 2027-01-16)
+advisories: new unallowlisted findings:
+GHSA-fc5q-39xc-vjpf|picomatch@2.3.1
+GHSA-fc5q-39xc-vjpf|picomatch@4.0.3
+GHSA-fc5q-39xc-vjpf|picomatch@4.0.7
+ ELIFECYCLE  Command failed with exit code 1.

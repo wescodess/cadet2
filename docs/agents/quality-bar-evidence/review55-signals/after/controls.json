@@ -1,0 +1,110 @@
+{
+  "pass": {
+    "exit": 0,
+    "directory": ".quality-output/run-GSELCN",
+    "manifest": {
+      "status": "pass",
+      "signal": null,
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "format:check",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "secrets:check",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "test:policy",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "test:components",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "build",
+          "status": "pass",
+          "seconds": "0.0"
+        }
+      ]
+    }
+  },
+  "fail": {
+    "exit": 1,
+    "directory": ".quality-output/run-26Zwdp",
+    "manifest": {
+      "status": "fail",
+      "signal": null,
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "fail",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "format:check",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "secrets:check",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "test:policy",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "test:components",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "build",
+          "status": "pass",
+          "seconds": "0.0"
+        }
+      ]
+    }
+  }
+}

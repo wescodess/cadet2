@@ -1,0 +1,743 @@
+{
+  "terminal-ctrl-c": {
+    "signal": "SIGINT",
+    "target": "group",
+    "terminal_ctrl_c": true,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGINT",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-jF0q3g"
+  },
+  "SIGINT-group": {
+    "signal": "SIGINT",
+    "target": "group",
+    "terminal_ctrl_c": false,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGINT",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-5S8JzT"
+  },
+  "SIGINT-parent": {
+    "signal": "SIGINT",
+    "target": "parent",
+    "terminal_ctrl_c": false,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGINT",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-W7h0mV"
+  },
+  "SIGINT-gate": {
+    "signal": "SIGINT",
+    "target": "gate",
+    "terminal_ctrl_c": false,
+    "exit": 130,
+    "shell_exit": 130,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGINT",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-rn29rQ"
+  },
+  "SIGINT-row": {
+    "signal": "SIGINT",
+    "target": "row",
+    "terminal_ctrl_c": false,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGINT",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-HaHJwV"
+  },
+  "SIGTERM-group": {
+    "signal": "SIGTERM",
+    "target": "group",
+    "terminal_ctrl_c": false,
+    "exit": 143,
+    "shell_exit": 143,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGTERM",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-7CaPHD"
+  },
+  "SIGTERM-parent": {
+    "signal": "SIGTERM",
+    "target": "parent",
+    "terminal_ctrl_c": false,
+    "exit": 143,
+    "shell_exit": 143,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGTERM",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-nj2qCD"
+  },
+  "SIGTERM-gate": {
+    "signal": "SIGTERM",
+    "target": "gate",
+    "terminal_ctrl_c": false,
+    "exit": 143,
+    "shell_exit": 143,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGTERM",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-GuCJzv"
+  },
+  "SIGTERM-row": {
+    "signal": "SIGTERM",
+    "target": "row",
+    "terminal_ctrl_c": false,
+    "exit": 143,
+    "shell_exit": 143,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGTERM",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-WTPs4l"
+  },
+  "SIGHUP-group": {
+    "signal": "SIGHUP",
+    "target": "group",
+    "terminal_ctrl_c": false,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGHUP",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-YbecGe"
+  },
+  "SIGHUP-parent": {
+    "signal": "SIGHUP",
+    "target": "parent",
+    "terminal_ctrl_c": false,
+    "exit": -1,
+    "shell_exit": 129,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGHUP",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "pnpm_parent_exit"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-H7B3Gi"
+  },
+  "SIGHUP-gate": {
+    "signal": "SIGHUP",
+    "target": "gate",
+    "terminal_ctrl_c": false,
+    "exit": 129,
+    "shell_exit": 129,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGHUP",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-WZtBZx"
+  },
+  "SIGHUP-row": {
+    "signal": "SIGHUP",
+    "target": "row",
+    "terminal_ctrl_c": false,
+    "exit": 129,
+    "shell_exit": 129,
+    "manifest": {
+      "status": "aborted",
+      "signal": "SIGHUP",
+      "baselinePolicy": {
+        "status": "pass",
+        "seconds": "0.2"
+      },
+      "rows": [
+        {
+          "row": "typecheck",
+          "status": "pass",
+          "seconds": "0.0"
+        },
+        {
+          "row": "lint",
+          "status": "interrupted",
+          "seconds": "0.3"
+        },
+        {
+          "row": "format:check",
+          "status": "not_run"
+        },
+        {
+          "row": "secrets:check",
+          "status": "not_run"
+        },
+        {
+          "row": "dependencies:check",
+          "status": "not_run"
+        },
+        {
+          "row": "test:policy",
+          "status": "not_run"
+        },
+        {
+          "row": "test:components",
+          "status": "not_run"
+        },
+        {
+          "row": "build",
+          "status": "not_run"
+        }
+      ],
+      "signalSource": "signal"
+    },
+    "surviving_processes": {
+      "row_pid": false,
+      "descendant_pid": false
+    },
+    "directory": ".quality-output/run-AT4Krh"
+  }
+}

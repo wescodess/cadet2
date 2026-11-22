@@ -1,0 +1,99 @@
+
+ RUN  v4.0.18 /private/tmp/fix-pr55-r7
+
+ ❯ tests/unit/quality-parsers.spec.mjs (40 tests | 10 failed) 24ms
+     ✓ registers a fixture for every parser module and no stale fixtures 1ms
+       × action references a missing advisory 4ms
+       × advisory has no referencing action 1ms
+       ✓ severity total disagrees with parsed advisory findings 0ms
+       ✓ action paths may differ from finding paths 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 2ms
+       ✓ accepts valid tool output 1ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 3ms
+       × asset ID disagrees with its API URL 0ms
+       × asset name disagrees with its download URL 1ms
+       × release ID disagrees with its API URL 0ms
+       × asset listing references a different release 0ms
+       × release page references a different tag 0ms
+       × duplicate asset identity with distinct names 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       × ticketed directive with real ESLint suppression metadata 0ms
+       ✓ unticketed suppression justification 0ms
+       ✓ empty suppression justification 0ms
+       × issue URL suppression justification 0ms
+       ✓ missing suppression entries 0ms
+       ✓ malformed suppression entries 1ms
+       ✓ unknown suppression metadata 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ accepts valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > audit.parser.mjs > action references a missing advisory
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > audit.parser.mjs > advisory has no referencing action
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > gitleaks-release.parser.mjs > asset ID disagrees with its API URL
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > gitleaks-release.parser.mjs > asset name disagrees with its download URL
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > gitleaks-release.parser.mjs > release ID disagrees with its API URL
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > gitleaks-release.parser.mjs > asset listing references a different release
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > gitleaks-release.parser.mjs > release page references a different tag
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > gitleaks-release.parser.mjs > duplicate asset identity with distinct names
+AssertionError: expected [Function] to throw an error
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ ❯ tests/unit/quality-parsers.spec.mjs:62:22
+     60|           const check = expect(() => parse(fixtureCase.input))
+     61|           if (fixtureCase.valid) check.not.toThrow()
+     62|           else check.toThrow(/Invalid /)
+       |                      ^
+     63|         })
+     64|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > lint.parser.mjs > ticketed directive with real ESLint suppression metadata
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > lint.parser.mjs > issue URL suppression justification
+AssertionError: expected [Function] to not throw an error but 'Error: Invalid ESLint results: result…' was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+"Error: Invalid ESLint results: results.0.suppressedMessages.0: Expected never, received object"
+
+ ❯ tests/unit/quality-parsers.spec.mjs:61:44
+     59|         it(fixtureCase.name, () => {
+     60|           const check = expect(() => parse(fixtureCase.input))
+     61|           if (fixtureCase.valid) check.not.toThrow()
+       |                                            ^
+     62|           else check.toThrow(/Invalid /)
+     63|         })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 30 passed (40)
+   Start at  17:59:52
+   Duration  189ms (transform 38ms, setup 0ms, import 78ms, tests 24ms, environment 0ms)
+
