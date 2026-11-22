@@ -1,0 +1,56 @@
+
+ RUN  v4.0.18 <repository>
+
+ ❯ tests/unit/quality-structural.spec.mjs (6 tests | 1 failed) 6012ms
+   ✓ rejects a cycle at the boundaries command and admits an acyclic control  1950ms
+   ✓ rejects private imports, including an index in a private directory, and admits its owner  1175ms
+   ✓ rejects an unused file and admits a reachable file at the dead-code command  1088ms
+   ✓ rejects an unused export and admits the same exported value when consumed  841ms
+   ✓ rejects an unused dependency and admits an actual dependency import  831ms
+   × rejects duplication involving a changed file and admits original code 127ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects duplication involving a changed file and admits original code
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to match /duplication regression|duplication: n…/
+
+- Expected: 
+/duplication regression|duplication: new files must be clean/
+
++ Received: 
+"node:internal/modules/cjs/loader:1568
+  throw err;
+  ^
+
+Error: Cannot find module '<repository>/scripts/quality/duplication.mjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at Module._load (node:internal/modules/cjs/loader:1341:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.20.0
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:91:25
+     89|   put('shared/copy.ts', block)
+     90|   const denied = row('duplication', directory)
+     91|   expect(denied.output).toMatch(/duplication regression|duplication: n…
+       |                         ^
+     92|   expect(denied.status).toBe(1)
+     93|   put('shared/copy.ts', 'console.log("unique")')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  22:07:10
+   Duration  6.16s (transform 12ms, setup 0ms, import 20ms, tests 6.01s, environment 0ms)
+

@@ -1,0 +1,8 @@
+{
+  "minTokens": 100,
+  "minLines": 10,
+  "mode": "strict",
+  "maxSize": "100mb",
+  "maxLines": 1000000,
+  "noGitignore": true
+}

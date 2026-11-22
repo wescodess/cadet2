@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { structuralCommit } from './structural.mjs'
 import { baselineCommit, files, git, json, main, qualityBaseRef, run } from './common.mjs'
 
 const date = z
@@ -10,11 +11,11 @@ const date = z
   })
 const text = z.string().refine((value) => value.trim().length > 0)
 const file = text.refine((value) => value.includes('.') && !value.includes('|'))
-const counted = (key) =>
+const counted = (key, commit = baselineCommit) =>
   z
     .object({
       date,
-      commit: z.literal(baselineCommit),
+      commit: z.literal(commit),
       counts: z.record(key, z.number().int().nonnegative()),
     })
     .strict()
@@ -26,6 +27,19 @@ const allowance = z
   })
   .strict()
 const schemas = {
+  'boundaries.json': counted(z.string().regex(/^.+\|[^|]+\|[^|]+$/), structuralCommit),
+  'dead-code.json': counted(
+    z
+      .string()
+      .regex(
+        /^.+\|(?:files|exports|types|dependencies|devDependencies|optionalPeerDependencies)\|[^|]+$/,
+      ),
+    structuralCommit,
+  ),
+  'duplication.json': counted(
+    z.string().regex(/^.+\|clone\|[^|]+\|[a-f0-9]{64}$/),
+    structuralCommit,
+  ),
   'types.json': counted(z.string().regex(/^.+\|TS\d+$/)),
   'types-convex.json': counted(z.string().regex(/^convex\/.+\|TS\d+$/)),
   'lint.json': counted(z.string().regex(/^.+\|[^|]+$/)),

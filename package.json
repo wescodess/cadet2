@@ -23,7 +23,10 @@
     "secrets:all": "node scripts/quality/secrets.mjs --all-branches",
     "dependencies:check": "node scripts/quality/dependencies.mjs",
     "test:policy": "node scripts/quality/test-policy.mjs",
-    "verify": "exec node scripts/quality/verify.mjs"
+    "verify": "exec node scripts/quality/verify.mjs",
+    "boundaries:check": "node scripts/quality/boundaries.mjs",
+    "dead-code:check": "node scripts/quality/dead-code.mjs",
+    "duplication:check": "node scripts/quality/duplication.mjs"
   },
   "dependencies": {
     "@better-auth/core": "1.4.9",
@@ -66,11 +69,14 @@
     "@tailwindcss/vite": "^4.2.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/test-utils": "^2.4.6",
+    "dependency-cruiser": "18.8.0",
     "drizzle-kit": "^0.31.9",
     "eslint": "10.15.0",
     "eslint-plugin-sonarjs": "4.2.2",
     "eslint-plugin-vue": "10.12.1",
+    "jscpd": "5.4.3",
     "jsdom": "^28.1.0",
+    "knip": "6.47.0",
     "lint-staged": "17.6.1",
     "prettier": "3.10.1",
     "shadcn-nuxt": "^2.4.3",

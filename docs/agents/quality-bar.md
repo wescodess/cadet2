@@ -1,6 +1,6 @@
 # Quality bar
 
-`pnpm verify` runs the seven static rows owned by #23, the existing Vitest tests and production build, and #28's real legacy-access boundary suite after the build. CI runs it on every PR and push to `dev` (and retains the existing `main`, scheduled and manual triggers). Pre-commit checks formatting and lint on staged files, then runs the complete type ratchet. `pnpm install` installs the hook; linked worktrees get their own `core.hooksPath` setting.
+`pnpm verify` runs the adopted static rows owned by #23 and the three structural rows owned by #24, the existing Vitest tests and production build, and #28's real legacy-access boundary suite after the build. CI runs it on every PR and push to `dev` (and retains the existing `main`, scheduled and manual triggers). Pre-commit checks formatting and lint on staged files, then runs the complete type ratchet. `pnpm install` installs the hook; linked worktrees get their own `core.hooksPath` setting.
 
 Use Node 24 from `.nvmrc`, pnpm 9.12.3 from `packageManager`, and a frozen lockfile:
 
@@ -277,3 +277,39 @@ The table records actual runs of the original three-file quality suite (**69 tes
 All production parser files were restored byte for byte after the mutation runs. Full before/after transcripts, mutation definitions and the machine-readable ledger are retained at `/Users/wesleyukadike/.orchestrate/scratch/cadet2-fix-pr55-b2r4-evidence/` on the implementation host. No baseline, threshold, allowance, workflow, dependency or application behavior was changed.
 
 After restoring all mutations, the shuffled focused suite passed **85/85 tests**. Removing `node_modules` and `.nuxt`, then running `pnpm install --frozen-lockfile`, exited **0**. The requested `BETTER_AUTH_SECRET=$(openssl rand -hex 32) NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3000 CONVEX_SITE_URL=http://127.0.0.1:3000 pnpm verify` command then passed all eight rows with exit **0**, including **22 Vitest files / 125 tests** and the production build. All seven baseline files match the pinned original byte for byte. The clean-install transcript, aggregate transcript, verification record and baseline digests are retained in the host evidence directory above. A redundant standalone lint invocation overlapped dependency cleanup and failed on a removed module; the fresh aggregate lint row subsequently passed with **1,692 current / 1,692 baseline**, without a source change.
+
+## D03: structural ratchets (#24)
+
+Starting integration head: `d7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501`. This adoption follows merged PR #55 and owns the first shared quality configuration update. `pnpm verify` additionally runs these three commands, with the same per-run evidence directory, fail-closed execution, strict Zod parsers and CI writer prohibition as the existing rows.
+
+| Row | Pin and threshold | Inherited baseline |
+| --- | --- | --- |
+| `pnpm boundaries:check` | [dependency-cruiser **18.8.0**](https://github.com/sverweij/dependency-cruiser/blob/main/doc/rules-reference.md); zero new cycles or prohibited import edges | **29** exact cycle identities, all in `app/`; `baselines/boundaries.json` |
+| `pnpm dead-code:check` | [knip **6.47.0**](https://knip.dev/reference/cli); zero new unused files, value/type exports, production/dev dependencies | **529** identities: 325 files, 119 value exports, 70 type exports, 13 dependencies, 2 devDependencies; `baselines/dead-code.json` |
+| `pnpm duplication:check` | [jscpd **5.4.3**](https://github.com/kucherenko/jscpd); exact clones of at least **100 tokens and 10 lines**, strict mode; zero new changed-file clone identities | **327** file/clone occurrences across 326 keys; `baselines/duplication.json` |
+
+The source inventory includes tracked and nonignored untracked JS/TS/Vue source, including tests and quality scripts. Generated Convex code, generated dot directories, vendor workflow/skill trees and design records are excluded. Knip's Nuxt, Convex, test-runner and configuration plugins discover framework entry points; the two auth configuration files are explicit entries. Run a frozen install first so Nuxt auto-import metadata is available. `dependency-cruiser` and `jscpd` are explicitly referenced in Knip's configuration because the row invokes their installed binaries dynamically; all other unused dependencies remain reportable. No new vulnerability or licence exception is introduced.
+
+Boundary rules prohibit application imports of server/Convex implementation (generated Convex clients remain public), shared imports of application/server/Convex code, and server/Convex imports of application code. A directory's `private/` and `internal/` descendants are available only to that directory's subtree, including private `index` files. Under `app/modules/<name>/`, `server/modules/<name>/` and `shared/modules/<name>/`, consumers outside the module use its `index` entry point. Nuxt `~`, `@`, `~~`, `@@` and `#shared` aliases resolve before rules run. The cycle identity includes its complete reported cycle, so changing an inherited cycle's path cannot reuse its allowance.
+
+Counts are scoped by source file plus rule/target, unused category/symbol, or duplication file pair/content digest. Debt in another scope cannot offset an increase. Structural source ancestry is pinned to the starting integration head above; newly introduced files must be clean even if a local allowance is fabricated. Full boundary and dead-code runs require paid-down allowances to be lowered. Duplication evaluates files changed from `merge-base(QUALITY_BASE_REF, HEAD)`, including committed, staged, unstaged, renamed, deleted and untracked changes. It compares against the full source corpus to detect copies of unchanged code, but reports and ratchets only pairs involving a changed file. Both sides of an affected pair must lower paid-down allowances. Unchanged legacy clones are not charged to unrelated changes. There is no percentage-based debt pool or persistent detector cache.
+
+Per-scope adoption counts:
+
+| Scope | Boundary findings | Dead-code findings | Duplication occurrences |
+| --- | ---: | ---: | ---: |
+| `app/` | 29 | 366 | 4 |
+| `server/` | 0 | 72 | 14 |
+| `shared/` | 0 | 11 | 0 |
+| `convex/` | 0 | 0 | 14 |
+| `scripts/` | 0 | 13 | 0 |
+| `tests/` | 0 | 52 | 295 |
+| `package.json` | 0 | 15 | 0 |
+
+The shared malformed-input suite includes captured successful and finding-bearing native outputs for every new parser. Dependency-cruiser checks selected-file graph coverage, edge/module totals and violation counts; its JSON reporter exits zero even with violations, which the row ratchets explicitly. Knip's finding-only JSON has no independent source population count; it must have a valid complete finding shape and matching process status. jscpd checks format/total statistics and clone population consistency before filtering. Missing/truncated/unknown output and failed processes are failures, never clean scans. No row subprocess has a timeout.
+
+[S24 deliberate-red and positive ledger](quality-bar-evidence/structural24/ledger.json) retains six real-tool defect/control pairs. The [test-first evidence](quality-bar-evidence/structural24/) distinguishes missing-row test failures during implementation from candidate deliberate-red runs. Malformed and failed-tool public-row tests use controlled external process output; cycle/import/dead-code/duplication controls run the pinned binaries in isolated synthetic repositories. These are CI/local structural proofs. Product UI journeys J01/J10, staging, owner verdicts and independent QA acceptance are unrun by this implementation and are not implied by these results.
+
+Hot configuration remains serialized at merge: rebase onto current `dev`, regenerate `pnpm-lock.yaml`, retain or lower all inherited allowances, and rerun frozen-install verification at the resulting head. Later configuration owners follow #75 → #76 → #77 → #26 → #27. Pending #158/#159 can require another rebase; this PR does not merge itself.
+
+Targeted mutation check: **17/17 caught (100% of selected mutants)**, zero survivors. The [mutation ledger](quality-bar-evidence/structural24/mutations.json) covers discarded findings, each unused category, missing ratchets, narrowed duplication comparison, new-file allowance bypass, paid-down debt bypass, permissive schemas and omitted completeness checks. Each mutant was restored before the next run. The [restored control](quality-bar-evidence/structural24/restored-control.txt) passes **251/251 tests**, zero skipped. This is a targeted guard check, not a claim of exhaustive Stryker coverage. The [pre-adoption replay](quality-bar-evidence/structural24/pre-adoption-tests.txt) fails all 14 structural command tests when the three row modules are absent. Repeatable local [mutation](quality-bar-evidence/structural24/mutations.py) and [real-tool defect/control](quality-bar-evidence/structural24/deliberate.py) scripts retain their explicit disposable-clone and external-scratch paths; full mutation transcripts are saved with the external evidence packet.

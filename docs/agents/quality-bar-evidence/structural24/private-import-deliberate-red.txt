@@ -1,0 +1,1 @@
+boundaries: new files must be clean: shared/consumer.ts|entry:shared/feature/|shared/feature/private/index.ts

@@ -1,0 +1,2 @@
+dead-code regression:
+package.json|dependencies|zod: 1 > 0

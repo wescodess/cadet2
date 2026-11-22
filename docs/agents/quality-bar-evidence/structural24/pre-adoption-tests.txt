@@ -1,0 +1,491 @@
+
+ RUN  v4.0.18 <repository>
+
+ ❯ tests/unit/quality-structural.spec.mjs (14 tests | 14 failed) 2546ms
+   × rejects a cycle at the boundaries command and admits an acyclic control 200ms
+   × rejects private imports, including an index in a private directory, and admits its owner 147ms
+   × rejects an unused file and admits a reachable file at the dead-code command 140ms
+   × rejects an unused export and admits the same exported value when consumed 192ms
+   × rejects an unused dependency and admits an actual dependency import 199ms
+   × rejects duplication involving a changed file and admits original code 140ms
+   × enforces module entry points and resolves Nuxt aliases before checking server imports 158ms
+   × requires paid-down inherited dead-code allowances to be lowered 127ms
+   × does not charge unchanged duplication and detects changed copies across directories 235ms
+   × refuses boundaries baseline writers in CI 238ms
+   × refuses dead-code baseline writers in CI 205ms
+   × refuses duplication baseline writers in CI 199ms
+   × rejects a new file even if a local dead-code allowance was added 184ms
+   × requires removed duplication debt to lower both affected file allowances 182ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects a cycle at the boundaries command and admits an acyclic control
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to match /boundaries regression.*|boundaries: …/s
+
+- Expected: 
+/boundaries regression.*|boundaries: new files must be clean/s
+
++ Received: 
+"node:internal/modules/cjs/loader:1568
+  throw err;
+  ^
+
+Error: Cannot find module '<repository>/scripts/quality/boundaries.mjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at Module._load (node:internal/modules/cjs/loader:1341:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.20.0
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:86:25
+     84|   const denied = row('boundaries', directory)
+     85|   expect(denied.status).toBe(1)
+     86|   expect(denied.output).toMatch(/boundaries regression.*|boundaries: n…
+       |                         ^
+     87|   put('shared/b.ts', 'export const b = () => 1')
+     88|   const admitted = row('boundaries', directory)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects private imports, including an index in a private directory, and admits its owner
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to match /boundaries regression|boundaries: new…/
+
+- Expected: 
+/boundaries regression|boundaries: new files must be clean/
+
++ Received: 
+"node:internal/modules/cjs/loader:1568
+  throw err;
+  ^
+
+Error: Cannot find module '<repository>/scripts/quality/boundaries.mjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at Module._load (node:internal/modules/cjs/loader:1341:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.20.0
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:99:25
+     97|   })
+     98|   const denied = row('boundaries', directory)
+     99|   expect(denied.output).toMatch(/boundaries regression|boundaries: new…
+       |                         ^
+    100|   expect(denied.status).toBe(1)
+    101|   put('shared/consumer.ts', '')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects an unused file and admits a reachable file at the dead-code command
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to match /dead-code regression|dead-code: new f…/
+
+- Expected: 
+/dead-code regression|dead-code: new files must be clean/
+
++ Received: 
+"node:internal/modules/cjs/loader:1568
+  throw err;
+  ^
+
+Error: Cannot find module '<repository>/scripts/quality/dead-code.mjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at Module._load (node:internal/modules/cjs/loader:1341:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.20.0
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:112:25
+    110|   })
+    111|   const denied = row('dead-code', directory)
+    112|   expect(denied.output).toMatch(/dead-code regression|dead-code: new f…
+       |                         ^
+    113|   expect(denied.status).toBe(1)
+    114|   put('index.ts', "import { value } from './shared/unused'; console.lo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects an unused export and admits the same exported value when consumed
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to match /dead-code.*(?:exports|new files must…/s
+
+- Expected: 
+/dead-code.*(?:exports|new files must be clean)/s
+
++ Received: 
+"node:internal/modules/cjs/loader:1568
+  throw err;
+  ^
+
+Error: Cannot find module '<repository>/scripts/quality/dead-code.mjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at Module._load (node:internal/modules/cjs/loader:1341:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.20.0
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:124:25
+    122|   })
+    123|   const denied = row('dead-code', directory)
+    124|   expect(denied.output).toMatch(/dead-code.*(?:exports|new files must …
+       |                         ^
+    125|   expect(denied.status).toBe(1)
+    126|   put('index.ts', "import { used, unused } from './shared/value'; cons…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects an unused dependency and admits an actual dependency import
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to contain 'package.json|dependencies|zod'
+
+- Expected
++ Received
+
+- package.json|dependencies|zod
++ node:internal/modules/cjs/loader:1568
++   throw err;
++   ^
++
++ Error: Cannot find module '<repository>/scripts/quality/dead-code.mjs'
++     at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
++     at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
++     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
++     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
++     at Module._load (node:internal/modules/cjs/loader:1341:5)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++     at node:internal/main/run_main_module:33:47 {
++   code: 'MODULE_NOT_FOUND',
++   requireStack: []
++ }
++
++ Node.js v24.20.0
++
+
+ ❯ tests/unit/quality-structural.spec.mjs:136:25
+    134|   })
+    135|   const denied = row('dead-code', directory)
+    136|   expect(denied.output).toContain('package.json|dependencies|zod')
+       |                         ^
+    137|   expect(denied.status).toBe(1)
+    138|   put('index.ts', "import { z } from 'zod'; console.log(z.string())")
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects duplication involving a changed file and admits original code
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to match /duplication regression|duplication: n…/
+
+- Expected: 
+/duplication regression|duplication: new files must be clean/
+
++ Received: 
+"node:internal/modules/cjs/loader:1568
+  throw err;
+  ^
+
+Error: Cannot find module '<repository>/scripts/quality/duplication.mjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at Module._load (node:internal/modules/cjs/loader:1341:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.20.0
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:150:25
+    148|   put('shared/copy.ts', block)
+    149|   const denied = row('duplication', directory)
+    150|   expect(denied.output).toMatch(/duplication regression|duplication: n…
+       |                         ^
+    151|   expect(denied.status).toBe(1)
+    152|   put('shared/copy.ts', 'console.log("unique")')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > enforces module entry points and resolves Nuxt aliases before checking server imports
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to contain 'boundaries: PASS'
+
+- Expected
++ Received
+
+- boundaries: PASS
++ node:internal/modules/cjs/loader:1568
++   throw err;
++   ^
++
++ Error: Cannot find module '<repository>/scripts/quality/boundaries.mjs'
++     at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
++     at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
++     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
++     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
++     at Module._load (node:internal/modules/cjs/loader:1341:5)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++     at node:internal/main/run_main_module:33:47 {
++   code: 'MODULE_NOT_FOUND',
++   requireStack: []
++ }
++
++ Node.js v24.20.0
++
+
+ ❯ tests/unit/quality-structural.spec.mjs:165:27
+    163|   put('app/consumer.ts', "import { value } from '~/modules/feature'; c…
+    164|   const admitted = row('boundaries', directory)
+    165|   expect(admitted.output).toContain('boundaries: PASS')
+       |                           ^
+    166|   expect(admitted.status).toBe(0)
+    167|   put('server/secret.ts', 'export const secret = 1')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > requires paid-down inherited dead-code allowances to be lowered
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/unit/quality-structural.spec.mjs:190:46
+    188|     )
+    189|   baseline({ [`${file}|files|${file}`]: 1 })
+    190|   expect(row('dead-code', directory).status).toBe(0)
+       |                                              ^
+    191|   put('index.ts', `import { value } from './${file}'; console.log(valu…
+    192|   const denied = row('dead-code', directory)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > does not charge unchanged duplication and detects changed copies across directories
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/unit/quality-structural.spec.mjs:205:48
+    203|   ).join('\n')
+    204|   const { directory, put } = fixture({ 'shared/first.ts': block, 'serv…
+    205|   expect(row('duplication', directory).status).toBe(0)
+       |                                                ^
+    206|   put('server/new.ts', block)
+    207|   const denied = row('duplication', directory)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > refuses boundaries baseline writers in CI
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to contain 'writer flags are forbidden in CI'
+
+- Expected
++ Received
+
+- writer flags are forbidden in CI
++ node:internal/modules/cjs/loader:1568
++   throw err;
++   ^
++
++ Error: Cannot find module '<repository>/scripts/quality/boundaries.mjs'
++     at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
++     at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
++     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
++     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
++     at Module._load (node:internal/modules/cjs/loader:1341:5)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++     at node:internal/main/run_main_module:33:47 {
++   code: 'MODULE_NOT_FOUND',
++   requireStack: []
++ }
++
++ Node.js v24.20.0
++
+
+ ❯ tests/unit/quality-structural.spec.mjs:221:27
+    219|     )
+    220|     expect(result.status).toBe(1)
+    221|     expect(result.stderr).toContain('writer flags are forbidden in CI')
+       |                           ^
+    222|   })
+    223| }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > refuses dead-code baseline writers in CI
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to contain 'writer flags are forbidden in CI'
+
+- Expected
++ Received
+
+- writer flags are forbidden in CI
++ node:internal/modules/cjs/loader:1568
++   throw err;
++   ^
++
++ Error: Cannot find module '<repository>/scripts/quality/dead-code.mjs'
++     at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
++     at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
++     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
++     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
++     at Module._load (node:internal/modules/cjs/loader:1341:5)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++     at node:internal/main/run_main_module:33:47 {
++   code: 'MODULE_NOT_FOUND',
++   requireStack: []
++ }
++
++ Node.js v24.20.0
++
+
+ ❯ tests/unit/quality-structural.spec.mjs:221:27
+    219|     )
+    220|     expect(result.status).toBe(1)
+    221|     expect(result.stderr).toContain('writer flags are forbidden in CI')
+       |                           ^
+    222|   })
+    223| }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > refuses duplication baseline writers in CI
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to contain 'writer flags are forbidden in CI'
+
+- Expected
++ Received
+
+- writer flags are forbidden in CI
++ node:internal/modules/cjs/loader:1568
++   throw err;
++   ^
++
++ Error: Cannot find module '<repository>/scripts/quality/duplication.mjs'
++     at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
++     at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
++     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
++     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
++     at Module._load (node:internal/modules/cjs/loader:1341:5)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++     at node:internal/main/run_main_module:33:47 {
++   code: 'MODULE_NOT_FOUND',
++   requireStack: []
++ }
++
++ Node.js v24.20.0
++
+
+ ❯ tests/unit/quality-structural.spec.mjs:221:27
+    219|     )
+    220|     expect(result.status).toBe(1)
+    221|     expect(result.stderr).toContain('writer flags are forbidden in CI')
+       |                           ^
+    222|   })
+    223| }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects a new file even if a local dead-code allowance was added
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to contain 'new files must be clean'
+
+- Expected
++ Received
+
+- new files must be clean
++ node:internal/modules/cjs/loader:1568
++   throw err;
++   ^
++
++ Error: Cannot find module '<repository>/scripts/quality/dead-code.mjs'
++     at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
++     at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
++     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
++     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
++     at Module._load (node:internal/modules/cjs/loader:1341:5)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++     at node:internal/main/run_main_module:33:47 {
++   code: 'MODULE_NOT_FOUND',
++   requireStack: []
++ }
++
++ Node.js v24.20.0
++
+
+ ❯ tests/unit/quality-structural.spec.mjs:240:25
+    238|   )
+    239|   const denied = row('dead-code', directory)
+    240|   expect(denied.output).toContain('new files must be clean')
+       |                         ^
+    241|   expect(denied.status).toBe(1)
+    242| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/14]⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > requires removed duplication debt to lower both affected file allowances
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/unit/quality-structural.spec.mjs:258:5
+    256|       '--write-baseline',
+    257|     ]).status,
+    258|   ).toBe(0)
+       |     ^
+    259|   expect(row('duplication', directory).status).toBe(0)
+    260|   put(file, 'console.log("debt removed")')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/14]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  14 failed (14)
+   Start at  22:22:08
+   Duration  2.77s (transform 14ms, setup 0ms, import 24ms, tests 2.55s, environment 0ms)
+

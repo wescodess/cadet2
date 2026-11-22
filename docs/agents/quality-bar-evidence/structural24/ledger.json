@@ -1,0 +1,134 @@
+[
+  {
+    "case": "cycle",
+    "row": "boundaries",
+    "seam": "S24",
+    "expected": [1, 0],
+    "runs": [
+      {
+        "phase": "deliberate-red",
+        "command": "node scripts/quality/boundaries.mjs",
+        "exit": 1,
+        "seconds": 2.865,
+        "artifact": "cycle-deliberate-red.txt"
+      },
+      {
+        "phase": "positive",
+        "command": "node scripts/quality/boundaries.mjs",
+        "exit": 0,
+        "seconds": 0.545,
+        "artifact": "cycle-positive.txt"
+      }
+    ]
+  },
+  {
+    "case": "private-import",
+    "row": "boundaries",
+    "seam": "S24",
+    "expected": [1, 0],
+    "runs": [
+      {
+        "phase": "deliberate-red",
+        "command": "node scripts/quality/boundaries.mjs",
+        "exit": 1,
+        "seconds": 0.519,
+        "artifact": "private-import-deliberate-red.txt"
+      },
+      {
+        "phase": "positive",
+        "command": "node scripts/quality/boundaries.mjs",
+        "exit": 0,
+        "seconds": 0.576,
+        "artifact": "private-import-positive.txt"
+      }
+    ]
+  },
+  {
+    "case": "unused-file",
+    "row": "dead-code",
+    "seam": "S24",
+    "expected": [1, 0],
+    "runs": [
+      {
+        "phase": "deliberate-red",
+        "command": "node scripts/quality/dead-code.mjs",
+        "exit": 1,
+        "seconds": 1.692,
+        "artifact": "unused-file-deliberate-red.txt"
+      },
+      {
+        "phase": "positive",
+        "command": "node scripts/quality/dead-code.mjs",
+        "exit": 0,
+        "seconds": 0.31,
+        "artifact": "unused-file-positive.txt"
+      }
+    ]
+  },
+  {
+    "case": "unused-export",
+    "row": "dead-code",
+    "seam": "S24",
+    "expected": [1, 0],
+    "runs": [
+      {
+        "phase": "deliberate-red",
+        "command": "node scripts/quality/dead-code.mjs",
+        "exit": 1,
+        "seconds": 0.285,
+        "artifact": "unused-export-deliberate-red.txt"
+      },
+      {
+        "phase": "positive",
+        "command": "node scripts/quality/dead-code.mjs",
+        "exit": 0,
+        "seconds": 0.271,
+        "artifact": "unused-export-positive.txt"
+      }
+    ]
+  },
+  {
+    "case": "unused-dependency",
+    "row": "dead-code",
+    "seam": "S24",
+    "expected": [1, 0],
+    "runs": [
+      {
+        "phase": "deliberate-red",
+        "command": "node scripts/quality/dead-code.mjs",
+        "exit": 1,
+        "seconds": 0.266,
+        "artifact": "unused-dependency-deliberate-red.txt"
+      },
+      {
+        "phase": "positive",
+        "command": "node scripts/quality/dead-code.mjs",
+        "exit": 0,
+        "seconds": 0.266,
+        "artifact": "unused-dependency-positive.txt"
+      }
+    ]
+  },
+  {
+    "case": "duplication",
+    "row": "duplication",
+    "seam": "S24",
+    "expected": [1, 0],
+    "runs": [
+      {
+        "phase": "deliberate-red",
+        "command": "node scripts/quality/duplication.mjs",
+        "exit": 1,
+        "seconds": 0.212,
+        "artifact": "duplication-deliberate-red.txt"
+      },
+      {
+        "phase": "positive",
+        "command": "node scripts/quality/duplication.mjs",
+        "exit": 0,
+        "seconds": 0.179,
+        "artifact": "duplication-positive.txt"
+      }
+    ]
+  }
+]

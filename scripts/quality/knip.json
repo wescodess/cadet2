@@ -1,0 +1,18 @@
+{
+  "entry": ["index.{ts,js,mjs}", "app/auth.config.ts", "server/auth.config.ts"],
+  "project": [
+    "**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,vue}",
+    "!_bmad/**",
+    "!_bmad-output/**",
+    "!docs/**",
+    "!convex/_generated/**"
+  ],
+  "ignore": ["convex/_generated/**"],
+  "ignoreDependencies": ["dependency-cruiser", "jscpd"],
+  "paths": {
+    "~/*": ["app/*"],
+    "@/*": ["app/*"],
+    "~~/*": ["*"],
+    "@@/*": ["*"]
+  }
+}

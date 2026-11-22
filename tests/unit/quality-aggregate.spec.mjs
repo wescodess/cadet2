@@ -8,6 +8,9 @@ const rows = [
   'format:check',
   'secrets:check',
   'dependencies:check',
+  'boundaries:check',
+  'dead-code:check',
+  'duplication:check',
   'test:policy',
   'test:components',
   'build',
@@ -111,9 +114,9 @@ describe('aggregate orchestration public module', () => {
       baselinePolicy: { status: 'not_run' },
       rows: rows.map((row) => ({ row, status: 'not_run' })),
     })
-    expect(snapshots).toHaveLength(12)
+    expect(snapshots).toHaveLength(15)
     expect(snapshots[1].baselinePolicy.status).toBe('pass')
-    for (let index = 0; index < 9; index++)
+    for (let index = 0; index < rows.length; index++)
       expect(snapshots[index + 2].rows.map(({ status }) => status)).toEqual(
         rows.map((_, i) => (i <= index ? 'pass' : 'not_run')),
       )
@@ -220,17 +223,7 @@ describe('aggregate edge conditions', () => {
     vi.spyOn(Date, 'now').mockImplementation(() => (milliseconds += 1000))
     await start()
     expect(snapshots.at(-1).baselinePolicy.seconds).toBe('1.0')
-    expect(snapshots.at(-1).rows.map(({ seconds }) => seconds)).toEqual([
-      '1.0',
-      '1.0',
-      '1.0',
-      '1.0',
-      '1.0',
-      '1.0',
-      '1.0',
-      '1.0',
-      '1.0',
-    ])
+    expect(snapshots.at(-1).rows.map(({ seconds }) => seconds)).toEqual(rows.map(() => '1.0'))
   })
   it('builds a usable executable search path when PATH is absent', async () => {
     delete proc.env.PATH

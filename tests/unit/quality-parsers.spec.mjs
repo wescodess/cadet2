@@ -11,6 +11,10 @@ const fixtures = readdirSync(fixturesDirectory)
   .filter((file) => file.endsWith('.json'))
   .sort()
 const completeness = {
+  'boundaries.parser.mjs': true,
+  'dead-code.parser.mjs':
+    'Finding-only output; knip JSON has no independent complete source inventory.',
+  'duplication.parser.mjs': true,
   'vitest-results.parser.mjs': true,
   'playwright-list.parser.mjs': true,
   'audit.parser.mjs': true,
