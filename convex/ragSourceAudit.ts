@@ -30,6 +30,14 @@ type Filters = {
   dateTo?: number
 }
 
+type UpperRange = IndexRange & {
+  lt(field: 'orderKey', value: string): IndexRange
+  lte(field: 'orderKey', value: string): IndexRange
+}
+type Bounds = (
+  range: UpperRange & { gte(field: 'orderKey', value: string): UpperRange },
+) => IndexRange
+
 function eventRange(ctx: QueryCtx, filters: Filters, upper?: string, before?: string) {
   const floor = filters.dateFrom === undefined ? undefined : orderKey(filters.dateFrom)
   let ceiling = upper
@@ -39,37 +47,38 @@ function eventRange(ctx: QueryCtx, filters: Filters, upper?: string, before?: st
   }
   const exclusive = before !== undefined && (!ceiling || before <= ceiling)
   const high = exclusive ? before : ceiling
-  type UpperRange = IndexRange & {
-    lt(field: 'orderKey', value: string): IndexRange
-    lte(field: 'orderKey', value: string): IndexRange
-  }
-  const bounds = (
-    range: UpperRange & { gte(field: 'orderKey', value: string): UpperRange },
-  ): IndexRange => {
+  const bounds: Bounds = (range) => {
     const lower = floor ? range.gte('orderKey', floor) : range
     return high ? (exclusive ? lower.lt('orderKey', high) : lower.lte('orderKey', high)) : lower
   }
+  return indexedEvents(ctx, filters, bounds).order('desc')
+}
 
+function indexedEvents(ctx: QueryCtx, filters: Filters, bounds: Bounds) {
   const { entityId, actorId, actionType } = filters
+  const events = ctx.db.query('rag_audit_events')
+  if (entityId && actorId && actionType)
+    return events.withIndex('by_entity_actor_action_order', (q) =>
+      bounds(q.eq('entityId', entityId).eq('actorId', actorId).eq('actionType', actionType)),
+    )
+  if (entityId && actorId)
+    return events.withIndex('by_entity_actor_order', (q) =>
+      bounds(q.eq('entityId', entityId).eq('actorId', actorId)),
+    )
+  if (entityId && actionType)
+    return events.withIndex('by_entity_action_order', (q) =>
+      bounds(q.eq('entityId', entityId).eq('actionType', actionType)),
+    )
+  if (actorId && actionType)
+    return events.withIndex('by_actor_action_order', (q) =>
+      bounds(q.eq('actorId', actorId).eq('actionType', actionType)),
+    )
   if (entityId)
-    return ctx.db
-      .query('rag_audit_events')
-      .withIndex('by_entity_order', (q) => bounds(q.eq('entityId', entityId)))
-      .order('desc')
-  if (actorId)
-    return ctx.db
-      .query('rag_audit_events')
-      .withIndex('by_actor_order', (q) => bounds(q.eq('actorId', actorId)))
-      .order('desc')
+    return events.withIndex('by_entity_order', (q) => bounds(q.eq('entityId', entityId)))
+  if (actorId) return events.withIndex('by_actor_order', (q) => bounds(q.eq('actorId', actorId)))
   if (actionType)
-    return ctx.db
-      .query('rag_audit_events')
-      .withIndex('by_action_order', (q) => bounds(q.eq('actionType', actionType)))
-      .order('desc')
-  return ctx.db
-    .query('rag_audit_events')
-    .withIndex('by_orderKey', (q) => bounds(q))
-    .order('desc')
+    return events.withIndex('by_action_order', (q) => bounds(q.eq('actionType', actionType)))
+  return events.withIndex('by_orderKey', (q) => bounds(q))
 }
 
 function matches(row: Doc<'rag_audit_events'>, filters: Filters) {
@@ -109,15 +118,9 @@ export const listEvents = query({
       return { items: [], totalCount: 0, upper: args.upper ?? '' }
     const limit = Math.max(1, Math.min(101, Math.floor(args.limit)))
     const range = eventRange(ctx, filters, args.upper, args.before)
-    const indexed = filters.entityId ? 'entityId' : filters.actorId ? 'actorId' : 'actionType'
-    const postFiltered =
-      Boolean(filters.search) ||
-      (['entityId', 'actorId', 'actionType'] as const).some(
-        (key) => filters[key] && key !== indexed,
-      )
     const page = await range.paginate({
       cursor: null,
-      numItems: postFiltered ? 512 : limit,
+      numItems: filters.search ? 512 : limit,
       maximumRowsRead: 512,
       maximumBytesRead: 1048576,
     })

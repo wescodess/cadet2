@@ -312,7 +312,11 @@ export default defineSchema({
     .index('by_orderKey', ['orderKey'])
     .index('by_action_order', ['actionType', 'orderKey'])
     .index('by_actor_order', ['actorId', 'orderKey'])
-    .index('by_entity_order', ['entityId', 'orderKey']),
+    .index('by_actor_action_order', ['actorId', 'actionType', 'orderKey'])
+    .index('by_entity_order', ['entityId', 'orderKey'])
+    .index('by_entity_action_order', ['entityId', 'actionType', 'orderKey'])
+    .index('by_entity_actor_order', ['entityId', 'actorId', 'orderKey'])
+    .index('by_entity_actor_action_order', ['entityId', 'actorId', 'actionType', 'orderKey']),
 
   rag_audit_details: defineTable({
     eventId: v.string(),
