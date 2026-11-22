@@ -1,3 +1,5 @@
+> **Superseded on 2026-11-17** by the approved Relay design system in the root [`DESIGN.md`](../../DESIGN.md); see `docs/design/system/decision.md`.
+
 # Design System: cadet2 UX App Foundation
 **Project ID:** 6257021077077987630
 **Approved Direction:** Comparison Workspace (Desktop + Mobile Pairing)
