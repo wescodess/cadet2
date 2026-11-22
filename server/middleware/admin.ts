@@ -5,6 +5,7 @@ import {
   getRequestURL,
   isError,
   sendRedirect,
+  setResponseHeader,
 } from 'h3'
 import type { H3Event } from 'h3'
 import { requireAdminSession } from '../utils/auth/requireAdminSession'
@@ -24,6 +25,7 @@ export default defineEventHandler(async (event) => {
   try {
     decoded = decodeURIComponent(getRequestURL(event).pathname)
   } catch {
+    setResponseHeader(event, 'Cache-Control', 'private, no-store')
     throw createError({ statusCode: 400, statusMessage: 'Bad Request' })
   }
   const path = decoded

@@ -853,9 +853,21 @@ test('denied page documents redirect while payloads and admin APIs keep their de
     }
     assert.equal((await request('/api/admin/access', actor)).status, status)
   }
-  for (const path of ['/admin/%', '/admin/%E0%A4%A', '/%']) {
-    const page = await request(path, null, 'GET', undefined, { accept: 'text/html' })
-    assert.equal(page.status, 400, path)
+  for (const actor of [null, ordinary, emailMatch, legacyGrant, admin]) {
+    for (const path of [
+      '/admin/%',
+      '/admin/%E0%A4%A',
+      '/ADMIN/%',
+      '/ai-search/%',
+      '/api/admin/%',
+      '/%',
+    ]) {
+      for (const method of ['GET', 'HEAD']) {
+        const page = await request(path, actor, method, undefined, { accept: 'text/html' })
+        assert.equal(page.status, 400, `${method} ${path}`)
+        assert.equal(page.headers.get('cache-control'), 'private, no-store', `${method} ${path}`)
+      }
+    }
   }
 })
 
