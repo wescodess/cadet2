@@ -1,6 +1,7 @@
 import { parse } from './lint.parser.mjs'
 import { ESLint } from 'eslint'
 import { readFileSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
 import {
   baselineCommit,
@@ -13,27 +14,19 @@ import {
   ratchet,
   sourceFiles,
 } from './common.mjs'
-import { stylesheetFindings } from './design-css.mjs'
-import { designMessages, utilityFindings } from './design-rule.mjs'
+import { checkDesignCompilation } from './design-compiler.mjs'
+import { designAuthority } from './design-authority.mjs'
+import { collectDesignSources } from './design-sources.mjs'
+import { designMessages } from './design-rule.mjs'
 
-function designStylesheets() {
-  const candidates = files().filter((file) => file.startsWith('app/') && file.endsWith('.css'))
-  if (!candidates.length) return []
-  const legacy = new Set(
-    git('ls-tree', '-r', '--name-only', baselineCommit, '--', 'app').split('\n'),
-  )
-  return candidates.filter((file) => !legacy.has(file))
-}
-
-function stylesheetResult(file) {
-  const text = readFileSync(file, 'utf8')
-  const messages = stylesheetFindings(text, 0, utilityFindings).map(({ index, messageId }) => {
-    const before = text.slice(0, index).split('\n')
+function designResult({ file, inputs, findings }) {
+  const messages = findings.map(({ index, messageId, construct }) => {
+    const before = inputs.text.slice(0, index).split('\n')
     return {
       ruleId: 'relay/design',
       severity: 2,
       messageId,
-      message: designMessages[messageId],
+      message: designMessages[messageId].replace('{{construct}}', construct ?? ''),
       line: before.length,
       column: before.at(-1).length + 1,
     }
@@ -64,6 +57,14 @@ async function checkDirectives(file) {
   }
 }
 
+function printDesignMessages(results) {
+  for (const result of results)
+    for (const message of result.messages.filter((item) => item.ruleId === 'relay/design'))
+      console.error(
+        `${localPath(result.filePath)}:${message.line}:${message.column}: ${message.message}`,
+      )
+}
+
 main(async () => {
   const supplied = process.argv
     .slice(2)
@@ -75,14 +76,42 @@ main(async () => {
   const eslint = new ESLint()
   const ignored = await Promise.all(candidates.map((file) => eslint.isPathIgnored(file)))
   const selected = candidates.filter((_file, index) => !ignored[index])
-  const stylesheets = designStylesheets().filter(
-    (file) => !supplied.length || supplied.includes(file),
+  const design = await collectDesignSources({
+    inventory: files(),
+    legacy: new Set(git('ls-tree', '-r', '--name-only', baselineCommit).split('\n')),
+    supplied,
+  })
+  const compiled = await checkDesignCompilation(design, designAuthority())
+  if (compiled.css != null) writeFileSync(`${outputDir}/design-compiled.css`, compiled.css)
+  writeFileSync(
+    `${outputDir}/design-inputs.json`,
+    JSON.stringify(
+      design.map((entry) => ({
+        file: entry.file,
+        sha256: entry.inputs.unread
+          ? null
+          : createHash('sha256').update(entry.inputs.text).digest('hex'),
+        context: Boolean(entry.context),
+        authority: entry.authority,
+        dependencies: entry.dependencies,
+        candidates: entry.inputs.candidates,
+        styles: entry.inputs.styles.map((style) => ({
+          offset: style.offset,
+          length: style.text.length,
+        })),
+      })),
+      null,
+      2,
+    ),
   )
-  if (!selected.length && !stylesheets.length && supplied.length) return
   const results = selected.length
     ? parse({ files: selected, results: await eslint.lintFiles(selected) }).results
     : []
-  results.push(...stylesheets.map(stylesheetResult))
+  for (const entry of design.map(designResult)) {
+    const existing = results.find((result) => result.filePath === entry.filePath)
+    if (existing) existing.messages.push(...entry.messages)
+    else results.push(entry)
+  }
   writeFileSync(
     `${outputDir}/lint.json`,
     JSON.stringify(
@@ -91,6 +120,7 @@ main(async () => {
       2,
     ),
   )
+  printDesignMessages(results)
   const counts = {}
   for (const result of results) {
     for (const message of result.messages) {

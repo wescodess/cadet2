@@ -17,7 +17,7 @@ const vue = new RuleTester({
 const ts = new RuleTester({ languageOptions: { parser: tseslint.parser } })
 
 const sfc = (template, script = '') =>
-  `<script setup lang="ts">\n${script}\n</script>\n\n<template>\n${template}\n</template>\n`
+  `<script setup lang="ts">\nimport { cn } from '~/lib/utils'\n${script}\n</script>\n\n<template>\n${template}\n</template>\n`
 
 describe('design ratchet rule', () => {
   it('accepts token utilities, the var shorthand and plain hrefs', () => {
@@ -42,7 +42,7 @@ describe('design ratchet rule', () => {
     ['an arbitrary colour value', sfc('<p class="bg-[var(--trust)]">x</p>'), 'arbitraryValue'],
     ['an arbitrary property', sfc('<p class="[mask-type:luminance]">x</p>'), 'arbitraryValue'],
     ['a hex colour', sfc('<svg><path fill="#1F2329" /></svg>'), 'rawColour'],
-    ['a colour function', sfc('<p>x</p>', "const shade = 'rgba(0, 0, 0, 0.4)'"), 'rawColour'],
+    ['a colour function', sfc('<svg><path fill="rgba(0, 0, 0, 0.4)" /></svg>'), 'rawColour'],
     ['a Tailwind palette colour', sfc('<p class="text-slate-700">x</p>'), 'rawColour'],
     ['plain white', sfc('<p class="bg-white">x</p>'), 'rawColour'],
   ])('rejects %s in a Vue file', (_name, code, messageId) => {
