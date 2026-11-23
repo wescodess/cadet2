@@ -89,7 +89,7 @@ const icon = computed(() => icons[props.glyph])
     </template>
     <template v-else-if="glyph === 'custom:fill-half'">
       <circle cx="12" cy="12" r="9.2" stroke-width="2" />
-      <path d="M12 12V6.4A5.6 5.6 0 0 0 1 12.00 17.60z" fill="currentColor" stroke="none" />
+      <path d="M12 12V6.4A5.6 5.6 0 0 1 12.00 17.60z" fill="currentColor" stroke="none" />
     </template>
     <template v-else-if="glyph === 'custom:circle-question'">
       <circle cx="12" cy="12" r="9.2" />
@@ -98,7 +98,7 @@ const icon = computed(() => icons[props.glyph])
     </template>
     <template v-else-if="glyph === 'custom:fill-three-quarters'">
       <circle cx="12" cy="12" r="9.2" stroke-width="2" />
-      <path d="M12 12V6.4A5.6 5.6 0 0 1 1 6.40 12.00z" fill="currentColor" stroke="none" />
+      <path d="M12 12V6.4A5.6 5.6 0 1 1 6.40 12.00z" fill="currentColor" stroke="none" />
     </template>
     <template v-else-if="glyph === 'custom:disc-check'">
       <circle cx="12" cy="12" r="10" fill="currentColor" stroke="none" />
