@@ -134,6 +134,7 @@ export async function scanDuplication(selected) {
   if (Object.entries(policy).some(([key, value]) => config[key] !== value))
     throw new Error('jscpd population policy differs from the pinned detection thresholds')
   const deadlineMs = Number(process.hrtime.bigint()) / 1e6 + scannerBudgets.duplication
+  const captureBudget = { bytes: 0 }
   const blockDirectory = resolve(outputDir, 'vue-token-blocks')
   mkdirSync(blockDirectory, { recursive: true })
   const sources = selected.map(sourceInput)
@@ -173,7 +174,7 @@ export async function scanDuplication(selected) {
         '--no-tips',
         ...extra,
       ],
-      { budgetMs: scannerBudgets.duplication, deadlineMs },
+      { budgetMs: scannerBudgets.duplication, deadlineMs, captureBudget },
     )
     if (result.status !== 0)
       throw new Error(`jscpd tool failure: exit ${result.status}: ${result.stderr}`)
