@@ -20,6 +20,8 @@ import SpecimenSpec from './SpecimenSpec.vue'
 const props = defineProps<{ theme: 'light' | 'dark' }>()
 
 const id = (name: string) => `${name}-representative-${props.theme}`
+const landmark = (name: string, example: string) =>
+  `${name}, ${example} example, representative ${props.theme} theme`
 
 const rows = [
   {
@@ -228,6 +230,7 @@ const rows = [
       note="Comes first on a signed plan. Only ever shown for a signed version."
     >
       <SignedPlanHeader
+        :aria-label="landmark('Signature', 'signed plan header')"
         name="Priya Raman"
         designation="RCIC"
         licence="R123456"

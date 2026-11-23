@@ -21,6 +21,8 @@ import SpecimenSpec from './SpecimenSpec.vue'
 const props = defineProps<{ theme: 'light' | 'dark' }>()
 
 const id = (name: string) => `${name}-client-${props.theme}`
+const landmark = (name: string, example: string) =>
+  `${name}, ${example} example, client ${props.theme} theme`
 
 const dateParts = [
   { name: 'day', label: 'Day', value: '14' },
@@ -36,7 +38,7 @@ const dateParts = [
       note="Under the top bar on every client screen. Both turns at once, with counts. Each segment opens the matching list."
     >
       <div class="grid gap-3">
-        <TurnBar>
+        <TurnBar :aria-label="landmark('Whose turn', 'your turn and Priya’s turn')">
           <TurnBarSegment
             turn="client"
             label="Your turn"
@@ -52,7 +54,7 @@ const dateParts = [
             href="#progress"
           />
         </TurnBar>
-        <TurnBar>
+        <TurnBar :aria-label="landmark('Whose turn', 'nothing for you')">
           <TurnBarSegment turn="done" label="Nothing for you" detail="Priya has it" href="#tasks" />
           <TurnBarSegment
             turn="representative"
@@ -62,7 +64,7 @@ const dateParts = [
             href="#progress"
           />
         </TurnBar>
-        <TurnBar>
+        <TurnBar :aria-label="landmark('Whose turn', 'your turn only')">
           <TurnBarSegment
             turn="client"
             label="Your turn"
@@ -78,7 +80,7 @@ const dateParts = [
             href="#progress"
           />
         </TurnBar>
-        <TurnBar>
+        <TurnBar :aria-label="landmark('Whose turn', 'signed, in French')">
           <TurnBarSegment turn="signed" label="Signed" detail="Version 2 is ready" href="#plan" />
           <TurnBarSegment
             turn="representative"
@@ -108,7 +110,7 @@ const dateParts = [
       note="Worst-case names and translated turn words wrap at 320 px; nothing truncates."
     >
       <div class="grid gap-3">
-        <TurnBar>
+        <TurnBar :aria-label="landmark('Whose turn', 'long names')">
           <TurnBarSegment
             turn="client"
             label="C’est votre tour"
@@ -129,6 +131,7 @@ const dateParts = [
           <TurnHolder turn="client" word="Vous, plus tard" initials="OA" />
         </div>
         <SignedPlanHeader
+          :aria-label="landmark('Signature', 'long name')"
           name="Oluwaseun Adébáyọ̀-Fitzgerald"
           designation="RCIC"
           licence="R705214"
@@ -263,6 +266,7 @@ const dateParts = [
       note="Comes first on a signed plan. Only ever shown for a signed version."
     >
       <SignedPlanHeader
+        :aria-label="landmark('Signature', 'signed plan header')"
         name="Priya Raman"
         designation="RCIC"
         licence="R123456"
