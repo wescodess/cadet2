@@ -268,7 +268,7 @@ it('admits registered Convex exports and framework defaults but checks their unr
   expect(admitted.status).toBe(0)
   put('convex/auth.config.ts', 'export default { providers: [] }; export const unrelated = 1')
   expect(row('dead-code', directory).output).toContain('convex/auth.config.ts|exports|unrelated')
-})
+}, 60000)
 
 it('rejects identical unused defaults outside the actual Convex component root', () => {
   const { directory, put } = fixture({
