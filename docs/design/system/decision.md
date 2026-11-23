@@ -2,7 +2,7 @@
 
 Date: 2026-11-17
 Gate: UI design gate, system creation (round 1: five options; round 2: three variations)
-Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)), 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19)) and 2026-11-22 (see [Proof timing amendment](#proof-timing-amendment-2026-11-22) and [Shadow alias amendment](#shadow-alias-amendment-2026-11-22))
+Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)), 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19)) and 2026-11-22 (see [Proof timing amendment](#proof-timing-amendment-2026-11-22), [Shadow alias amendment](#shadow-alias-amendment-2026-11-22) and [Holder long names amendment](#holder-long-names-amendment-2026-11-22))
 Approved specimen: [approved.html](approved.html)
 Implementer guide: [DESIGN.md](../../../DESIGN.md)
 Tokens: [tokens.css](tokens.css), [tokens.json](tokens.json) (not yet wired into the app)
@@ -227,6 +227,25 @@ The owner answered with these exact words:
 > Approve both exact aliases and record update (Recommended)
 
 `tokens.css` and `tokens.json` now carry `--shadow-button-base: 0 1px 0 rgba(0,0,0,.04)` and `--shadow-input-base: inset 0 1px 1px rgba(0,0,0,.03)` in both the light and dark themes, and the token authority check pins the updated bytes of both files. These are the base shadows already specified in `DESIGN.md` section 7 and `approved.html` (lines 288 and 296), now named so the app can reference them under the token-only colour rule. `approved.html`, every other token value, the palette, the earlier approvals and the Holder rules are unchanged, and no other raw-colour exemption is granted.
+
+## Holder long names amendment 2026-11-22
+
+The owner was asked:
+
+> Is the rendered refined “Split in place” Holder your final design? It keeps the 72 px column and 12 px/600 text, breaks at spaces first and inside a word only when needed, lets the row grow for extreme names, and changes B2’s narrow column from 64 to 72 px. Full text stays available without shrinking or clipping. [Checked full proposal](/Users/wesleyukadike/.orchestrate/scratch/cadet2-holder-refinement-r2-20261122/index.html). Approval covers this design; implementation, full quality checks and real screen-reader QA still follow.
+
+The owner answered with these exact words:
+
+> Approve refined Split in place as final; I am satisfied (Recommended)
+
+The approved design, both rounds and the full record are in [`docs/design/holder-long-names/`](../holder-long-names/decision.md); the canonical approval is [#160, comment 7089068254](https://github.com/wescodess/cadet2/issues/160#issuecomment-7089068254). It amends only the Representative Holder: a fixed 72 px column, words breaking at spaces first and inside a single word only when that word cannot fit 72 px on its own line, no inserted hyphen, clipping, truncation or smaller type, and rows that grow only for extreme words. B2’s narrow Holder column moves from 64 to 72 px. “Words break only at spaces” under [New in Relay](#new-in-relay) and the 72 px column in build requirement 6 now read with this amendment. `approved.html`, `tokens.css`, `tokens.json`, the palette, the Client holder and every other rule are unchanged.
+
+| Section | Spec | Was | Now |
+|---|---|---|---|
+| `DESIGN.md` 12.2, Holder | Desk word breaks | Only at spaces | At spaces first; inside a single word only when it cannot fit 72 px on its own line; never shrunk, hyphenated, clipped or truncated |
+| `DESIGN.md` 12.2, Holder | Desk holder height | Not specified | Grows downward; the row grows only for extreme words |
+| `DESIGN.md` 12.2, QueueRow | Holder column | 72 px | 72 px, unchanged; the word wraps inside it |
+| B2 `decision.md`, build rules | Narrow queue Holder column | 64 px | 72 px |
 
 ## Discrepancies between the approved specimen and the critiques
 
