@@ -32,7 +32,9 @@ main(async () => {
         from: { pathNot: `^${escape(directory)}` },
         to: {
           path: `^${target}`,
-          ...(!target.includes('private|internal') ? { pathNot: '/index[.][cm]?[jt]s$' } : {}),
+          ...(!target.includes('private|internal')
+            ? { pathNot: `^${escape(directory)}index[.][cm]?[jt]s$` }
+            : {}),
         },
       }
     }),

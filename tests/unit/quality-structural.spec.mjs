@@ -639,6 +639,29 @@ it('enforces module entry points and resolves Nuxt aliases before checking serve
   expect(denied.status).toBe(1)
 })
 
+it.each([
+  ['app', './modules/feature+v1/impl'],
+  ['app', './modules/feature+v1/impl/index'],
+  ['server', './modules/feature+v1/impl'],
+  ['server', './modules/feature+v1/impl/index'],
+  ['shared', './modules/feature+v1/impl'],
+  ['shared', './modules/feature+v1/impl/index'],
+])('requires the %s module root entry instead of %s', (scope, nested) => {
+  const consumer = `${scope}/consumer.ts`
+  const { directory, put } = fixture({
+    [`${scope}/modules/feature+v1/impl/index.ts`]: 'export const value = 1',
+    [`${scope}/modules/feature+v1/index.ts`]: "export { value } from './impl'",
+    [consumer]: "import { value } from './modules/feature+v1'; console.log(value)",
+  })
+  expect(row('boundaries', directory).status).toBe(0)
+  put(consumer, `import { value } from '${nested}'; console.log(value)`)
+  const denied = row('boundaries', directory)
+  expect(denied.status, denied.output).toBe(1)
+  expect(denied.output).toContain(`entry:${scope}/modules/feature+v1/`)
+  put(consumer, "import { value } from './modules/feature+v1'; console.log(value)")
+  expect(row('boundaries', directory).status).toBe(0)
+})
+
 it('requires paid-down inherited dead-code allowances to be lowered', () => {
   const file = 'shared/types/workspace-summary.ts'
   const { directory, put } = fixture({
