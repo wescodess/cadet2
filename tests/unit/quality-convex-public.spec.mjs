@@ -52,6 +52,54 @@ function rejects(code) {
   expect(result.stderr).toContain(code)
   return result
 }
+const declarationKinds = [
+  ['var', false],
+  ['let', false],
+  ['const', true],
+  ['using', false],
+  ['await using', false],
+]
+for (const placement of ['candidate', 'state', 'helper']) {
+  it.each(declarationKinds)(
+    `public row enforces %s declaration kind in ${placement}`,
+    (kind, admitted) => {
+      const sources = {
+        candidate: {
+          'convex/functions.ts': `import { queryGeneric as ask } from 'convex/server'; ${kind} named = ask({ args: {}, handler: () => null }); export { named }`,
+        },
+        state: {
+          'convex/functions.ts': `import { queryGeneric as ask } from 'convex/server'; ${kind} encoder = new TextEncoder(); export const named = ask({ args: {}, handler: () => encoder.encode('value') })`,
+        },
+        helper: {
+          'convex/functions.ts': helperDeclaration,
+          'shared/helper.ts': `${kind} encoder = new TextEncoder(); export function work() { return encoder.encode('value') }`,
+        },
+      }
+      prepare(sources[placement])
+      const result = publicRow()
+      expect(result.status, result.stdout + result.stderr).toBe(admitted ? 0 : 1)
+      if (!admitted) expect(result.stderr).toContain('mutable_binding')
+      const { snapshot } = JSON.parse(
+        readFileSync(join(result.evidence, 'convex-authority-request.json'), 'utf8'),
+      )
+      const file = placement === 'helper' ? 'shared/helper.ts' : 'convex/functions.ts'
+      const binding = placement === 'candidate' ? 'named' : 'encoder'
+      const fact = snapshot.facts.find((row) => row.file === file)
+      expect(fact.variables.find((row) => row.name === binding).constant).toBe(admitted)
+      if (admitted) {
+        const native = JSON.parse(readFileSync(join(result.evidence, 'dead-code.json'), 'utf8'))
+        expect(native.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              file: 'convex/functions.ts',
+              exports: expect.arrayContaining([expect.objectContaining({ name: 'named' })]),
+            }),
+          ]),
+        )
+      }
+    },
+  )
+}
 it('public row rejects initializer-time indexing of an already-bound schema table', () => {
   prepare({
     'convex/schema.ts':

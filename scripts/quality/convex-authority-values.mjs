@@ -650,7 +650,7 @@ export class DeclarationValues {
     return value
   }
   variable(statement) {
-    if (!(statement.declarationList.flags & ts.NodeFlags.Const))
+    if ((statement.declarationList.flags & ts.NodeFlags.BlockScoped) !== ts.NodeFlags.Const)
       this.fail('mutable_binding', 'top-level runtime bindings must be const', statement)
     for (const declaration of statement.declarationList.declarations) {
       if (!ts.isIdentifier(declaration.name))

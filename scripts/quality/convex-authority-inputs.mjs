@@ -221,7 +221,7 @@ function variableFacts(statement) {
       start: declaration.getStart(),
       end: declaration.end,
       nameEnd: declaration.name.end,
-      constant: Boolean(statement.declarationList.flags & ts.NodeFlags.Const),
+      constant: (statement.declarationList.flags & ts.NodeFlags.BlockScoped) === ts.NodeFlags.Const,
       erased: erasedStatement(statement),
       exported: Boolean(
         statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword),
