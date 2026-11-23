@@ -84,6 +84,73 @@ async function driverControl(directory, program) {
   return { ...outcome, output, milliseconds: performance.now() - started, evidence }
 }
 
+function delayedSupervisorCleanup(directory, missingReceipt = false) {
+  const hook = join(directory, 'delayed-cleanup.mjs')
+  writeFileSync(
+    hook,
+    `import { readFileSync, writeFileSync, rmSync } from 'node:fs';
+    if (process.argv[1]?.endsWith('/scanner-supervisor.mjs')) {
+      const nativeKill = process.kill.bind(process), request = JSON.parse(process.argv[2]);
+      process.kill = (pid, signal) => {
+        if (pid !== -process.pid || signal !== 'SIGKILL') return nativeKill(pid, signal);
+        writeFileSync(${JSON.stringify(join(directory, 'genuine.json'))}, readFileSync(request.path));
+        if (${missingReceipt}) rmSync(request.path);
+        setTimeout(() => nativeKill(pid, signal), 300);
+        return true;
+      };
+    }`,
+  )
+  return `process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS + ' ' : '') + ${JSON.stringify('--import=' + hook)};`
+}
+
+it.each([0, 7])('preserves native exit %i during supervised fallback cleanup', async (status) => {
+  const directory = mkdtempSync(join(tmpdir(), 'scanner-delayed-cleanup-'))
+  temporary.push(directory)
+  const result = await driverControl(
+    directory,
+    `${delayedSupervisorCleanup(directory)}
+    try {
+      const result = await runScanner('completion', process.execPath, ['-e', ${JSON.stringify(`process.stdout.write('native completion'); process.exitCode = ${status}`)}], { budgetMs: 4000 });
+      console.log(result.stdout); process.exitCode = result.status;
+    } catch (error) { console.error(error.message); process.exitCode = error.exitCode ?? 1 }`,
+  )
+  expect(result.code, result.output).toBe(status)
+  expect(result.output).toContain('native completion')
+  const genuine = JSON.parse(readFileSync(join(directory, 'genuine.json'), 'utf8'))
+  const record = JSON.parse(
+    readFileSync(join(result.evidence, 'completion-execution.json'), 'utf8'),
+  )
+  expect(genuine.status).toBe(status)
+  expect(genuine.reason).toBe('completed')
+  expect(record.state).toBe('complete')
+  expect(record.error).toBeNull()
+  expect(record.groupTerminated).toBe(true)
+  expect(record.streamsDrained).toBe(true)
+  expect(record.settlementMilliseconds).toBeLessThanOrEqual(2000)
+})
+
+it('rejects a missing receipt during supervised fallback cleanup', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'scanner-missing-delayed-receipt-'))
+  temporary.push(directory)
+  const result = await driverControl(
+    directory,
+    `${delayedSupervisorCleanup(directory, true)}
+    try { await runScanner('completion', process.execPath, ['-e', 'process.exitCode = 0'], { budgetMs: 4000 }); }
+    catch (error) { console.error(error.message); process.exitCode = error.exitCode ?? 1 }`,
+  )
+  expect(result.code, result.output).toBe(1)
+  expect(result.output).toContain('receipt')
+  const genuine = JSON.parse(readFileSync(join(directory, 'genuine.json'), 'utf8'))
+  const record = JSON.parse(
+    readFileSync(join(result.evidence, 'completion-execution.json'), 'utf8'),
+  )
+  expect(genuine.status).toBe(0)
+  expect(record.state).toBe('failed')
+  expect(record.groupTerminated).toBe(true)
+  expect(record.streamsDrained).toBe(true)
+  expect(record.settlementMilliseconds).toBeLessThanOrEqual(2000)
+})
+
 it('rejects combined output beyond 64 MiB and observes native termination', async () => {
   const directory = mkdtempSync(join(tmpdir(), 'scanner-output-'))
   temporary.push(directory)

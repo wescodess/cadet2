@@ -118,6 +118,7 @@ function observe(child, request, captureBudget) {
       failure = null,
       signal = null,
       gone = false,
+      cleanupSent = false,
       done = false
     let supervisorStatus = null,
       supervisorSignal = null,
@@ -179,9 +180,12 @@ function observe(child, request, captureBudget) {
         stop('timeout')
       }
       if (terminalAt === null) return
-      if (!exited && current - terminalAt >= 50) stop(failure ?? 'supervisor did not settle')
       try {
         gone ||= groupGone(child.pid)
+        if (!exited && !gone && !cleanupSent && current - terminalAt >= 50) {
+          cleanupSent = true
+          killGroup(child.pid)
+        }
       } catch (error) {
         stop(error.message)
       }

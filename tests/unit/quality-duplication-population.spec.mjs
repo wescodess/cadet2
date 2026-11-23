@@ -155,7 +155,8 @@ for (const kind of ['empty', 'partial', 'vue-empty']) {
         join(directory, vue ? 'second.vue' : 'second.ts'),
         vue ? component('different') : block('different'),
       )
-      expect(row('restored-native').status).toBe(0)
+      const restored = row('restored-native')
+      expect(restored.status, restored.output).toBe(0)
       for (const file of ['first.ts', 'second.ts', 'third.js'])
         writeFileSync(join(directory, file), 'console.log(1)\n')
       if (vue) {
