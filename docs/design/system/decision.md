@@ -247,6 +247,10 @@ The approved design, both rounds and the full record are in [`docs/design/holder
 | `DESIGN.md` 12.2, QueueRow | Holder column | 72 px | 72 px, unchanged; the word wraps inside it |
 | B2 `decision.md`, build rules | Narrow queue Holder column | 64 px | 72 px |
 
+## Errata
+
+- [2026-11-22, work-status glyph arc syntax](errata/2026-11-22-state-glyph-arc-syntax.md): the half and three-quarter fill paths in `approved.html` and the later approved records carry one extra number in their arc, so browsers stop drawing them. The erratum gives the corrected paths for the fractions already approved; it is a mechanical correction, not an owner decision, and leaves every approved file unchanged.
+
 ## Discrepancies between the approved specimen and the critiques
 
 Found while recording; none changes the approved design. Implementers follow the specimen, except where a dated amendment (2026-11-18 or 2026-11-19, above and in `DESIGN.md`) changes it, and raise these at the first UI gate.

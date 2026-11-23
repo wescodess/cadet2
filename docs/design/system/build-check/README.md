@@ -61,5 +61,5 @@ The specimen loaded only `/fonts/ibm-plex/*.woff2` from the app, with no request
 
 ## For the owner
 
-- The work-status glyphs for **Submitted** and **Representative reviewing** in `approved.html` (and the B2 file) carry arc path data that browsers stop drawing partway (`A5.6 5.6 0 0 0 1 12.00 17.60z`). The build copies the paths exactly, so it renders exactly as approved. A clean half fill and three-quarter fill would need a design decision.
+- The work-status glyphs for **Submitted** and **Representative reviewing** in `approved.html` (and the B2 file) carry arc path data that browsers stop drawing partway (`A5.6 5.6 0 0 0 1 12.00 17.60z`). The build copies the paths exactly, so it renders exactly as approved. A clean half fill and three-quarter fill would need a design decision. Superseded on 2026-11-22 by the [glyph arc syntax erratum](../errata/2026-11-22-state-glyph-arc-syntax.md).
 - `DESIGN.md` and `tokens.css` still say the tokens are not wired into the app. The records are approval files, so this ticket leaves them unchanged.

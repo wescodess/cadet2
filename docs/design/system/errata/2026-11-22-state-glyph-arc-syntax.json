@@ -1,0 +1,50 @@
+{
+  "id": "2026-11-22-state-glyph-arc-syntax",
+  "date": "2026-11-22",
+  "kind": "mechanical SVG path syntax correction",
+  "ownerApproval": "none; restores the fractions already approved in DESIGN.md section 10 and section 11",
+  "fillDisk": { "cx": 12, "cy": 12, "r": 5.6, "start": "12 o'clock", "direction": "clockwise" },
+  "corrections": [
+    {
+      "glyph": "custom:fill-half",
+      "state": "submitted",
+      "fraction": 0.5,
+      "old": "M12 12V6.4A5.6 5.6 0 0 0 1 12.00 17.60z",
+      "corrected": "M12 12V6.4A5.6 5.6 0 0 1 12.00 17.60z"
+    },
+    {
+      "glyph": "custom:fill-three-quarters",
+      "state": "reviewing",
+      "fraction": 0.75,
+      "old": "M12 12V6.4A5.6 5.6 0 0 1 1 6.40 12.00z",
+      "corrected": "M12 12V6.4A5.6 5.6 0 1 1 6.40 12.00z"
+    }
+  ],
+  "sources": [
+    {
+      "file": "docs/design/system/approved.html",
+      "sha256": "97db488dd7a0abb48b56be28d83ea23d15bba9ab409d17887e41af9e356d81cd",
+      "occurrences": { "custom:fill-half": 13, "custom:fill-three-quarters": 27 }
+    },
+    {
+      "file": "docs/design/b2-practice-preparation/approved.html",
+      "sha256": "e08e725b68caa073ac471e00e9ff9fa73dd3e80365b01ff73cff2233fccdc2c5",
+      "occurrences": { "custom:fill-half": 159, "custom:fill-three-quarters": 0 }
+    },
+    {
+      "file": "docs/design/b1-access-and-intake/approved.html",
+      "sha256": "fdb76b32e9fbc2cfe71be091969db63114298d0cb669498f24f71148093b36b5",
+      "occurrences": { "custom:fill-half": 1, "custom:fill-three-quarters": 0 }
+    },
+    {
+      "file": "docs/design/holder-long-names/approved.html",
+      "sha256": "e5f40d79ce9c88dea9b5ad4f444844c275526a01da71ed4dd5669c29dab639d1",
+      "occurrences": { "custom:fill-half": 60, "custom:fill-three-quarters": 0 }
+    },
+    {
+      "file": "docs/design/holder-long-names/approved-preview.html",
+      "sha256": "10e086de943db26660e14c69b6082121b099274fc5e6adbb1a34598180f1c25a",
+      "occurrences": { "custom:fill-half": 14, "custom:fill-three-quarters": 0 }
+    }
+  ]
+}

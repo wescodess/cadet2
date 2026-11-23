@@ -240,7 +240,7 @@ No bounce and no stagger. Under `prefers-reduced-motion: reduce`, slides become 
 
 **Lucide** (`lucide-vue-next`), already in the stack. Interface icons use 1.75 px stroke at 15 to 18 px; state glyphs render at 2 px stroke at 16 px in chips and 18 px in row icon wells. Icons and glyphs are `aria-hidden="true"`; the adjacent word carries the meaning.
 
-One custom family, drawn as small Vue components on a 24 px grid: **work-status circles that fill as work moves**. Dashed with a quarter fill for intake, half for submitted, three quarters for reviewing, solid with a cut-out tick for signed and solid with a cut-out arrow for delivered; an outlined circle with a question mark for clarification; a dashed circle with a question mark for unknown. The cut-out uses `--glyph-cut` (the surface colour behind the glyph). Copy the paths from `approved.html`.
+One custom family, drawn as small Vue components on a 24 px grid: **work-status circles that fill as work moves**. Dashed with a quarter fill for intake, half for submitted, three quarters for reviewing, solid with a cut-out tick for signed and solid with a cut-out arrow for delivered; an outlined circle with a question mark for clarification; a dashed circle with a question mark for unknown. The cut-out uses `--glyph-cut` (the surface colour behind the glyph). Copy the paths from `approved.html`, except the half and three-quarter fills, whose arc syntax is corrected by the [2026-11-22 erratum](docs/design/system/errata/2026-11-22-state-glyph-arc-syntax.md).
 
 ## 11. Semantic states
 
