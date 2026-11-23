@@ -1,6 +1,16 @@
 // @vitest-environment node
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync, symlinkSync } from 'node:fs'
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  rmSync,
+  symlinkSync,
+  cpSync,
+  readdirSync,
+  chmodSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { afterEach, expect, it, vi } from 'vitest'
@@ -131,6 +141,81 @@ it('rejects private imports, including an index in a private directory, and admi
   put('shared/feature/index.ts', "import { secret } from './private/index'; console.log(secret)")
   expect(row('boundaries', directory).status).toBe(0)
 })
+
+it.each([
+  ['native', 1, 2, /boundaries regression/],
+  ['omit-new', 1, 1, /Invalid dependency-cruiser report/],
+  ['omit-all', 1, 0, /Invalid dependency-cruiser report/],
+  ['positive', 0, 0, /boundaries: PASS/],
+])(
+  'checks %s boundary reports with inherited debt at the public row',
+  (mode, status, count, message) => {
+    const { directory, put } = fixture({
+      'app/lib/utils.ts':
+        mode === 'positive'
+          ? 'console.log(1)'
+          : "import { secret } from '../../shared/private/secret'; import { server } from '../../server/control'; console.log(secret, server)",
+      'shared/private/secret.ts': 'export const secret = 1',
+      'server/control.ts': 'export const server = 2',
+    })
+    rmSync(join(directory, 'node_modules'))
+    mkdirSync(join(directory, 'node_modules/.bin'), { recursive: true })
+    for (const name of readdirSync(join(root, 'node_modules')).filter((name) => name !== '.bin'))
+      symlinkSync(join(root, 'node_modules', name), join(directory, 'node_modules', name))
+    cpSync(join(root, 'scripts/quality'), join(directory, 'scripts/quality'), { recursive: true })
+    put(
+      'scripts/quality/baselines/boundaries.json',
+      JSON.stringify({
+        date: '2026-11-21',
+        commit: '1b335bface0686641850ea8cd23aa5c5dea4e45c',
+        counts:
+          mode === 'positive'
+            ? {}
+            : { 'app/lib/utils.ts|entry:shared/|shared/private/secret.ts': 1 },
+      }),
+    )
+    put(
+      'node_modules/.bin/depcruise',
+      `#!/usr/bin/env node
+const { spawnSync } = require('node:child_process');
+const { writeFileSync } = require('node:fs');
+const result = spawnSync(${JSON.stringify(join(root, 'node_modules/.bin/depcruise'))}, process.argv.slice(2), { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+if (result.status !== 0) { process.stderr.write(result.stderr); process.exit(result.status ?? 1); }
+const report = JSON.parse(result.stdout);
+writeFileSync('.quality-output/native.json', JSON.stringify(report));
+if (process.env.BOUNDARY_REPORT_MODE === 'omit-new') report.summary.violations = report.summary.violations.filter(v => v.rule.name !== 'client-entry');
+if (process.env.BOUNDARY_REPORT_MODE === 'omit-all') report.summary.violations = [];
+report.summary.error = report.summary.violations.length;
+report.summary.advisedExitCode = report.summary.error;
+writeFileSync('.quality-output/emitted.json', JSON.stringify(report));
+process.stdout.write(JSON.stringify(report));
+`,
+    )
+    chmodSync(join(directory, 'node_modules/.bin/depcruise'), 0o755)
+    mkdirSync(join(directory, '.quality-output'), { recursive: true })
+    const environment = { ...process.env, QUALITY_BASE_REF: 'HEAD', BOUNDARY_REPORT_MODE: mode }
+    delete environment.QUALITY_OUTPUT_DIR
+    const result = spawnSync(
+      process.execPath,
+      [join(directory, 'scripts/quality/boundaries.mjs')],
+      {
+        cwd: directory,
+        encoding: 'utf8',
+        env: environment,
+        maxBuffer: 16 * 1024 * 1024,
+      },
+    )
+    expect(result.status, result.stdout + result.stderr).toBe(status)
+    expect(result.stdout + result.stderr).toMatch(message)
+    const native = JSON.parse(readFileSync(join(directory, '.quality-output/native.json'), 'utf8'))
+    const emitted = JSON.parse(
+      readFileSync(join(directory, '.quality-output/emitted.json'), 'utf8'),
+    )
+    expect(native.summary.violations).toHaveLength(mode === 'positive' ? 0 : 2)
+    expect(emitted.summary.violations).toHaveLength(count)
+    expect(emitted.modules).toStrictEqual(native.modules)
+  },
+)
 
 it('rejects an unused file and admits a reachable file at the dead-code command', () => {
   const { directory, put } = fixture({

@@ -134,6 +134,68 @@ const report = z
       .strict(),
   })
   .strict()
+
+function violationIdentity(violation, links) {
+  const { type, from, to, rule, cycle } = violation
+  if (type === 'dependency' && cycle === undefined)
+    return JSON.stringify([type, rule.name, from, to])
+  if (type !== 'cycle' || !cycle?.length) return null
+  const names = cycle.map((item) => item.name)
+  const pairs = names.map((name, index) => JSON.stringify([names.at(index - 1), name]))
+  if (
+    new Set(names).size !== names.length ||
+    !pairs.includes(JSON.stringify([from, to])) ||
+    pairs.some((pair) => !links.has(pair))
+  )
+    return null
+  // The pinned reporter coalesces rotated cycle witnesses by their member set.
+  return JSON.stringify([type, rule.name, names.sort()])
+}
+
+function violationWitness(violation) {
+  const { type, from, to, unresolvedTo, dependencyTypes, rule, cycle } = violation
+  return JSON.stringify([type, from, to, unresolvedTo, dependencyTypes, rule, cycle])
+}
+
+function completeViolations(modules, summary) {
+  const types = new Map(
+    summary.ruleSetUsed.forbidden.map((rule) => [
+      rule.name,
+      rule.to.circular ? 'cycle' : 'dependency',
+    ]),
+  )
+  if (types.size !== summary.ruleSetUsed.forbidden.length) return false
+  const edges = modules.flatMap((module) =>
+    module.dependencies.map((dependency) => ({ from: module.source, dependency })),
+  )
+  if (edges.some(({ dependency }) => dependency.valid !== !dependency.rules?.length)) return false
+  const links = new Set(
+    edges.map(({ from, dependency }) => JSON.stringify([from, dependency.resolved])),
+  )
+  const graph = edges.flatMap(({ from, dependency }) =>
+    (dependency.rules ?? []).map((rule) => ({
+      type: types.get(rule.name),
+      from,
+      to: dependency.resolved,
+      unresolvedTo: dependency.module,
+      dependencyTypes: dependency.dependencyTypes,
+      rule,
+      cycle: types.get(rule.name) === 'cycle' ? dependency.cycle : undefined,
+    })),
+  )
+  const expected = new Set(graph.map((violation) => violationIdentity(violation, links)))
+  const witnesses = new Set(graph.map(violationWitness))
+  const reported = summary.violations.map((violation) => violationIdentity(violation, links))
+  return (
+    !expected.has(null) &&
+    !reported.includes(null) &&
+    new Set(reported).size === reported.length &&
+    expected.size === reported.length &&
+    reported.every((identity) => expected.has(identity)) &&
+    summary.violations.every((violation) => witnesses.has(violationWitness(violation)))
+  )
+}
+
 export const parse = parser(
   'dependency-cruiser report',
   z
@@ -144,20 +206,8 @@ export const parse = parser(
       const summary = value.summary
       const sources = value.modules.map((item) => item.source)
       const dependencies = value.modules.flatMap((item) => item.dependencies)
-      const reportedEdges = summary.violations.every((violation) =>
-        value.modules.some(
-          (module) =>
-            module.source === violation.from &&
-            module.dependencies.some(
-              (dependency) =>
-                dependency.resolved === violation.to &&
-                dependency.rules?.some((rule) => rule.name === violation.rule.name),
-            ),
-        ),
-      )
       const valid =
-        reportedEdges &&
-        summary.error > 0 === dependencies.some((dependency) => !dependency.valid) &&
+        completeViolations(value.modules, summary) &&
         summary.totalCruised === sources.length &&
         summary.totalDependenciesCruised === dependencies.length &&
         selected.every((file) => sources.includes(file)) &&
