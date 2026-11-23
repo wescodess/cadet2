@@ -6,6 +6,7 @@ import TurnDisc from '~/components/relay/TurnDisc.vue'
 import type { RelayTurn } from '~/components/relay/turns'
 
 import { expectAccessible, readableText } from './accessibility'
+import { approvedHolderWords } from './specimen'
 
 function holder(props: { turn: RelayTurn; word: string; initials?: string; unassigned?: boolean }) {
   return mount(TurnHolder, { props })
@@ -116,5 +117,80 @@ describe('TurnHolder', () => {
   it('accepts an unassigned file with an empty person disc', () => {
     const wrapper = holder({ turn: 'representative', word: 'Unassigned', unassigned: true })
     expect(wrapper.get('svg').classes()).toContain('lucide-user-round')
+  })
+})
+
+describe('TurnHolder long words', () => {
+  const stress = (length: number) => 'Longsyntheticfirstname'.repeat(12).slice(0, length)
+
+  function parts(word: string, turn: RelayTurn = 'representative') {
+    return holder({ turn, word, initials: 'AB' })
+      .findAll('[data-slot="holder-part"]')
+      .map((part) => part.text())
+  }
+
+  it.each([
+    ['Sivasubramanian', ['Sivasubramanian']],
+    ['Jean-Baptiste', ['Jean-Baptiste']],
+    ['Anna Marie-Ève', ['Anna', 'Marie-Ève']],
+    ['Maria Guadalupe', ['Maria', 'Guadalupe']],
+    ['You, later', ['You,', 'later']],
+  ] as const)('breaks "%s" at its spaces first', (word, expected) => {
+    expect(parts(word)).toEqual(expected)
+  })
+
+  it.each([
+    ['Anna Marie-Ève', 'Whose turn: Anna Marie-Ève'],
+    ['Maria Guadalupe', 'Whose turn: Maria Guadalupe'],
+  ] as const)('still reads "%s" as one whole name after the prefix', (word, sentence) => {
+    const wrapper = holder({ turn: 'representative', word, initials: 'AM' })
+    expect(readableText(wrapper)).toBe(sentence)
+    expect(wrapper.get('[data-slot="holder-word"]').text()).toBe(sentence)
+    expectAccessible(wrapper)
+  })
+
+  it.each([64, 128, 255])(
+    'keeps every character of a %i character word, with nothing inserted or cut',
+    (length) => {
+      const word = stress(length)
+      expect(word).toHaveLength(length)
+      const wrapper = holder({ turn: 'representative', word, initials: 'LS' })
+      expect(readableText(wrapper)).toBe(`Whose turn: ${word}`)
+      expect(parts(word)).toEqual([word])
+    },
+  )
+
+  it.each(
+    approvedHolderWords().map(
+      (approved) =>
+        [
+          approved.word.length > 32
+            ? `${String(approved.word.length)} character stress word`
+            : approved.word,
+          approved,
+        ] as const,
+    ),
+  )('matches the approved split of "%s"', (_label, approved) => {
+    const { word } = approved
+    const turn = approved.prefix === 'Whose turn:' ? 'representative' : 'done'
+    const wrapper = holder({ turn, word, initials: turn === 'done' ? undefined : 'AB' })
+    expect(parts(word, turn)).toEqual(approved.parts)
+    expect(readableText(wrapper)).toBe(`${approved.prefix} ${word}`)
+  })
+
+  it('lets a desk word part break inside itself only within the column, and leaves the client word growing', () => {
+    const wrapper = holder({ turn: 'representative', word: 'Anna Marie-Ève', initials: 'AM' })
+    expect(wrapper.classes()).toEqual(
+      expect.arrayContaining([
+        'grid-cols-1',
+        'max-w-18',
+        'client:grid-cols-none',
+        'client:max-w-none',
+      ]),
+    )
+    for (const part of wrapper.findAll('[data-slot="holder-part"]'))
+      expect(part.classes()).toEqual(
+        expect.arrayContaining(['inline-block', 'max-w-full', 'wrap-anywhere', 'client:inline']),
+      )
   })
 })

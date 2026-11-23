@@ -12,3 +12,18 @@ export const stateGroups = [...new Set(relayStates.map((state) => state.group))]
     .filter((state) => state.group === name)
     .map((state) => ({ id: state.id, count: counts[state.id] })),
 }))
+
+const stress = (length: number) => 'Longsyntheticfirstname'.repeat(12).slice(0, length)
+
+export const longHolderRows = [
+  { name: 'Rahul Venkataraghavan', word: 'Sivasubramanian', initials: 'SK' },
+  { name: 'Chinwe Eze-Lindqvist', word: 'Jean-Baptiste', initials: 'JB' },
+  { name: 'Aigerim Nurlanovna Bekmukhambetova', word: 'Anna Marie-Ève', initials: 'AM' },
+  { name: 'Zhang Wei', word: 'Maria Guadalupe', initials: 'MG' },
+  { name: 'Leilani Kahananui-Ferreira', word: 'Ọláolúwa', initials: 'OO' },
+  ...[64, 128, 255].map((length) => ({
+    name: `Stress test, ${String(length)} characters`,
+    word: stress(length),
+    initials: 'LS',
+  })),
+]

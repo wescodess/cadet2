@@ -14,7 +14,7 @@ import SignedPlanHeader from '~/components/relay/SignedPlanHeader.vue'
 import StatusChip from '~/components/relay/StatusChip.vue'
 import TurnHolder from '~/components/relay/TurnHolder.vue'
 
-import { stateGroups } from './fixtures'
+import { longHolderRows, stateGroups } from './fixtures'
 import SpecimenSpec from './SpecimenSpec.vue'
 
 const props = defineProps<{ theme: 'light' | 'dark' }>()
@@ -169,7 +169,12 @@ const rows = [
             <span class="text-small text-muted-foreground">{{ row.detail }}</span>
             <span><StatusChip :state="row.state" size="sm" /></span>
           </span>
-          <TurnHolder :turn="row.turn" :word="row.word" :initials="row.initials" class="w-18" />
+          <TurnHolder
+            :turn="row.turn"
+            :word="row.word"
+            :initials="row.initials"
+            class="w-18 shrink-0"
+          />
         </a>
       </div>
       <div class="mt-4 flex flex-wrap items-start gap-4">
@@ -177,6 +182,32 @@ const rows = [
         <TurnHolder turn="signed" word="Signed" />
         <TurnHolder turn="done" word="Done" />
         <TurnHolder turn="none" word="Not yet" />
+      </div>
+    </SpecimenSpec>
+
+    <SpecimenSpec
+      title="Long holder words"
+      note="Words break at spaces first, and inside a word only when it cannot fit 72 px. The row grows only for extreme words; 64, 128 and 255 characters are stress tests, not limits."
+    >
+      <div class="overflow-hidden rounded-panel border border-border bg-card">
+        <a
+          v-for="row in longHolderRows"
+          :key="row.word"
+          href="#queue"
+          class="flex items-start gap-2.5 border-b border-border px-3.5 py-2.5 no-underline last:border-b-0 hover:bg-accent"
+        >
+          <span class="grid min-w-0 flex-1 gap-1">
+            <span class="font-medium">{{ row.name }}</span>
+            <span class="text-small text-muted-foreground">Work permit · 14 Mar 2027</span>
+            <span><StatusChip state="submitted" size="sm" /></span>
+          </span>
+          <TurnHolder
+            turn="representative"
+            :word="row.word"
+            :initials="row.initials"
+            class="w-18 shrink-0"
+          />
+        </a>
       </div>
     </SpecimenSpec>
 
