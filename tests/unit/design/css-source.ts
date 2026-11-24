@@ -59,7 +59,7 @@ function record(into: Blocks, frame: { selector: string; text: string }) {
   }
 }
 
-export function parseBlocks(css: string, into: Blocks = new Map()): Blocks {
+function parseBlocks(css: string, into: Blocks = new Map()): Blocks {
   const source = stripComments(css)
   const frames: { selector: string; text: string }[] = [{ selector: '', text: '' }]
   let boundary = 0
@@ -97,7 +97,7 @@ export function recordJson() {
   return JSON.parse(readFileSync(repoPath('docs/design/system/tokens.json'), 'utf8')) as RecordJson
 }
 
-export interface RecordState {
+interface RecordState {
   id: string
   group: string
   word: string
@@ -107,7 +107,7 @@ export interface RecordState {
   meaning: string
 }
 
-export interface RecordJson {
+interface RecordJson {
   font: Record<string, string>
   radius: string
   motion: Record<string, string>

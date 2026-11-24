@@ -3,6 +3,7 @@
     "index.{ts,js,mjs}",
     "app/auth.config.ts",
     "server/auth.config.ts",
+    "app/specimen/RelaySpecimen.vue",
     "scripts/quality/knip.scanner.mjs",
     "scripts/quality/convex-authority.scanner.mjs",
     "scripts/quality/scanner-supervisor.mjs",

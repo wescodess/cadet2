@@ -84,7 +84,7 @@ function semanticViolations(element: Element, label: string): string[] {
   return []
 }
 
-export function accessibilityViolations(target: Target): string[] {
+function accessibilityViolations(target: Target): string[] {
   const root = elementOf(target)
   const elements = [root, ...root.querySelectorAll('*')]
   const ids = elements.map((element) => element.id).filter(Boolean)

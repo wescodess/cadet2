@@ -1,44 +1,31 @@
-export const relayRoles = [
-  'positive',
-  'negative',
-  'caution',
-  'progress',
-  'seal',
-  'scope',
-  'history',
-  'urgent',
-] as const
+type RelayRole =
+  'positive' | 'negative' | 'caution' | 'progress' | 'seal' | 'scope' | 'history' | 'urgent'
 
-export type RelayRole = (typeof relayRoles)[number]
-
-export const relayGlyphs = [
-  'alarm-clock',
-  'archive',
-  'badge-check',
-  'ban',
-  'calendar-clock',
-  'calendar-search',
-  'circle-arrow-out-up-right',
-  'circle-check',
-  'circle-dashed',
-  'custom:circle-dashed-question',
-  'custom:circle-question',
-  'custom:disc-arrow',
-  'custom:disc-check',
-  'custom:fill-half',
-  'custom:fill-quarter-dashed',
-  'custom:fill-three-quarters',
-  'file-check',
-  'file-clock',
-  'file-up',
-  'file-x',
-  'git-compare-arrows',
-  'message-square-quote',
-  'send',
-  'siren',
-] as const
-
-export type RelayGlyph = (typeof relayGlyphs)[number]
+export type RelayGlyph =
+  | 'alarm-clock'
+  | 'archive'
+  | 'badge-check'
+  | 'ban'
+  | 'calendar-clock'
+  | 'calendar-search'
+  | 'circle-arrow-out-up-right'
+  | 'circle-check'
+  | 'circle-dashed'
+  | 'custom:circle-dashed-question'
+  | 'custom:circle-question'
+  | 'custom:disc-arrow'
+  | 'custom:disc-check'
+  | 'custom:fill-half'
+  | 'custom:fill-quarter-dashed'
+  | 'custom:fill-three-quarters'
+  | 'file-check'
+  | 'file-clock'
+  | 'file-up'
+  | 'file-x'
+  | 'git-compare-arrows'
+  | 'message-square-quote'
+  | 'send'
+  | 'siren'
 
 export type RelayNeutralGlyph = 'circle-dashed' | 'circle-help' | 'inbox'
 

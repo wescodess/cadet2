@@ -1,6 +1,11 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
+/**
+ * @typedef {{ roles: string[], theme: { light: Record<string, string>, dark: Record<string, string> } }} ContrastRecord
+ * @typedef {{ kind: 'text' | 'non-text', minimum: number, fg: string, bg: string, use: string, light: number, dark: number, passes: boolean }} ContrastRow
+ */
+
 const recordPath = 'docs/design/system/tokens.json'
 export const outputPath = 'docs/design/system/build-check/contrast.md'
 
@@ -16,12 +21,12 @@ function luminance(hex) {
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
 }
 
-export function contrast(a, b) {
+function contrast(a, b) {
   const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x)
   return (light + 0.05) / (dark + 0.05)
 }
 
-export function pairs(record) {
+function pairs(record) {
   const text = [
     ...surfaces.map((surface) => ['foreground', surface, 'Body text']),
     ...['background', 'card', 'popover', 'muted', 'accent'].map((surface) => [
@@ -77,6 +82,10 @@ export function pairs(record) {
   ]
 }
 
+/**
+ * @param {ContrastRecord} record
+ * @returns {ContrastRow[]}
+ */
 export function rows(record) {
   return pairs(record).map((pair) => {
     const [light, dark] = ['light', 'dark'].map((theme) => {
@@ -92,6 +101,7 @@ export function rows(record) {
   })
 }
 
+/** @param {ContrastRecord} record */
 export function render(record) {
   const all = rows(record)
   const table = (kind) =>
@@ -128,6 +138,7 @@ ${table('non-text')}
 `
 }
 
+/** @returns {ContrastRecord} */
 export function readRecord() {
   return JSON.parse(readFileSync(recordPath, 'utf8'))
 }

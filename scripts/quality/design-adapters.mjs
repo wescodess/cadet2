@@ -143,7 +143,7 @@ function compoundValues(node, bindings, seen) {
   return uninspectable
 }
 
-export function utilityFindings(text, offset = 0) {
+function utilityFindings(text, offset = 0) {
   return staticCandidates(text, offset).flatMap((candidate) => {
     const base = candidate.value.split(':').at(-1).replace(/^!|!$/g, '')
     const messageId = /\[|\]/.test(candidate.value)

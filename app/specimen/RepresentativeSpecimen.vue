@@ -2,7 +2,8 @@
 import { CircleAlert } from 'lucide-vue-next'
 
 import { Button } from '~/components/ui/button'
-import { FieldDescription, FieldError } from '~/components/ui/field'
+import FieldDescription from '~/components/ui/field/FieldDescription.vue'
+import FieldError from '~/components/ui/field/FieldError.vue'
 import { Input } from '~/components/ui/input'
 import { Kbd } from '~/components/ui/kbd'
 import { Label } from '~/components/ui/label'

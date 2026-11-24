@@ -1,13 +1,7 @@
-import {
-  adaptDesignSource,
-  analyseDesignInputs,
-  styleDefinitions,
-  utilityFindings,
-} from './design-adapters.mjs'
+import { adaptDesignSource, analyseDesignInputs, styleDefinitions } from './design-adapters.mjs'
 import { designAuthority } from './design-authority.mjs'
 import { createValuePolicy } from './design-values.mjs'
 
-export { utilityFindings }
 export const designMessages = {
   inlineStyle: 'Inline styles are not allowed in new UI files; use Relay token utilities.',
   arbitraryValue:

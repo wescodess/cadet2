@@ -21,7 +21,7 @@ const standard = new Set(
 )
 const directives = new Set('theme utility variant custom-variant apply reference'.split(' '))
 
-export function lexicalFinding(text) {
+function lexicalFinding(text) {
   const stack = []
   let invalid = null
   const t = css.tokenTypes
