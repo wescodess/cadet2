@@ -662,6 +662,25 @@ it.each([
   expect(row('boundaries', directory).status).toBe(0)
 })
 
+it.each(['app', 'server', 'shared'])(
+  'admits a %s module root entry backed by its own private implementation',
+  (scope) => {
+    const consumer = `${scope}/consumer.ts`
+    const { directory, put } = fixture({
+      [`${scope}/modules/feature/private/value.ts`]: 'export const value = 1',
+      [`${scope}/modules/feature/index.ts`]: "export { value } from './private/value'",
+      [consumer]: "import { value } from './modules/feature/index'; console.log(value)",
+    })
+    const admitted = row('boundaries', directory)
+    expect(admitted.output).toContain('boundaries: PASS')
+    expect(admitted.status).toBe(0)
+    put(consumer, "import { value } from './modules/feature/private/value'; console.log(value)")
+    const denied = row('boundaries', directory)
+    expect(denied.status, denied.output).toBe(1)
+    expect(denied.output).toContain(`entry:${scope}/modules/feature/`)
+  },
+)
+
 it('requires paid-down inherited dead-code allowances to be lowered', () => {
   const file = 'shared/types/workspace-summary.ts'
   const { directory, put } = fixture({

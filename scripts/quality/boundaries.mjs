@@ -10,22 +10,17 @@ import { parse } from './boundaries.parser.mjs'
 const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 main(async () => {
   const selected = structuralFiles()
-  const owners = new Set(
-    selected.flatMap((file) => {
-      const privatePath = file.match(/^(.+\/)\b(?:private|internal)\//)?.[1]
-      const modulePath = file.match(/^((?:app|server|shared)\/modules\/[^/]+\/)/)?.[1]
-      return [
-        privatePath && [privatePath, `${escape(privatePath)}(?:private|internal)/`],
-        modulePath && [modulePath, escape(modulePath)],
-      ]
-        .filter(Boolean)
-        .map(JSON.stringify)
-    }),
-  )
+  const owners = new Map()
+  for (const file of selected) {
+    const privatePath = file.match(/^(.+\/)\b(?:private|internal)\//)?.[1]
+    const modulePath = file.match(/^((?:app|server|shared)\/modules\/[^/]+\/)/)?.[1]
+    if (privatePath && !owners.has(privatePath))
+      owners.set(privatePath, `${escape(privatePath)}(?:private|internal)/`)
+    if (modulePath) owners.set(modulePath, escape(modulePath))
+  }
   const forbidden = [
     ...config.forbidden,
-    ...[...owners].map((owner) => {
-      const [directory, target] = JSON.parse(owner)
+    ...[...owners].map(([directory, target]) => {
       return {
         name: `entry:${directory}`,
         severity: 'error',
