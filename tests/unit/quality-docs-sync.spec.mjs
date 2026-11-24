@@ -4,115 +4,49 @@ import { expect, it } from 'vitest'
 
 const START = '<!-- quality-figures:start -->'
 const END = '<!-- quality-figures:end -->'
-const numbers = [
-  'zero',
-  'one',
-  'two',
-  'three',
-  'four',
-  'five',
-  'six',
-  'seven',
-  'eight',
-  'nine',
-  'ten',
-]
-const count = (text) => (numbers.includes(text) ? numbers.indexOf(text) : Number(text))
 const total = (entries) => entries.reduce((sum, [, value]) => sum + value, 0)
 const category = (entries, kind) => total(entries.filter(([key]) => key.split('|')[1] === kind))
 const occurrences = (text, part) => text.split(part).length - 1
 
-function figures(docs, problems) {
-  if (occurrences(docs, START) !== 1 || occurrences(docs, END) !== 1) {
-    problems.push(`expected exactly one ${START} … ${END} block`)
-    return ''
-  }
-  const [, after] = docs.split(START)
-  const [inside] = after.split(END)
-  if (!docs.includes(END, docs.indexOf(START))) problems.push(`${END} precedes ${START}`)
-  return inside.replace(/<!--[\s\S]*?-->/g, '').replace(/^```[\s\S]*?^```/gm, '')
+function render({ entries, tools, boundaries, deadCode, duplication }) {
+  const scanners = entries
+    .filter((entry) => entry.startsWith('scripts/quality/'))
+    .map((entry) => `\`${entry.slice('scripts/quality/'.length)}\``)
+    .sort()
+  const operators = entries.filter((entry) => /^qa\/.*\.mjs$/.test(entry)).length
+  const defaults = entries.filter((entry) => entry.endsWith('auth.config.ts')).length
+  const roots = [...new Set(boundaries.map(([key]) => key.split('/')[0]))]
+  const where = roots.length === 1 ? `, all in \`${roots[0]}/\`` : ''
+  const unused = ['files', 'exports', 'types', 'dependencies', 'devDependencies'].map((kind) =>
+    category(deadCode, kind),
+  )
+  return [
+    '| Row | Pin and threshold | Inherited baseline |',
+    '| --- | --- | --- |',
+    `| \`pnpm boundaries:check\` | [dependency-cruiser **${tools['dependency-cruiser']}**](https://github.com/sverweij/dependency-cruiser/blob/main/doc/rules-reference.md); zero new cycles or prohibited import edges | **${total(boundaries)}** exact cycle identities${where}; \`baselines/boundaries.json\` |`,
+    `| \`pnpm dead-code:check\` | [knip **${tools.knip}**](https://knip.dev/reference/cli); zero new unused files, value/type exports, production/dev dependencies | **${total(deadCode)}** identities: ${unused[0]} files, ${unused[1]} value exports, ${unused[2]} type exports, ${unused[3]} dependencies, ${unused[4]} devDependencies; \`baselines/dead-code.json\` |`,
+    `| \`pnpm duplication:check\` | [jscpd **${tools.jscpd}**](https://github.com/kucherenko/jscpd); exact clones of at least **100 tokens and 10 lines**, strict mode; zero new changed-file clone identities | **${total(duplication)}** file/clone occurrences across ${duplication.length} keys; \`baselines/duplication.json\` |`,
+    '',
+    `Explicit Knip entries: **${defaults}** Nuxt auth defaults, **${operators}** operator CLI paths and **${scanners.length}** scanner executable files (${scanners.join(', ')}).`,
+  ].join('\n')
 }
 
-function drift({ docs, entries, tools, boundaries, deadCode, duplication }) {
+function drift(sources) {
+  const { docs } = sources
+  if (occurrences(docs, START) !== 1 || occurrences(docs, END) !== 1)
+    return [`expected exactly one ${START} and one ${END}`]
+  const start = docs.indexOf(START)
+  const end = docs.indexOf(END)
+  if (end < start) return [`${END} precedes ${START}`]
+  const before = docs.slice(0, start)
   const problems = []
-  const block = figures(docs, problems)
-  const once = (text, pattern, where) => {
-    const found = [...text.matchAll(new RegExp(pattern.source, 'g'))]
-    if (found.length !== 1)
-      problems.push(`${where}: expected one ${pattern}, found ${found.length}`)
-    return found[0]
-  }
-  const row = (command) => {
-    const matches = block.split('\n').filter((line) => line.startsWith(`| \`${command}\` |`))
-    if (matches.length !== 1)
-      problems.push(`expected one row for ${command}, found ${matches.length}`)
-    return matches[0] ?? ''
-  }
-  const compare = (where, documented, actual) => {
-    if (JSON.stringify(documented) !== JSON.stringify(actual))
-      problems.push(
-        `${where}: documents ${JSON.stringify(documented)}, source is ${JSON.stringify(actual)}`,
-      )
-  }
-  const pinned = (command, tool) => {
-    const match = once(row(command), new RegExp(`\\[${tool} \\*\\*([^*]+)\\*\\*\\]`), command)
-    if (match) compare(`${command} ${tool} version`, match[1], tools[tool])
-  }
-
-  const scanners = entries.filter((entry) => entry.startsWith('scripts/quality/')).sort()
-  const listed = once(block, /the (\w+) scanner executable files \(([^)]*)\)/, 'scanner entries')
-  if (listed) {
-    const named = [...listed[2].matchAll(/`([^`]+)`/g)].map(([, name]) => `scripts/quality/${name}`)
-    compare('scanner entries', [count(listed[1]), named.sort()], [scanners.length, scanners])
-  }
-  const operators = once(block, /The (\w+) operator CLI paths in `knip\.json`/, 'operator entries')
-  if (operators)
-    compare(
-      'operator entries',
-      count(operators[1]),
-      entries.filter((e) => /^qa\/.*\.mjs$/.test(e)).length,
-    )
-  const defaults = once(block, /The (\w+) Nuxt auth defaults/, 'auth entries')
-  if (defaults)
-    compare(
-      'auth entries',
-      count(defaults[1]),
-      entries.filter((e) => e.endsWith('auth.config.ts')).length,
-    )
-
-  pinned('pnpm boundaries:check', 'dependency-cruiser')
-  const cycles = once(
-    row('pnpm boundaries:check'),
-    /\*\*(\d+)\*\* exact cycle identities/,
-    'boundaries',
-  )
-  if (cycles) compare('boundaries baseline', Number(cycles[1]), total(boundaries))
-
-  pinned('pnpm dead-code:check', 'knip')
-  const unused = once(
-    row('pnpm dead-code:check'),
-    /\*\*(\d+)\*\* identities: (\d+) files, (\d+) value exports, (\d+) type exports, (\d+) dependencies, (\d+) devDependencies/,
-    'dead-code',
-  )
-  if (unused)
-    compare('dead-code baseline', unused.slice(1).map(Number), [
-      total(deadCode),
-      ...['files', 'exports', 'types', 'dependencies', 'devDependencies'].map((kind) =>
-        category(deadCode, kind),
-      ),
-    ])
-
-  pinned('pnpm duplication:check', 'jscpd')
-  const clones = once(
-    row('pnpm duplication:check'),
-    /\*\*(\d+)\*\* file\/clone occurrences across (\d+) keys/,
-    'duplication',
-  )
-  if (clones)
-    compare('duplication baseline', clones.slice(1).map(Number), [
-      total(duplication),
-      duplication.length,
-    ])
+  if (occurrences(before, '<!--') !== occurrences(before, '-->'))
+    problems.push('the figures block sits inside an HTML comment')
+  if (before.split('\n').filter((line) => /^\s*(```|~~~)/.test(line)).length % 2)
+    problems.push('the figures block sits inside a code fence')
+  const expected = render(sources)
+  if (docs.slice(start + START.length, end).trim() !== expected)
+    problems.push(`docs/agents/quality-bar.md figures block must read exactly:\n${expected}`)
   return problems
 }
 
@@ -130,25 +64,18 @@ function repository() {
   }
 }
 
-const FIXTURE_TABLE = [
-  '| Row | Pin and threshold | Inherited baseline |',
-  '| --- | --- | --- |',
-  '| `pnpm boundaries:check` | [dependency-cruiser **1.0.0**](x) | **2** exact cycle identities |',
-  '| `pnpm dead-code:check` | [knip **2.0.0**](x) | **6** identities: 1 files, 1 value exports, 1 type exports, 2 dependencies, 1 devDependencies |',
-  '| `pnpm duplication:check` | [jscpd **3.0.0**](x) | **3** file/clone occurrences across 2 keys |',
-].join('\n')
-const FIXTURE_TEXT =
-  'The one operator CLI paths in `knip.json` are roots. The one Nuxt auth defaults and the two scanner executable files (`a.scanner.mjs`, `b.scanner.mjs`) remain entries.'
-const fixture = () => ({
-  docs: `# Bar\n\n${START}\n\n${FIXTURE_TABLE}\n\n${FIXTURE_TEXT}\n\n${END}\n`,
+const sources = () => ({
   entries: [
     'app/auth.config.ts',
     'qa/run.mjs',
-    'scripts/quality/a.scanner.mjs',
     'scripts/quality/b.scanner.mjs',
+    'scripts/quality/a.scanner.mjs',
   ],
   tools: { 'dependency-cruiser': '1.0.0', knip: '2.0.0', jscpd: '3.0.0' },
-  boundaries: [['a|no-cycles|b', 2]],
+  boundaries: [
+    ['app/a|no-cycles|app/b', 1],
+    ['app/c|no-cycles|app/d', 1],
+  ],
   deadCode: [
     ['a|files|a', 1],
     ['b|exports|x', 1],
@@ -161,89 +88,85 @@ const fixture = () => ({
     ['c|clone|c:d|h2', 1],
   ],
 })
-const edit = (docs, from, to) => {
-  expect(docs, `fixture no longer contains ${from}`).toContain(from)
-  return docs.replace(from, to)
+const EXPECTED = [
+  '| Row | Pin and threshold | Inherited baseline |',
+  '| --- | --- | --- |',
+  '| `pnpm boundaries:check` | [dependency-cruiser **1.0.0**](https://github.com/sverweij/dependency-cruiser/blob/main/doc/rules-reference.md); zero new cycles or prohibited import edges | **2** exact cycle identities, all in `app/`; `baselines/boundaries.json` |',
+  '| `pnpm dead-code:check` | [knip **2.0.0**](https://knip.dev/reference/cli); zero new unused files, value/type exports, production/dev dependencies | **6** identities: 1 files, 1 value exports, 1 type exports, 2 dependencies, 1 devDependencies; `baselines/dead-code.json` |',
+  '| `pnpm duplication:check` | [jscpd **3.0.0**](https://github.com/kucherenko/jscpd); exact clones of at least **100 tokens and 10 lines**, strict mode; zero new changed-file clone identities | **3** file/clone occurrences across 2 keys; `baselines/duplication.json` |',
+  '',
+  'Explicit Knip entries: **1** Nuxt auth defaults, **1** operator CLI paths and **2** scanner executable files (`a.scanner.mjs`, `b.scanner.mjs`).',
+].join('\n')
+const DUPLICATION_ROW = EXPECTED.split('\n')[4]
+const documented = (body) => `# Bar\n\nIntro.\n\n${START}\n\n${body}\n\n${END}\n\nAfter.\n`
+const edit = (text, from, to) => {
+  expect(text, `fixture no longer contains ${from}`).toContain(from)
+  return text.replace(from, to)
 }
 
-it('keeps the quality bar figures in sync with knip, the baselines and the tool pins', () => {
+it('keeps the quality bar figures block equal to knip, the baselines and the tool pins', () => {
   expect(drift(repository())).toEqual([])
 })
 
-it('accepts the explicit fixture and synchronized paydowns of every baseline', () => {
-  const base = fixture()
-  expect(drift(base)).toEqual([])
-  const docs = (from, to) => edit(base.docs, from, to)
-  expect(
-    drift({
-      ...base,
-      boundaries: [['a|no-cycles|b', 1]],
-      docs: docs('**2** exact', '**1** exact'),
-    }),
-  ).toEqual([])
-  expect(
-    drift({
-      ...base,
-      deadCode: base.deadCode.slice(1),
-      docs: docs('**6** identities: 1 files', '**5** identities: 0 files'),
-    }),
-  ).toEqual([])
-  expect(
-    drift({
-      ...base,
-      duplication: base.duplication.slice(1),
-      docs: docs(
-        '**3** file/clone occurrences across 2 keys',
-        '**1** file/clone occurrences across 1 keys',
-      ),
-    }),
-  ).toEqual([])
+it('renders the explicit fixture to its known-good literal block', () => {
+  expect(render(sources())).toBe(EXPECTED)
+  expect(drift({ ...sources(), docs: documented(EXPECTED) })).toEqual([])
+})
+
+it.each([
+  [
+    'boundaries',
+    (base) => ({ boundaries: base.boundaries.slice(1) }),
+    '**2** exact cycle',
+    '**1** exact cycle',
+  ],
+  [
+    'dead code',
+    (base) => ({ deadCode: base.deadCode.slice(1) }),
+    '**6** identities: 1 files',
+    '**5** identities: 0 files',
+  ],
+  [
+    'duplication',
+    (base) => ({ duplication: base.duplication.slice(1) }),
+    '**3** file/clone occurrences across 2 keys',
+    '**1** file/clone occurrences across 1 keys',
+  ],
+])('accepts a synchronized %s paydown', (_, lower, from, to) => {
+  const base = { ...sources(), ...lower(sources()) }
+  expect(drift({ ...base, docs: documented(edit(EXPECTED, from, to)) })).toEqual([])
+  expect(drift({ ...base, docs: documented(EXPECTED) })).not.toEqual([])
 })
 
 it.each([
   ['a changed figure', (docs) => edit(docs, '**3** file/clone', '**4** file/clone')],
+  ['a hidden row', (docs) => edit(docs, DUPLICATION_ROW, `<!-- ${DUPLICATION_ROW} -->`)],
   [
-    'a hidden row',
-    (docs) =>
-      edit(docs, '| `pnpm boundaries:check` |', '<!-- | `pnpm boundaries:check` |').replace(
-        'identities |',
-        'identities | -->',
-      ),
+    'a backtick-fenced table',
+    (docs) => edit(docs, EXPECTED, `\`\`\`markdown\n${EXPECTED}\n\`\`\``),
+  ],
+  ['a tilde-fenced table', (docs) => edit(docs, EXPECTED, `~~~markdown\n${EXPECTED}\n~~~`)],
+  [
+    'a fence around the whole block',
+    (docs) => edit(edit(docs, START, `~~~\n${START}`), END, `${END}\n~~~`),
   ],
   [
-    'swapped baseline cells',
-    (docs) =>
-      edit(
-        edit(docs, '**2** exact cycle identities', '@@'),
-        '**3** file/clone occurrences across 2 keys',
-        '**2** exact cycle identities',
-      ).replace('@@', '**3** file/clone occurrences across 2 keys'),
+    'a comment around the whole block',
+    (docs) => edit(edit(docs, START, `<!--\n${START}`), END, `${END}\n-->`),
   ],
   [
     'an earlier historical copy shadowing a wrong current figure',
-    (docs) => `## History\n\n${FIXTURE_TABLE}\n\n${edit(docs, '**2** exact', '**9** exact')}`,
+    (docs) => `## History\n\n${EXPECTED}\n\n${edit(docs, '**2** exact', '**9** exact')}`,
   ],
-  [
-    'a later historical copy after the current row is dropped',
-    (docs) => `${edit(docs, FIXTURE_TABLE.split('\n')[2], '')}\n${FIXTURE_TABLE}\n`,
-  ],
-  ['a duplicated block', (docs) => `${docs}\n${START}\n${FIXTURE_TABLE}\n${END}\n`],
-  [
-    'a fenced table',
-    (docs) => edit(docs, FIXTURE_TABLE, `\`\`\`markdown\n${FIXTURE_TABLE}\n\`\`\``),
-  ],
+  ['a duplicated block', (docs) => `${docs}\n${START}\n${EXPECTED}\n${END}\n`],
   ['a missing end marker', (docs) => edit(docs, END, '')],
-  [
-    'a stale scanner list',
-    (docs) => edit(docs, 'the two scanner executable files', 'the three scanner executable files'),
-  ],
-  [
-    'a repeated statement inside the block',
-    (docs) => edit(docs, END, `The one Nuxt auth defaults again.\n${END}`),
-  ],
+  ['swapped markers', (docs) => edit(edit(docs, START, '@@'), END, START).replace('@@', END)],
+  ['an extra statement inside the block', (docs) => edit(docs, END, `Also: **9** more.\n\n${END}`)],
 ])('rejects %s', (_, mutate) => {
-  const base = fixture()
-  expect(drift({ ...base, docs: mutate(base.docs) })).not.toEqual([])
+  const docs = documented(EXPECTED)
+  const mutated = mutate(docs)
+  expect(mutated).not.toBe(docs)
+  expect(drift({ ...sources(), docs: mutated })).not.toEqual([])
 })
 
 it.each([
@@ -253,22 +176,10 @@ it.each([
   ],
   ['a moved tool pin', (base) => ({ tools: { ...base.tools, jscpd: '9.9.9' } })],
   [
-    'a paid-down baseline the docs still claim',
-    (base) => ({ duplication: base.duplication.slice(1) }),
+    'a cycle outside app/',
+    (base) => ({ boundaries: [...base.boundaries, ['server/x|no-cycles|server/y', 1]] }),
   ],
 ])('rejects %s', (_, change) => {
-  const base = fixture()
-  expect(drift({ ...base, ...change(base) })).not.toEqual([])
-})
-
-it('reads the current figures only from the marked block of the real document', () => {
-  const real = repository()
-  const [before, rest] = real.docs.split(START)
-  const shifted = rest.replace(
-    /\*\*(\d+)\*\* exact cycle identities/,
-    (_, n) => `**${Number(n) + 1}** exact cycle identities`,
-  )
-  expect(shifted).not.toBe(rest)
-  expect(drift({ ...real, docs: `${before}${START}${shifted}` })).not.toEqual([])
-  expect(drift({ ...real, docs: `${before}${rest}` })).not.toEqual([])
+  const base = sources()
+  expect(drift({ ...base, ...change(base), docs: documented(EXPECTED) })).not.toEqual([])
 })
