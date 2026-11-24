@@ -1,0 +1,180 @@
+
+ RUN  v4.0.18 <repository>
+
+ ❯ tests/unit/quality-parsers.spec.mjs (148 tests | 1 failed) 50ms
+     ✓ registers a fixture for every parser module and no stale fixtures 1ms
+       ✓ action references a missing advisory 2ms
+       ✓ advisory has no referencing action 1ms
+       ✓ severity total disagrees with parsed advisory findings 0ms
+       ✓ action paths may differ from finding paths 0ms
+       ✓ preserves a completed audit with zero advisories 0ms
+       ✓ advisory numeric identity differs 0ms
+       ✓ advisory URL identity differs 0ms
+       ✓ one of two advisory paths mismatches 0ms
+       ✓ dependency component totals differ 0ms
+       ✓ finding absent from independent frozen population 0ms
+       ✓ coherent critical advisory 0ms
+       ✓ coherent low advisory 0ms
+       ✓ coherent moderate advisory 0ms
+       ✓ nonzero dev and optional population 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 1ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 3ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 1ms
+       × rejects the shared malformed corpus and tool-specific inconsistencies 4ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 1ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ invalid completion startedAt 101 0ms
+       ✓ invalid completion endedAt 99 0ms
+       ✓ invalid completion endedAt 104 0ms
+       ✓ dependency overrides 0ms
+       ✓ unrecognised pnpm install setting 0ms
+       ✓ blank dependency override 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 2ms
+       ✓ asset ID disagrees with its API URL 2ms
+       ✓ asset name disagrees with its download URL 0ms
+       ✓ release ID disagrees with its API URL 0ms
+       ✓ asset listing references a different release 0ms
+       ✓ release page references a different tag 0ms
+       ✓ duplicate asset identity with distinct names 0ms
+       ✓ reaction total differs 0ms
+       ✓ duplicate asset names with distinct IDs 0ms
+       ✓ distinct names share one asset ID 0ms
+       ✓ second asset has wrong reference 0ms
+       ✓ two distinct coherent assets 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ reversed finding line interval 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ rejects duplicate package across license categories 0ms
+       ✓ rejects unknown package 0ms
+       ✓ rejects repeated versions in one package 0ms
+       ✓ accepts a package license matching its category 0ms
+       ✓ rejects GPL package hidden in MIT category 0ms
+       ✓ rejects MIT package in ISC category 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ ticketed directive with real ESLint suppression metadata 0ms
+       ✓ unticketed suppression justification 0ms
+       ✓ empty suppression justification 0ms
+       ✓ issue URL suppression justification 0ms
+       ✓ missing suppression entries 0ms
+       ✓ malformed suppression entries 0ms
+       ✓ unknown suppression metadata 0ms
+       ✓ fatal fixable warning and zero-width fix 0ms
+       ✓ reversed fix range 0ms
+       ✓ fixable error 0ms
+       ✓ duplicate files 0ms
+       ✓ missing result 0ms
+       ✓ duplicate result 0ms
+       ✓ mixed result population 0ms
+       ✓ two distinct files 0ms
+       ✓ extra duplicate result 0ms
+       ✓ duplicated file identity 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ accepts disabled CI web server serialized as null 1ms
+       ✓ preserves a declared Playwright skip 0ms
+       ✓ preserves an empty Playwright suite 0ms
+       ✓ nested valid 0ms
+       ✓ missing suites property 0ms
+       ✓ nested file mismatch 0ms
+       ✓ spec file mismatch 0ms
+       ✓ duplicate spec ID 0ms
+       ✓ mixed project identity 0ms
+       ✓ project name mismatch 0ms
+       ✓ mixed file population 0ms
+       ✓ duplicate files 0ms
+       ✓ missing suite 0ms
+       ✓ duplicate suite 0ms
+       ✓ two distinct files 0ms
+       ✓ extra duplicate result 0ms
+       ✓ duplicated file identity 0ms
+       ✓ mixed suite file violation 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 2ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 0ms
+       ✓ leading spaces 0ms
+       ✓ multi digit positions 0ms
+       ✓ white blank line 0ms
+       ✓ continuation without preceding diagnostic 0ms
+       ✓ bad continuation after diagnostic 0ms
+       ✓ embedded continuation 0ms
+       ✓ rejects a Unicode line separator inside a continuation 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+       ✓ preserves a completed Vitest file with zero assertions 0ms
+       ✓ backward test timing 0ms
+       ✓ suite total differs 0ms
+       ✓ too few suites for files 0ms
+       ✓ failed file in successful report 0ms
+       ✓ mixed failed files in successful report 0ms
+       ✓ failed suite with success 0ms
+       ✓ failed tests with success 0ms
+       ✓ duplicate files 0ms
+       ✓ missing result 0ms
+       ✓ duplicate result 0ms
+       ✓ mixed result population 0ms
+       ✓ exit disagrees with success 0ms
+       ✓ pending assertion 0ms
+       ✓ pending suite 0ms
+       ✓ two distinct files 0ms
+       ✓ extra duplicate result 0ms
+       ✓ duplicated file identity 0ms
+       ✓ declares and checks independent completeness coverage 0ms
+       ✓ preserves the exact result of every valid tool output 0ms
+       ✓ rejects the shared malformed corpus and tool-specific inconsistencies 1ms
+     ✓ rejects malformed JSON even when the downstream value schema accepts unknown values 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-parsers.spec.mjs > quality tool parsers > boundaries.parser.mjs > rejects the shared malformed corpus and tool-specific inconsistencies
+AssertionError: {"status":0,"stdout":"{\"modules\": [{\"source\": \"shared/a.ts\", \"dependencies\": [{\"dynamic\": false, \"module\": \"./b\", \"moduleSystem\": \"es6\", \"exoticallyRequired\": false, \"dependencyTypes\": [\"local\", \"import\"], \"resolved\": \"shared/b.ts\", \"coreModule\": false, \"followable\": true, \"couldNotResolve\": false, \"matchesDoNotFollow\": false, \"circular\": true, \"cycle\": [{\"name\": \"shared/b.ts\", \"dependencyTypes\": [\"local\", \"import\"]}, {\"name\": \"shared/a.ts\", \"dependencyTypes\": [\"local\", \"import\"]}], \"valid\": false, \"rules\": [{\"severity\": \"error\", \"name\": \"no-cycles\"}]}], \"dependents\": [\"shared/b.ts\"], \"orphan\": false, \"valid\": true}, {\"source\": \"shared/b.ts\", \"dependencies\": [{\"dynamic\": false, \"module\": \"./a\", \"moduleSystem\": \"es6\", \"exoticallyRequired\": false, \"dependencyTypes\": [\"local\", \"import\"], \"resolved\": \"shared/a.ts\", \"coreModule\": false, \"followable\": true, \"couldNotResolve\": false, \"matchesDoNotFollow\": false, \"circular\": true, \"cycle\": [{\"name\": \"shared/a.ts\", \"dependencyTypes\": [\"local\", \"import\"]}, {\"name\": \"shared/b.ts\", \"dependencyTypes\": [\"local\", \"import\"]}], \"valid\": false, \"rules\": [{\"severity\": \"error\", \"name\": \"no-cycles\"}]}], \"dependents\": [\"shared/a.ts\"], \"orphan\": false, \"valid\": true}], \"summary\": {\"violations\": [], \"error\": 0, \"warn\": 0, \"info\": 0, \"ignore\": 0, \"advisedExitCode\": 0, \"totalCruised\": 2, \"totalDependenciesCruised\": 2, \"optionsUsed\": {\"baseDir\": \"<repository>-scratch/parser-fixture\", \"combinedDependencies\": false, \"detectImportsInAmbientModules\": false, \"detectJSDocImports\": false, \"detectProcessBuiltinModuleCalls\": false, \"doNotFollow\": {\"path\": \"node_modules\"}, \"exoticRequireStrings\": [], \"externalModuleResolutionStrategy\": \"node_modules\", \"metrics\": false, \"moduleSystems\": [\"es6\", \"cjs\", \"tsd\", \"amd\"], \"outputTo\": \"-\", \"outputType\": \"json\", \"preserveSymlinks\": false, \"rulesFile\": \"<repository>-scratch/parser-fixture/config.json\", \"skipAnalysisNotInRules\": false, \"tsConfig\": {\"fileName\": \"<repository>-scratch/parser-fixture/tsconfig.json\"}, \"tsPreCompilationDeps\": true, \"args\": \"shared/a.ts shared/b.ts\", \"enhancedResolveOptions\": {\"extensions\": [\".ts\", \".js\"]}}, \"ruleSetUsed\": {\"forbidden\": [{\"name\": \"no-cycles\", \"severity\": \"error\", \"from\": {}, \"to\": {\"circular\": true}, \"scope\": \"module\"}]}, \"environment\": {\"version\": \"18.8.0\", \"nodeVersionSupported\": \"^22||^24||>=26\", \"nodeVersionFound\": \"v24.20.0\", \"osVersionFound\": \"arm64 darwin@25.5.0\", \"transpilersFound\": [{\"name\": \"javascript\", \"version\": \"*\", \"available\": true, \"currentVersion\": \"acorn@8.19.0\"}, {\"name\": \"babel\", \"version\": \">=7.0.0 <8.0.0\", \"available\": true, \"currentVersion\": \"@babel/core@7.29.0\"}, {\"name\": \"coffee-script\", \"version\": \">=1.0.0 <2.0.0\", \"available\": false, \"currentVersion\": \"-\"}, {\"name\": \"coffeescript\", \"version\": \">=1.0.0 <3.0.0\", \"available\": false, \"currentVersion\": \"-\"}, {\"name\": \"livescript\", \"version\": \">=1.0.0 <2.0.0\", \"available\": false, \"currentVersion\": \"-\"}, {\"name\": \"svelte\", \"version\": \">=3.0.0 <6.0.0\", \"available\": false, \"currentVersion\": \"-\"}, {\"name\": \"swc\", \"version\": \">=1.0.0 <2.0.0\", \"available\": false, \"currentVersion\": \"-\"}, {\"name\": \"typescript\", \"version\": \">=2.0.0 <7.0.0||>=7.1.0 <8.0.0\", \"available\": true, \"currentVersion\": \"typescript@5.9.3\"}, {\"name\": \"vue-template-compiler\", \"version\": \">=2.0.0 <3.0.0\", \"available\": false, \"currentVersion\": \"@vue/compiler-sfc@3.5.28\"}, {\"name\": \"@vue/compiler-sfc\", \"version\": \">=3.0.0 <4.0.0\", \"available\": true, \"currentVersion\": \"@vue/compiler-sfc@3.5.28\"}], \"extensionsFound\": [{\"extension\": \".js\", \"available\": true}, {\"extension\": \".cjs\", \"available\": true}, {\"extension\": \".mjs\", \"available\": true}, {\"extension\": \".jsx\", \"available\": true}, {\"extension\": \".ts\", \"available\": true}, {\"extension\": \".tsx\", \"available\": true}, {\"extension\": \".d.ts\", \"available\": true}, {\"extension\": \".cts\", \"available\": true}, {\"extension\": \".d.cts\", \"available\": true}, {\"extension\": \".mts\", \"available\": true}, {\"extension\": \".d.mts\", \"available\": true}, {\"extension\": \".vue\", \"available\": true}, {\"extension\": \".svelte\", \"available\": false}, {\"extension\": \".ls\", \"available\": false}, {\"extension\": \".coffee\", \"available\": false}, {\"extension\": \".litcoffee\", \"available\": false}, {\"extension\": \".coffee.md\", \"available\": false}, {\"extension\": \".csx\", \"available\": false}, {\"extension\": \".cjsx\", \"available\": false}]}}}","selected":["shared/a.ts","shared/b.ts"]}: expected [Function] to throw an error
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ ❯ tests/unit/quality-parsers.spec.mjs:108:61
+    106|       it('rejects the shared malformed corpus and tool-specific incons…
+    107|         for (const value of [...malformedInputs(fixture.valid), ...fix…
+    108|           expect(() => parse(value), JSON.stringify(value)).toThrow(/I…
+       |                                                             ^
+    109|       })
+    110|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 147 passed (148)
+   Start at  22:34:52
+   Duration  559ms (transform 99ms, setup 0ms, import 236ms, tests 50ms, environment 0ms)
+

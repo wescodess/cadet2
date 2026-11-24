@@ -1,0 +1,48 @@
+
+ RUN  v4.0.18 <repository>
+
+ ✓ tests/unit/quality-process.spec.mjs (83 tests) 25397ms
+     ✓ invokes all twelve rows and propagates null exit +0  584ms
+     ✓ invokes all twelve rows and propagates 'typecheck' exit 1  578ms
+     ✓ invokes all twelve rows and propagates 'typecheck' exit 2  656ms
+     ✓ invokes all twelve rows and propagates 'typecheck' exit 127  665ms
+     ✓ invokes all twelve rows and propagates 'lint' exit 1  697ms
+     ✓ invokes all twelve rows and propagates 'lint' exit 2  614ms
+     ✓ invokes all twelve rows and propagates 'lint' exit 127  578ms
+     ✓ invokes all twelve rows and propagates 'format:check' exit 1  653ms
+     ✓ invokes all twelve rows and propagates 'format:check' exit 2  787ms
+     ✓ invokes all twelve rows and propagates 'format:check' exit 127  698ms
+     ✓ invokes all twelve rows and propagates 'secrets:check' exit 1  646ms
+     ✓ invokes all twelve rows and propagates 'secrets:check' exit 2  770ms
+     ✓ invokes all twelve rows and propagates 'secrets:check' exit 127  691ms
+     ✓ invokes all twelve rows and propagates 'dependencies:check' exit 1  697ms
+     ✓ invokes all twelve rows and propagates 'dependencies:check' exit 2  866ms
+     ✓ invokes all twelve rows and propagates 'dependencies:check' exit 127  575ms
+     ✓ invokes all twelve rows and propagates 'boundaries:check' exit 1  527ms
+     ✓ invokes all twelve rows and propagates 'boundaries:check' exit 2  499ms
+     ✓ invokes all twelve rows and propagates 'boundaries:check' exit 127  511ms
+     ✓ invokes all twelve rows and propagates 'dead-code:check' exit 1  495ms
+     ✓ invokes all twelve rows and propagates 'dead-code:check' exit 2  521ms
+     ✓ invokes all twelve rows and propagates 'dead-code:check' exit 127  645ms
+     ✓ invokes all twelve rows and propagates 'duplication:check' exit 1  537ms
+     ✓ invokes all twelve rows and propagates 'duplication:check' exit 2  540ms
+     ✓ invokes all twelve rows and propagates 'duplication:check' exit 127  588ms
+     ✓ invokes all twelve rows and propagates 'test:policy' exit 1  817ms
+     ✓ invokes all twelve rows and propagates 'test:policy' exit 2  577ms
+     ✓ invokes all twelve rows and propagates 'test:policy' exit 127  536ms
+     ✓ invokes all twelve rows and propagates 'test:components' exit 1  486ms
+     ✓ invokes all twelve rows and propagates 'test:components' exit 2  480ms
+     ✓ invokes all twelve rows and propagates 'test:components' exit 127  487ms
+     ✓ invokes all twelve rows and propagates 'build' exit 1  478ms
+     ✓ invokes all twelve rows and propagates 'build' exit 2  475ms
+     ✓ invokes all twelve rows and propagates 'build' exit 127  467ms
+     ✓ invokes all twelve rows and propagates 'test:legacy-access' exit 1  492ms
+     ✓ invokes all twelve rows and propagates 'test:legacy-access' exit 2  480ms
+     ✓ invokes all twelve rows and propagates 'test:legacy-access' exit 127  471ms
+     ✓ refuses to baseline a dirty new file with an existing manifest: false  449ms
+
+ Test Files  1 passed (1)
+      Tests  83 passed (83)
+   Start at  22:38:39
+   Duration  25.62s (transform 21ms, setup 0ms, import 35ms, tests 25.40s, environment 0ms)
+

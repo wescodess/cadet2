@@ -66,16 +66,20 @@ export function count(counts, key) {
   counts[key] = (counts[key] ?? 0) + 1
 }
 
-export function ratchet(name, counts, { full = true } = {}) {
+export function ratchet(
+  name,
+  counts,
+  { full = true, commit = baselineCommit, scope = () => true, date = '2026-11-17' } = {},
+) {
   const path = `scripts/quality/baselines/${name}.json`
-  const legacy = new Set(git('ls-tree', '-r', '--name-only', baselineCommit).split('\n'))
+  const legacy = new Set(git('ls-tree', '-r', '--name-only', commit).split('\n'))
   for (const key of Object.keys(counts)) {
     if (!legacy.has(key.split('|')[0])) throw new Error(`${name}: new files must be clean: ${key}`)
   }
   if (writingBaseline) {
     writeJSON(path, {
-      date: '2026-11-17',
-      commit: baselineCommit,
+      date,
+      commit,
       counts: Object.fromEntries(Object.entries(counts).sort()),
     })
     console.log(`${name}: wrote ${Object.values(counts).reduce((a, b) => a + b, 0)} violations`)
@@ -88,7 +92,7 @@ export function ratchet(name, counts, { full = true } = {}) {
       failures.push(`${key}: ${value} > ${baseline.counts[key] ?? 0}`)
   }
   if (full) {
-    for (const [key, allowance] of Object.entries(baseline.counts)) {
+    for (const [key, allowance] of Object.entries(baseline.counts).filter(([key]) => scope(key))) {
       const value = counts[key] ?? 0
       if (value < allowance) failures.push(`${key}: lower allowance to ${value}`)
     }
@@ -104,6 +108,6 @@ export function main(fn) {
     .then(fn)
     .catch((error) => {
       console.error(error.message)
-      process.exitCode = 1
+      process.exitCode = error.exitCode ?? 1
     })
 }

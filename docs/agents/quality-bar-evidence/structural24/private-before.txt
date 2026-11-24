@@ -1,0 +1,35 @@
+
+ RUN  v4.0.18 <repository>
+
+ ❯ tests/unit/quality-structural.spec.mjs (2 tests | 1 failed) 1989ms
+   ✓ rejects a cycle at the boundaries command and admits an acyclic control  1354ms
+   × rejects private imports, including an index in a private directory, and admits its owner 634ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects private imports, including an index in a private directory, and admits its owner
+AssertionError: expected 'boundaries: PASS (0 current; 0 baseli…' to match /boundaries regression|boundaries: new…/
+
+- Expected: 
+/boundaries regression|boundaries: new files must be clean/
+
++ Received: 
+"boundaries: PASS (0 current; 0 baseline)
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:51:25
+     49|   const { directory, put } = fixture({ 'shared/consumer.ts': "import {…
+     50|   const denied = row('boundaries', directory)
+     51|   expect(denied.output).toMatch(/boundaries regression|boundaries: new…
+       |                         ^
+     52|   expect(denied.status).toBe(1)
+     53|   put('shared/consumer.ts', '')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  22:05:44
+   Duration  2.10s (transform 13ms, setup 0ms, import 20ms, tests 1.99s, environment 0ms)
+

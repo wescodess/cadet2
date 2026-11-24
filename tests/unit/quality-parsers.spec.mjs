@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { authorityReceiptFixture } from '../support/quality-authority-fixture.mjs'
 
 const directory = new URL('../../scripts/quality/', import.meta.url)
 const fixturesDirectory = new URL('./quality-parsers/', import.meta.url)
@@ -11,6 +12,11 @@ const fixtures = readdirSync(fixturesDirectory)
   .filter((file) => file.endsWith('.json'))
   .sort()
 const completeness = {
+  'convex-authority.parser.mjs': true,
+  'boundaries.parser.mjs': true,
+  'dead-code.parser.mjs':
+    'Finding-only output; knip JSON has no independent complete source inventory.',
+  'duplication.parser.mjs': true,
   'vitest-results.parser.mjs': true,
   'playwright-list.parser.mjs': true,
   'audit.parser.mjs': true,
@@ -61,6 +67,30 @@ function malformedInputs(valid) {
   return inputs
 }
 
+function parserFixture(file) {
+  const descriptor = JSON.parse(
+    readFileSync(new URL(file.replace('.parser.mjs', '.json'), fixturesDirectory), 'utf8'),
+  )
+  if (descriptor.native !== 'convex-authority-worker') return descriptor
+  const { fixture, genuine, binding } = authorityReceiptFixture()
+  try {
+    expect(genuine.claims).toEqual([{ file: 'convex/functions.ts', name: 'named', kind: 'query' }])
+    const valid = { status: 0, stdout: JSON.stringify(genuine) }
+    return {
+      context: binding,
+      valid,
+      expected: genuine,
+      alsoValid: [],
+      alsoExpected: [],
+      incomplete: { ...valid, stdout: JSON.stringify({ ...genuine, population: [] }) },
+      invalid: [{ ...valid, status: 1 }],
+      cases: [],
+    }
+  } finally {
+    fixture.remove()
+  }
+}
+
 describe('quality tool parsers', () => {
   it('registers a fixture for every parser module and no stale fixtures', () => {
     expect(modules.length).toBeGreaterThan(0)
@@ -71,21 +101,20 @@ describe('quality tool parsers', () => {
   for (const file of modules) {
     describe(file, async () => {
       const { parse } = await import(new URL(file, directory).href)
-      const fixture = JSON.parse(
-        readFileSync(new URL(file.replace('.parser.mjs', '.json'), fixturesDirectory), 'utf8'),
-      )
+      const fixture = parserFixture(file)
+      const consume = (input) => parse(input, fixture.context)
       for (const fixtureCase of fixture.cases ?? []) {
         it(fixtureCase.name, () => {
           if (fixtureCase.valid) {
             expect(fixtureCase).toHaveProperty('expected')
-            expect(parse(fixtureCase.input)).toStrictEqual(fixtureCase.expected)
-          } else expect(() => parse(fixtureCase.input)).toThrow(/Invalid /)
+            expect(consume(fixtureCase.input)).toStrictEqual(fixtureCase.expected)
+          } else expect(() => consume(fixtureCase.input)).toThrow(/Invalid /)
         })
       }
       it('declares and checks independent completeness coverage', () => {
         if (completeness[file] === true) {
           expect(fixture.incomplete).toBeDefined()
-          expect(() => parse(fixture.incomplete)).toThrow(/Invalid /)
+          expect(() => consume(fixture.incomplete)).toThrow(/Invalid /)
         } else {
           expect(completeness[file]).toEqual(expect.any(String))
           expect(completeness[file].length).toBeGreaterThan(20)
@@ -94,14 +123,14 @@ describe('quality tool parsers', () => {
       it('preserves the exact result of every valid tool output', () => {
         expect(fixture).toHaveProperty('expected')
         expect(fixture.alsoExpected).toHaveLength(fixture.alsoValid.length)
-        expect(parse(fixture.valid)).toStrictEqual(fixture.expected)
+        expect(consume(fixture.valid)).toStrictEqual(fixture.expected)
         fixture.alsoValid.forEach((input, index) => {
-          expect(parse(input)).toStrictEqual(fixture.alsoExpected[index])
+          expect(consume(input)).toStrictEqual(fixture.alsoExpected[index])
         })
       })
       it('rejects the shared malformed corpus and tool-specific inconsistencies', () => {
         for (const value of [...malformedInputs(fixture.valid), ...fixture.invalid])
-          expect(() => parse(value), JSON.stringify(value)).toThrow(/Invalid /)
+          expect(() => consume(value), JSON.stringify(value)).toThrow(/Invalid /)
       })
     })
   }

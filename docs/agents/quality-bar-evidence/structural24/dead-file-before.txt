@@ -1,0 +1,53 @@
+
+ RUN  v4.0.18 <repository>
+
+ ❯ tests/unit/quality-structural.spec.mjs (3 tests | 1 failed) 2634ms
+   ✓ rejects a cycle at the boundaries command and admits an acyclic control  1336ms
+   ✓ rejects private imports, including an index in a private directory, and admits its owner  1162ms
+   × rejects an unused file and admits a reachable file at the dead-code command 135ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects an unused file and admits a reachable file at the dead-code command
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to match /dead-code regression|dead-code: new f…/
+
+- Expected: 
+/dead-code regression|dead-code: new files must be clean/
+
++ Received: 
+"node:internal/modules/cjs/loader:1568
+  throw err;
+  ^
+
+Error: Cannot find module '<repository>/scripts/quality/dead-code.mjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at Module._load (node:internal/modules/cjs/loader:1341:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.20.0
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:61:25
+     59|   const { directory, put } = fixture({ 'shared/unused.ts': 'export con…
+     60|   const denied = row('dead-code', directory)
+     61|   expect(denied.output).toMatch(/dead-code regression|dead-code: new f…
+       |                         ^
+     62|   expect(denied.status).toBe(1)
+     63|   put('index.ts', "import { value } from './shared/unused'; console.lo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  22:06:15
+   Duration  2.75s (transform 12ms, setup 0ms, import 20ms, tests 2.63s, environment 0ms)
+

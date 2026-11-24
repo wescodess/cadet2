@@ -1,0 +1,35 @@
+{
+  "valid": {
+    "status": 1,
+    "stdout": "{\"issues\": [{\"file\": \"app/auth.config.ts\", \"dependencies\": [], \"devDependencies\": [], \"exports\": [], \"files\": [{\"name\": \"app/auth.config.ts\"}], \"optionalPeerDependencies\": [], \"types\": []}]}"
+  },
+  "expected": {
+    "issues": [
+      {
+        "file": "app/auth.config.ts",
+        "dependencies": [],
+        "devDependencies": [],
+        "exports": [],
+        "files": [
+          {
+            "name": "app/auth.config.ts"
+          }
+        ],
+        "optionalPeerDependencies": [],
+        "types": []
+      }
+    ]
+  },
+  "alsoValid": [],
+  "alsoExpected": [],
+  "invalid": [
+    {
+      "status": 127,
+      "stdout": "{\"issues\": [{\"file\": \"app/auth.config.ts\", \"dependencies\": [], \"devDependencies\": [], \"exports\": [], \"files\": [{\"name\": \"app/auth.config.ts\"}], \"optionalPeerDependencies\": [], \"types\": []}]}"
+    },
+    {
+      "status": 1,
+      "stdout": "{\"truncated\":"
+    }
+  ]
+}

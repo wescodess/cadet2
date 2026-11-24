@@ -1,0 +1,128 @@
+[
+  {
+    "name": "boundaries-empty",
+    "file": "scripts/quality/boundaries.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 11.56
+  },
+  {
+    "name": "dead-files",
+    "file": "scripts/quality/dead-code.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 11.79
+  },
+  {
+    "name": "dead-exports",
+    "file": "scripts/quality/dead-code.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 12.05
+  },
+  {
+    "name": "dead-dependencies",
+    "file": "scripts/quality/dead-code.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 12.08
+  },
+  {
+    "name": "duplication-empty",
+    "file": "scripts/quality/duplication.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 12.47
+  },
+  {
+    "name": "duplication-changed-only",
+    "file": "scripts/quality/duplication.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 15.75
+  },
+  {
+    "name": "new-files-allowance",
+    "file": "scripts/quality/common.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 13.32
+  },
+  {
+    "name": "paid-down-dead-code",
+    "file": "scripts/quality/common.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 12.37
+  },
+  {
+    "name": "paid-down-duplication",
+    "file": "scripts/quality/common.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 10.77
+  },
+  {
+    "name": "boundaries-no-ratchet",
+    "file": "scripts/quality/boundaries.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 8.12
+  },
+  {
+    "name": "dead-code-no-ratchet",
+    "file": "scripts/quality/dead-code.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 8.97
+  },
+  {
+    "name": "duplication-no-ratchet",
+    "file": "scripts/quality/duplication.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 9.8
+  },
+  {
+    "name": "dead-code-permissive",
+    "file": "scripts/quality/dead-code.parser.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 10.26
+  },
+  {
+    "name": "duplication-permissive",
+    "file": "scripts/quality/duplication.parser.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 11.13
+  },
+  {
+    "name": "duplication-ignore-completeness",
+    "file": "scripts/quality/duplication.parser.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 10.09
+  },
+  {
+    "name": "boundaries-permissive",
+    "file": "scripts/quality/boundaries.parser.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 2.56
+  },
+  {
+    "name": "boundaries-ignore-completeness",
+    "file": "scripts/quality/boundaries.parser.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 0.78
+  },
+  {
+    "name": "boundaries-ignore-graph",
+    "file": "scripts/quality/boundaries.parser.mjs",
+    "exit": 1,
+    "caught": true,
+    "seconds": 0.74
+  }
+]

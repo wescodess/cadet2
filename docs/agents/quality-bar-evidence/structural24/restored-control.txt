@@ -1,0 +1,43 @@
+
+ RUN  v4.0.18 <repository>
+
+ ✓ tests/unit/quality-parsers.spec.mjs (148 tests) 60ms
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts unchanged manifests and checks the integration merge-base
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts initial adoption when no prior manifests exist
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts reductions and removals across every manifest kind
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline manifest boundaries > uses origin/dev by default and ignores ordinary repository files
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline comparison bases > compares against every base that has manifests
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline comparison bases > accepts initial adoption when a base descends from the adoption commit
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+ ✓ tests/unit/quality-baselines.spec.mjs (55 tests) 547ms
+ ✓ tests/unit/quality-structural-rows.spec.mjs (12 tests) 121ms
+ ✓ tests/unit/quality-aggregate.spec.mjs (22 tests) 62ms
+ ✓ tests/unit/quality-structural.spec.mjs (14 tests) 12185ms
+   ✓ rejects a cycle at the boundaries command and admits an acyclic control  2323ms
+   ✓ rejects private imports, including an index in a private directory, and admits its owner  1177ms
+   ✓ rejects an unused file and admits a reachable file at the dead-code command  1287ms
+   ✓ rejects an unused export and admits the same exported value when consumed  697ms
+   ✓ rejects an unused dependency and admits an actual dependency import  737ms
+   ✓ rejects duplication involving a changed file and admits original code  725ms
+   ✓ enforces module entry points and resolves Nuxt aliases before checking server imports  1744ms
+   ✓ requires paid-down inherited dead-code allowances to be lowered  1084ms
+   ✓ does not charge unchanged duplication and detects changed copies across directories  653ms
+   ✓ rejects a new file even if a local dead-code allowance was added  407ms
+   ✓ requires removed duplication debt to lower both affected file allowances  952ms
+
+ Test Files  5 passed (5)
+      Tests  251 passed (251)
+   Start at  22:22:12
+   Duration  12.37s (transform 243ms, setup 0ms, import 464ms, tests 12.97s, environment 1ms)
+

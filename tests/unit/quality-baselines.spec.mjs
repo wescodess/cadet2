@@ -3,7 +3,18 @@ import { readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as common from '../../scripts/quality/common.mjs'
 
-const names = ['types', 'types-convex', 'lint', 'test-policy', 'format', 'secrets', 'dependencies']
+const names = [
+  'boundaries',
+  'dead-code',
+  'duplication',
+  'types',
+  'types-convex',
+  'lint',
+  'test-policy',
+  'format',
+  'secrets',
+  'dependencies',
+]
 const original = Object.fromEntries(
   names.map((name) => [
     `scripts/quality/baselines/${name}.json`,
@@ -51,7 +62,7 @@ describe('baseline policy public entry point', () => {
       ['merge-base', 'integration', 'HEAD'],
       ['merge-base', 'origin/dev', 'HEAD'],
     ])
-    expect(run).toHaveBeenCalledTimes(7)
+    expect(run).toHaveBeenCalledTimes(10)
   })
   it('accepts initial adoption when no prior manifests exist', async () => {
     git.mockImplementation((...args) => (args[0] === 'merge-base' ? 'base' : ''))
@@ -68,14 +79,19 @@ describe('baseline policy public entry point', () => {
     inventory.push(path('unknown'))
     await expect(policy()).rejects.toThrow(/Unknown baseline manifest/)
   })
-  it.each(['types', 'types-convex', 'lint', 'test-policy'])(
-    'allows reductions but rejects increases for %s',
-    async (name) => {
-      const key = Object.keys(current[path(name)].counts)[0]
-      current[path(name)].counts[key] += 1
-      await expect(policy()).rejects.toThrow(/Baseline count increased/)
-    },
-  )
+  it.each([
+    'types',
+    'types-convex',
+    'lint',
+    'test-policy',
+    'boundaries',
+    'dead-code',
+    'duplication',
+  ])('allows reductions but rejects increases for %s', async (name) => {
+    const key = Object.keys(current[path(name)].counts)[0]
+    current[path(name)].counts[key] += 1
+    await expect(policy()).rejects.toThrow(/Baseline count increased/)
+  })
   it('accepts reductions and removals across every manifest kind', async () => {
     for (const name of ['types', 'types-convex', 'lint', 'test-policy']) {
       for (const key of Object.keys(current[path(name)].counts)) current[path(name)].counts[key] = 0
@@ -187,8 +203,8 @@ describe('baseline manifest boundaries', () => {
     inventory.push('README.md')
     await expect(policy()).resolves.toBeUndefined()
     expect(git.mock.calls[0]).toEqual(['merge-base', 'origin/dev', 'HEAD'])
-    expect(git.mock.calls[1]).toEqual(['ls-tree', '--name-only', 'base', '--', path('types')])
-    expect(run.mock.calls[0]).toEqual(['git', ['show', `base:${path('types')}`]])
+    expect(git.mock.calls[1]).toEqual(['ls-tree', '--name-only', 'base', '--', path('boundaries')])
+    expect(run.mock.calls[0]).toEqual(['git', ['show', `base:${path('boundaries')}`]])
   })
   it.each(['', ' '])('rejects a blank dependency allowance reason "%s"', async (reason) => {
     Object.values(current[path('dependencies')].advisories)[0].reason = reason
@@ -267,8 +283,8 @@ describe('baseline comparison bases', () => {
     manifests.add('main-base')
     await expect(policy()).resolves.toBeUndefined()
     const shown = run.mock.calls.map(([, args]) => args[1].split(':')[0])
-    expect(shown.filter((base) => base === 'main-base')).toHaveLength(7)
-    expect(shown.filter((base) => base === 'dev-base')).toHaveLength(7)
+    expect(shown.filter((base) => base === 'main-base')).toHaveLength(10)
+    expect(shown.filter((base) => base === 'dev-base')).toHaveLength(10)
   })
   it('rejects an increase against the second base when the first base allows it', async () => {
     manifests.add('main-base')
@@ -287,7 +303,7 @@ describe('baseline comparison bases', () => {
   it('fails closed when no base has manifests and none descends from the adoption commit', async () => {
     manifests.clear()
     await expect(policy()).rejects.toThrow(
-      `No prior baseline manifest at a base descending from ${common.baselineCommit}: ${path('types')}`,
+      `No prior baseline manifest at a base descending from ${common.baselineCommit}: ${path('boundaries')}`,
     )
   })
   it('accepts initial adoption when a base descends from the adoption commit', async () => {

@@ -1,0 +1,367 @@
+
+> cadet2@ test:components <repository>
+> vitest run --maxWorkers=2
+
+
+ RUN  v4.0.18 <repository>
+
+ ✓ tests/unit/quality-entrypoints.spec.mjs (40 tests) 22347ms
+     ✓ passes the unchanged vitest legacy skips at 10/10  1170ms
+     ✓ passes the unchanged playwright legacy skips at 10/10  1527ms
+     ✓ asks to lower the allowance when a vitest legacy skip is removed  924ms
+     ✓ asks to lower the allowance when a playwright legacy skip is removed  913ms
+     ✓ rejects a new vitest skip: it.skip('new', () => {})  911ms
+     ✓ rejects a new playwright skip: test.skip('new', async () => {})  844ms
+     ✓ rejects a new vitest skip: describe.skip('new', () => { it('a', () => {}) })  888ms
+     ✓ rejects a new playwright skip: test.describe.skip('new', () => { test('a', async () => {}) })  870ms
+     ✓ rejects a new playwright skip: test('new', async () => { test.skip(true, 'blocked') })  885ms
+     ✓ rejects a new vitest skip: it.todo('new')  911ms
+     ✓ rejects a new vitest skip: it('new', (ctx) => { ctx.skip('blocked') })  896ms
+     ✓ rejects a new vitest skip: it.skip('new #23', () => {})  898ms
+     ✓ rejects a new playwright skip: test.skip('new #23', async () => {})  877ms
+     ✓ rejects a new vitest skip: describe.skip('new #23', () => { it('a', () => {}) })  896ms
+     ✓ rejects a new playwright skip: test.describe.skip('new #23', () => { test('a', async () => {}) })  812ms
+     ✓ rejects a new playwright skip: test('new', async () => { test.skip(true, 'blocked #23') })  847ms
+     ✓ rejects a new vitest skip: it.todo('new #23')  884ms
+     ✓ rejects a new vitest skip: it('new', (ctx) => { ctx.skip('blocked #23') })  904ms
+     ✓ rejects the earlier leak through an inactive group ticket beside unticketed skips  824ms
+     ✓ rejects the earlier leak through an inactive group ticket around unticketed skips  820ms
+     ✓ rejects the earlier leak through an inactive in-body ticket under a group skip  990ms
+     ✓ rejects the earlier leak through a ticket in a never-called nested function  855ms
+     ✓ rejects vitest focus  894ms
+     ✓ rejects playwright focus  819ms
+ ✓ tests/unit/quality-process.spec.mjs (83 tests) 22616ms
+     ✓ invokes all twelve rows and propagates null exit +0  573ms
+     ✓ invokes all twelve rows and propagates 'typecheck' exit 1  499ms
+     ✓ invokes all twelve rows and propagates 'typecheck' exit 2  544ms
+     ✓ invokes all twelve rows and propagates 'typecheck' exit 127  520ms
+     ✓ invokes all twelve rows and propagates 'lint' exit 1  519ms
+     ✓ invokes all twelve rows and propagates 'lint' exit 2  564ms
+     ✓ invokes all twelve rows and propagates 'lint' exit 127  523ms
+     ✓ invokes all twelve rows and propagates 'format:check' exit 1  607ms
+     ✓ invokes all twelve rows and propagates 'format:check' exit 2  513ms
+     ✓ invokes all twelve rows and propagates 'format:check' exit 127  532ms
+     ✓ invokes all twelve rows and propagates 'secrets:check' exit 1  499ms
+     ✓ invokes all twelve rows and propagates 'secrets:check' exit 2  532ms
+     ✓ invokes all twelve rows and propagates 'secrets:check' exit 127  513ms
+     ✓ invokes all twelve rows and propagates 'dependencies:check' exit 1  499ms
+     ✓ invokes all twelve rows and propagates 'dependencies:check' exit 2  519ms
+     ✓ invokes all twelve rows and propagates 'dependencies:check' exit 127  512ms
+     ✓ invokes all twelve rows and propagates 'boundaries:check' exit 1  558ms
+     ✓ invokes all twelve rows and propagates 'boundaries:check' exit 2  500ms
+     ✓ invokes all twelve rows and propagates 'boundaries:check' exit 127  537ms
+     ✓ invokes all twelve rows and propagates 'dead-code:check' exit 1  519ms
+     ✓ invokes all twelve rows and propagates 'dead-code:check' exit 2  508ms
+     ✓ invokes all twelve rows and propagates 'dead-code:check' exit 127  512ms
+     ✓ invokes all twelve rows and propagates 'duplication:check' exit 1  518ms
+     ✓ invokes all twelve rows and propagates 'duplication:check' exit 2  541ms
+     ✓ invokes all twelve rows and propagates 'duplication:check' exit 127  500ms
+     ✓ invokes all twelve rows and propagates 'test:policy' exit 1  562ms
+     ✓ invokes all twelve rows and propagates 'test:policy' exit 2  490ms
+     ✓ invokes all twelve rows and propagates 'test:policy' exit 127  545ms
+     ✓ invokes all twelve rows and propagates 'test:components' exit 1  493ms
+     ✓ invokes all twelve rows and propagates 'test:components' exit 2  499ms
+     ✓ invokes all twelve rows and propagates 'test:components' exit 127  500ms
+     ✓ invokes all twelve rows and propagates 'build' exit 1  500ms
+     ✓ invokes all twelve rows and propagates 'build' exit 2  539ms
+     ✓ invokes all twelve rows and propagates 'build' exit 127  490ms
+     ✓ invokes all twelve rows and propagates 'test:legacy-access' exit 1  487ms
+     ✓ invokes all twelve rows and propagates 'test:legacy-access' exit 2  500ms
+     ✓ invokes all twelve rows and propagates 'test:legacy-access' exit 127  643ms
+stdout | tests/unit/quality-rows.spec.mjs > public quality row entry points preserve parser decisions > dependencies reject the audit parser losing an advisory
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > quality gate regression boundaries > types enforce the literal existing-file allowance at 1 diagnostics
+types: PASS (1 current; 32 baseline)
+types-convex: PASS (0 current; 10 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > quality gate regression boundaries > lint enforces the literal existing-file allowance at 1 findings
+lint: PASS (1 current; 1427 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > quality gate regression boundaries > rejects an unallowlisted high advisory
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > quality gate regression boundaries > rejects an unallowlisted critical advisory
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license MIT
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license ISC
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license Apache-2.0
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license BSD-2-Clause
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license BSD-3-Clause
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license 0BSD
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license CC0-1.0
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license Unlicense
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license Python-2.0
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license BlueOak-1.0.0
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license (MIT OR Apache-2.0)
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license (Apache-2.0 OR MIT)
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license (MIT AND Zlib)
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts the documented permitted license (MIT OR CC0-1.0)
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects an unallowlisted restricted license
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > accepts an exact advisory and license allowance but rejects one new path
+advisories: PASS (1 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (1 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects one new advisory path alongside an allowed path
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects invalid allowance '' undefined
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects invalid allowance ' ' undefined
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects invalid allowance 42 undefined
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects invalid allowance undefined 'invalid'
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects invalid allowance undefined '2027-02-30'
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects invalid allowance undefined '2027-1-16'
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > rejects invalid allowance undefined '2026-01-01'
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > reports but does not fail low advisory debt
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > reports but does not fail moderate advisory debt
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > dependency command and allowance contracts > writes independently specified advisory and license identities locally
+dependencies: wrote 1 advisory/version and 1 license exceptions
+
+stdout | tests/unit/quality-rows.spec.mjs > compiler and linter invocation contracts > checks Nuxt and Convex separately and deduplicates repeated compiler diagnostics
+types: PASS (1 current; 32 baseline)
+types-convex: PASS (0 current; 10 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > compiler and linter invocation contracts > enforces suppression tickets in // eslint-disable rule --	  description #123
+lint: PASS (0 current; 1427 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > compiler and linter invocation contracts > enforces suppression tickets in // eslint-disable rule -- x https://github.com/owner/repo/issues/123
+lint: PASS (0 current; 1427 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > compiler and linter invocation contracts > selects only explicitly supplied lint files and removes the writer flag from selection
+lint: PASS (0 current; 1427 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > formatter decisions > preserves ignored handling
+format: PASS (0 unchanged legacy files)
+
+stdout | tests/unit/quality-rows.spec.mjs > formatter decisions > preserves unknown parser handling
+format: PASS (0 unchanged legacy files)
+
+stdout | tests/unit/quality-rows.spec.mjs > formatter decisions > preserves formatted handling
+format: PASS (0 unchanged legacy files)
+
+stdout | tests/unit/quality-rows.spec.mjs > formatter decisions > preserves legacy unchanged handling
+format: PASS (1 unchanged legacy files)
+
+stdout | tests/unit/quality-rows.spec.mjs > formatter decisions > preserves legacy writer handling
+format: wrote (1 unchanged legacy files)
+
+stdout | tests/unit/quality-rows.spec.mjs > formatter decisions > selects only requested formatting paths and drops the writer flag
+format: PASS (0 unchanged legacy files)
+
+stdout | tests/unit/quality-rows.spec.mjs > secret scan enforcement > scans and rejects a fresh finding in diff
+secrets history: PASS (0 existing findings; zero new)
+
+stdout | tests/unit/quality-rows.spec.mjs > secret scan enforcement > scans and rejects a fresh finding in working
+secrets history: PASS (0 existing findings; zero new)
+secrets diff: PASS (0 existing findings; zero new)
+
+stdout | tests/unit/quality-rows.spec.mjs > secret scan enforcement > scans every working file and retains only digests for exact existing exceptions
+secrets history: PASS (1 existing findings; zero new)
+secrets diff: PASS (1 existing findings; zero new)
+secrets working: PASS (1 existing findings; zero new)
+
+stdout | tests/unit/quality-rows.spec.mjs > secret scan enforcement > writes a deduplicated digest baseline locally
+secrets: wrote 1 exact rule/file/secret-digest exceptions
+
+hint: Support for <GIT_DIR>/info/grafts is deprecated
+hint: and will be removed in a future Git version.
+hint:
+hint: Please use "git replace --convert-graft-file"
+hint: to convert the grafts into replace refs.
+hint:
+hint: Turn this message off by running
+hint: "git config set advice.graftFileDeprecated false"
+stdout | tests/unit/quality-rows.spec.mjs > deterministic dependency evidence > sorts independent installed identities, allowance keys and accumulated advisory paths
+dependencies: wrote 2 advisory/version and 2 license exceptions
+
+stdout | tests/unit/quality-rows.spec.mjs > deterministic dependency evidence > rejects arbitrary unknown licence text with no exception
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > writer-only selection and ordinary failures > keeps the full lint inventory when the only argument is the writer flag
+lint: PASS (0 current; 1427 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > writer-only selection and ordinary failures > keeps the full formatter inventory when the only argument is the writer flag
+format: wrote (0 unchanged legacy files)
+
+stdout | tests/unit/quality-rows.spec.mjs > idempotent private-directory cleanup > accepts a completed license scan whose temporary directory was already removed
+advisories: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+licenses: PASS (0 existing exceptions, zero new; expire 2027-01-16)
+
+stdout | tests/unit/quality-rows.spec.mjs > idempotent private-directory cleanup > accepts clean secret reports after their private directory has already been removed
+secrets history: PASS (0 existing findings; zero new)
+secrets diff: PASS (0 existing findings; zero new)
+secrets working: PASS (0 existing findings; zero new)
+
+stdout | tests/unit/quality-rows.spec.mjs > child exit status boundaries > rejects 'tsc' exit 1 without diagnostics
+types: PASS (0 current; 32 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > child exit status boundaries > rejects 'tsc' exit 2 without diagnostics
+types: PASS (0 current; 32 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > child exit status boundaries > rejects 'tsc' exit 127 without diagnostics
+types: PASS (0 current; 32 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > repository suppression boundaries > uses private default rules and ignores allow comments (all branches: false)
+secrets history: PASS (0 existing findings; zero new)
+secrets diff: PASS (0 existing findings; zero new)
+secrets working: PASS (0 existing findings; zero new)
+
+stdout | tests/unit/quality-rows.spec.mjs > repository suppression boundaries > uses private default rules and ignores allow comments (all branches: true)
+secrets all-branches: PASS (0 existing findings; zero new)
+
+stdout | tests/unit/quality-rows.spec.mjs > preserves comment-shaped string literals while rejecting actual inline configurations
+lint: PASS (0 current; 1427 baseline)
+
+stdout | tests/unit/quality-rows.spec.mjs > lets ESLint ignores determine which selected files enter the lint parser population
+lint: PASS (0 current; 1427 baseline)
+
+ ✓ tests/unit/quality-rows.spec.mjs (159 tests) 8339ms
+     ✓ lint rejects a new rule finding from ESLint  737ms
+     ✓ reports a deleted secret hidden by 'committed nested binary attribute' (all branches: false)  352ms
+     ✓ reports a deleted secret hidden by 'committed nested binary attribute' (all branches: true)  323ms
+     ✓ reports a deleted secret hidden by 'committed pem binary attribute' (all branches: false)  335ms
+ ✓ tests/unit/quality-policy.spec.mjs (50 tests) 1796ms
+     ✓ counts every skipped test and todo, including suite children and dynamic skips  398ms
+     ✓ forbids 'options only' through Vitest  360ms
+     ✓ forbids 'modifier only' through Vitest  331ms
+     ✓ counts a conditional skip in source even when it does not skip at runtime  324ms
+     ✓ counts tickets like any other skip  330ms
+ ✓ tests/unit/quality-inventory.spec.mjs (14 tests) 760ms
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts unchanged manifests and checks the integration merge-base
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts initial adoption when no prior manifests exist
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts reductions and removals across every manifest kind
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline manifest boundaries > uses origin/dev by default and ignores ordinary repository files
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline comparison bases > compares against every base that has manifests
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline comparison bases > accepts initial adoption when a base descends from the adoption commit
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+ ✓ tests/unit/quality-baselines.spec.mjs (55 tests) 428ms
+stdout | tests/unit/quality-common.spec.mjs > full count ratchets > requires paid-down types allowances to be lowered, including absent keys
+types: PASS (31 current; 32 baseline)
+
+ ✓ tests/unit/quality-structural.spec.mjs (14 tests) 12173ms
+   ✓ rejects a cycle at the boundaries command and admits an acyclic control  2191ms
+   ✓ rejects private imports, including an index in a private directory, and admits its owner  1250ms
+   ✓ rejects an unused file and admits a reachable file at the dead-code command  1382ms
+   ✓ rejects an unused export and admits the same exported value when consumed  711ms
+   ✓ rejects an unused dependency and admits an actual dependency import  704ms
+   ✓ rejects duplication involving a changed file and admits original code  873ms
+   ✓ enforces module entry points and resolves Nuxt aliases before checking server imports  1789ms
+   ✓ requires paid-down inherited dead-code allowances to be lowered  1082ms
+   ✓ does not charge unchanged duplication and detects changed copies across directories  458ms
+   ✓ rejects a new file even if a local dead-code allowance was added  421ms
+   ✓ requires removed duplication debt to lower both affected file allowances  946ms
+stdout | tests/unit/quality-common.spec.mjs > full count ratchets > requires paid-down types-convex allowances to be lowered, including absent keys
+types-convex: PASS (9 current; 10 baseline)
+
+stdout | tests/unit/quality-common.spec.mjs > full count ratchets > requires paid-down lint allowances to be lowered, including absent keys
+lint: PASS (1426 current; 1427 baseline)
+
+stdout | tests/unit/quality-common.spec.mjs > full count ratchets > requires paid-down test-policy allowances to be lowered, including absent keys
+test-policy: PASS (9 current; 10 baseline)
+
+ ✓ tests/unit/quality-common.spec.mjs (16 tests) 248ms
+ ✓ tests/unit/quality-cache.spec.mjs (40 tests) 197ms
+ ✓ tests/unit/quality-structural-rows.spec.mjs (12 tests) 78ms
+ ✓ tests/unit/quality-parsers.spec.mjs (148 tests) 46ms
+ ✓ tests/components/auth/SignOutButton.spec.ts (6 tests) 37ms
+ ✓ tests/components/admin/PathwayDefinitionTable.spec.ts (4 tests) 92ms
+ ✓ tests/components/workspace/RecommendationRunCard.spec.ts (4 tests) 40ms
+ ✓ tests/unit/quality-aggregate.spec.mjs (22 tests) 43ms
+ ✓ tests/components/workspace/PlanningWorkspaceHero.spec.ts (1 test) 29ms
+ ✓ tests/components/admin/EvidenceSourceDetail.spec.ts (2 tests) 33ms
+ ✓ tests/components/admin/PathwayRuleAccordion.spec.ts (2 tests) 34ms
+ ✓ tests/components/workspace/PathwayChangeCard.spec.ts (4 tests) 23ms
+ ✓ tests/components/workspace/PlanningWorkspaceActionPanel.spec.ts (1 test) 18ms
+ ✓ tests/components/admin/EvidenceSourceList.spec.ts (2 tests) 19ms
+ ✓ tests/components/workspace/CaveatChangesPanel.spec.ts (1 test) 16ms
+ ✓ tests/components/workspace/TrustEvidencePanel.spec.ts (1 test) 15ms
+ ✓ tests/components/workspace/RunHistoryFilterBar.spec.ts (2 tests) 16ms
+ ✓ tests/components/workspace/ComparisonStatCard.spec.ts (3 tests) 16ms
+ ✓ tests/components/workspace/RunStatusBadge.spec.ts (3 tests) 15ms
+ ✓ tests/components/workspace/PlanningProgressTimeline.spec.ts (1 test) 17ms
+ ✓ tests/components/workspace/ProfileDeltaPanel.spec.ts (1 test) 12ms
+ ✓ tests/unit/buildRunComparison.spec.ts (3 tests) 11ms
+ ✓ tests/unit/eligibilityDslEvaluator.spec.ts (4 tests) 2ms
+ ✓ tests/unit/recommendation-run-comparison.spec.ts (1 test) 1ms
+
+ Test Files  31 passed (31)
+      Tests  699 passed (699)
+   Start at  22:40:50
+   Duration  43.30s (transform 1.89s, setup 0ms, import 5.75s, tests 69.52s, environment 8.43s)
+

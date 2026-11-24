@@ -1,0 +1,70 @@
+{
+  "status": "fail",
+  "signal": null,
+  "baselinePolicy": {
+    "status": "pass",
+    "seconds": "1.7"
+  },
+  "rows": [
+    {
+      "row": "typecheck",
+      "status": "pass",
+      "seconds": "39.7"
+    },
+    {
+      "row": "lint",
+      "status": "pass",
+      "seconds": "47.0"
+    },
+    {
+      "row": "format:check",
+      "status": "pass",
+      "seconds": "8.4"
+    },
+    {
+      "row": "secrets:check",
+      "status": "pass",
+      "seconds": "5.8"
+    },
+    {
+      "row": "dependencies:check",
+      "status": "pass",
+      "seconds": "61.5"
+    },
+    {
+      "row": "boundaries:check",
+      "status": "pass",
+      "seconds": "13.6"
+    },
+    {
+      "row": "dead-code:check",
+      "status": "pass",
+      "seconds": "14.8"
+    },
+    {
+      "row": "duplication:check",
+      "status": "pass",
+      "seconds": "4.0"
+    },
+    {
+      "row": "test:policy",
+      "status": "fail",
+      "seconds": "54.3"
+    },
+    {
+      "row": "test:components",
+      "status": "fail",
+      "seconds": "35.3"
+    },
+    {
+      "row": "build",
+      "status": "pass",
+      "seconds": "31.8"
+    },
+    {
+      "row": "test:legacy-access",
+      "status": "pass",
+      "seconds": "59.7"
+    }
+  ]
+}

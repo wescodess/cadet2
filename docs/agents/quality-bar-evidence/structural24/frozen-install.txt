@@ -1,0 +1,436 @@
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1405
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1405, reused 295, downloaded 0, added 0
+Progress: resolved 1405, reused 1033, downloaded 0, added 0
+Progress: resolved 1405, reused 1401, downloaded 0, added 114
+Progress: resolved 1405, reused 1401, downloaded 0, added 299
+Progress: resolved 1405, reused 1401, downloaded 0, added 509
+Progress: resolved 1405, reused 1401, downloaded 0, added 652
+Progress: resolved 1405, reused 1401, downloaded 0, added 825
+Progress: resolved 1405, reused 1401, downloaded 0, added 1089
+Progress: resolved 1405, reused 1401, downloaded 0, added 1397
+Progress: resolved 1405, reused 1401, downloaded 0, added 1405, done
+
+dependencies:
++ @better-auth/core 1.4.9
++ @better-auth/utils 0.3.0
++ @convex-dev/better-auth 0.10.11
++ @convex-vue/core 0.0.4
++ @electric-sql/pglite 0.3.15
++ @internationalized/date 3.12.4
++ @nuxthub/core 0.10.6
++ @onmax/nuxt-better-auth 0.0.2-alpha.29
++ @tanstack/vue-table 8.21.3
++ @unovis/vue 1.8.1
++ @vee-validate/zod 4.15.1
++ @vueuse/core 14.2.1
++ better-auth 1.4.9
++ better-call 1.1.7
++ class-variance-authority 0.7.1
++ clsx 2.1.1
++ convex 1.32.0
++ drizzle-orm 0.45.1
++ embla-carousel-vue 8.6.0
++ lucide-vue-next 0.575.0
++ nuxt 4.3.1
++ nuxt-convex 0.0.6
++ reka-ui 2.8.2
++ tailwind-merge 3.5.0
++ vaul-vue 0.4.1
++ vee-validate 4.15.1
++ vue 3.5.28
++ vue-input-otp 0.3.2
++ vue-router 4.6.4
++ vue-sonner 2.0.9
++ zod 3.25.76
+
+devDependencies:
++ @eslint/js 10.0.1
++ @faker-js/faker 10.3.0
++ @playwright/test 1.58.2
++ @seontechnologies/playwright-utils 3.14.0
++ @tailwindcss/vite 4.2.0
++ @vitejs/plugin-vue 6.0.4
++ @vue/test-utils 2.4.6
++ dependency-cruiser 18.8.0
++ drizzle-kit 0.31.9
++ eslint 10.15.0
++ eslint-plugin-sonarjs 4.2.2
++ eslint-plugin-vue 10.12.1
++ jscpd 5.4.3
++ jsdom 28.1.0
++ knip 6.47.0
++ lint-staged 17.6.1
++ prettier 3.10.1
++ shadcn-nuxt 2.4.3
++ tailwindcss 4.2.0
++ tw-animate-css 1.4.0
++ typescript 5.9.3
++ typescript-eslint 8.73.0
++ vitest 4.0.18
++ vue-eslint-parser 10.4.2
++ vue-tsc 3.3.14
++ yaml 2.9.1
+
+
+> cadet2@ postinstall <repository>
+> nuxt prepare
+
+[nuxt-better-auth] ℹ Generated postgresql schema (.ts + .mjs)
+
+ WARN  Component directory does not exist: <repository>/components/ui
+
+
+[nuxt:convex]  WARN  Convex URL not configured. Set CONVEX_URL or NUXT_PUBLIC_CONVEX_URL
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAccordion:
+
+ - <repository>/app/components/ui/accordion/index.ts
+ - <repository>/app/components/ui/accordion/Accordion.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAlertDialog:
+
+ - <repository>/app/components/ui/alert-dialog/index.ts
+ - <repository>/app/components/ui/alert-dialog/AlertDialog.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAlert:
+
+ - <repository>/app/components/ui/alert/index.ts
+ - <repository>/app/components/ui/alert/Alert.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAspectRatio:
+
+ - <repository>/app/components/ui/aspect-ratio/index.ts
+ - <repository>/app/components/ui/aspect-ratio/AspectRatio.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiAvatar:
+
+ - <repository>/app/components/ui/avatar/index.ts
+ - <repository>/app/components/ui/avatar/Avatar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiBadge:
+
+ - <repository>/app/components/ui/badge/index.ts
+ - <repository>/app/components/ui/badge/Badge.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiBreadcrumb:
+
+ - <repository>/app/components/ui/breadcrumb/index.ts
+ - <repository>/app/components/ui/breadcrumb/Breadcrumb.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiButtonGroup:
+
+ - <repository>/app/components/ui/button-group/index.ts
+ - <repository>/app/components/ui/button-group/ButtonGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiButton:
+
+ - <repository>/app/components/ui/button/index.ts
+ - <repository>/app/components/ui/button/Button.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCalendar:
+
+ - <repository>/app/components/ui/calendar/index.ts
+ - <repository>/app/components/ui/calendar/Calendar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCard:
+
+ - <repository>/app/components/ui/card/index.ts
+ - <repository>/app/components/ui/card/Card.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCarousel:
+
+ - <repository>/app/components/ui/carousel/index.ts
+ - <repository>/app/components/ui/carousel/Carousel.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCheckbox:
+
+ - <repository>/app/components/ui/checkbox/index.ts
+ - <repository>/app/components/ui/checkbox/Checkbox.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCollapsible:
+
+ - <repository>/app/components/ui/collapsible/index.ts
+ - <repository>/app/components/ui/collapsible/Collapsible.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCombobox:
+
+ - <repository>/app/components/ui/combobox/index.ts
+ - <repository>/app/components/ui/combobox/Combobox.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiCommand:
+
+ - <repository>/app/components/ui/command/index.ts
+ - <repository>/app/components/ui/command/Command.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiContextMenu:
+
+ - <repository>/app/components/ui/context-menu/index.ts
+ - <repository>/app/components/ui/context-menu/ContextMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDialog:
+
+ - <repository>/app/components/ui/dialog/index.ts
+ - <repository>/app/components/ui/dialog/Dialog.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDrawer:
+
+ - <repository>/app/components/ui/drawer/index.ts
+ - <repository>/app/components/ui/drawer/Drawer.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiDropdownMenu:
+
+ - <repository>/app/components/ui/dropdown-menu/index.ts
+ - <repository>/app/components/ui/dropdown-menu/DropdownMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiEmpty:
+
+ - <repository>/app/components/ui/empty/index.ts
+ - <repository>/app/components/ui/empty/Empty.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiField:
+
+ - <repository>/app/components/ui/field/index.ts
+ - <repository>/app/components/ui/field/Field.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiHoverCard:
+
+ - <repository>/app/components/ui/hover-card/index.ts
+ - <repository>/app/components/ui/hover-card/HoverCard.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiInputGroup:
+
+ - <repository>/app/components/ui/input-group/index.ts
+ - <repository>/app/components/ui/input-group/InputGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiInput:
+
+ - <repository>/app/components/ui/input/index.ts
+ - <repository>/app/components/ui/input/Input.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiItem:
+
+ - <repository>/app/components/ui/item/index.ts
+ - <repository>/app/components/ui/item/Item.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiKbd:
+
+ - <repository>/app/components/ui/kbd/index.ts
+ - <repository>/app/components/ui/kbd/Kbd.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiLabel:
+
+ - <repository>/app/components/ui/label/index.ts
+ - <repository>/app/components/ui/label/Label.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiMenubar:
+
+ - <repository>/app/components/ui/menubar/index.ts
+ - <repository>/app/components/ui/menubar/Menubar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNativeSelect:
+
+ - <repository>/app/components/ui/native-select/index.ts
+ - <repository>/app/components/ui/native-select/NativeSelect.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNavigationMenu:
+
+ - <repository>/app/components/ui/navigation-menu/index.ts
+ - <repository>/app/components/ui/navigation-menu/NavigationMenu.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiNumberField:
+
+ - <repository>/app/components/ui/number-field/index.ts
+ - <repository>/app/components/ui/number-field/NumberField.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPagination:
+
+ - <repository>/app/components/ui/pagination/index.ts
+ - <repository>/app/components/ui/pagination/Pagination.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPinInput:
+
+ - <repository>/app/components/ui/pin-input/index.ts
+ - <repository>/app/components/ui/pin-input/PinInput.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiPopover:
+
+ - <repository>/app/components/ui/popover/index.ts
+ - <repository>/app/components/ui/popover/Popover.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiProgress:
+
+ - <repository>/app/components/ui/progress/index.ts
+ - <repository>/app/components/ui/progress/Progress.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiRadioGroup:
+
+ - <repository>/app/components/ui/radio-group/index.ts
+ - <repository>/app/components/ui/radio-group/RadioGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiRangeCalendar:
+
+ - <repository>/app/components/ui/range-calendar/index.ts
+ - <repository>/app/components/ui/range-calendar/RangeCalendar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiScrollArea:
+
+ - <repository>/app/components/ui/scroll-area/index.ts
+ - <repository>/app/components/ui/scroll-area/ScrollArea.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSelect:
+
+ - <repository>/app/components/ui/select/index.ts
+ - <repository>/app/components/ui/select/Select.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSeparator:
+
+ - <repository>/app/components/ui/separator/index.ts
+ - <repository>/app/components/ui/separator/Separator.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSheet:
+
+ - <repository>/app/components/ui/sheet/index.ts
+ - <repository>/app/components/ui/sheet/Sheet.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSidebar:
+
+ - <repository>/app/components/ui/sidebar/index.ts
+ - <repository>/app/components/ui/sidebar/Sidebar.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSkeleton:
+
+ - <repository>/app/components/ui/skeleton/index.ts
+ - <repository>/app/components/ui/skeleton/Skeleton.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSlider:
+
+ - <repository>/app/components/ui/slider/index.ts
+ - <repository>/app/components/ui/slider/Slider.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSonner:
+
+ - <repository>/app/components/ui/sonner/index.ts
+ - <repository>/app/components/ui/sonner/Sonner.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSpinner:
+
+ - <repository>/app/components/ui/spinner/index.ts
+ - <repository>/app/components/ui/spinner/Spinner.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiStepper:
+
+ - <repository>/app/components/ui/stepper/index.ts
+ - <repository>/app/components/ui/stepper/Stepper.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiSwitch:
+
+ - <repository>/app/components/ui/switch/index.ts
+ - <repository>/app/components/ui/switch/Switch.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTable:
+
+ - <repository>/app/components/ui/table/index.ts
+ - <repository>/app/components/ui/table/Table.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTabs:
+
+ - <repository>/app/components/ui/tabs/index.ts
+ - <repository>/app/components/ui/tabs/Tabs.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTagsInput:
+
+ - <repository>/app/components/ui/tags-input/index.ts
+ - <repository>/app/components/ui/tags-input/TagsInput.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTextarea:
+
+ - <repository>/app/components/ui/textarea/index.ts
+ - <repository>/app/components/ui/textarea/Textarea.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiToggleGroup:
+
+ - <repository>/app/components/ui/toggle-group/index.ts
+ - <repository>/app/components/ui/toggle-group/ToggleGroup.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiToggle:
+
+ - <repository>/app/components/ui/toggle/index.ts
+ - <repository>/app/components/ui/toggle/Toggle.vue
+
+
+[nuxt]  WARN  Two component files resolving to the same name UiTooltip:
+
+ - <repository>/app/components/ui/tooltip/index.ts
+ - <repository>/app/components/ui/tooltip/Tooltip.vue
+
+
+ WARN  Duplicated imports "toIsoString", the one from "<repository>/server/utils/recommendations/lifecycle.ts" has been ignored and "<repository>/server/utils/recommendations/reviewDateUtils.ts" is used
+
+
+ WARN  Duplicated imports "toIsoString", the one from "<repository>/server/utils/recommendations/lifecycle.ts" has been ignored and "<repository>/server/utils/recommendations/reviewDateUtils.ts" is used
+
+│
+◆  Types generated in .nuxt.
+
+> cadet2@ prepare <repository>
+> node scripts/quality/install-hooks.mjs
+
+Done in 26.6s

@@ -1,0 +1,118 @@
+{
+  "valid": {
+    "status": 0,
+    "stdout": "{\n  \"duplicates\": [],\n  \"statistics\": {\n    \"detectionDate\": \"2026-11-22T03:14:23.330Z\",\n    \"formats\": {},\n    \"total\": {\n      \"clones\": 0,\n      \"duplicatedLines\": 0,\n      \"duplicatedTokens\": 0,\n      \"lines\": 0,\n      \"newClones\": 0,\n      \"newDuplicatedLines\": 0,\n      \"percentage\": 0.0,\n      \"percentageTokens\": 0.0,\n      \"sources\": 0,\n      \"tokens\": 0\n    }\n  }\n}"
+  },
+  "expected": {
+    "duplicates": [],
+    "statistics": {
+      "detectionDate": "2026-11-22T03:14:23.330Z",
+      "formats": {},
+      "total": {
+        "clones": 0,
+        "duplicatedLines": 0,
+        "duplicatedTokens": 0,
+        "lines": 0,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 0.0,
+        "percentageTokens": 0.0,
+        "sources": 0,
+        "tokens": 0
+      }
+    }
+  },
+  "alsoValid": [
+    {
+      "status": 0,
+      "stdout": "{\"duplicates\": [{\"firstFile\": {\"end\": 20, \"endLoc\": {\"column\": 36, \"line\": 20, \"position\": 719}, \"name\": \"/private/tmp/impl-24-scratch/parser-fixture/shared/a.ts\", \"start\": 1, \"startLoc\": {\"column\": 0, \"line\": 1, \"position\": 0}}, \"format\": \"typescript\", \"fragment\": \"console.log('operation 0', 0 * 17)\\nconsole.log('operation 1', 1 * 17)\\nconsole.log('operation 2', 2 * 17)\\nconsole.log('operation 3', 3 * 17)\\nconsole.log('operation 4', 4 * 17)\\nconsole.log('operation 5', 5 * 17)\\nconsole.log('operation 6', 6 * 17)\\nconsole.log('operation 7', 7 * 17)\\nconsole.log('operation 8', 8 * 17)\\nconsole.log('operation 9', 9 * 17)\\nconsole.log('operation 10', 10 * 17)\\nconsole.log('operation 11', 11 * 17)\\nconsole.log('operation 12', 12 * 17)\\nconsole.log('operation 13', 13 * 17)\\nconsole.log('operation 14', 14 * 17)\\nconsole.log('operation 15', 15 * 17)\\nconsole.log('operation 16', 16 * 17)\\nconsole.log('operation 17', 17 * 17)\\nconsole.log('operation 18', 18 * 17)\\nconsole.log('operation 19', 19 * 17)\", \"isNew\": false, \"kind\": \"exact\", \"lines\": 20, \"secondFile\": {\"end\": 20, \"endLoc\": {\"column\": 36, \"line\": 20, \"position\": 719}, \"name\": \"/private/tmp/impl-24-scratch/parser-fixture/shared/b.ts\", \"start\": 1, \"startLoc\": {\"column\": 0, \"line\": 1, \"position\": 0}}, \"tokens\": 200}], \"statistics\": {\"detectionDate\": \"2026-11-22T03:14:24.590Z\", \"formats\": {\"typescript\": {\"clones\": 1, \"duplicatedLines\": 20, \"duplicatedTokens\": 200, \"lines\": 40, \"newClones\": 0, \"newDuplicatedLines\": 0, \"percentage\": 50.0, \"percentageTokens\": 50.0, \"sources\": 2, \"tokens\": 400}}, \"total\": {\"clones\": 1, \"duplicatedLines\": 20, \"duplicatedTokens\": 200, \"lines\": 40, \"newClones\": 0, \"newDuplicatedLines\": 0, \"percentage\": 50.0, \"percentageTokens\": 50.0, \"sources\": 2, \"tokens\": 400}}}"
+    }
+  ],
+  "alsoExpected": [
+    {
+      "duplicates": [
+        {
+          "firstFile": {
+            "end": 20,
+            "endLoc": {
+              "column": 36,
+              "line": 20,
+              "position": 719
+            },
+            "name": "/private/tmp/impl-24-scratch/parser-fixture/shared/a.ts",
+            "start": 1,
+            "startLoc": {
+              "column": 0,
+              "line": 1,
+              "position": 0
+            }
+          },
+          "format": "typescript",
+          "fragment": "console.log('operation 0', 0 * 17)\nconsole.log('operation 1', 1 * 17)\nconsole.log('operation 2', 2 * 17)\nconsole.log('operation 3', 3 * 17)\nconsole.log('operation 4', 4 * 17)\nconsole.log('operation 5', 5 * 17)\nconsole.log('operation 6', 6 * 17)\nconsole.log('operation 7', 7 * 17)\nconsole.log('operation 8', 8 * 17)\nconsole.log('operation 9', 9 * 17)\nconsole.log('operation 10', 10 * 17)\nconsole.log('operation 11', 11 * 17)\nconsole.log('operation 12', 12 * 17)\nconsole.log('operation 13', 13 * 17)\nconsole.log('operation 14', 14 * 17)\nconsole.log('operation 15', 15 * 17)\nconsole.log('operation 16', 16 * 17)\nconsole.log('operation 17', 17 * 17)\nconsole.log('operation 18', 18 * 17)\nconsole.log('operation 19', 19 * 17)",
+          "isNew": false,
+          "kind": "exact",
+          "lines": 20,
+          "secondFile": {
+            "end": 20,
+            "endLoc": {
+              "column": 36,
+              "line": 20,
+              "position": 719
+            },
+            "name": "/private/tmp/impl-24-scratch/parser-fixture/shared/b.ts",
+            "start": 1,
+            "startLoc": {
+              "column": 0,
+              "line": 1,
+              "position": 0
+            }
+          },
+          "tokens": 200
+        }
+      ],
+      "statistics": {
+        "detectionDate": "2026-11-22T03:14:24.590Z",
+        "formats": {
+          "typescript": {
+            "clones": 1,
+            "duplicatedLines": 20,
+            "duplicatedTokens": 200,
+            "lines": 40,
+            "newClones": 0,
+            "newDuplicatedLines": 0,
+            "percentage": 50.0,
+            "percentageTokens": 50.0,
+            "sources": 2,
+            "tokens": 400
+          }
+        },
+        "total": {
+          "clones": 1,
+          "duplicatedLines": 20,
+          "duplicatedTokens": 200,
+          "lines": 40,
+          "newClones": 0,
+          "newDuplicatedLines": 0,
+          "percentage": 50.0,
+          "percentageTokens": 50.0,
+          "sources": 2,
+          "tokens": 400
+        }
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "status": 127,
+      "stdout": "{\n  \"duplicates\": [],\n  \"statistics\": {\n    \"detectionDate\": \"2026-11-22T03:14:23.330Z\",\n    \"formats\": {},\n    \"total\": {\n      \"clones\": 0,\n      \"duplicatedLines\": 0,\n      \"duplicatedTokens\": 0,\n      \"lines\": 0,\n      \"newClones\": 0,\n      \"newDuplicatedLines\": 0,\n      \"percentage\": 0.0,\n      \"percentageTokens\": 0.0,\n      \"sources\": 0,\n      \"tokens\": 0\n    }\n  }\n}"
+    },
+    {
+      "status": 0,
+      "stdout": "{\"truncated\":"
+    }
+  ],
+  "incomplete": {
+    "status": 0,
+    "stdout": "{\"duplicates\": [], \"statistics\": {\"detectionDate\": \"2026-11-22T03:14:23.330Z\", \"formats\": {}, \"total\": {\"clones\": 0, \"duplicatedLines\": 0, \"duplicatedTokens\": 0, \"lines\": 0, \"newClones\": 0, \"newDuplicatedLines\": 0, \"percentage\": 0.0, \"percentageTokens\": 0.0, \"sources\": 1, \"tokens\": 0}}}"
+  }
+}

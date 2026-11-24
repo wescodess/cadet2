@@ -1,0 +1,51 @@
+
+ RUN  v4.0.18 <repository>
+
+ ❯ tests/unit/quality-structural.spec.mjs (1 test | 1 failed) 164ms
+   × rejects a cycle at the boundaries command and admits an acyclic control 163ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/quality-structural.spec.mjs > rejects a cycle at the boundaries command and admits an acyclic control
+AssertionError: expected 'node:internal/modules/cjs/loader:1568…' to match /boundaries regression.*|boundaries: …/s
+
+- Expected: 
+/boundaries regression.*|boundaries: new files must be clean/s
+
++ Received: 
+"node:internal/modules/cjs/loader:1568
+  throw err;
+  ^
+
+Error: Cannot find module '<repository>/scripts/quality/boundaries.mjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)
+    at Module._load (node:internal/modules/cjs/loader:1341:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.20.0
+"
+
+ ❯ tests/unit/quality-structural.spec.mjs:40:25
+     38|   const denied = row('boundaries', directory)
+     39|   expect(denied.status).toBe(1)
+     40|   expect(denied.output).toMatch(/boundaries regression.*|boundaries: n…
+       |                         ^
+     41|   put('shared/b.ts', 'export const b = () => 1')
+     42|   const admitted = row('boundaries', directory)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  22:01:15
+   Duration  547ms (transform 14ms, setup 0ms, import 24ms, tests 164ms, environment 0ms)
+

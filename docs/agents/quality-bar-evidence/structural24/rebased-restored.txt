@@ -1,0 +1,56 @@
+
+ RUN  v4.0.18 <repository>
+
+ ✓ tests/unit/quality-parsers.spec.mjs (148 tests) 52ms
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts unchanged manifests and checks the integration merge-base
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts initial adoption when no prior manifests exist
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline policy public entry point > accepts reductions and removals across every manifest kind
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline manifest boundaries > uses origin/dev by default and ignores ordinary repository files
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline comparison bases > compares against every base that has manifests
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+stdout | tests/unit/quality-baselines.spec.mjs > baseline comparison bases > accepts initial adoption when a base descends from the adoption commit
+baselines: PASS (valid schemas; no increases against integration merge-bases)
+
+ ✓ tests/unit/quality-baselines.spec.mjs (55 tests) 479ms
+stdout | tests/unit/quality-common.spec.mjs > full count ratchets > requires paid-down types allowances to be lowered, including absent keys
+types: PASS (31 current; 32 baseline)
+
+stdout | tests/unit/quality-common.spec.mjs > full count ratchets > requires paid-down types-convex allowances to be lowered, including absent keys
+types-convex: PASS (9 current; 10 baseline)
+
+stdout | tests/unit/quality-common.spec.mjs > full count ratchets > requires paid-down lint allowances to be lowered, including absent keys
+lint: PASS (1426 current; 1427 baseline)
+
+stdout | tests/unit/quality-common.spec.mjs > full count ratchets > requires paid-down test-policy allowances to be lowered, including absent keys
+test-policy: PASS (9 current; 10 baseline)
+
+ ✓ tests/unit/quality-common.spec.mjs (16 tests) 226ms
+ ✓ tests/unit/quality-aggregate.spec.mjs (22 tests) 38ms
+ ✓ tests/unit/quality-structural-rows.spec.mjs (12 tests) 59ms
+ ✓ tests/unit/quality-structural.spec.mjs (14 tests) 9848ms
+   ✓ rejects a cycle at the boundaries command and admits an acyclic control  1345ms
+   ✓ rejects private imports, including an index in a private directory, and admits its owner  1150ms
+   ✓ rejects an unused file and admits a reachable file at the dead-code command  714ms
+   ✓ rejects an unused export and admits the same exported value when consumed  680ms
+   ✓ rejects an unused dependency and admits an actual dependency import  688ms
+   ✓ rejects duplication involving a changed file and admits original code  463ms
+   ✓ enforces module entry points and resolves Nuxt aliases before checking server imports  1768ms
+   ✓ requires paid-down inherited dead-code allowances to be lowered  994ms
+   ✓ does not charge unchanged duplication and detects changed copies across directories  451ms
+   ✓ rejects a new file even if a local dead-code allowance was added  396ms
+   ✓ requires removed duplication debt to lower both affected file allowances  838ms
+
+ Test Files  6 passed (6)
+      Tests  267 passed (267)
+   Start at  22:33:06
+   Duration  10.17s (transform 183ms, setup 0ms, import 310ms, tests 10.70s, environment 1ms)
+

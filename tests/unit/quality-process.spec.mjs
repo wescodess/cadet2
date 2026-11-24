@@ -23,6 +23,9 @@ const rows = [
   'format:check',
   'secrets:check',
   'dependencies:check',
+  'boundaries:check',
+  'dead-code:check',
+  'duplication:check',
   'test:policy',
   'test:components',
   'build',
@@ -53,7 +56,7 @@ describe('public quality processes', () => {
     { failure: null, code: 0 },
     ...rows.flatMap((failure) => [1, 2, 127].map((code) => ({ failure, code }))),
   ])(
-    'invokes all nine rows and propagates $failure exit $code',
+    'invokes all twelve rows and propagates $failure exit $code',
     ({ failure, code }) => {
       const root = sandbox()
       writeFileSync(join(root, 'scripts/quality/baseline-policy.mjs'), 'process.exit(0)\n')
