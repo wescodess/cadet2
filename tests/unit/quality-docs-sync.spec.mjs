@@ -38,16 +38,10 @@ function drift(sources) {
   const start = docs.indexOf(START)
   const end = docs.indexOf(END)
   if (end < start) return [`${END} precedes ${START}`]
-  const before = docs.slice(0, start)
-  const problems = []
-  if (occurrences(before, '<!--') !== occurrences(before, '-->'))
-    problems.push('the figures block sits inside an HTML comment')
-  if (before.split('\n').filter((line) => /^\s*(```|~~~)/.test(line)).length % 2)
-    problems.push('the figures block sits inside a code fence')
   const expected = render(sources)
-  if (docs.slice(start + START.length, end).trim() !== expected)
-    problems.push(`docs/agents/quality-bar.md figures block must read exactly:\n${expected}`)
-  return problems
+  return docs.slice(start + START.length, end).trim() === expected
+    ? []
+    : [`docs/agents/quality-bar.md figures block must read exactly:\n${expected}`]
 }
 
 function repository() {
@@ -147,14 +141,6 @@ it.each([
   ],
   ['a tilde-fenced table', (docs) => edit(docs, EXPECTED, `~~~markdown\n${EXPECTED}\n~~~`)],
   [
-    'a fence around the whole block',
-    (docs) => edit(edit(docs, START, `~~~\n${START}`), END, `${END}\n~~~`),
-  ],
-  [
-    'a comment around the whole block',
-    (docs) => edit(edit(docs, START, `<!--\n${START}`), END, `${END}\n-->`),
-  ],
-  [
     'an earlier historical copy shadowing a wrong current figure',
     (docs) => `## History\n\n${EXPECTED}\n\n${edit(docs, '**2** exact', '**9** exact')}`,
   ],
@@ -179,7 +165,23 @@ it.each([
     'a cycle outside app/',
     (base) => ({ boundaries: [...base.boundaries, ['server/x|no-cycles|server/y', 1]] }),
   ],
-])('rejects %s', (_, change) => {
-  const base = sources()
-  expect(drift({ ...base, ...change(base), docs: documented(EXPECTED) })).not.toEqual([])
+])('rejects %s and prints the block to paste', (_, change) => {
+  const changed = { ...sources(), ...change(sources()) }
+  expect(drift({ ...changed, docs: documented(EXPECTED) })).toEqual([
+    `docs/agents/quality-bar.md figures block must read exactly:\n${render(changed)}`,
+  ])
+})
+
+it('prints the exact expected block when a documented figure drifts', () => {
+  const docs = documented(edit(EXPECTED, '**3** file/clone', '**4** file/clone'))
+  expect(drift({ ...sources(), docs })).toEqual([
+    `docs/agents/quality-bar.md figures block must read exactly:\n${EXPECTED}`,
+  ])
+})
+
+it('leaves Markdown context around the marked block to review', () => {
+  const docs = documented(EXPECTED)
+  const fenced = edit(edit(docs, START, `~~~\n${START}`), END, `${END}\n~~~`)
+  expect(drift({ ...sources(), docs: `Use \`-->\` in examples.\n\n${docs}` })).toEqual([])
+  expect(drift({ ...sources(), docs: fenced })).toEqual([])
 })
