@@ -1,14 +1,36 @@
 // @vitest-environment node
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import * as common from '../../scripts/quality/common.mjs'
 
+const checkout = process.cwd()
 let directory, completion, result, population
 beforeEach(() => {
   vi.resetModules()
-  directory = mkdtempSync(join(tmpdir(), 'structural-report-'))
+  vi.spyOn(common, 'sourceFiles').mockImplementation(() => {
+    throw new Error('Structural row fixtures must not discover the working tree')
+  })
+  directory = realpathSync(mkdtempSync(join(tmpdir(), 'structural-report-')))
+  writeFileSync(join(directory, 'fixture.ts'), 'export const fixture = 1\n')
+  writeFileSync(join(directory, 'package.json'), '{"name":"structural-row","type":"module"}')
+  for (const args of [
+    ['init', '-q'],
+    ['add', 'fixture.ts', 'package.json'],
+    [
+      '-c',
+      'user.name=Fixture',
+      '-c',
+      'user.email=fixture@example.invalid',
+      'commit',
+      '-qm',
+      'fixture',
+    ],
+  ])
+    execFileSync('git', args, { cwd: directory })
+  process.chdir(directory)
   result = { status: 0, stdout: '{}', stderr: '' }
   population = ['package.json']
   vi.doMock('../../scripts/quality/common.mjs', () => ({
@@ -39,8 +61,10 @@ beforeEach(() => {
   }))
 })
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.doUnmock('../../scripts/quality/common.mjs')
   vi.doUnmock('../../scripts/quality/scanner.mjs')
+  process.chdir(checkout)
   rmSync(directory, { recursive: true, force: true })
 })
 
@@ -48,7 +72,7 @@ for (const row of ['boundaries', 'dead-code', 'duplication']) {
   it.each(['malformed', 'failed', 'truncated', 'unknown'])(
     'rejects %s tool output at the ' + row + ' row',
     async (kind) => {
-      if (row === 'dead-code') population = common.sourceFiles()
+      if (row === 'dead-code') population = ['fixture.ts']
       if (kind === 'failed') {
         result = {
           ...result,
