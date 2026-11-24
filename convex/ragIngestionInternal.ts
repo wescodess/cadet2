@@ -469,8 +469,9 @@ async function processBatchRuns(ctx: MutationCtx, batchId: Id<'ingestion_batches
   return await ctx.db.get(batchId)
 }
 
-async function createOrReuseAndProcessBatch(
+async function createOrReuseBatch(
   ctx: MutationCtx,
+  mode: 'prepare' | 'process',
   input: {
     trigger: 'manual' | 'scheduled'
     now: number
@@ -517,65 +518,10 @@ async function createOrReuseAndProcessBatch(
     requestedByEmail: input.requestedByEmail,
   })
 
-  const batch = await processBatchRuns(ctx, batchId)
+  const batch =
+    mode === 'process' ? await processBatchRuns(ctx, batchId) : await ctx.db.get(batchId)
   if (!batch) {
-    throw new Error('Failed to load processed batch')
-  }
-
-  return batchIdempotencyResult(batch, false, 'created')
-}
-
-async function createOrReuseBatchOnly(
-  ctx: MutationCtx,
-  input: {
-    trigger: 'manual' | 'scheduled'
-    now: number
-    scheduledFor: number
-    sourceIds?: Id<'sources'>[]
-    includeOnlyDue: boolean
-    idempotencyKey: string
-    force?: boolean
-    requestedByUserId?: string
-    requestedByEmail?: string
-  },
-) {
-  const idempotencyKey = toSafeString(input.idempotencyKey)
-  if (!idempotencyKey) {
-    throw new Error('idempotencyKey is required')
-  }
-
-  const existing = await getLatestBatchByIdempotencyKey(ctx, idempotencyKey)
-  if (existing) await requireWebsiteBatch(ctx, existing._id)
-  if (existing && !input.force) {
-    if (isBatchActive(existing.status)) {
-      return batchIdempotencyResult(existing, true, 'active')
-    }
-    return batchIdempotencyResult(existing, true, 'terminal')
-  }
-
-  const sources = await selectSourcesForBatch(ctx, {
-    now: input.now,
-    sourceIds: input.sourceIds,
-    includeOnlyDue: input.includeOnlyDue,
-  })
-
-  if ((input.sourceIds?.length ?? 0) > 0 && sources.length === 0) {
-    throw new Error('No approved + enabled sources matched the requested sourceIds')
-  }
-
-  const batchId = await createBatchWithQueuedRuns(ctx, {
-    now: input.now,
-    scheduledFor: input.scheduledFor,
-    trigger: input.trigger,
-    idempotencyKey,
-    sources,
-    requestedByUserId: input.requestedByUserId,
-    requestedByEmail: input.requestedByEmail,
-  })
-
-  const batch = await ctx.db.get(batchId)
-  if (!batch) {
-    throw new Error('Failed to load prepared batch')
+    throw new Error(`Failed to load ${mode === 'process' ? 'processed' : 'prepared'} batch`)
   }
 
   return batchIdempotencyResult(batch, false, 'created')
@@ -654,18 +600,20 @@ const aiSearchSyncJobStatusValidator = v.union(
   v.literal('timeout'),
 )
 
+const manualBatchArgs = {
+  idempotencyKey: v.string(),
+  sourceIds: v.optional(v.array(v.id('sources'))),
+  force: v.optional(v.boolean()),
+  actorUserId: v.string(),
+  actorEmail: v.optional(v.string()),
+  scheduledFor: v.optional(v.number()),
+}
+
 export const runManualBatchAsNuxtAdmin = internalMutation({
-  args: {
-    idempotencyKey: v.string(),
-    sourceIds: v.optional(v.array(v.id('sources'))),
-    force: v.optional(v.boolean()),
-    actorUserId: v.string(),
-    actorEmail: v.optional(v.string()),
-    scheduledFor: v.optional(v.number()),
-  },
+  args: manualBatchArgs,
   handler: async (ctx, args) => {
     const now = Date.now()
-    return await createOrReuseAndProcessBatch(ctx, {
+    return await createOrReuseBatch(ctx, 'process', {
       trigger: 'manual',
       now,
       scheduledFor: args.scheduledFor ?? now,
@@ -687,7 +635,7 @@ export const runScheduledBatch = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    return await createOrReuseAndProcessBatch(ctx, {
+    return await createOrReuseBatch(ctx, 'process', {
       trigger: 'scheduled',
       now,
       scheduledFor: args.scheduledFor ?? now,
@@ -699,17 +647,10 @@ export const runScheduledBatch = internalMutation({
 })
 
 export const prepareManualBatchAsNuxtAdmin = internalMutation({
-  args: {
-    idempotencyKey: v.string(),
-    sourceIds: v.optional(v.array(v.id('sources'))),
-    force: v.optional(v.boolean()),
-    actorUserId: v.string(),
-    actorEmail: v.optional(v.string()),
-    scheduledFor: v.optional(v.number()),
-  },
+  args: manualBatchArgs,
   handler: async (ctx, args) => {
     const now = Date.now()
-    return await createOrReuseBatchOnly(ctx, {
+    return await createOrReuseBatch(ctx, 'prepare', {
       trigger: 'manual',
       now,
       scheduledFor: args.scheduledFor ?? now,
@@ -731,7 +672,7 @@ export const prepareScheduledBatch = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    return await createOrReuseBatchOnly(ctx, {
+    return await createOrReuseBatch(ctx, 'prepare', {
       trigger: 'scheduled',
       now,
       scheduledFor: args.scheduledFor ?? now,

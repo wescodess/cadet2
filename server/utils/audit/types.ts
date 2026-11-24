@@ -75,7 +75,7 @@ export type AuditTrailRelatedEvent = Pick<
   'eventId' | 'timestamp' | 'actionType' | 'entityType' | 'entityLabel'
 >
 
-export type AuditTrailDetailItem = AuditTrailListItem & {
+type AuditTrailDetailItem = AuditTrailListItem & {
   changeContext: AuditChangeContext
   stateDigests?: { before: string; after: string }
   truncated: boolean

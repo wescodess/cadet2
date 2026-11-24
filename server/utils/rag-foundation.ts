@@ -53,7 +53,7 @@ function toOptionalString(value: unknown) {
   return typeof value === 'string' && value.trim() ? value.trim() : ''
 }
 
-export function getRagFoundationConfig(event: H3Event) {
+function getRagFoundationConfig(event: H3Event) {
   const runtimeConfig = useRuntimeConfig(event) as {
     cloudflareAiSearch?: Record<string, unknown>
     cloudflareAiGateway?: Record<string, unknown>

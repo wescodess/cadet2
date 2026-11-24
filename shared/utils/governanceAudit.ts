@@ -1,6 +1,6 @@
 import { convexToJson } from 'convex/values'
 
-export const sourceSizeLimits = {
+const sourceSizeLimits = {
   name: 255,
   description: 4000,
   configBytes: 16384,
@@ -21,7 +21,7 @@ export function canonicalJson(value: unknown): string {
   return JSON.stringify(convexToJson(value as Parameters<typeof convexToJson>[0]))
 }
 
-export function jsonBytes(value: unknown) {
+function jsonBytes(value: unknown) {
   return encoder.encode(canonicalJson(value)).byteLength
 }
 

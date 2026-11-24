@@ -3,7 +3,7 @@ import { createError } from 'h3'
 
 // A single budget covers session, token, authority and subsequent admin operations,
 // including complete response bodies. Periodic upstream bytes cannot extend it.
-export const ADMIN_REQUEST_TIMEOUT_MS = 10_000
+const ADMIN_REQUEST_TIMEOUT_MS = 10_000
 const transports = new WeakMap<H3Event, typeof globalThis.fetch>()
 
 export function adminRequestTransport(event: H3Event): typeof globalThis.fetch {

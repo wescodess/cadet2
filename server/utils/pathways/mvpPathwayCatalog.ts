@@ -4,7 +4,7 @@ export const MVP_PATHWAY_IDS = [
   'mvp-study-to-work',
 ] as const
 
-export type MvpPathwayId = typeof MVP_PATHWAY_IDS[number]
+export type MvpPathwayId = (typeof MVP_PATHWAY_IDS)[number]
 
 export type NormalizedPathwayProfile = {
   englishClb: number
@@ -27,45 +27,21 @@ export type MvpPathwayDefinition = {
   rules: readonly MvpPathwayRule[]
 }
 
-export type MvpPathwayInventorySeed = {
-  pathwayId: MvpPathwayId
-  displayName: string
-  description: string
-}
-
-export const MVP_PATHWAY_INVENTORY_SEEDS: readonly MvpPathwayInventorySeed[] = [
-  {
-    pathwayId: 'mvp-skilled-worker',
-    displayName: 'Skilled Worker pathway',
-    description: 'Core skilled worker pathway supported in the MVP recommendation catalog.',
-  },
-  {
-    pathwayId: 'mvp-provincial-nominee',
-    displayName: 'Provincial Nominee pathway',
-    description: 'Province-linked route that requires offer and relocation flexibility.',
-  },
-  {
-    pathwayId: 'mvp-study-to-work',
-    displayName: 'Study-to-Work pathway',
-    description: 'Longer-horizon study route available for candidates open to retraining.',
-  },
-] as const
-
 export const MVP_PATHWAY_CATALOG: readonly MvpPathwayDefinition[] = [
   {
     pathwayId: 'mvp-skilled-worker',
     rules: [
       {
         unmetConditionId: 'minimum-english-clb-8',
-        isSatisfied: profile => profile.englishClb >= 8,
+        isSatisfied: (profile) => profile.englishClb >= 8,
       },
       {
         unmetConditionId: 'minimum-skilled-experience-2-years',
-        isSatisfied: profile => profile.yearsSkilledExperience >= 2,
+        isSatisfied: (profile) => profile.yearsSkilledExperience >= 2,
       },
       {
         unmetConditionId: 'minimum-settlement-funds-15000-cad',
-        isSatisfied: profile => profile.settlementFundsCad >= 15000,
+        isSatisfied: (profile) => profile.settlementFundsCad >= 15000,
       },
     ],
   },
@@ -74,11 +50,11 @@ export const MVP_PATHWAY_CATALOG: readonly MvpPathwayDefinition[] = [
     rules: [
       {
         unmetConditionId: 'requires-valid-job-offer',
-        isSatisfied: profile => profile.hasValidJobOffer,
+        isSatisfied: (profile) => profile.hasValidJobOffer,
       },
       {
         unmetConditionId: 'requires-relocation-flexibility',
-        isSatisfied: profile => profile.openToRelocation,
+        isSatisfied: (profile) => profile.openToRelocation,
       },
     ],
   },
@@ -87,15 +63,15 @@ export const MVP_PATHWAY_CATALOG: readonly MvpPathwayDefinition[] = [
     rules: [
       {
         unmetConditionId: 'requires-study-or-retraining-intent',
-        isSatisfied: profile => profile.willingToStudyOrRetrain,
+        isSatisfied: (profile) => profile.willingToStudyOrRetrain,
       },
       {
         unmetConditionId: 'minimum-budget-25000-cad',
-        isSatisfied: profile => profile.budgetCad >= 25000,
+        isSatisfied: (profile) => profile.budgetCad >= 25000,
       },
       {
         unmetConditionId: 'minimum-timeline-10-months',
-        isSatisfied: profile => profile.targetTimelineMonths >= 10,
+        isSatisfied: (profile) => profile.targetTimelineMonths >= 10,
       },
     ],
   },

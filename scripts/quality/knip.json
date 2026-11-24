@@ -20,7 +20,10 @@
     "qa/acceptance/28/refresh-probes.mjs",
     "qa/acceptance/28/retain-legacy.mjs",
     "qa/acceptance/28/journeys.spec.ts",
-    "qa/acceptance/28/playwright.config.ts"
+    "qa/acceptance/28/playwright.config.ts",
+    "scripts/security/check-admin-surfaces.mjs",
+    "scripts/security/execute-boundaries.mjs",
+    "scripts/security/startup-gate.mjs"
   ],
   "ignore": ["convex/_generated/**"],
   "ignoreDependencies": ["dependency-cruiser", "jscpd"],
