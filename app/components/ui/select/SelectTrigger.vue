@@ -5,6 +5,7 @@ import { reactiveOmit } from '@vueuse/core'
 import { ChevronDown } from 'lucide-vue-next'
 import { SelectIcon, SelectTrigger, useForwardProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
+import { interfaceIconStroke } from '@/lib/relay/icons'
 
 const props = withDefaults(
   defineProps<SelectTriggerProps & { class?: HTMLAttributes['class']; size?: 'sm' | 'default' }>(),
@@ -29,7 +30,7 @@ const forwardedProps = useForwardProps(delegatedProps)
   >
     <slot />
     <SelectIcon as-child>
-      <ChevronDown class="size-4 opacity-50" />
+      <ChevronDown :stroke-width="interfaceIconStroke" class="size-4 opacity-50" />
     </SelectIcon>
   </SelectTrigger>
 </template>

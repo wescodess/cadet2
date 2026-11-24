@@ -2,6 +2,7 @@
 import type { HTMLAttributes } from 'vue'
 import { Loader2Icon } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
+import { interfaceIconStroke } from '@/lib/relay/icons'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -10,6 +11,7 @@ const props = defineProps<{
 
 <template>
   <Loader2Icon
+    :stroke-width="interfaceIconStroke"
     role="status"
     aria-label="Loading"
     :class="

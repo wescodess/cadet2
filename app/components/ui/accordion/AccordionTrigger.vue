@@ -5,6 +5,7 @@ import { reactiveOmit } from '@vueuse/core'
 import { ChevronDown } from 'lucide-vue-next'
 import { AccordionHeader, AccordionTrigger } from 'reka-ui'
 import { cn } from '@/lib/utils'
+import { interfaceIconStroke } from '@/lib/relay/icons'
 
 const props = defineProps<AccordionTriggerProps & { class?: HTMLAttributes['class'] }>()
 
@@ -26,6 +27,7 @@ const delegatedProps = reactiveOmit(props, 'class')
       <slot />
       <slot name="icon">
         <ChevronDown
+          :stroke-width="interfaceIconStroke"
           class="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200"
         />
       </slot>

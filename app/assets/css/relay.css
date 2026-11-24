@@ -248,6 +248,7 @@
   width: var(--check-size);
   height: var(--check-size);
   border-radius: var(--check-radius);
+  box-shadow: none;
 
   &[data-state='unchecked'] {
     background-color: var(--card);
@@ -257,9 +258,16 @@
 @utility relay-radio {
   width: var(--check-size);
   height: var(--check-size);
+  box-shadow: none;
 
   &[data-slot] {
     background-color: var(--card);
+  }
+
+  & [data-slot='radio-group-indicator'] > svg {
+    width: 60%;
+    height: 60%;
+    stroke: none;
   }
 }
 
