@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { parse as parseFrozenInstall } from '../../scripts/quality/frozen-install.parser.mjs'
 import { authorityReceiptFixture } from '../support/quality-authority-fixture.mjs'
 
 const directory = new URL('../../scripts/quality/', import.meta.url)
@@ -144,5 +145,49 @@ describe('shared JSON boundary', () => {
     expect(() => parse('{"truncated":')).toThrow(/Invalid /)
     expect(parse('null')).toBeNull()
     expect(parse('42')).toBe(42)
+  })
+})
+
+describe('frozen install completion clocks', () => {
+  const fixture = parserFixture('frozen-install.parser.mjs')
+  const input = (completion) => {
+    const entries = fixture.valid.stdout.trimEnd().split('\n').map(JSON.parse)
+    Object.assign(entries[3], completion)
+    return {
+      ...fixture.valid,
+      stdout: `${entries.map((entry) => JSON.stringify(entry)).join('\n')}\n`,
+    }
+  }
+
+  it.each([
+    ['a log timestamp 1 ms after endedAt', { startedAt: 99, endedAt: 103, time: 104 }],
+    ['a log timestamp 7 ms after endedAt', { startedAt: 99, endedAt: 103, time: 110 }],
+    ['a log timestamp at the 50 ms bound', { startedAt: 99, endedAt: 103, time: 153 }],
+    ['startedAt equal to the first event', { startedAt: 100, endedAt: 103, time: 103 }],
+    ['endedAt equal to the last preceding event', { startedAt: 99, endedAt: 102, time: 103 }],
+  ])('accepts %s', (_, completion) => {
+    const expected = { ...fixture.expected, stdout: [...fixture.expected.stdout] }
+    expected.stdout[3] = {
+      time: completion.time,
+      hostname: 'fixture',
+      pid: 1,
+      level: 'debug',
+      name: 'pnpm:execution-time',
+      startedAt: completion.startedAt,
+      endedAt: completion.endedAt,
+    }
+    expect(parseFrozenInstall(input(completion))).toStrictEqual(expected)
+  })
+
+  it.each([
+    ['a log timestamp before endedAt', { time: 103, endedAt: 104 }],
+    ['a 51 ms gap beyond the bound', { time: 154 }],
+    ['endedAt before the first event', { endedAt: 99 }],
+    ['endedAt before the preceding install events', { endedAt: 101 }],
+    ['startedAt after the first event', { startedAt: 101 }],
+  ])('rejects %s', (_, completion) => {
+    expect(() => parseFrozenInstall(input(completion))).toThrow(
+      /Inconsistent install completion time/,
+    )
   })
 })

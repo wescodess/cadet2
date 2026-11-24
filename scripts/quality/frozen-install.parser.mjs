@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { jsonOutput, natural, nonempty, parser, positive } from './parser.mjs'
 
+const MAX_COMPLETION_LOG_DELAY_MS = 50
+
 const manifest = z
   .object({
     name: nonempty,
@@ -52,7 +54,12 @@ const events = z
       )
     )
       context.addIssue({ code: 'custom', message: 'Inconsistent install event stream' })
-    if (last.startedAt > first.time || last.endedAt < first.time || last.endedAt !== last.time)
+    if (
+      last.startedAt > first.time ||
+      last.endedAt < entries[2].time ||
+      last.time < last.endedAt ||
+      last.time - last.endedAt > MAX_COMPLETION_LOG_DELAY_MS
+    )
       context.addIssue({ code: 'custom', message: 'Inconsistent install completion time' })
   })
 const stream = z
