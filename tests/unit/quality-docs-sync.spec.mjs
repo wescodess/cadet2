@@ -197,6 +197,21 @@ it('prints the exact expected block when a documented figure drifts', () => {
   ])
 })
 
+it('drops the app/-only claim once a cycle sits outside app/', () => {
+  const boundaries = [['server/x|no-cycles|server/y', 1]]
+  const row = render({ ...sources(), boundaries }).split('\n')[2]
+  expect(row).toBe(
+    '| `pnpm boundaries:check` | [dependency-cruiser **1.0.0**](https://github.com/sverweij/dependency-cruiser/blob/main/doc/rules-reference.md); zero new cycles or prohibited import edges | **1** exact cycle identities, all in `server/`; `baselines/boundaries.json` |',
+  )
+  const mixed = render({
+    ...sources(),
+    boundaries: [...sources().boundaries, ...boundaries],
+  }).split('\n')[2]
+  expect(mixed).toBe(
+    '| `pnpm boundaries:check` | [dependency-cruiser **1.0.0**](https://github.com/sverweij/dependency-cruiser/blob/main/doc/rules-reference.md); zero new cycles or prohibited import edges | **3** exact cycle identities; `baselines/boundaries.json` |',
+  )
+})
+
 it('names a structural tool missing from devDependencies instead of rendering it', () => {
   const tools = { ...sources().tools }
   delete tools.knip
