@@ -296,7 +296,11 @@ export async function runScanner(
   writeJSON(path, { ...request, scope: 'process_group', state: 'running' })
   const child = spawn(
     process.execPath,
-    [fileURLToPath(new URL('./scanner-supervisor.mjs', import.meta.url)), JSON.stringify(request)],
+    [
+      fileURLToPath(new URL('./scanner-supervisor.mjs', import.meta.url)),
+      JSON.stringify({ ...request, args: undefined }),
+      ...args,
+    ],
     { detached: true, stdio: ['ignore', 'pipe', 'pipe', 'pipe'] },
   )
   writeJSON(path, {

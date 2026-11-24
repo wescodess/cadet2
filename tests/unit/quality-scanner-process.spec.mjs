@@ -212,6 +212,24 @@ it('shares the 64 MiB capture ceiling across sequential scanner phases', async (
   expect(second.outputBytes).toBeLessThan(34 * 1024 * 1024)
   expect(second.groupTerminated).toBe(true)
 }, 10000)
+it('delivers scanner arguments without serializing them into one exec argument', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'scanner-argument-volume-'))
+  temporary.push(directory)
+  const payload = Array.from({ length: 4000 }, () => '\u0001'.repeat(100))
+  const result = await driverControl(
+    directory,
+    `const payload = Array.from({ length: 4000 }, () => '\\u0001'.repeat(100));
+    try {
+      const result = await runScanner('arguments', process.execPath, ['-e', 'const a = process.argv.slice(1); process.stdout.write(a.length + ":" + a.join("").length)', ...payload], { budgetMs: 6000 });
+      console.log(result.stdout); process.exitCode = result.status;
+    } catch (error) { console.error(error.message); process.exitCode = error.exitCode ?? 1 }`,
+  )
+  expect(result.code, result.output).toBe(0)
+  expect(result.output).toContain('4000:400000')
+  const record = JSON.parse(readFileSync(join(result.evidence, 'arguments-execution.json'), 'utf8'))
+  expect(record.state).toBe('complete')
+  expect(record.args.slice(2)).toEqual(payload)
+}, 10000)
 function trigger(mode, driver, directory) {
   if (Object.hasOwn(completions, mode)) writeFileSync(join(directory, 'finish'), completions[mode])
   else if (mode === 'supervisor-exit') writeFileSync(join(directory, 'stop-supervisor'), 'stop')

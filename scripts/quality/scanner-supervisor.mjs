@@ -3,7 +3,7 @@ import { renameSync, writeFileSync } from 'node:fs'
 import { Socket } from 'node:net'
 import { setTimeout } from 'node:timers'
 
-const request = JSON.parse(process.argv[2])
+const request = { ...JSON.parse(process.argv[2]), args: process.argv.slice(3) }
 const { name, command, args, budgetMs, deadlineMs, path, receipt } = request
 const now = () => Number(process.hrtime.bigint()) / 1e6
 const startedAtMs = now()
