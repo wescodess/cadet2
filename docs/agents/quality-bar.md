@@ -296,7 +296,7 @@ Starting integration head: `d7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501`. This adop
 | `pnpm dead-code:check` | [knip **6.47.0**](https://knip.dev/reference/cli); zero new unused files, value/type exports, production/dev dependencies | **556** identities: 341 files, 137 value exports, 63 type exports, 13 dependencies, 2 devDependencies; `baselines/dead-code.json` |
 | `pnpm duplication:check` | [jscpd **5.4.3**](https://github.com/kucherenko/jscpd); exact clones of at least **100 tokens and 10 lines**, strict mode; zero new changed-file clone identities | **81** file/clone occurrences across 81 keys; `baselines/duplication.json` |
 
-Explicit Knip entries: **2** Nuxt auth defaults, **13** operator CLI paths and **3** scanner executable files (`convex-authority.scanner.mjs`, `knip.scanner.mjs`, `scanner-supervisor.mjs`).
+All **21** explicit Knip entries: **2** Nuxt auth defaults, **13** operator CLI paths, **3** scanner executable files (`convex-authority.scanner.mjs`, `knip.scanner.mjs`, `scanner-supervisor.mjs`) and **3** other entries (`index.{ts,js,mjs}`, `qa/acceptance/28/journeys.spec.ts`, `qa/acceptance/28/playwright.config.ts`).
 
 <!-- quality-figures:end -->
 
