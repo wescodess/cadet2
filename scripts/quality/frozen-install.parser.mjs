@@ -56,7 +56,7 @@ const events = z
       context.addIssue({ code: 'custom', message: 'Inconsistent install event stream' })
     if (
       last.startedAt > first.time ||
-      last.endedAt < first.time ||
+      last.endedAt < entries[2].time ||
       last.time < last.endedAt ||
       last.time - last.endedAt > MAX_COMPLETION_LOG_DELAY_MS
     )

@@ -181,6 +181,7 @@ describe('frozen install completion clocks', () => {
     ['a log timestamp before endedAt', { time: 103, endedAt: 104 }],
     ['a 51 ms gap beyond the bound', { time: 154 }],
     ['endedAt before the first event', { endedAt: 99 }],
+    ['endedAt before the preceding install events', { endedAt: 101 }],
     ['startedAt after the first event', { startedAt: 101 }],
   ])('rejects %s', (_, completion) => {
     expect(() => parseFrozenInstall(input(completion))).toThrow(
