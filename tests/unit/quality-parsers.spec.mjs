@@ -160,21 +160,23 @@ describe('frozen install completion clocks', () => {
   }
 
   it.each([
-    ['1 ms', 104],
-    ['7 ms', 110],
-    ['the 50 ms bound', 153],
-  ])('accepts a log timestamp after endedAt by %s', (_, time) => {
+    ['a log timestamp 1 ms after endedAt', { startedAt: 99, endedAt: 103, time: 104 }],
+    ['a log timestamp 7 ms after endedAt', { startedAt: 99, endedAt: 103, time: 110 }],
+    ['a log timestamp at the 50 ms bound', { startedAt: 99, endedAt: 103, time: 153 }],
+    ['startedAt equal to the first event', { startedAt: 100, endedAt: 103, time: 103 }],
+    ['endedAt equal to the last preceding event', { startedAt: 99, endedAt: 102, time: 103 }],
+  ])('accepts %s', (_, completion) => {
     const expected = { ...fixture.expected, stdout: [...fixture.expected.stdout] }
     expected.stdout[3] = {
-      time,
+      time: completion.time,
       hostname: 'fixture',
       pid: 1,
       level: 'debug',
       name: 'pnpm:execution-time',
-      startedAt: 99,
-      endedAt: 103,
+      startedAt: completion.startedAt,
+      endedAt: completion.endedAt,
     }
-    expect(parseFrozenInstall(input({ time }))).toStrictEqual(expected)
+    expect(parseFrozenInstall(input(completion))).toStrictEqual(expected)
   })
 
   it.each([
