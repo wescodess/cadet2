@@ -329,11 +329,10 @@ describe('the shared-controls specimen activates each checkbox and radio from it
         return control
       })
       const clicks = controls.map(() => 0)
-      controls.forEach((control, index) =>
+      for (const [index, control] of controls.entries())
         control.addEventListener('click', () => {
           clicks[index] = (clicks[index] ?? 0) + 1
-        }),
-      )
+        })
       const states = () => controls.map((control) => control.getAttribute('aria-checked'))
       const press = async (target: HTMLElement) => {
         target.click()

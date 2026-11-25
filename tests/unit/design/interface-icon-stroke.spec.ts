@@ -1,368 +1,478 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { basename, dirname, join, relative, resolve } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { basename } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { babelParse, parse } from 'vue/compiler-sfc'
 
 import { repoPath } from './css-source'
+import { approvedTwoPixelGlyphs, strokeGuard, type Overlay } from './icon-stroke-guard'
 
-const uiRoot = 'app/components/ui'
-const adoptedConsumerRoots = ['app/specimen']
-const lucideSource = /^(?:lucide-vue-next|@lucide\/vue)(?:\/|$)/
-const strokeModule = /^[@~]\/lib\/relay\/icons$/
-const strokeBinding = 'interfaceIconStroke'
-const strokeNames = new Set(['stroke-width', 'strokeWidth'])
+const report = strokeGuard()
 
-const approvedTwoPixelGlyphs = new Map([
-  ['StateGlyph', 'DESIGN.md:241: state glyphs render at 2 px stroke'],
-])
+const uiProbe = 'app/components/ui/stroke-probe/StrokeProbe.vue'
+const uiHelper = 'app/components/ui/stroke-probe/stroke-probe.ts'
+const specimenProbe = 'app/specimen/StrokeProbe.vue'
+const relayProbe = 'app/components/relay/StrokeProbe.vue'
+const libProbe = 'app/lib/stroke-probe.ts'
+const legacyProbe = 'app/components/admin/StrokeProbe.vue'
 
-const ELEMENT = 1
-const INTERPOLATION = 5
-const ATTRIBUTE = 6
-const DIRECTIVE = 7
-
-interface TemplateProp {
-  type: number
-  name: string
-  arg?: { content?: string }
-  exp?: { content?: string }
-}
-
-interface TemplateNode {
-  type: number
-  tag?: string
-  props?: TemplateProp[]
-  children?: TemplateNode[]
-  content?: { content?: string }
-  loc: { start: { line: number } }
-}
-
-interface SourceFacts {
-  file: string
-  lucide: Set<string>
-  scriptUses: Set<string>
-  imports: Map<string, string>
-  strokeImported: boolean
-  template: TemplateNode[]
-  problems: string[]
-}
-
-interface AstNode {
-  type: string
-  [key: string]: unknown
-}
-
-const renderFunctions = new Set(['h', 'createVNode', 'createElementVNode', 'createBlock'])
-
-function* walk(node: unknown): Generator<AstNode> {
-  if (Array.isArray(node)) {
-    for (const child of node) yield* walk(child)
-    return
-  }
-  if (!node || typeof node !== 'object') return
-  const ast = node as AstNode
-  if (typeof ast.type === 'string') yield ast
-  for (const [key, value] of Object.entries(ast)) {
-    if (key === 'loc' || key === 'extra' || key.endsWith('Comments')) continue
-    yield* walk(value)
-  }
-}
-
-function sourceFiles(directory: string, extensions: RegExp): string[] {
-  return readdirSync(repoPath(directory), { withFileTypes: true }).flatMap((entry) => {
-    const path = join(directory, entry.name)
-    if (entry.isDirectory()) return sourceFiles(path, extensions)
-    return extensions.test(entry.name) ? [path] : []
-  })
-}
-
-function pascal(tag: string) {
-  return tag
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')
-}
-
-function identifiers(expression: string) {
-  return expression.match(/[A-Za-z_$][\w$]*/g) ?? []
-}
-
-type Program = ReturnType<typeof babelParse>['program']
-type Statement = Program['body'][number]
-
-function readImport(facts: SourceFacts, statement: Statement) {
-  if (statement.type !== 'ImportDeclaration' || statement.importKind === 'type') return
-  const source = statement.source.value
-  for (const specifier of statement.specifiers) {
-    const local = specifier.local.name
-    const typeOnly = specifier.type === 'ImportSpecifier' && specifier.importKind === 'type'
-    if (typeOnly) continue
-    if (!lucideSource.test(source)) {
-      facts.imports.set(local, source)
-      if (strokeModule.test(source) && local === strokeBinding) facts.strokeImported = true
-    } else if (specifier.type === 'ImportSpecifier') facts.lucide.add(local)
-    else facts.problems.push(`${facts.file}: ${local} imports Lucide as a whole module`)
-  }
-}
-
-function readScriptNode(facts: SourceFacts, node: AstNode) {
-  if (node.type === 'StringLiteral' && lucideSource.test(String(node.value)))
-    facts.problems.push(`${facts.file}: Lucide is loaded outside a static import`)
-  if (node.type === 'Identifier' && facts.lucide.has(String(node.name)))
-    facts.scriptUses.add(String(node.name))
-  const callee = node.type === 'CallExpression' ? (node.callee as AstNode) : undefined
-  const name = callee?.type === 'Identifier' ? String(callee.name) : ''
-  if (facts.lucide.size && renderFunctions.has(name))
-    facts.problems.push(`${facts.file}: renders through ${name}(), so its stroke cannot be checked`)
-}
-
-function readScript(facts: SourceFacts, code: string) {
-  const program = babelParse(code, { sourceType: 'module', plugins: ['typescript'] }).program
-  for (const statement of program.body) readImport(facts, statement)
-  const body = program.body.filter((statement) => statement.type !== 'ImportDeclaration')
-  for (const node of walk(body)) readScriptNode(facts, node)
-}
-
-const factsCache = new Map<string, SourceFacts>()
-
-function sourceFacts(file: string): SourceFacts {
-  const cached = factsCache.get(file)
-  if (cached) return cached
-  const text = readFileSync(repoPath(file), 'utf8')
-  const facts: SourceFacts = {
-    file,
-    lucide: new Set(),
-    scriptUses: new Set(),
-    imports: new Map(),
-    strokeImported: false,
-    template: [],
-    problems: [],
-  }
-  if (file.endsWith('.vue')) {
-    const { descriptor } = parse(text, { filename: file })
-    for (const block of [descriptor.script, descriptor.scriptSetup])
-      if (block) readScript(facts, block.content)
-    facts.template = (descriptor.template?.ast?.children ?? []) as unknown as TemplateNode[]
-  } else {
-    readScript(facts, text)
-    for (const name of facts.lucide)
-      facts.problems.push(`${file}: ${name} is imported outside a template`)
-  }
-  factsCache.set(file, facts)
-  return facts
-}
-
-function strokeProblem(node: TemplateNode, facts: SourceFacts) {
-  const props = node.props ?? []
-  const where = `${facts.file}:${String(node.loc.start.line)} <${node.tag ?? ''}>`
-  if (props.some((prop) => prop.type === ATTRIBUTE && strokeNames.has(prop.name)))
-    return `${where} sets a literal stroke-width`
-  if (props.some((prop) => prop.type === DIRECTIVE && prop.name === 'bind' && !prop.arg))
-    return `${where} spreads v-bind, so its stroke cannot be checked`
-  const bound = props.filter(
-    (prop) =>
-      prop.type === DIRECTIVE && prop.name === 'bind' && strokeNames.has(prop.arg?.content ?? ''),
-  )
-  if (bound.length !== 1 || bound[0]?.exp?.content?.trim() !== strokeBinding)
-    return `${where} has no :stroke-width="${strokeBinding}"`
-  if (!facts.strokeImported)
-    return `${where} binds ${strokeBinding} without importing it from lib/relay/icons`
-  return null
-}
-
-function dynamicIcon(node: TemplateNode, facts: SourceFacts) {
-  if (node.tag !== 'component') return { is: '', icon: false }
-  const is = (node.props ?? []).find(
-    (prop) => prop.type === DIRECTIVE && prop.name === 'bind' && prop.arg?.content === 'is',
-  )
-  const expression = is?.exp?.content ?? ''
-  const direct = identifiers(expression).some((name) => facts.lucide.has(name))
-  return { is: expression, icon: direct || facts.scriptUses.size > 0 }
-}
-
-function valueProblem(where: string, name: string) {
-  return `${where} uses ${name} as a value, so its stroke cannot be checked`
-}
-
-function elementProblems(
-  node: TemplateNode,
-  facts: SourceFacts,
-  rendered: Set<string>,
-  where: string,
-) {
-  const problems: string[] = []
-  const tag = pascal(node.tag ?? '')
-  const dynamic = dynamicIcon(node, facts)
-  for (const prop of node.props ?? []) {
-    const expression = prop.type === DIRECTIVE ? (prop.exp?.content ?? '') : ''
-    const names = identifiers(expression).filter((name) => facts.lucide.has(name))
-    const asComponent = dynamic.icon && expression === dynamic.is
-    for (const name of names)
-      if (asComponent) rendered.add(name)
-      else problems.push(valueProblem(where, name))
-  }
-  if (facts.lucide.has(tag)) rendered.add(tag)
-  const problem = facts.lucide.has(tag) || dynamic.icon ? strokeProblem(node, facts) : null
-  return problem ? [...problems, problem] : problems
-}
-
-function iconProblems(nodes: TemplateNode[], facts: SourceFacts, rendered = new Set<string>()) {
-  return nodes.flatMap((node): string[] => {
-    const where = `${facts.file}:${String(node.loc.start.line)}`
-    const own =
-      node.type === INTERPOLATION
-        ? identifiers(node.content?.content ?? '')
-            .filter((name) => facts.lucide.has(name))
-            .map((name) => valueProblem(where, name))
-        : node.type === ELEMENT && node.tag
-          ? elementProblems(node, facts, rendered, where)
-          : []
-    return [...own, ...iconProblems(node.children ?? [], facts, rendered)]
-  })
-}
-
-function primitiveProblems(file: string) {
-  const facts = sourceFacts(file)
-  const rendered = new Set<string>()
-  const problems = [...facts.problems, ...iconProblems(facts.template, facts, rendered)]
-  for (const name of facts.scriptUses)
-    problems.push(`${file}: ${name} is used in script, so its stroke cannot be checked`)
-  if (file.endsWith('.vue'))
-    for (const name of facts.lucide)
-      if (!rendered.has(name) && !facts.scriptUses.has(name))
-        problems.push(`${file}: ${name} is imported but never rendered as a checked element`)
-  return problems
-}
-
-const components = new Map<string, string>()
-for (const file of sourceFiles('app/components', /\.vue$/)) {
-  const parts = relative('app/components', dirname(file)).split('/').filter(Boolean)
-  const name = basename(file, '.vue')
-  const prefix = parts.map(pascal).join('')
-  components.set(name.startsWith(prefix) ? name : prefix + name, file)
-  if (file.startsWith(`${uiRoot}/`)) components.set(name, file)
-}
-
-function resolveComponent(node: TemplateNode, facts: SourceFacts) {
-  if (node.type !== ELEMENT || !node.tag) return undefined
-  const name = pascal(node.tag).replace(/^Lazy(?=[A-Z])/, '')
-  const source = facts.imports.get(name)
-  if (!source) return components.get(name)
-  if (!/^(?:[@~]\/|\.\.?\/)/.test(source)) return undefined
-  const base = /^[@~]\//.test(source)
-    ? join('app', source.slice(2))
-    : relative(repoPath('.'), resolve(dirname(repoPath(facts.file)), source))
-  for (const candidate of [base, `${base}.vue`])
-    if (candidate.endsWith('.vue') && existsSync(repoPath(candidate))) return candidate
-  return isPrimitive(base) ? uiRoot : undefined
-}
-
-function isPrimitive(file: string | undefined) {
-  return file === uiRoot || Boolean(file?.startsWith(`${uiRoot}/`))
-}
-
-const exemptionsUsed = new Set<string>()
-
-function exempt(target: string) {
-  const name = basename(target, '.vue')
-  if (!approvedTwoPixelGlyphs.has(name)) return false
-  exemptionsUsed.add(name)
-  return true
-}
-
-function componentProblems(file: string, seen = new Set<string>()): string[] {
-  if (seen.has(file)) return []
-  seen.add(file)
-  const facts = sourceFacts(file)
-  const problems = [...facts.problems, ...iconProblems(facts.template, facts)]
-  const visit = (nodes: TemplateNode[]) => {
-    for (const node of nodes) {
-      const target = resolveComponent(node, facts)
-      if (target && !isPrimitive(target) && !exempt(target))
-        problems.push(...componentProblems(target, seen))
-      if (node.children) visit(node.children)
-    }
-  }
-  visit(facts.template)
-  return problems
-}
-
-function slotProblems(nodes: TemplateNode[], facts: SourceFacts, host: string): string[] {
-  return nodes.flatMap((node) => {
-    const problems = iconProblems([{ ...node, children: [] }], facts)
-    const target = resolveComponent(node, facts)
-    if (target && !isPrimitive(target) && !exempt(target)) {
-      const inner = componentProblems(target)
-      if (inner.length)
-        problems.push(
-          `${facts.file}:${String(node.loc.start.line)} passes <${node.tag ?? ''}> into <${host}>: ${inner.join('; ')}`,
-        )
-    }
-    return [...problems, ...slotProblems(node.children ?? [], facts, host)]
-  })
-}
-
-function consumerProblems(file: string) {
-  const facts = sourceFacts(file)
-  const problems: string[] = []
-  const visit = (nodes: TemplateNode[]) => {
-    for (const node of nodes) {
-      if (isPrimitive(resolveComponent(node, facts)))
-        problems.push(
-          ...iconProblems([{ ...node, children: [] }], facts),
-          ...slotProblems(node.children ?? [], facts, node.tag ?? ''),
-        )
-      else if (node.children) visit(node.children)
-    }
-  }
-  visit(facts.template)
-  return problems
-}
-
-function renderTree(file: string, tree: Set<string>) {
-  if (tree.has(file)) return tree
-  tree.add(file)
-  const facts = sourceFacts(file)
-  const visit = (nodes: TemplateNode[]) => {
-    for (const node of nodes) {
-      const target = resolveComponent(node, facts)
-      if (target && !isPrimitive(target)) renderTree(target, tree)
-      if (node.children) visit(node.children)
-    }
-  }
-  visit(facts.template)
-  return tree
-}
-
-const primitives = sourceFiles(uiRoot, /\.(vue|ts)$/)
-const consumers = [
-  ...adoptedConsumerRoots
-    .flatMap((root) => sourceFiles(root, /\.vue$/))
-    .reduce((tree, file) => renderTree(file, tree), new Set<string>()),
+const probeImports = [
+  `import { Check as ProbeIcon } from 'lucide-vue-next'`,
+  `import { interfaceIconStroke } from '@/lib/relay/icons'`,
 ]
+const buttonImport = `import { Button } from '~/components/ui/button'`
+
+function sfc(template: string, ...script: string[]) {
+  return `<script setup lang="ts">\n${script.join('\n')}\n</script>\n\n<template>\n  ${template}\n</template>\n`
+}
+
+const probe = (template: string, ...script: string[]) => sfc(template, ...probeImports, ...script)
+
+function rendersInSlot(component: string, source: string) {
+  return sfc(
+    `<Button><${component} /></Button>`,
+    buttonImport,
+    `import ${component} from '${source}'`,
+  )
+}
+
+interface Regression {
+  name: string
+  origin: string
+  files: Overlay
+  file: string
+  construct: string
+}
+
+const checkbox = 'app/components/ui/checkbox/Checkbox.vue'
+
+const regressions: Regression[] = [
+  {
+    name: 'a dynamic strokeWidth bind argument overrides the shared binding',
+    origin: 'R5-F1 dynamic-camel-override',
+    files: {
+      [uiProbe]: probe(
+        '<ProbeIcon :stroke-width="interfaceIconStroke" :[strokeProp]="2" />',
+        `const strokeProp = 'strokeWidth'`,
+      ),
+    },
+    file: uiProbe,
+    construct: 'dynamic bind argument',
+  },
+  {
+    name: 'a template v-for shadows interfaceIconStroke while the import is also used',
+    origin: 'R5-F1 shadow-used-import',
+    files: {
+      [uiProbe]: probe(
+        '<span :data-stroke="interfaceIconStroke"><template v-for="interfaceIconStroke in [2]" :key="interfaceIconStroke"><ProbeIcon :stroke-width="interfaceIconStroke" /></template></span>',
+      ),
+    },
+    file: uiProbe,
+    construct: 'uses interfaceIconStroke outside',
+  },
+  {
+    name: 'a slot scope shadows interfaceIconStroke',
+    origin: 'R5-F1 template-local shadowing',
+    files: {
+      [uiProbe]: probe(
+        '<Checkbox v-slot="{ interfaceIconStroke }"><ProbeIcon :stroke-width="interfaceIconStroke" /></Checkbox>',
+        `import { Checkbox } from '../checkbox'`,
+      ),
+    },
+    file: uiProbe,
+    construct: 'uses interfaceIconStroke outside',
+  },
+  {
+    name: 'script declares its own interfaceIconStroke',
+    origin: 'R5-F1 script-local shadowing',
+    files: {
+      [uiProbe]: probe(
+        '<ProbeIcon :stroke-width="interfaceIconStroke" />',
+        'const widths = [2].map((interfaceIconStroke) => interfaceIconStroke)',
+        'void widths',
+      ),
+    },
+    file: uiProbe,
+    construct: 'interfaceIconStroke in script',
+  },
+  {
+    name: 'absolute-stroke-width competes with the shared binding',
+    origin: 'R5-F1 competing stroke attribute',
+    files: {
+      [uiProbe]: probe('<ProbeIcon :stroke-width="interfaceIconStroke" absolute-stroke-width />'),
+    },
+    file: uiProbe,
+    construct: 'competing stroke attribute',
+  },
+  {
+    name: 'a stroke-width utility class competes with the shared binding',
+    origin: 'R5-F1 competing stroke attribute',
+    files: {
+      [uiProbe]: probe('<ProbeIcon :stroke-width="interfaceIconStroke" class="stroke-2" />'),
+    },
+    file: uiProbe,
+    construct: 'sets a stroke width',
+  },
+  {
+    name: 'a style binding competes with the shared binding',
+    origin: 'R5-F1 competing stroke attribute',
+    files: {
+      [uiProbe]: probe(
+        '<ProbeIcon :stroke-width="interfaceIconStroke" :style="{ strokeWidth: 2 }" />',
+      ),
+    },
+    file: uiProbe,
+    construct: 'competing stroke attribute',
+  },
+  {
+    name: 'a primitive host class overrides the stroke of the icons in its slot',
+    origin: 'R5-F1 competing stroke attribute',
+    files: {
+      [specimenProbe]: sfc(
+        '<Button class="[&_svg]:stroke-2"><ProbeIcon :stroke-width="interfaceIconStroke" /></Button>',
+        ...probeImports,
+        buttonImport,
+      ),
+    },
+    file: specimenProbe,
+    construct: 'sets a stroke width',
+  },
+  {
+    name: 'a <style> block sets stroke-width',
+    origin: 'R5-F1 competing stroke attribute',
+    files: {
+      [uiProbe]: `${probe('<ProbeIcon :stroke-width="interfaceIconStroke" />')}\n<style>\nsvg { stroke-width: 2; }\n</style>\n`,
+    },
+    file: uiProbe,
+    construct: 'a <style> block sets a stroke width',
+  },
+  {
+    name: 'a specimen passes a namespace-imported icon into a Button slot',
+    origin: 'R5-F2 namespace-consumer',
+    files: {
+      [specimenProbe]: sfc(
+        '<Button><Icons.Check /></Button>',
+        `import * as Icons from 'lucide-vue-next'`,
+        buttonImport,
+      ),
+    },
+    file: specimenProbe,
+    construct: 'whole module',
+  },
+  {
+    name: 'a specimen passes a local h(Check) helper into a Button slot',
+    origin: 'R5-F2 helper-consumer',
+    files: {
+      [specimenProbe]: sfc(
+        '<Button><RenderIcon /></Button>',
+        `import { h } from 'vue'`,
+        `import { Check } from 'lucide-vue-next'`,
+        buttonImport,
+        'const RenderIcon = () => h(Check)',
+      ),
+    },
+    file: specimenProbe,
+    construct: 'in script',
+  },
+  {
+    name: 'a specimen passes a render helper imported from a .ts file into a Button slot',
+    origin: 'R5-F2 ts-local-helper',
+    files: {
+      [libProbe]: `import { h } from 'vue'\nimport { Check } from 'lucide-vue-next'\n\nexport const RenderIcon = () => h(Check)\n`,
+      [specimenProbe]: sfc(
+        '<Button><RenderIcon /></Button>',
+        buttonImport,
+        `import { RenderIcon } from '~/lib/stroke-probe'`,
+      ),
+    },
+    file: libProbe,
+    construct: 'outside a .vue template',
+  },
+  {
+    name: 'a specimen renders Button through <component :is> with a bare icon child',
+    origin: 'R5-F2 dynamic-host-consumer',
+    files: {
+      [specimenProbe]: sfc(
+        '<component :is="Button"><ProbeIcon /></component>',
+        `import { Check as ProbeIcon } from 'lucide-vue-next'`,
+        buttonImport,
+      ),
+    },
+    file: specimenProbe,
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
+  {
+    name: 'a specimen hosts icons in a primitive chosen at run time',
+    origin: 'R5-F2 unresolvable primitive host',
+    files: {
+      [specimenProbe]: sfc(
+        `<component :is="framed ? Button : 'div'"><ProbeIcon :stroke-width="interfaceIconStroke" /></component>`,
+        ...probeImports,
+        buttonImport,
+        'const framed = true',
+      ),
+    },
+    file: specimenProbe,
+    construct: 'primitive Button as a value',
+  },
+  {
+    name: 'a specimen resolves a component by name',
+    origin: 'R5-F2 unresolvable component',
+    files: {
+      [specimenProbe]: sfc(
+        '<component :is="host"><ProbeIcon :stroke-width="interfaceIconStroke" /></component>',
+        ...probeImports,
+        `import { resolveComponent } from 'vue'`,
+        `const host = resolveComponent('Button')`,
+      ),
+    },
+    file: specimenProbe,
+    construct: 'resolveComponent',
+  },
+  {
+    name: 'a specimen passes an icon re-exported from a .ts file into a Button slot',
+    origin: 'R5-F2 .ts helper',
+    files: {
+      [libProbe]: `export { Check } from 'lucide-vue-next'\n`,
+      [specimenProbe]: sfc(
+        '<Button><Check /></Button>',
+        buttonImport,
+        `import { Check } from '~/lib/stroke-probe'`,
+      ),
+    },
+    file: specimenProbe,
+    construct: 'cannot be resolved',
+  },
+  {
+    name: 'a primitive renders an icon re-exported from a .ts file outside app/components/ui',
+    origin: 'R5-F2 .ts helper',
+    files: {
+      [libProbe]: `export { Check } from 'lucide-vue-next'\n`,
+      [uiProbe]: sfc('<Check />', `import { Check } from '@/lib/stroke-probe'`),
+    },
+    file: libProbe,
+    construct: 'outside a .vue template',
+  },
+  {
+    name: 'a relay component the specimens render draws an icon at a literal 2 px',
+    origin: 'fail closed: relay components in scope',
+    files: {
+      [relayProbe]: sfc(
+        '<ProbeIcon :stroke-width="2" />',
+        `import { Check as ProbeIcon } from 'lucide-vue-next'`,
+      ),
+      [specimenProbe]: sfc('<Probe />', `import Probe from '~/components/relay/StrokeProbe.vue'`),
+    },
+    file: relayProbe,
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
+  {
+    name: 'an aliased Lucide import renders bare',
+    origin: 'R5 alias-bare',
+    files: { [uiProbe]: probe('<ProbeIcon />') },
+    file: uiProbe,
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
+  {
+    name: 'a bare icon sits in a primitive slot fallback',
+    origin: 'R5 default-slot-bare',
+    files: { [uiProbe]: probe('<slot><ProbeIcon /></slot>') },
+    file: uiProbe,
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
+  {
+    name: 'a v-bind object can override the stroke',
+    origin: 'R5 spread-override',
+    files: {
+      [uiProbe]: probe(
+        '<ProbeIcon :stroke-width="interfaceIconStroke" v-bind="attrs" />',
+        'const attrs = { strokeWidth: 2 }',
+      ),
+    },
+    file: uiProbe,
+    construct: 'spreads v-bind',
+  },
+  {
+    name: 'a Lucide icon renders through <component :is> without a binding',
+    origin: 'R5 dynamic-direct-bare',
+    files: { [uiProbe]: probe('<component :is="ProbeIcon" />') },
+    file: uiProbe,
+    construct: 'as a value',
+  },
+  {
+    name: 'a Lucide icon renders through <component :is>, even with the binding',
+    origin: 'R5 dynamic-direct-good, now outside the positive rule',
+    files: {
+      [uiProbe]: probe('<component :is="ProbeIcon" :stroke-width="interfaceIconStroke" />'),
+    },
+    file: uiProbe,
+    construct: 'as a value',
+  },
+  {
+    name: 'a template v-for shadows interfaceIconStroke',
+    origin: 'R5 shadow-v-for',
+    files: {
+      [uiProbe]: probe(
+        '<template v-for="interfaceIconStroke in [2]" :key="interfaceIconStroke"><ProbeIcon :stroke-width="interfaceIconStroke" /></template>',
+      ),
+    },
+    file: uiProbe,
+    construct: 'uses interfaceIconStroke outside',
+  },
+  {
+    name: 'a dynamic stroke-width bind argument overrides the shared binding',
+    origin: 'R5 dynamic-attribute-override',
+    files: {
+      [uiProbe]: probe(
+        '<ProbeIcon :stroke-width="interfaceIconStroke" :[strokeProp]="2" />',
+        `const strokeProp = 'stroke-width'`,
+      ),
+    },
+    file: uiProbe,
+    construct: 'dynamic bind argument',
+  },
+  {
+    name: 'an inline style overrides the stroke',
+    origin: 'R5 inline-style-override',
+    files: {
+      [uiProbe]: probe('<ProbeIcon :stroke-width="interfaceIconStroke" style="stroke-width: 2" />'),
+    },
+    file: uiProbe,
+    construct: 'competing stroke attribute',
+  },
+  {
+    name: 'a primitive .ts helper renders Lucide through h()',
+    origin: 'R5 ts-render-helper',
+    files: {
+      [uiHelper]: `import { h } from 'vue'\nimport { Check } from 'lucide-vue-next'\n\nexport const draw = () => h(Check)\n`,
+    },
+    file: uiHelper,
+    construct: 'outside a .vue template',
+  },
+  {
+    name: 'a primitive imports Lucide as a namespace',
+    origin: 'R5 namespace-primitive',
+    files: { [uiProbe]: sfc('<Icons.Check />', `import * as Icons from 'lucide-vue-next'`) },
+    file: uiProbe,
+    construct: 'whole module',
+  },
+  {
+    name: 'a specimen passes a relay component with a bare icon into a Button slot',
+    origin: 'R5 relay-slot-consumer',
+    files: {
+      [relayProbe]: probe('<ProbeIcon />'),
+      [specimenProbe]: rendersInSlot('Inner', '~/components/relay/StrokeProbe.vue'),
+    },
+    file: relayProbe,
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
+  {
+    name: 'a primitive drops its binding',
+    origin: 'round 4 mutation',
+    files: {
+      [checkbox]: readFileSync(repoPath(checkbox), 'utf8').replace(
+        ' :stroke-width="interfaceIconStroke"',
+        '',
+      ),
+    },
+    file: checkbox,
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
+  {
+    name: 'a new primitive file renders a bare Lucide icon',
+    origin: 'round 4 mutation',
+    files: { [uiProbe]: sfc('<Check />', `import { Check } from 'lucide-vue-next'`) },
+    file: uiProbe,
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
+  {
+    name: 'a specimen passes a bare icon into a primitive slot',
+    origin: 'round 4 mutation',
+    files: {
+      [specimenProbe]: sfc(
+        '<Button><Check /></Button>',
+        `import { Check } from 'lucide-vue-next'`,
+        buttonImport,
+      ),
+    },
+    file: specimenProbe,
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
+]
+
+const controls: { name: string; files: Overlay }[] = [
+  {
+    name: 'an aliased Lucide import with the shared binding',
+    files: { [uiProbe]: probe('<ProbeIcon :stroke-width="interfaceIconStroke" />') },
+  },
+  {
+    name: 'a bound icon beside an unrelated h() call',
+    files: {
+      [uiProbe]: probe(
+        '<div><ProbeIcon :stroke-width="interfaceIconStroke" />{{ auxiliary.type }}</div>',
+        `import { h } from 'vue'`,
+        `const auxiliary = h('span', 'label')`,
+      ),
+    },
+  },
+  {
+    name: 'a specimen passing a bound icon into a Button slot',
+    files: {
+      [specimenProbe]: sfc(
+        '<Button><ProbeIcon :stroke-width="interfaceIconStroke" /></Button>',
+        ...probeImports,
+        buttonImport,
+      ),
+    },
+  },
+  {
+    name: 'a legacy screen outside the adopted roots passing a bare icon into a Button slot',
+    files: {
+      [legacyProbe]: sfc(
+        '<Button><Check /></Button>',
+        `import { Check } from 'lucide-vue-next'`,
+        buttonImport,
+      ),
+    },
+  },
+]
+
+function problemsFor(files: Overlay, file: string) {
+  const { primitiveProblems, consumerProblems } = strokeGuard(files)
+  return [...primitiveProblems, ...consumerProblems].filter((problem) => problem.startsWith(file))
+}
 
 describe('every Lucide icon a shared primitive renders takes the shared interface stroke', () => {
   it('finds the Lucide icons in the primitives it guards', () => {
-    const icons = primitives.reduce((count, file) => count + sourceFacts(file).lucide.size, 0)
-    expect(icons).toBeGreaterThan(0)
+    expect(report.iconCount).toBeGreaterThan(0)
   })
 
   it('binds interfaceIconStroke on every Lucide icon in app/components/ui', () => {
-    expect(primitives.flatMap(primitiveProblems)).toEqual([])
+    expect(report.primitiveProblems).toEqual([])
   })
 
-  it('binds interfaceIconStroke on every icon an adopted screen passes into a primitive slot', () => {
-    expect(consumers.length).toBeGreaterThan(0)
-    expect(consumers.flatMap(consumerProblems)).toEqual([])
+  it('binds interfaceIconStroke on every Lucide icon in the adopted roots and the components they reach', () => {
+    expect(report.consumers.length).toBeGreaterThan(0)
+    expect(report.consumerProblems).toEqual([])
   })
 
-  it('exempts only the named 2 px state glyphs, and only where a primitive renders them', () => {
-    consumers.forEach(consumerProblems)
-    expect([...exemptionsUsed].sort()).toEqual([...approvedTwoPixelGlyphs.keys()].sort())
+  it('exempts only the named 2 px state glyphs, and only where the adopted roots reach them', () => {
+    expect(report.exemptionsUsed).toEqual([...approvedTwoPixelGlyphs.keys()].sort())
     for (const name of approvedTwoPixelGlyphs.keys()) {
-      const file = [...components.values()].find((path) => basename(path, '.vue') === name)
+      const file = [...report.components.values()].find((path) => basename(path, '.vue') === name)
       expect(file, name).toBeDefined()
       expect(readFileSync(repoPath(file ?? ''), 'utf8')).toMatch(/:stroke-width="2"/)
     }
+  })
+})
+
+describe('the stroke guard fails closed on any Lucide use it cannot positively verify', () => {
+  it.each(regressions)('fails when $name ($origin)', ({ files, file, construct }) => {
+    const problems = problemsFor(files, file)
+    expect(problems, `no problem names ${file}`).not.toEqual([])
+    expect(problems.join('\n')).toContain(construct)
+  })
+
+  it.each(controls)('passes $name', ({ files }) => {
+    const { primitiveProblems, consumerProblems } = strokeGuard(files)
+    expect([...primitiveProblems, ...consumerProblems]).toEqual([])
   })
 })
