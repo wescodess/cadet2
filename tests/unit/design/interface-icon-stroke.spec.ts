@@ -319,8 +319,27 @@ function consumerProblems(file: string) {
   return problems
 }
 
+function renderTree(file: string, tree: Set<string>) {
+  if (tree.has(file)) return tree
+  tree.add(file)
+  const facts = sourceFacts(file)
+  const visit = (nodes: TemplateNode[]) => {
+    for (const node of nodes) {
+      const target = resolveComponent(node, facts)
+      if (target && !isPrimitive(target)) renderTree(target, tree)
+      if (node.children) visit(node.children)
+    }
+  }
+  visit(facts.template)
+  return tree
+}
+
 const primitives = sourceFiles(uiRoot, /\.(vue|ts)$/)
-const consumers = adoptedConsumerRoots.flatMap((root) => sourceFiles(root, /\.vue$/))
+const consumers = [
+  ...adoptedConsumerRoots
+    .flatMap((root) => sourceFiles(root, /\.vue$/))
+    .reduce((tree, file) => renderTree(file, tree), new Set<string>()),
+]
 
 describe('every Lucide icon a shared primitive renders takes the shared interface stroke', () => {
   it('finds the Lucide icons in the primitives it guards', () => {
