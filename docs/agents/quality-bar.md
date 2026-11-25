@@ -293,10 +293,10 @@ Starting integration head: `d7fb8a4ac9c25dfe65e8ba84680ff2f40cb3a501`. This adop
 | Row | Pin and threshold | Inherited baseline |
 | --- | --- | --- |
 | `pnpm boundaries:check` | [dependency-cruiser **18.8.0**](https://github.com/sverweij/dependency-cruiser/blob/main/doc/rules-reference.md); zero new cycles or prohibited import edges | **29** exact cycle identities, all in `app/`; `baselines/boundaries.json` |
-| `pnpm dead-code:check` | [knip **6.47.0**](https://knip.dev/reference/cli); zero new unused files, value/type exports, production/dev dependencies | **543** identities: 341 files, 126 value exports, 61 type exports, 13 dependencies, 2 devDependencies; `baselines/dead-code.json` |
+| `pnpm dead-code:check` | [knip **6.47.0**](https://knip.dev/reference/cli); zero new unused files, value/type exports, production/dev dependencies | **518** identities: 316 files, 126 value exports, 61 type exports, 13 dependencies, 2 devDependencies; `baselines/dead-code.json` |
 | `pnpm duplication:check` | [jscpd **5.4.3**](https://github.com/kucherenko/jscpd); exact clones of at least **100 tokens and 10 lines**, strict mode; zero new changed-file clone identities | **62** file/clone occurrences across 62 keys; `baselines/duplication.json` |
 
-All **24** explicit Knip entries: **2** Nuxt auth defaults, **13** operator CLI paths, **3** scanner executable files (`convex-authority.scanner.mjs`, `knip.scanner.mjs`, `scanner-supervisor.mjs`) and **6** other entries (`index.{ts,js,mjs}`, `qa/acceptance/28/journeys.spec.ts`, `qa/acceptance/28/playwright.config.ts`, `scripts/security/check-admin-surfaces.mjs`, `scripts/security/execute-boundaries.mjs`, `scripts/security/startup-gate.mjs`).
+All **25** explicit Knip entries: **2** Nuxt auth defaults, **13** operator CLI paths, **3** scanner executable files (`convex-authority.scanner.mjs`, `knip.scanner.mjs`, `scanner-supervisor.mjs`) and **7** other entries (`app/specimen/RelaySpecimen.vue`, `index.{ts,js,mjs}`, `qa/acceptance/28/journeys.spec.ts`, `qa/acceptance/28/playwright.config.ts`, `scripts/security/check-admin-surfaces.mjs`, `scripts/security/execute-boundaries.mjs`, `scripts/security/startup-gate.mjs`).
 
 <!-- quality-figures:end -->
 
