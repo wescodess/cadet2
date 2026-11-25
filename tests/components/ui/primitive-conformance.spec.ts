@@ -27,6 +27,7 @@ import Slider from '~/components/ui/slider/Slider.vue'
 import { Spinner } from '~/components/ui/spinner'
 import { Textarea } from '~/components/ui/textarea'
 import SharedControlsSpecimen from '~/specimen/SharedControlsSpecimen.vue'
+import SpecimenPanel from '~/specimen/SpecimenPanel.vue'
 
 import { recordBlocks, repoPath } from '../../unit/design/css-source'
 
@@ -296,10 +297,10 @@ describe('the shared-controls specimen gives checkbox and radio rows the approve
     ]
     expect(controls).toHaveLength(3)
     for (const control of controls) {
-      const row = control.parentElement
+      const row = control.closest('.min-h-check-row')
       if (!row) throw new Error('The control has no row')
-      expect([...row.classList]).toContain('min-h-check-row')
-      expect(row.querySelector('label')?.getAttribute('for')).toBe(control.id)
+      expect(row.tagName).toBe('LABEL')
+      expect(row.getAttribute('for')).toBe(control.id)
       expect([...row.classList].some((name) => /^(?:h|max-h)-/.test(name))).toBe(false)
     }
     expect(relay).toContain(`--spacing-check-row: var(--check-row, ${checkRow.client});`)
@@ -309,4 +310,54 @@ describe('the shared-controls specimen gives checkbox and radio rows the approve
       checkRow.representative,
     )
   })
+})
+
+describe('the shared-controls specimen activates each checkbox and radio from its whole row', () => {
+  it.each(['client', 'representative'] as const)(
+    'changes each control exactly once per click on the row surface outside its text, in the %s expression',
+    async (expression) => {
+      mount(SpecimenPanel, { attachTo, props: { theme: 'light', expression, tag: expression } })
+      const rows = [
+        ...document.querySelectorAll<HTMLElement>(
+          `[data-expression="${expression}"] [data-specimen-controls] .min-h-check-row`,
+        ),
+      ]
+      expect(rows).toHaveLength(3)
+      const controls = rows.map((row) => {
+        const control = row.querySelector<HTMLElement>('[role="checkbox"], [role="radio"]')
+        if (!control) throw new Error(`${row.outerHTML} has no control`)
+        return control
+      })
+      const clicks = controls.map(() => 0)
+      controls.forEach((control, index) =>
+        control.addEventListener('click', () => {
+          clicks[index] = (clicks[index] ?? 0) + 1
+        }),
+      )
+      const states = () => controls.map((control) => control.getAttribute('aria-checked'))
+      const press = async (target: HTMLElement) => {
+        target.click()
+        await nextTick()
+      }
+      const [checkboxRow, firstRow, secondRow] = rows
+      if (!checkboxRow || !firstRow || !secondRow) throw new Error('Missing rows')
+
+      expect(states()).toEqual(['false', 'true', 'false'])
+      await press(checkboxRow)
+      expect(states()).toEqual(['true', 'true', 'false'])
+      expect(clicks).toEqual([1, 0, 0])
+      await press(secondRow)
+      expect(states()).toEqual(['true', 'false', 'true'])
+      expect(clicks).toEqual([1, 0, 1])
+      await press(firstRow)
+      expect(states()).toEqual(['true', 'true', 'false'])
+      expect(clicks).toEqual([1, 1, 1])
+      await press(checkboxRow)
+      expect(states()).toEqual(['false', 'true', 'false'])
+      expect(clicks).toEqual([2, 1, 1])
+      await press(controls[0] as HTMLElement)
+      expect(states()).toEqual(['true', 'true', 'false'])
+      expect(clicks).toEqual([3, 1, 1])
+    },
+  )
 })
