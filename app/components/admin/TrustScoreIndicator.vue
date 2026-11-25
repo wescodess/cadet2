@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-vue-next'
-import { interfaceIconStroke } from '@/lib/relay/icons'
 
 import { Badge } from '@/components/ui/badge'
 import {
@@ -30,15 +29,10 @@ const toneByScore = {
 <template>
   <Badge
     :data-testid="recommendationReviewTestIds.trustScore"
-    :class="
-      cn(
-        'gap-2 border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]',
-        toneByScore[score],
-      )
-    "
+    :class="cn('gap-2 border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]', toneByScore[score])"
     variant="outline"
   >
-    <component :stroke-width="interfaceIconStroke" :is="iconByScore[score]" class="size-3.5" />
+    <component :is="iconByScore[score]" class="size-3.5" />
     {{ formatRecommendationTrustScore(score) }}
   </Badge>
 </template>

@@ -1,33 +1,30 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { PlusIcon } from 'lucide-vue-next'
-import { interfaceIconStroke } from '@/lib/relay/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { EvidenceSourceRecord } from '@/lib/admin/evidenceSources'
-import { evidenceSourceTestIds, formatEvidenceStatus } from '@/lib/admin/evidenceSources'
+import {
+  evidenceSourceTestIds,
+  formatEvidenceStatus,
+} from '@/lib/admin/evidenceSources'
 
-const props = withDefaults(
-  defineProps<{
-    items: EvidenceSourceRecord[]
-    selectedSourceId?: string | null
-    loading?: boolean
-  }>(),
-  {
-    selectedSourceId: null,
-    loading: false,
-  },
-)
+const props = withDefaults(defineProps<{
+  items: EvidenceSourceRecord[]
+  selectedSourceId?: string | null
+  loading?: boolean
+}>(), {
+  selectedSourceId: null,
+  loading: false,
+})
 
 const emit = defineEmits<{
   (event: 'select', payload: string): void
   (event: 'create'): void
 }>()
 
-function badgeClass(
-  status: EvidenceSourceRecord['lifecycleStatus'] | EvidenceSourceRecord['freshness'],
-) {
+function badgeClass(status: EvidenceSourceRecord['lifecycleStatus'] | EvidenceSourceRecord['freshness']) {
   if (status === 'active' || status === 'fresh') {
     return 'border-emerald-300 bg-emerald-50 text-emerald-700'
   }
@@ -62,10 +59,16 @@ const emptyMessage = computed(() => {
         <p class="text-xs font-semibold uppercase tracking-[0.24em] text-teal-700">
           Curated sources
         </p>
-        <h2 class="mt-1 text-xl font-semibold text-slate-950">Trusted evidence inventory</h2>
+        <h2 class="mt-1 text-xl font-semibold text-slate-950">
+          Trusted evidence inventory
+        </h2>
       </div>
-      <Button :data-testid="evidenceSourceTestIds.addButton" type="button" @click="emit('create')">
-        <PlusIcon :stroke-width="interfaceIconStroke" class="size-4" />
+      <Button
+        :data-testid="evidenceSourceTestIds.addButton"
+        type="button"
+        @click="emit('create')"
+      >
+        <PlusIcon class="size-4" />
         Add source
       </Button>
     </div>
@@ -76,11 +79,9 @@ const emptyMessage = computed(() => {
         :key="item.id"
         type="button"
         class="w-full rounded-2xl border p-4 text-left transition"
-        :class="
-          item.id === selectedSourceId
-            ? 'border-teal-300 bg-teal-50/80 shadow-sm'
-            : 'border-slate-200 bg-slate-50/80 hover:border-slate-300 hover:bg-white'
-        "
+        :class="item.id === selectedSourceId
+          ? 'border-teal-300 bg-teal-50/80 shadow-sm'
+          : 'border-slate-200 bg-slate-50/80 hover:border-slate-300 hover:bg-white'"
         @click="emit('select', item.id)"
       >
         <div class="flex flex-wrap items-start justify-between gap-3">

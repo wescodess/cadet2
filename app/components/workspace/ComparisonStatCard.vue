@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Minus, TrendingDown, TrendingUp } from 'lucide-vue-next'
-import { interfaceIconStroke } from '@/lib/relay/icons'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -34,17 +33,16 @@ const trendClasses = computed(() => {
   return 'text-slate-600'
 })
 
-const testId = computed(
-  () =>
-    `comparison-stat-${props.label
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')}`,
+const testId = computed(() =>
+  `comparison-stat-${props.label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`,
 )
 </script>
 
 <template>
-  <Card :data-testid="testId" class="gap-3 rounded-3xl border-slate-200 bg-white px-5 py-5">
+  <Card
+    :data-testid="testId"
+    class="gap-3 rounded-3xl border-slate-200 bg-white px-5 py-5"
+  >
     <div class="space-y-1">
       <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
         {{ props.label }}
@@ -54,13 +52,11 @@ const testId = computed(
       </p>
     </div>
 
-    <div class="inline-flex items-center gap-2 text-sm font-medium" :class="trendClasses">
-      <component
-        :stroke-width="interfaceIconStroke"
-        :is="trendIcon"
-        class="size-4"
-        aria-hidden="true"
-      />
+    <div
+      class="inline-flex items-center gap-2 text-sm font-medium"
+      :class="trendClasses"
+    >
+      <component :is="trendIcon" class="size-4" aria-hidden="true" />
       <span>{{ props.trendLabel }}</span>
     </div>
   </Card>

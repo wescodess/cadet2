@@ -8,7 +8,6 @@ import {
   SaveIcon,
   Trash2Icon,
 } from 'lucide-vue-next'
-import { interfaceIconStroke } from '@/lib/relay/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,28 +18,31 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Progress } from '@/components/ui/progress'
 import { Textarea } from '@/components/ui/textarea'
 import type { PathwayDefinitionRecord } from '@/lib/admin/pathwayDefinitions'
-import type { EvidenceSourceDetailRecord, EvidenceSourceDraft } from '@/lib/admin/evidenceSources'
-import { evidenceSourceTestIds, formatEvidenceStatus } from '@/lib/admin/evidenceSources'
+import type {
+  EvidenceSourceDetailRecord,
+  EvidenceSourceDraft,
+} from '@/lib/admin/evidenceSources'
+import {
+  evidenceSourceTestIds,
+  formatEvidenceStatus,
+} from '@/lib/admin/evidenceSources'
 
-const props = withDefaults(
-  defineProps<{
-    mode: 'empty' | 'view' | 'edit' | 'create'
-    detail: EvidenceSourceDetailRecord | null
-    draft: EvidenceSourceDraft
-    pathwayOptions: PathwayDefinitionRecord[]
-    loading?: boolean
-    saving?: boolean
-    actionPending?: string | null
-    showBackButton?: boolean
-  }>(),
-  {
-    detail: null,
-    loading: false,
-    saving: false,
-    actionPending: null,
-    showBackButton: false,
-  },
-)
+const props = withDefaults(defineProps<{
+  mode: 'empty' | 'view' | 'edit' | 'create'
+  detail: EvidenceSourceDetailRecord | null
+  draft: EvidenceSourceDraft
+  pathwayOptions: PathwayDefinitionRecord[]
+  loading?: boolean
+  saving?: boolean
+  actionPending?: string | null
+  showBackButton?: boolean
+}>(), {
+  detail: null,
+  loading: false,
+  saving: false,
+  actionPending: null,
+  showBackButton: false,
+})
 
 const emit = defineEmits<{
   (event: 'back'): void
@@ -92,7 +94,8 @@ function toggleLinkedPathway(pathwayId: string, checked: boolean | 'indeterminat
 
   if (checked === true) {
     selected.add(pathwayId)
-  } else {
+  }
+  else {
     selected.delete(pathwayId)
   }
 
@@ -108,9 +111,7 @@ function formatTimestamp(value: number | null) {
 }
 
 function pathwayLabel(pathwayId: string) {
-  return (
-    props.pathwayOptions.find((option) => option.pathwayId === pathwayId)?.displayName || pathwayId
-  )
+  return props.pathwayOptions.find(option => option.pathwayId === pathwayId)?.displayName || pathwayId
 }
 </script>
 
@@ -143,7 +144,7 @@ function pathwayLabel(pathwayId: string) {
             class="-ml-3 h-auto px-3 py-1 text-slate-500 lg:hidden"
             @click="emit('back')"
           >
-            <ArrowLeftIcon :stroke-width="interfaceIconStroke" class="size-4" />
+            <ArrowLeftIcon class="size-4" />
             Back to list
           </Button>
 
@@ -161,27 +162,20 @@ function pathwayLabel(pathwayId: string) {
             </Badge>
           </div>
           <p class="text-sm text-slate-500">
-            {{
-              mode === 'create'
-                ? 'Add a governed source record without leaving the curation workspace.'
-                : currentSource?.description || 'No description recorded for this source yet.'
-            }}
+            {{ mode === 'create'
+              ? 'Add a governed source record without leaving the curation workspace.'
+              : currentSource?.description || 'No description recorded for this source yet.' }}
           </p>
         </div>
 
         <div class="flex flex-wrap gap-2">
           <template v-if="mode === 'view' && currentSource">
             <Button type="button" variant="outline" @click="emit('start-edit')">
-              <PencilIcon :stroke-width="interfaceIconStroke" class="size-4" />
+              <PencilIcon class="size-4" />
               Edit
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              :disabled="actionPending === 'refresh'"
-              @click="emit('refresh')"
-            >
-              <RefreshCwIcon :stroke-width="interfaceIconStroke" class="size-4" />
+            <Button type="button" variant="outline" :disabled="actionPending === 'refresh'" @click="emit('refresh')">
+              <RefreshCwIcon class="size-4" />
               {{ actionPending === 'refresh' ? 'Refreshing…' : 'Trigger refresh' }}
             </Button>
             <Button
@@ -191,7 +185,7 @@ function pathwayLabel(pathwayId: string) {
               :disabled="actionPending === 'resume'"
               @click="emit('resume')"
             >
-              <PlayIcon :stroke-width="interfaceIconStroke" class="size-4" />
+              <PlayIcon class="size-4" />
               Resume
             </Button>
             <Button
@@ -210,15 +204,17 @@ function pathwayLabel(pathwayId: string) {
               :disabled="actionPending === 'remove'"
               @click="emit('remove')"
             >
-              <Trash2Icon :stroke-width="interfaceIconStroke" class="size-4" />
+              <Trash2Icon class="size-4" />
               Remove
             </Button>
           </template>
 
           <template v-else>
-            <Button type="button" variant="outline" @click="emit('cancel')"> Cancel </Button>
+            <Button type="button" variant="outline" @click="emit('cancel')">
+              Cancel
+            </Button>
             <Button type="button" :disabled="saving" @click="emit('save')">
-              <SaveIcon :stroke-width="interfaceIconStroke" class="size-4" />
+              <SaveIcon class="size-4" />
               {{ saving ? 'Saving…' : mode === 'create' ? 'Create source' : 'Save changes' }}
             </Button>
           </template>
@@ -232,21 +228,20 @@ function pathwayLabel(pathwayId: string) {
             <NativeSelect
               :model-value="draft.type"
               :disabled="mode === 'edit'"
-              @update:model-value="
-                (value) => updateDraft('type', String(value) as EvidenceSourceDraft['type'])
-              "
+              @update:model-value="value => updateDraft('type', String(value) as EvidenceSourceDraft['type'])"
             >
-              <option value="website">Website</option>
-              <option value="youtube_channel">YouTube channel</option>
+              <option value="website">
+                Website
+              </option>
+              <option value="youtube_channel">
+                YouTube channel
+              </option>
             </NativeSelect>
           </div>
 
           <div class="space-y-2">
             <Label>Source name</Label>
-            <Input
-              :model-value="draft.name"
-              @update:model-value="(value) => updateDraft('name', String(value))"
-            />
+            <Input :model-value="draft.name" @update:model-value="value => updateDraft('name', String(value))" />
           </div>
         </div>
 
@@ -256,47 +251,47 @@ function pathwayLabel(pathwayId: string) {
             <Input
               :model-value="String(draft.trustScore)"
               type="number"
-              @update:model-value="(value) => updateDraft('trustScore', Number(value))"
+              @update:model-value="value => updateDraft('trustScore', Number(value))"
             />
           </div>
           <div class="space-y-2">
             <Label>Tenant</Label>
-            <Input
-              :model-value="draft.tenantId"
-              @update:model-value="(value) => updateDraft('tenantId', String(value))"
-            />
+            <Input :model-value="draft.tenantId" @update:model-value="value => updateDraft('tenantId', String(value))" />
           </div>
           <div class="space-y-2">
             <Label>Schedule</Label>
             <NativeSelect
               :model-value="draft.frequency"
-              @update:model-value="
-                (value) =>
-                  updateDraft('frequency', String(value) as EvidenceSourceDraft['frequency'])
-              "
+              @update:model-value="value => updateDraft('frequency', String(value) as EvidenceSourceDraft['frequency'])"
             >
-              <option value="daily">Daily</option>
-              <option value="manual">Manual</option>
-              <option value="interval">Interval</option>
+              <option value="daily">
+                Daily
+              </option>
+              <option value="manual">
+                Manual
+              </option>
+              <option value="interval">
+                Interval
+              </option>
             </NativeSelect>
           </div>
         </div>
 
-        <div v-if="draft.frequency === 'interval'" class="space-y-2">
+        <div
+          v-if="draft.frequency === 'interval'"
+          class="space-y-2"
+        >
           <Label>Interval hours</Label>
           <Input
             :model-value="String(draft.intervalHours)"
             type="number"
-            @update:model-value="(value) => updateDraft('intervalHours', Number(value))"
+            @update:model-value="value => updateDraft('intervalHours', Number(value))"
           />
         </div>
 
         <div class="space-y-2">
           <Label>Description</Label>
-          <Textarea
-            :model-value="draft.description"
-            @update:model-value="(value) => updateDraft('description', String(value))"
-          />
+          <Textarea :model-value="draft.description" @update:model-value="value => updateDraft('description', String(value))" />
         </div>
 
         <div class="space-y-2">
@@ -304,7 +299,7 @@ function pathwayLabel(pathwayId: string) {
           <Input
             :model-value="draft.tagsText"
             placeholder="policy, official, verified"
-            @update:model-value="(value) => updateDraft('tagsText', String(value))"
+            @update:model-value="value => updateDraft('tagsText', String(value))"
           />
         </div>
 
@@ -315,8 +310,7 @@ function pathwayLabel(pathwayId: string) {
                 Linked pathways
               </h3>
               <p class="mt-1 text-sm text-slate-500">
-                Flag which managed pathway definitions should reference this source during operator
-                review.
+                Flag which managed pathway definitions should reference this source during operator review.
               </p>
             </div>
           </div>
@@ -328,92 +322,76 @@ function pathwayLabel(pathwayId: string) {
             >
               <Checkbox
                 :model-value="draft.linkedPathwayIds.includes(pathway.pathwayId)"
-                @update:model-value="(checked) => toggleLinkedPathway(pathway.pathwayId, checked)"
+                @update:model-value="checked => toggleLinkedPathway(pathway.pathwayId, checked)"
               />
               <span>{{ pathway.displayName }}</span>
             </label>
           </div>
         </div>
 
-        <div v-if="draft.type === 'website'" class="grid gap-4 md:grid-cols-2">
+        <div
+          v-if="draft.type === 'website'"
+          class="grid gap-4 md:grid-cols-2"
+        >
           <div class="space-y-2 md:col-span-2">
             <Label>Seed URLs</Label>
             <Input
               :model-value="draft.websiteSeedUrls"
               placeholder="https://www.canada.ca/en/immigration-refugees-citizenship.html"
-              @update:model-value="(value) => updateDraft('websiteSeedUrls', String(value))"
+              @update:model-value="value => updateDraft('websiteSeedUrls', String(value))"
             />
           </div>
           <div class="space-y-2">
             <Label>Allowed domains</Label>
-            <Input
-              :model-value="draft.websiteAllowedDomains"
-              @update:model-value="(value) => updateDraft('websiteAllowedDomains', String(value))"
-            />
+            <Input :model-value="draft.websiteAllowedDomains" @update:model-value="value => updateDraft('websiteAllowedDomains', String(value))" />
           </div>
           <div class="space-y-2">
             <Label>Include patterns</Label>
-            <Input
-              :model-value="draft.websiteIncludePatterns"
-              @update:model-value="(value) => updateDraft('websiteIncludePatterns', String(value))"
-            />
+            <Input :model-value="draft.websiteIncludePatterns" @update:model-value="value => updateDraft('websiteIncludePatterns', String(value))" />
           </div>
           <div class="space-y-2">
             <Label>Exclude patterns</Label>
-            <Input
-              :model-value="draft.websiteExcludePatterns"
-              @update:model-value="(value) => updateDraft('websiteExcludePatterns', String(value))"
-            />
+            <Input :model-value="draft.websiteExcludePatterns" @update:model-value="value => updateDraft('websiteExcludePatterns', String(value))" />
           </div>
           <div class="space-y-2">
             <Label>Render mode</Label>
             <NativeSelect
               :model-value="draft.websiteRenderMode"
-              @update:model-value="
-                (value) =>
-                  updateDraft(
-                    'websiteRenderMode',
-                    String(value) as EvidenceSourceDraft['websiteRenderMode'],
-                  )
-              "
+              @update:model-value="value => updateDraft('websiteRenderMode', String(value) as EvidenceSourceDraft['websiteRenderMode'])"
             >
-              <option value="static">Static</option>
-              <option value="rendered">Rendered</option>
+              <option value="static">
+                Static
+              </option>
+              <option value="rendered">
+                Rendered
+              </option>
             </NativeSelect>
           </div>
         </div>
 
-        <div v-else class="grid gap-4 md:grid-cols-2">
+        <div
+          v-else
+          class="grid gap-4 md:grid-cols-2"
+        >
           <div class="space-y-2">
             <Label>Channel ID</Label>
-            <Input
-              :model-value="draft.youtubeChannelId"
-              @update:model-value="(value) => updateDraft('youtubeChannelId', String(value))"
-            />
+            <Input :model-value="draft.youtubeChannelId" @update:model-value="value => updateDraft('youtubeChannelId', String(value))" />
           </div>
           <div class="space-y-2">
             <Label>Channel URL</Label>
-            <Input
-              :model-value="draft.youtubeChannelUrl"
-              @update:model-value="(value) => updateDraft('youtubeChannelUrl', String(value))"
-            />
+            <Input :model-value="draft.youtubeChannelUrl" @update:model-value="value => updateDraft('youtubeChannelUrl', String(value))" />
           </div>
           <div class="space-y-2">
             <Label>Max videos per run</Label>
             <Input
               :model-value="String(draft.youtubeMaxVideosPerRun)"
               type="number"
-              @update:model-value="(value) => updateDraft('youtubeMaxVideosPerRun', Number(value))"
+              @update:model-value="value => updateDraft('youtubeMaxVideosPerRun', Number(value))"
             />
           </div>
           <div class="space-y-2">
             <Label>Preferred language</Label>
-            <Input
-              :model-value="draft.youtubePreferredLanguage"
-              @update:model-value="
-                (value) => updateDraft('youtubePreferredLanguage', String(value))
-              "
-            />
+            <Input :model-value="draft.youtubePreferredLanguage" @update:model-value="value => updateDraft('youtubePreferredLanguage', String(value))" />
           </div>
         </div>
       </div>
@@ -435,10 +413,7 @@ function pathwayLabel(pathwayId: string) {
                   {{ currentSource.type === 'website' ? 'Website source' : 'YouTube channel' }}
                 </div>
               </div>
-              <Progress
-                class="mt-4 bg-slate-200 [&_[data-slot=progress-indicator]]:bg-teal-600"
-                :model-value="currentSource.trustScore"
-              />
+              <Progress class="mt-4 bg-slate-200 [&_[data-slot=progress-indicator]]:bg-teal-600" :model-value="currentSource.trustScore" />
             </div>
 
             <div class="grid gap-4 md:grid-cols-2">
@@ -495,15 +470,11 @@ function pathwayLabel(pathwayId: string) {
                 </div>
                 <div class="flex items-start justify-between gap-3">
                   <dt>Created by</dt>
-                  <dd class="font-medium text-slate-900">
-                    {{ currentSource.createdByEmail || currentSource.createdByUserId }}
-                  </dd>
+                  <dd class="font-medium text-slate-900">{{ currentSource.createdByEmail || currentSource.createdByUserId }}</dd>
                 </div>
                 <div class="flex items-start justify-between gap-3">
                   <dt>Enabled</dt>
-                  <dd class="font-medium text-slate-900">
-                    {{ currentSource.enabled ? 'Yes' : 'No' }}
-                  </dd>
+                  <dd class="font-medium text-slate-900">{{ currentSource.enabled ? 'Yes' : 'No' }}</dd>
                 </div>
               </dl>
             </div>
@@ -519,20 +490,11 @@ function pathwayLabel(pathwayId: string) {
                   class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3"
                 >
                   <div class="flex items-center justify-between gap-3">
-                    <span class="text-sm font-medium text-slate-900">{{
-                      formatEvidenceStatus(auditItem.action)
-                    }}</span>
-                    <span class="text-xs text-slate-500">{{
-                      formatTimestamp(auditItem.timestamp)
-                    }}</span>
+                    <span class="text-sm font-medium text-slate-900">{{ formatEvidenceStatus(auditItem.action) }}</span>
+                    <span class="text-xs text-slate-500">{{ formatTimestamp(auditItem.timestamp) }}</span>
                   </div>
                   <p class="mt-1 text-xs text-slate-500">
-                    {{
-                      auditItem.note ||
-                      auditItem.reason ||
-                      auditItem.diffSummary ||
-                      'No additional note recorded.'
-                    }}
+                    {{ auditItem.note || auditItem.reason || auditItem.diffSummary || 'No additional note recorded.' }}
                   </p>
                 </div>
               </div>

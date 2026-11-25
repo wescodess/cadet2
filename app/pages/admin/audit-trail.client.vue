@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Search, ShieldCheck, ShieldEllipsis, TimerReset } from 'lucide-vue-next'
-import { interfaceIconStroke } from '@/lib/relay/icons'
 
 import SignOutButton from '@/components/auth/SignOutButton.vue'
 import { Button } from '@/components/ui/button'
@@ -283,7 +282,6 @@ if (import.meta.client) {
           >
             <span>{{ link.label }}</span>
             <ShieldEllipsis
-              :stroke-width="interfaceIconStroke"
               v-if="link.href === '/admin/audit-trail'"
               class="h-4 w-4 text-cyan-200"
             />
@@ -367,7 +365,6 @@ if (import.meta.client) {
               <span>Search</span>
               <div class="relative">
                 <Search
-                  :stroke-width="interfaceIconStroke"
                   class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
                 />
                 <Input
@@ -414,7 +411,7 @@ if (import.meta.client) {
                 class="self-end rounded-2xl border-white/10 bg-white/5 text-slate-100 hover:bg-white/10"
                 @click="resetFilters"
               >
-                <TimerReset :stroke-width="interfaceIconStroke" class="mr-2 h-4 w-4" />
+                <TimerReset class="mr-2 h-4 w-4" />
                 Reset
               </Button>
             </div>
@@ -479,10 +476,7 @@ if (import.meta.client) {
                       {{ item.changeSummary }}
                     </p>
                   </div>
-                  <ShieldCheck
-                    :stroke-width="interfaceIconStroke"
-                    class="mt-1 h-4 w-4 shrink-0 text-cyan-200/80"
-                  />
+                  <ShieldCheck class="mt-1 h-4 w-4 shrink-0 text-cyan-200/80" />
                 </div>
                 <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
                   <span>{{ item.actorEmail || item.actorUserId }}</span>

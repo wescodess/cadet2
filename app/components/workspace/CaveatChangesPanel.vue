@@ -2,7 +2,6 @@
 import type { RecommendationRunComparisonCaveat } from '~~/shared/types/recommendation-run-comparison'
 
 import { AlertTriangle, CheckCircle2 } from 'lucide-vue-next'
-import { interfaceIconStroke } from '@/lib/relay/icons'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -19,8 +18,12 @@ const hasChanges = computed(() => props.addedCaveats.length > 0 || props.removed
     class="gap-4 rounded-3xl border-slate-200 bg-white px-5 py-5"
   >
     <div class="space-y-1">
-      <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Caveat changes</p>
-      <h3 class="text-lg font-semibold text-slate-950">What changed in the trust caveats</h3>
+      <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+        Caveat changes
+      </p>
+      <h3 class="text-lg font-semibold text-slate-950">
+        What changed in the trust caveats
+      </h3>
     </div>
 
     <div
@@ -31,7 +34,10 @@ const hasChanges = computed(() => props.addedCaveats.length > 0 || props.removed
     </div>
 
     <div v-else class="space-y-4">
-      <Accordion type="multiple" class="space-y-3 md:hidden">
+      <Accordion
+        type="multiple"
+        class="space-y-3 md:hidden"
+      >
         <AccordionItem value="added" class="rounded-2xl border border-amber-200 bg-amber-50 px-4">
           <AccordionTrigger class="py-3 text-sm font-semibold text-amber-900 hover:no-underline">
             New caveats ({{ props.addedCaveats.length }})
@@ -43,24 +49,14 @@ const hasChanges = computed(() => props.addedCaveats.length > 0 || props.removed
                 :key="caveat.id"
                 class="flex items-start gap-2 text-sm text-amber-950"
               >
-                <AlertTriangle
-                  :stroke-width="interfaceIconStroke"
-                  class="mt-0.5 size-4 shrink-0"
-                  aria-hidden="true"
-                />
-                <span
-                  ><span class="font-semibold">{{ caveat.pathwayName }}:</span>
-                  {{ caveat.text }}</span
-                >
+                <AlertTriangle class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                <span><span class="font-semibold">{{ caveat.pathwayName }}:</span> {{ caveat.text }}</span>
               </li>
             </ul>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem
-          value="removed"
-          class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4"
-        >
+        <AccordionItem value="removed" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4">
           <AccordionTrigger class="py-3 text-sm font-semibold text-emerald-900 hover:no-underline">
             Resolved caveats ({{ props.removedCaveats.length }})
           </AccordionTrigger>
@@ -71,15 +67,8 @@ const hasChanges = computed(() => props.addedCaveats.length > 0 || props.removed
                 :key="caveat.id"
                 class="flex items-start gap-2 text-sm text-emerald-950"
               >
-                <CheckCircle2
-                  :stroke-width="interfaceIconStroke"
-                  class="mt-0.5 size-4 shrink-0"
-                  aria-hidden="true"
-                />
-                <span
-                  ><span class="font-semibold">{{ caveat.pathwayName }}:</span>
-                  {{ caveat.text }}</span
-                >
+                <CheckCircle2 class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                <span><span class="font-semibold">{{ caveat.pathwayName }}:</span> {{ caveat.text }}</span>
               </li>
             </ul>
           </AccordionContent>
@@ -89,7 +78,7 @@ const hasChanges = computed(() => props.addedCaveats.length > 0 || props.removed
       <div class="hidden gap-4 md:grid">
         <section class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
           <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-900">
-            <AlertTriangle :stroke-width="interfaceIconStroke" class="size-4" aria-hidden="true" />
+            <AlertTriangle class="size-4" aria-hidden="true" />
             <span>New caveats</span>
           </div>
           <ul class="space-y-2">
@@ -105,7 +94,7 @@ const hasChanges = computed(() => props.addedCaveats.length > 0 || props.removed
 
         <section class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
           <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-emerald-900">
-            <CheckCircle2 :stroke-width="interfaceIconStroke" class="size-4" aria-hidden="true" />
+            <CheckCircle2 class="size-4" aria-hidden="true" />
             <span>Resolved caveats</span>
           </div>
           <ul class="space-y-2">

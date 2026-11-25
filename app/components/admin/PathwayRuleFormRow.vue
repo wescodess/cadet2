@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Trash2Icon } from 'lucide-vue-next'
-import { interfaceIconStroke } from '@/lib/relay/icons'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,15 +20,12 @@ import {
   pathwayRuleTestIds,
 } from '@/lib/admin/pathwayRules'
 
-const props = withDefaults(
-  defineProps<{
-    modelValue: PathwayRuleDraft
-    disabled?: boolean
-  }>(),
-  {
-    disabled: false,
-  },
-)
+const props = withDefaults(defineProps<{
+  modelValue: PathwayRuleDraft
+  disabled?: boolean
+}>(), {
+  disabled: false,
+})
 
 const emit = defineEmits<{
   (event: 'update:modelValue', payload: PathwayRuleDraft): void
@@ -37,9 +33,9 @@ const emit = defineEmits<{
 }>()
 
 const usesBooleanValue = computed(() => isBooleanEligibilityFieldPath(props.modelValue.fieldPath))
-const availableOperators = computed(() =>
-  usesBooleanValue.value ? eligibilityDslBooleanOperatorValues : eligibilityDslOperatorValues,
-)
+const availableOperators = computed(() => usesBooleanValue.value
+  ? eligibilityDslBooleanOperatorValues
+  : eligibilityDslOperatorValues)
 
 function updateRule<K extends keyof PathwayRuleDraft>(field: K, value: PathwayRuleDraft[K]) {
   emit('update:modelValue', {
@@ -57,8 +53,9 @@ function handleFieldPathChange(value: string | number) {
 
   if (isBooleanEligibilityFieldPath(fieldPath)) {
     nextRule.operator = nextRule.operator === '!=' ? '!=' : '=='
-    nextRule.comparisonValue =
-      typeof nextRule.comparisonValue === 'boolean' ? nextRule.comparisonValue : true
+    nextRule.comparisonValue = typeof nextRule.comparisonValue === 'boolean'
+      ? nextRule.comparisonValue
+      : true
   }
 
   emit('update:modelValue', nextRule)
@@ -73,10 +70,7 @@ function handleComparisonValueChange(value: string | number) {
   const rawValue = String(value)
   const numericValue = Number(rawValue)
 
-  updateRule(
-    'comparisonValue',
-    rawValue.trim() !== '' && Number.isFinite(numericValue) ? numericValue : rawValue,
-  )
+  updateRule('comparisonValue', rawValue.trim() !== '' && Number.isFinite(numericValue) ? numericValue : rawValue)
 }
 </script>
 
@@ -92,7 +86,7 @@ function handleComparisonValueChange(value: string | number) {
           :model-value="modelValue.unmetConditionId"
           :disabled="disabled"
           placeholder="minimum-english-clb-8"
-          @update:model-value="(value) => updateRule('unmetConditionId', String(value))"
+          @update:model-value="value => updateRule('unmetConditionId', String(value))"
         />
       </div>
 
@@ -118,11 +112,13 @@ function handleComparisonValueChange(value: string | number) {
         <NativeSelect
           :model-value="modelValue.operator"
           :disabled="disabled"
-          @update:model-value="
-            (value) => updateRule('operator', String(value) as EligibilityDslOperator)
-          "
+          @update:model-value="value => updateRule('operator', String(value) as EligibilityDslOperator)"
         >
-          <option v-for="operator in availableOperators" :key="operator" :value="operator">
+          <option
+            v-for="operator in availableOperators"
+            :key="operator"
+            :value="operator"
+          >
             {{ operator }}
           </option>
         </NativeSelect>
@@ -137,7 +133,7 @@ function handleComparisonValueChange(value: string | number) {
           variant="ghost"
           @click="emit('remove')"
         >
-          <Trash2Icon :stroke-width="interfaceIconStroke" class="size-4" />
+          <Trash2Icon class="size-4" />
         </Button>
       </div>
     </div>
@@ -150,8 +146,12 @@ function handleComparisonValueChange(value: string | number) {
         :disabled="disabled"
         @update:model-value="handleComparisonValueChange"
       >
-        <option value="true">True</option>
-        <option value="false">False</option>
+        <option value="true">
+          True
+        </option>
+        <option value="false">
+          False
+        </option>
       </NativeSelect>
       <Input
         v-else

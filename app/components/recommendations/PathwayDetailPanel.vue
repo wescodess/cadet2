@@ -2,7 +2,6 @@
 import type { RecommendationResultsCandidate } from '~/lib/recommendations/comparison'
 
 import { ChevronDown } from 'lucide-vue-next'
-import { interfaceIconStroke } from '~/lib/relay/icons'
 
 import BlockerAndTradeoffPanel from '~/components/recommendations/BlockerAndTradeoffPanel.vue'
 import EvidenceConfidencePanel from '~/components/recommendations/EvidenceConfidencePanel.vue'
@@ -72,19 +71,14 @@ const tradeoffs = computed(() => props.candidate.tradeoffs || [])
 const actions = computed(() => props.candidate.improvementActions || [])
 const citations = computed(() => props.candidate.citations || [])
 const nextStepPlan = computed(() => props.candidate.nextStepPlan || null)
-const hasStrategicRoute = computed(() =>
-  Boolean(props.candidate.composedSteps && props.candidate.composedSteps.length > 0),
-)
-const fitSignalsPanelId = computed(
-  () => `fit-signals-${props.candidate.type}-${props.candidate.pathwayId}-${props.candidate.rank}`,
-)
-const nextStepPlanPanelIdBase = computed(
-  () =>
-    `next-step-plan-${props.candidate.type}-${props.candidate.pathwayId}-${props.candidate.rank}`,
-)
-const citationSummary = computed(() =>
-  citations.value.length === 1 ? '1 citation' : `${citations.value.length} citations`,
-)
+const hasStrategicRoute = computed(() => Boolean(props.candidate.composedSteps && props.candidate.composedSteps.length > 0))
+const fitSignalsPanelId = computed(() => `fit-signals-${props.candidate.type}-${props.candidate.pathwayId}-${props.candidate.rank}`)
+const nextStepPlanPanelIdBase = computed(() => `next-step-plan-${props.candidate.type}-${props.candidate.pathwayId}-${props.candidate.rank}`)
+const citationSummary = computed(() => (
+  citations.value.length === 1
+    ? '1 citation'
+    : `${citations.value.length} citations`
+))
 
 function toggleMobileFitSignals() {
   isMobileFitSignalsOpen.value = !isMobileFitSignalsOpen.value
@@ -113,9 +107,7 @@ function toggleMobileFitSignals() {
             >
               {{ getRecommendationTrustBoundaryBadgeLabel(props.candidate.trustBoundary) }}
             </span>
-            <span
-              class="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-3 py-1 text-xs font-medium text-slate-700"
-            >
+            <span class="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-3 py-1 text-xs font-medium text-slate-700">
               {{ citationSummary }}
             </span>
             <span class="text-xs font-medium text-slate-600">
@@ -131,8 +123,7 @@ function toggleMobileFitSignals() {
               {{ pathwayType.description }}
             </p>
             <p class="text-xs font-medium text-slate-700">
-              {{ candidateOutcomeSummary(props.candidate) }} · Confidence
-              {{ props.candidate.confidence }} · Freshness {{ props.candidate.freshness }}
+              {{ candidateOutcomeSummary(props.candidate) }} · Confidence {{ props.candidate.confidence }} · Freshness {{ props.candidate.freshness }}
             </p>
           </div>
         </div>
@@ -145,7 +136,9 @@ function toggleMobileFitSignals() {
       </div>
 
       <div class="rounded-2xl border border-slate-200 bg-white/85 p-4">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Summary</p>
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+          Summary
+        </p>
         <p class="mt-2 text-sm leading-relaxed text-slate-900">
           {{ props.candidate.rationale }}
         </p>
@@ -166,14 +159,11 @@ function toggleMobileFitSignals() {
               Fit signals
             </span>
             <span class="mt-1 block text-sm text-slate-700">
-              Review {{ props.candidate.fitSignals.length }} supporting signal{{
-                props.candidate.fitSignals.length === 1 ? '' : 's'
-              }}.
+              Review {{ props.candidate.fitSignals.length }} supporting signal{{ props.candidate.fitSignals.length === 1 ? '' : 's' }}.
             </span>
           </span>
 
           <ChevronDown
-            :stroke-width="interfaceIconStroke"
             class="size-4 shrink-0 text-slate-500 transition-transform"
             :class="isMobileFitSignalsOpen ? 'rotate-180' : ''"
           />
@@ -218,10 +208,16 @@ function toggleMobileFitSignals() {
       </ul>
     </div>
 
-    <MilestoneRoutePlanner v-if="hasStrategicRoute" :steps="props.candidate.composedSteps || []" />
+    <MilestoneRoutePlanner
+      v-if="hasStrategicRoute"
+      :steps="props.candidate.composedSteps || []"
+    />
 
     <div class="space-y-4">
-      <BlockerAndTradeoffPanel :blockers="blockers" :tradeoffs="tradeoffs" />
+      <BlockerAndTradeoffPanel
+        :blockers="blockers"
+        :tradeoffs="tradeoffs"
+      />
 
       <NextActionQueue
         v-if="nextStepPlan || actions.length > 0"

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ArrowUpRight, Flag, Link2, PauseCircle, ShieldCheck } from 'lucide-vue-next'
-import { interfaceIconStroke } from '@/lib/relay/icons'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -83,11 +82,8 @@ function freshnessClasses(value: RecommendationReviewCitation['freshness']) {
       </div>
 
       <div class="flex flex-wrap gap-2">
-        <Badge
-          :class="cn('border text-[11px] font-semibold', supportClasses(citation.supportStrength))"
-          variant="outline"
-        >
-          <ShieldCheck :stroke-width="interfaceIconStroke" class="size-3.5" />
+        <Badge :class="cn('border text-[11px] font-semibold', supportClasses(citation.supportStrength))" variant="outline">
+          <ShieldCheck class="size-3.5" />
           {{ formatRecommendationReviewSupportStrength(citation.supportStrength) }}
         </Badge>
         <Badge
@@ -113,12 +109,11 @@ function freshnessClasses(value: RecommendationReviewCitation['freshness']) {
         </p>
       </div>
       <div class="rounded-[1.2rem] border border-slate-200 bg-slate-50/80 px-4 py-3">
-        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Freshness</p>
-        <p
-          class="mt-2 inline-flex items-center gap-2 text-sm font-medium"
-          :class="freshnessClasses(citation.freshness)"
-        >
-          <Link2 :stroke-width="interfaceIconStroke" class="size-4" />
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Freshness
+        </p>
+        <p class="mt-2 inline-flex items-center gap-2 text-sm font-medium" :class="freshnessClasses(citation.freshness)">
+          <Link2 class="size-4" />
           {{ formatRecommendationReviewFreshness(citation.freshness) }}
         </p>
         <p v-if="citation.flagReason" class="mt-3 text-xs leading-5 text-slate-500">
@@ -133,7 +128,7 @@ function freshnessClasses(value: RecommendationReviewCitation['freshness']) {
         size="sm"
         @click="$emit('flag', citation)"
       >
-        <Flag :stroke-width="interfaceIconStroke" class="size-4" />
+        <Flag class="size-4" />
         Flag citation
       </Button>
       <Button
@@ -142,14 +137,14 @@ function freshnessClasses(value: RecommendationReviewCitation['freshness']) {
         variant="outline"
         @click="$emit('pause-source', citation)"
       >
-        <PauseCircle :stroke-width="interfaceIconStroke" class="size-4" />
+        <PauseCircle class="size-4" />
         Pause source
       </Button>
       <NuxtLink
         class="inline-flex h-9 items-center justify-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
         to="/admin/evidence-sources"
       >
-        <ArrowUpRight :stroke-width="interfaceIconStroke" class="size-4" />
+        <ArrowUpRight class="size-4" />
         Refresh source
       </NuxtLink>
     </div>
