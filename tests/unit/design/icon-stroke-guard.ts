@@ -7,7 +7,7 @@ import { repoPath } from './css-source'
 export type Overlay = Record<string, string>
 
 export const approvedTwoPixelGlyphs = new Map([
-  ['StateGlyph', 'DESIGN.md:241: state glyphs render at 2 px stroke'],
+  ['app/components/relay/StateGlyph.vue', 'DESIGN.md:241: state glyphs render at 2 px stroke'],
 ])
 
 const uiRoot = 'app/components/ui'
@@ -124,14 +124,15 @@ function localName(specifier: AstNode) {
 }
 
 function readLucideImport(facts: Facts, specifiers: AstNode[], where: string) {
-  if (!facts.vue)
+  const runtime = specifiers.filter((specifier) => specifier.importKind !== 'type')
+  if (!facts.vue && runtime.length > 0)
     facts.problems.push(
       `${where} uses Lucide outside a .vue template, so its stroke cannot be checked`,
     )
-  for (const specifier of specifiers) {
+  for (const specifier of runtime) {
     if (specifier.type !== 'ImportSpecifier')
       facts.problems.push(`${where} imports Lucide as a whole module (${localName(specifier)})`)
-    else if (specifier.importKind !== 'type' && facts.vue) facts.lucide.add(localName(specifier))
+    else if (facts.vue) facts.lucide.add(localName(specifier))
   }
 }
 
@@ -598,9 +599,8 @@ function check(run: Run, file: string) {
   const facts = sourceFacts(file, readSource(run, file))
   run.scope.set(file, facts)
   followImports(run, facts)
-  const name = basename(file, '.vue')
-  if (facts.vue && !isPrimitive(file) && approvedTwoPixelGlyphs.has(name)) {
-    run.exemptionsUsed.add(name)
+  if (facts.vue && approvedTwoPixelGlyphs.has(file)) {
+    run.exemptionsUsed.add(file)
     return
   }
   for (const problem of facts.problems) report(run, file, problem)

@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs'
-import { basename } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { repoPath } from './css-source'
@@ -45,6 +44,22 @@ interface Regression {
 const checkbox = 'app/components/ui/checkbox/Checkbox.vue'
 
 const regressions: Regression[] = [
+  {
+    name: 'another file named StateGlyph draws a non-approved stroke',
+    origin: 'R6-F2 basename exemption',
+    files: {
+      [specimenProbe]: sfc(
+        '<R6StateGlyph />',
+        `import R6StateGlyph from '~/components/relay/r6/StateGlyph.vue'`,
+      ),
+      'app/components/relay/r6/StateGlyph.vue': sfc(
+        '<Check :stroke-width="7" />',
+        `import { Check } from 'lucide-vue-next'`,
+      ),
+    },
+    file: 'app/components/relay/r6/StateGlyph.vue',
+    construct: 'has no :stroke-width="interfaceIconStroke"',
+  },
   {
     name: 'a dynamic strokeWidth bind argument overrides the shared binding',
     origin: 'R5-F1 dynamic-camel-override',
@@ -400,6 +415,13 @@ const regressions: Regression[] = [
 
 const controls: { name: string; files: Overlay }[] = [
   {
+    name: 'an inline type-only Lucide import in a TypeScript helper',
+    files: {
+      [specimenProbe]: sfc('<span>{{ mark }}</span>', `import { mark } from '~/lib/stroke-probe'`),
+      [libProbe]: `import { type LucideProps } from 'lucide-vue-next'\nexport type MarkProps = LucideProps\nexport const mark = 'mark'\n`,
+    },
+  },
+  {
     name: 'an aliased Lucide import with the shared binding',
     files: { [uiProbe]: probe('<ProbeIcon :stroke-width="interfaceIconStroke" />') },
   },
@@ -456,11 +478,8 @@ describe('every Lucide icon a shared primitive renders takes the shared interfac
 
   it('exempts only the named 2 px state glyphs, and only where the adopted roots reach them', () => {
     expect(report.exemptionsUsed).toEqual([...approvedTwoPixelGlyphs.keys()].sort())
-    for (const name of approvedTwoPixelGlyphs.keys()) {
-      const file = [...report.components.values()].find((path) => basename(path, '.vue') === name)
-      expect(file, name).toBeDefined()
-      expect(readFileSync(repoPath(file ?? ''), 'utf8')).toMatch(/:stroke-width="2"/)
-    }
+    for (const file of approvedTwoPixelGlyphs.keys())
+      expect(readFileSync(repoPath(file), 'utf8')).toMatch(/:stroke-width="2"/)
   })
 })
 
