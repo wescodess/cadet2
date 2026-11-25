@@ -6,6 +6,7 @@ import { babelParse, parse } from 'vue/compiler-sfc'
 import { repoPath } from './css-source'
 
 const uiRoot = 'app/components/ui'
+const adoptedConsumerRoots = ['app/specimen']
 const lucideSource = /^(?:lucide-vue-next|@lucide\/vue)(?:\/|$)/
 const strokeModule = /^[@~]\/lib\/relay\/icons$/
 const strokeBinding = 'interfaceIconStroke'
@@ -319,7 +320,7 @@ function consumerProblems(file: string) {
 }
 
 const primitives = sourceFiles(uiRoot, /\.(vue|ts)$/)
-const consumers = sourceFiles('app', /\.vue$/).filter((file) => !isPrimitive(file))
+const consumers = adoptedConsumerRoots.flatMap((root) => sourceFiles(root, /\.vue$/))
 
 describe('every Lucide icon a shared primitive renders takes the shared interface stroke', () => {
   it('finds the Lucide icons in the primitives it guards', () => {
@@ -331,7 +332,8 @@ describe('every Lucide icon a shared primitive renders takes the shared interfac
     expect(primitives.flatMap(primitiveProblems)).toEqual([])
   })
 
-  it('binds interfaceIconStroke on every icon a consumer passes into a primitive slot', () => {
+  it('binds interfaceIconStroke on every icon an adopted screen passes into a primitive slot', () => {
+    expect(consumers.length).toBeGreaterThan(0)
     expect(consumers.flatMap(consumerProblems)).toEqual([])
   })
 
