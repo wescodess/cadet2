@@ -3,6 +3,7 @@ import type { RadioGroupItemProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { reactiveOmit } from '@vueuse/core'
 import { CircleIcon } from 'lucide-vue-next'
+import { interfaceIconStroke } from '@/lib/relay/icons'
 import { RadioGroupIndicator, RadioGroupItem, useForwardProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
 
@@ -30,6 +31,7 @@ const forwardedProps = useForwardProps(delegatedProps)
     >
       <slot>
         <CircleIcon
+          :stroke-width="interfaceIconStroke"
           class="fill-primary absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2"
         />
       </slot>
