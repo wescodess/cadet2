@@ -61,6 +61,7 @@ export async function requireAdminSession(event: H3Event) {
     if (status.currentUser.userId !== userId) {
       throw new ConvexError('Admin access required')
     }
+    event.context.admittedAdmin = true
     return { session, userId, convex, authorizationSource: 'rag_admins' as const }
   } catch (error) {
     if (isError(error) && error.statusCode === 401) throw error

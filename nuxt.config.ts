@@ -1,9 +1,21 @@
+import { fileURLToPath } from 'node:url'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite'
 
 const localHubDbDataDir = process.env.NUXT_HUB_DB_DATA_DIR || '.data/db/pglite-dev'
 
 export default defineNuxtConfig({
+  hooks: {
+    'nitro:config'(config) {
+      const handlers = config.errorHandler
+      if (typeof handlers !== 'string') throw new Error('Expected the Nuxt error renderer')
+      config.alias = { ...config.alias, '#admin-error-renderer': handlers }
+      config.errorHandler = [
+        fileURLToPath(new URL('./server/error-handlers/private-admin.ts', import.meta.url)),
+        handlers,
+      ]
+    },
+  },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   typescript: {
