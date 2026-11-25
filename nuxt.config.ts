@@ -9,9 +9,9 @@ export default defineNuxtConfig({
     'nitro:config'(config) {
       const handlers = config.errorHandler
       if (typeof handlers !== 'string') throw new Error('Expected the Nuxt error renderer')
-      config.alias = { ...config.alias, '#admin-error-renderer': handlers }
+      config.alias = { ...config.alias, '#nuxt-error-renderer': handlers }
       config.errorHandler = [
-        fileURLToPath(new URL('./server/error-handlers/private-admin.ts', import.meta.url)),
+        fileURLToPath(new URL('./server/error-handlers/private-errors.ts', import.meta.url)),
         handlers,
       ]
     },

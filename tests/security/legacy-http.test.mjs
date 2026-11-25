@@ -17,6 +17,54 @@ after(async () => {
   await stack?.close()
 })
 
+for (const role of ['own-client', 'admin', 'anonymous']) {
+  for (const path of [
+    '/does-not-exist',
+    '/api/does-not-exist',
+    '/api/admin/does-not-exist',
+    '/api/admin/pathways/does-not-exist',
+  ]) {
+    for (const accept of ['text/html', 'application/json', '*/*']) {
+      test(`error privacy: ${role} ${path} Accept ${accept}`, async () => {
+        const actor = stack.actors.find((candidate) => candidate.role === role)
+        const response = await fetch(`${stack.origin}${path}`, {
+          headers: { cookie: actor.cookie, accept },
+          redirect: 'manual',
+        })
+        const body = await response.text()
+        const api = path.startsWith('/api/')
+        const denied = path === '/api/admin/pathways/does-not-exist' && role !== 'admin'
+        const status = denied ? (role === 'anonymous' ? 401 : 403) : 404
+        const json = api || accept !== 'text/html'
+        assert.deepEqual(
+          {
+            status: response.status,
+            cacheControl: response.headers.get('cache-control'),
+            contentType: response.headers.get('content-type')?.split(';')[0],
+            privateApiData:
+              api && /\$sauth|__NUXT_DATA__|session|profile|currentUser|PRIVATE_/.test(body),
+            actorInApi: api && Boolean(actor.id) && body.includes(actor.id),
+          },
+          {
+            status,
+            cacheControl: 'private, no-store',
+            contentType: json ? 'application/json' : 'text/html',
+            privateApiData: false,
+            actorInApi: false,
+          },
+        )
+        if (json) {
+          const error = JSON.parse(body)
+          assert.equal(error.statusCode, status)
+          assert.equal(typeof error.message, 'string')
+        } else {
+          assert.match(body, /__NUXT_DATA__/)
+        }
+      })
+    }
+  }
+}
+
 const pages = [
   '/workspace',
   '/workspace/intake',
