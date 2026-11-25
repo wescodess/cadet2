@@ -406,7 +406,7 @@ test('J74-05 reviewed admin cannot change frozen YouTube sources through visible
   await assertFrozenNotice(page, 'delete')
   await expect
     .soft(
-      page.getByRole('button', { name: new RegExp(`^QA74 ${info.project.name} UI delete`) }),
+      page.getByRole('heading', { name: `QA74 ${info.project.name} UI delete`, exact: true }),
       oracle.frozen,
     )
     .toBeVisible()
