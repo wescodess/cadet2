@@ -1,0 +1,34 @@
+
+ RUN  v4.0.18 <workspace>
+
+ ❯ tests/unit/adminSurfaceGuard.spec.mjs (10 tests | 1 failed) 7351ms
+   ✓ classifies the actual source registrations  963ms
+   × rejects AI Search provider resurrection at the real source-manifest guard 830ms
+   ✓ rejects default export at the real source-manifest guard  524ms
+   ✓ rejects unguarded export at the real source-manifest guard  548ms
+   ✓ rejects export alias at the real source-manifest guard  556ms
+   ✓ rejects removed admission at the real source-manifest guard  922ms
+   ✓ rejects generic internal wrapper at the real source-manifest guard  1116ms
+   ✓ rejects dormant ingestion import at the real source-manifest guard  793ms
+   ✓ rejects runtime demo DDL at the real source-manifest guard  667ms
+   ✓ rejects internal visibility escape at the real source-manifest guard  429ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/adminSurfaceGuard.spec.mjs > rejects AI Search provider resurrection at the real source-manifest guard
+AssertionError: expected [Function] to throw an error
+ ❯ tests/unit/adminSurfaceGuard.spec.mjs:77:50
+     75|     const previous = await readFile(path, 'utf8').catch(() => '')
+     76|     await writeFile(path, mutate(previous))
+     77|     expect(() => inspectAdminSources(directory)).toThrow()
+       |                                                  ^
+     78|   } finally {
+     79|     await rm(directory, { recursive: true, force: true })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  18:52:48
+   Duration  7.77s (transform 97ms, setup 0ms, import 233ms, tests 7.35s, environment 0ms)

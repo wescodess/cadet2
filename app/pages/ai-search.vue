@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SignOutButton from '@/components/auth/SignOutButton.vue'
-
+definePageMeta({ middleware: ['auth', 'admin'] })
 type QueryMode = 'search' | 'ai-search'
 
 const mode = ref<QueryMode>('search')
@@ -54,8 +54,7 @@ async function runQuery() {
       <p class="text-xs uppercase tracking-[0.2em] text-cyan-300">Cloudflare AI Search</p>
       <h1 class="text-2xl font-semibold text-white">AI Search Query Playground</h1>
       <p class="text-sm text-slate-400">
-        This page calls a server-side Nuxt API route that proxies Cloudflare AI Search so your API
-        token stays private.
+        AI Search is unavailable pending provider and approved corpus checks.
       </p>
     </header>
 
@@ -138,7 +137,7 @@ async function runQuery() {
           <button
             type="submit"
             class="rounded-md border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-100 hover:bg-cyan-500/20 disabled:opacity-60"
-            :disabled="pending"
+            disabled
           >
             {{ pending ? 'Running…' : 'Run Query' }}
           </button>

@@ -26,8 +26,8 @@ export const auditEntityTypes = [
   'GOVERNANCE_SETTING',
 ] as const
 
-export type AuditActionType = typeof auditActionTypes[number]
-export type AuditEntityType = typeof auditEntityTypes[number]
+export type AuditActionType = (typeof auditActionTypes)[number]
+export type AuditEntityType = (typeof auditEntityTypes)[number]
 
 export type AuditChangeContext = {
   before: Record<string, unknown> | null
@@ -75,8 +75,10 @@ export type AuditTrailRelatedEvent = Pick<
   'eventId' | 'timestamp' | 'actionType' | 'entityType' | 'entityLabel'
 >
 
-export type AuditTrailDetailItem = AuditTrailListItem & {
+type AuditTrailDetailItem = AuditTrailListItem & {
   changeContext: AuditChangeContext
+  stateDigests?: { before: string; after: string }
+  truncated: boolean
   relatedEvents: AuditTrailRelatedEvent[]
 }
 
@@ -84,6 +86,7 @@ export type AuditTrailListResponse = {
   ok: true
   items: AuditTrailListItem[]
   totalCount: number
+  totalCountCapped: boolean
   nextCursor: string | null
 }
 

@@ -1,8 +1,7 @@
+import { throwSourceError } from '../../../../utils/admin/sourceError'
 import { anyApi } from 'convex/server'
 
-import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
 import {
   evidenceSourceDetailSchema,
   toEvidenceAuditRecord,
@@ -11,10 +10,8 @@ import {
 } from '../../../../utils/admin/evidenceSourceSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
-  const { session } = adminSession
+  const adminSession = await requireAdminSession(event)
+  const { convex } = adminSession
   const sourceId = getRouterParam(event, 'sourceId')
 
   if (!sourceId) {
@@ -37,31 +34,15 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const convex = await createConvexAdminClientActingAs(event, {
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
-  })
-
-  const beforeDetail = await convex.query(
-    (anyApi as any).ragSources.getSource,
-    { sourceId },
-  ) as {
-    source: Record<string, unknown> | null
-  } | null
-
-  await convex.mutation(
-    (anyApi as any).ragSources.updateSourceConfig,
-    {
+  await convex
+    .mutation((anyApi as any).ragSources.updateSourceConfig, {
       sourceId,
       ...parsed.data,
-    },
-  )
+      description: parsed.data.description === null ? '' : parsed.data.description,
+    })
+    .catch(throwSourceError)
 
-  const detail = await convex.query(
-    (anyApi as any).ragSources.getSource,
-    { sourceId },
-  ) as {
+  const detail = (await convex.query((anyApi as any).ragSources.getSource, { sourceId })) as {
     source: Record<string, unknown> | null
     audit: Array<Record<string, unknown>>
     currentUserIsAdmin: boolean
@@ -74,20 +55,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await recordGovernanceAction(event, {
-    actionType: 'EVIDENCE_SOURCE_UPDATED',
-    entityType: 'EVIDENCE_SOURCE',
-    entityId: sourceId,
-    entityLabel: String((detail.source as { name?: unknown }).name || sourceId),
-    changeContext: {
-      before: beforeDetail?.source || null,
-      after: detail.source,
-    },
-  }, adminSession)
-
   return evidenceSourceDetailSchema.parse({
     currentUserIsAdmin: detail.currentUserIsAdmin,
     source: toEvidenceSourceRecord(detail.source as never),
-    audit: (detail.audit || []).map(item => toEvidenceAuditRecord(item as never)),
+    audit: (detail.audit || []).map((item) => toEvidenceAuditRecord(item as never)),
   })
 })

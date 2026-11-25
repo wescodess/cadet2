@@ -1,3 +1,4 @@
+import { withPathwayTransaction } from '../../../../../utils/pathways/pathwayTransaction'
 import { getRouterParam } from 'h3'
 
 import { recordGovernanceAction } from '../../../../../utils/audit/recordGovernanceAction'
@@ -10,9 +11,7 @@ import {
 import { pathwayRuleInputSchema } from '../../../../../utils/pathways/pathwayRuleSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const adminSession = await requireAdminSession(event)
 
   const pathwayId = getRouterParam(event, 'pathwayId')?.trim() || ''
   const ruleId = getRouterParam(event, 'ruleId')?.trim() || ''
@@ -52,33 +51,40 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const before = (await listPathwayRules(pathwayId)).find(item => item.id === ruleId) || null
-    const item = await updateRule(ruleId, parsed.data, pathwayId)
+    return await withPathwayTransaction(pathwayId, async (transaction) => {
+      const before =
+        (await listPathwayRules(pathwayId, transaction)).find((item) => item.id === ruleId) || null
+      const item = await updateRule(ruleId, parsed.data, pathwayId, transaction)
 
-    if (!item) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Pathway rule not found',
-      })
-    }
+      if (!item) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: 'Pathway rule not found',
+        })
+      }
 
-    await recordGovernanceAction(event, {
-      actionType: 'PATHWAY_RULE_UPDATED',
-      entityType: 'PATHWAY_RULE',
-      entityId: item.id,
-      entityLabel: `${pathwayId}:${item.unmetConditionId}`,
-      changeContext: {
-        before,
-        after: item,
-      },
-    }, adminSession)
+      await recordGovernanceAction(
+        event,
+        {
+          actionType: 'PATHWAY_RULE_UPDATED',
+          entityType: 'PATHWAY_RULE',
+          entityId: item.id,
+          entityLabel: `${pathwayId}:${item.unmetConditionId}`,
+          changeContext: {
+            before,
+            after: item,
+          },
+        },
+        adminSession,
+        transaction,
+      )
 
-    return {
-      ok: true,
-      item,
-    }
-  }
-  catch (error) {
+      return {
+        ok: true,
+        item,
+      }
+    })
+  } catch (error) {
     if (error instanceof PathwayRuleConflictError) {
       throw createError({
         statusCode: 409,

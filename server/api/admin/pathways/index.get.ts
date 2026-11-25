@@ -1,15 +1,11 @@
 import { getQuery } from 'h3'
 
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
-import {
-  listPathwayDefinitions,
-} from '../../../utils/pathways/pathwayDefinitionService'
+import { listPathwayDefinitions } from '../../../utils/pathways/pathwayDefinitionService'
 import { pathwayDefinitionListQuerySchema } from '../../../utils/pathways/pathwayDefinitionSchema'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  await requireAdminSession(event)
 
   const parsed = pathwayDefinitionListQuerySchema.safeParse(getQuery(event))
 

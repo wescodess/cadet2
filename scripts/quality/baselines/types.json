@@ -18,6 +18,6 @@
     "nuxt.config.ts|TS2322": 1,
     "server/api/admin/rag/sources/index.get.ts|TS7006": 1,
     "server/api/recommendations/testing/seed.post.ts|TS2345": 1,
-    "server/utils/convex-admin-client.ts|TS2339": 2
+    "server/utils/convex-admin-client.ts|TS2339": 1
   }
 }

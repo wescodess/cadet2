@@ -1,17 +1,13 @@
+import { withPathwayTransaction } from '../../../../utils/pathways/pathwayTransaction'
 import { getRouterParam } from 'h3'
 
 import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import {
-  getPathwayDefinition,
-  updatePathwayStatus,
-} from '../../../../utils/pathways/pathwayDefinitionService'
+import { updatePathwayStatus } from '../../../../utils/pathways/pathwayDefinitionService'
 import { updatePathwayStatusSchema } from '../../../../utils/pathways/pathwayDefinitionSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const adminSession = await requireAdminSession(event)
 
   const pathwayId = getRouterParam(event, 'pathwayId')?.trim() || ''
 
@@ -35,27 +31,33 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const before = await getPathwayDefinition(pathwayId)
-  const updated = await updatePathwayStatus(pathwayId, parsed.data.status)
+  return withPathwayTransaction(pathwayId, async (transaction, before) => {
+    const updated = await updatePathwayStatus(pathwayId, parsed.data.status, transaction)
 
-  if (!updated) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Pathway definition not found',
-    })
-  }
+    if (!updated) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Pathway definition not found',
+      })
+    }
 
-  await recordGovernanceAction(event, {
-    actionType: 'PATHWAY_STATUS_CHANGED',
-    entityType: 'PATHWAY',
-    entityId: updated.pathwayId,
-    entityLabel: updated.displayName,
-    changeContext: {
-      before,
-      after: updated,
-    },
-    reason: `Status changed to ${updated.status}`,
-  }, adminSession)
+    await recordGovernanceAction(
+      event,
+      {
+        actionType: 'PATHWAY_STATUS_CHANGED',
+        entityType: 'PATHWAY',
+        entityId: updated.pathwayId,
+        entityLabel: updated.displayName,
+        changeContext: {
+          before,
+          after: updated,
+        },
+        reason: `Status changed to ${updated.status}`,
+      },
+      adminSession,
+      transaction,
+    )
 
-  return updated
+    return updated
+  })
 })

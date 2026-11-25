@@ -1,7 +1,5 @@
 import { createHmac, createHash } from 'node:crypto'
-import { promises as fs } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { createError } from '#imports'
+import { createError } from 'h3'
 
 type PutRagObjectInput = {
   key: string
@@ -9,7 +7,7 @@ type PutRagObjectInput = {
   contentType: string
 }
 
-type RagStorageMode = 'cloudflare-r2' | 'local-fallback'
+type RagStorageMode = 'cloudflare-r2' | 'unavailable'
 
 type CloudflareR2Config = {
   accountId: string
@@ -31,24 +29,14 @@ function hmacSha256(key: Buffer | string, value: string) {
   return createHmac('sha256', key).update(value).digest()
 }
 
-function getLocalR2RootDir() {
-  const envOverride = toSafeString(process.env.NUXT_RAG_LOCAL_R2_DIR)
-  return envOverride || join(process.cwd(), '.data', 'rag-r2')
-}
-
-async function writeLocalR2Object(key: string, body: string) {
-  const fullPath = join(getLocalR2RootDir(), ...key.split('/'))
-  await fs.mkdir(dirname(fullPath), { recursive: true })
-  await fs.writeFile(fullPath, body, 'utf8')
-}
-
 function getCloudflareR2Config(): CloudflareR2Config | null {
   const accountId = toSafeString(process.env.NUXT_CLOUDFLARE_R2_ACCOUNT_ID)
   const bucket = toSafeString(process.env.NUXT_CLOUDFLARE_R2_BUCKET)
   const accessKeyId = toSafeString(process.env.NUXT_CLOUDFLARE_R2_ACCESS_KEY_ID)
   const secretAccessKey = toSafeString(process.env.NUXT_CLOUDFLARE_R2_SECRET_ACCESS_KEY)
-  const endpoint = toSafeString(process.env.NUXT_CLOUDFLARE_R2_ENDPOINT)
-    || (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : '')
+  const endpoint =
+    toSafeString(process.env.NUXT_CLOUDFLARE_R2_ENDPOINT) ||
+    (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : '')
 
   if (!accountId || !bucket || !accessKeyId || !secretAccessKey || !endpoint) {
     return null
@@ -66,7 +54,7 @@ function getCloudflareR2Config(): CloudflareR2Config | null {
 function encodeR2KeyPath(key: string) {
   return key
     .split('/')
-    .map(segment => encodeURIComponent(segment))
+    .map((segment) => encodeURIComponent(segment))
     .join('/')
 }
 
@@ -160,18 +148,13 @@ async function putObjectToCloudflareR2(input: PutRagObjectInput, config: Cloudfl
 }
 
 export function getRagStorageMode(): RagStorageMode {
-  return getCloudflareR2Config() ? 'cloudflare-r2' : 'local-fallback'
+  return getCloudflareR2Config() ? 'cloudflare-r2' : 'unavailable'
 }
 
 export async function putRagObject(input: PutRagObjectInput) {
   const r2 = getCloudflareR2Config()
-  if (!r2) {
-    await writeLocalR2Object(input.key, input.body)
-    return {
-      mode: 'local-fallback' as const,
-      key: input.key,
-    }
-  }
+  if (!r2)
+    throw createError({ statusCode: 503, statusMessage: 'Approved RAG storage is unavailable' })
 
   await putObjectToCloudflareR2(input, r2)
   return {

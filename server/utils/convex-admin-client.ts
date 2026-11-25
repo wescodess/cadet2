@@ -25,8 +25,7 @@ async function readLocalConvexAdminKey() {
     return typeof parsed.adminKey === 'string' && parsed.adminKey.trim()
       ? parsed.adminKey.trim()
       : null
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -59,25 +58,6 @@ export async function createConvexAdminClient() {
   return client
 }
 
-export async function createConvexAdminClientActingAs(event: H3Event, user: {
-  id: string
-  email?: string | null
-  name?: string | null
-}) {
-  const client = new ConvexHttpClient(getConvexUrl(), { logger: false })
-  const adminKey = await getConvexAdminKey()
-  const issuer = getRequestURL(event).origin
-
-  client.setAdminAuth(adminKey, {
-    subject: user.id,
-    issuer,
-    email: user.email ?? undefined,
-    name: user.name ?? undefined,
-  })
-
-  return client
-}
-
 export async function getConvexTokenForEvent(event: H3Event) {
   const origin = getRequestURL(event).origin
   const cookie = getHeader(event, 'cookie')
@@ -97,7 +77,7 @@ export async function getConvexTokenForEvent(event: H3Event) {
     })
   }
 
-  const body = await response.json() as { token?: string }
+  const body = (await response.json()) as { token?: string }
   if (!body.token) {
     throw createError({
       statusCode: 401,

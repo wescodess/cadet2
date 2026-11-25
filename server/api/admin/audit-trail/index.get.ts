@@ -31,9 +31,7 @@ function toOptionalNumber(value: unknown) {
 }
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const { convex } = await requireAdminSession(event)
 
   const query = getQuery(event)
   const actionType = isAuditActionType(query.actionType) ? query.actionType : undefined
@@ -43,6 +41,7 @@ export default defineEventHandler(async (event) => {
     actionType,
     entityType,
     actorId: toOptionalString(query.actorId),
+    entityId: toOptionalString(query.entityId),
     search: toOptionalString(query.search),
     dateFrom: toOptionalString(query.dateFrom),
     dateTo: toOptionalString(query.dateTo),
@@ -50,5 +49,5 @@ export default defineEventHandler(async (event) => {
     pageSize: toOptionalNumber(query.pageSize),
   }
 
-  return await listAuditTrailEvents(filters)
+  return await listAuditTrailEvents(convex, filters)
 })

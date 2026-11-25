@@ -1,0 +1,434 @@
+{
+  "scope": "Issue 74 admin, RAG, AI Search and ingestion. Legacy entries owned by 28 and 75 are inventoried, not certified.",
+  "convex": {
+    "auditLog:recordAuditEvent": {
+      "kind": "mutation",
+      "owner": "28"
+    },
+    "auditLog:listAuditEvents": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "auditLog:getAuditEvent": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "auditLog:getAuditSummary": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "ragIngestionInternal:runManualBatchAsNuxtAdmin": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:runScheduledBatch": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:prepareManualBatchAsNuxtAdmin": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:prepareScheduledBatch": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:startBatchExecutionFromNuxt": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:getBatchExecutionPlanFromNuxt": {
+      "kind": "internalQuery",
+      "owner": "74"
+    },
+    "ragIngestionInternal:listSourceItemsForSourceFromNuxt": {
+      "kind": "internalQuery",
+      "owner": "74"
+    },
+    "ragIngestionInternal:markSourceRunStartedFromNuxt": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:completeSourceRunFromNuxt": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:finalizeBatchExecutionFromNuxt": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:createOrReuseAiSearchSyncJobForBatchFromNuxt": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:markAiSearchSyncJobSubmittedFromNuxt": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:updateAiSearchSyncJobFromNuxt": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragIngestionInternal:listBatchesAsNuxtAdmin": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragIngestionInternal:getBatchDetailAsNuxtAdmin": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragIngestionInternal:queueSourceRunRetryScaffold": {
+      "kind": "internalMutation",
+      "owner": "74"
+    },
+    "ragSourceAudit:listApprovalEvents": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSourceAudit:listDeletionEvents": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSources:getAdminStatus": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSources:listSources": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSources:getSource": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSources:createSourceSubmission": {
+      "kind": "mutation",
+      "owner": "74"
+    },
+    "ragSources:updateSourceConfig": {
+      "kind": "mutation",
+      "owner": "74"
+    },
+    "ragSources:approveSource": {
+      "kind": "mutation",
+      "owner": "74"
+    },
+    "ragSources:rejectSource": {
+      "kind": "mutation",
+      "owner": "74"
+    },
+    "ragSources:pauseSource": {
+      "kind": "mutation",
+      "owner": "74"
+    },
+    "ragSources:resumeSource": {
+      "kind": "mutation",
+      "owner": "74"
+    },
+    "ragSources:removeSource": {
+      "kind": "mutation",
+      "owner": "74"
+    },
+    "recommendationRuns:createQueuedRun": {
+      "kind": "mutation",
+      "owner": "28"
+    },
+    "recommendationRuns:listForUser": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "recommendationRuns:readStatusForUser": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "recommendationRuns:readPathwayEvaluationForUser": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "recommendationRuns:writePathwayEvaluationForUser": {
+      "kind": "mutation",
+      "owner": "28"
+    },
+    "recommendationRuns:readRankedRecommendationsForUser": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "recommendationRuns:writeRankedRecommendationsForUser": {
+      "kind": "mutation",
+      "owner": "28"
+    },
+    "recommendationRuns:startProcessingForUser": {
+      "kind": "mutation",
+      "owner": "28"
+    },
+    "recommendationRuns:setTerminalStatusForUser": {
+      "kind": "mutation",
+      "owner": "28"
+    },
+    "recommendationRuns:seedRunForUser": {
+      "kind": "mutation",
+      "owner": "28"
+    },
+    "recommendationRuns:resetRunsForUser": {
+      "kind": "mutation",
+      "owner": "28"
+    },
+    "recommendationRuns:listRunsForUserTesting": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "recommendationRuns:listForAdmin": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "recommendationRuns:readRankedRecommendationsForAdmin": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "tasks:list": {
+      "kind": "query",
+      "owner": "28"
+    },
+    "ragSourceAudit:listEvents": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSourceAudit:getEvent": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSourceAudit:getSummary": {
+      "kind": "query",
+      "owner": "74"
+    },
+    "ragSourceAudit:backfillEvents": {
+      "kind": "internalMutation",
+      "owner": "74"
+    }
+  },
+  "http": {
+    "server/api/admin/access.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/audit-trail/[eventId].get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/audit-trail/index.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/audit-trail/summary.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/[pathwayId]/rules/[ruleId].delete.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/[pathwayId]/rules/[ruleId].patch.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/[pathwayId]/rules.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/[pathwayId]/rules.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/[pathwayId]/rules.put.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/[pathwayId]/status.patch.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/[pathwayId].get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/[pathwayId].patch.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/index.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/pathways/index.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/ingestion/batches/[batchId].get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/ingestion/batches/index.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/ingestion/run.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/phase0-readiness.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/[sourceId]/approve.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/[sourceId]/pause.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/[sourceId]/reject.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/[sourceId]/resume.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/[sourceId].delete.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/[sourceId].get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/[sourceId].patch.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/admin-status.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/index.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/rag/sources/index.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/recommendation-reviews/[runId]/citations/[citationId]/flag.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/recommendation-reviews/[runId]/citations.get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/recommendation-reviews/[runId]/dismiss.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/recommendation-reviews/[runId]/flag.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/recommendation-reviews/[runId]/resolve.post.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/recommendation-reviews/[runId].get.ts": {
+      "owner": "74"
+    },
+    "server/api/admin/recommendation-reviews/index.get.ts": {
+      "owner": "74"
+    },
+    "server/api/ai-search/query.post.ts": {
+      "owner": "74"
+    },
+    "server/api/intake/draft.get.ts": {
+      "owner": "28"
+    },
+    "server/api/intake/draft.post.ts": {
+      "owner": "28"
+    },
+    "server/api/intake/submit.post.ts": {
+      "owner": "28"
+    },
+    "server/api/internal/scheduler/daily-ingestion.post.ts": {
+      "owner": "74"
+    },
+    "server/api/recommendations/runs/[runId]/pathways.get.ts": {
+      "owner": "28"
+    },
+    "server/api/recommendations/runs/[runId]/refresh.post.ts": {
+      "owner": "28"
+    },
+    "server/api/recommendations/runs/[runId]/results.get.ts": {
+      "owner": "28"
+    },
+    "server/api/recommendations/runs/[runId]/start.post.ts": {
+      "owner": "28"
+    },
+    "server/api/recommendations/runs/[runId]/status.get.ts": {
+      "owner": "28"
+    },
+    "server/api/recommendations/testing/reset.post.ts": {
+      "owner": "75"
+    },
+    "server/api/recommendations/testing/seed.post.ts": {
+      "owner": "75"
+    },
+    "server/api/workspace/me.get.ts": {
+      "owner": "28"
+    },
+    "server/api/workspace/recommendation-runs.get.ts": {
+      "owner": "28"
+    },
+    "server/api/workspace/runs/[runId].get.ts": {
+      "owner": "28"
+    },
+    "server/api/workspace/runs/compare.get.ts": {
+      "owner": "28"
+    },
+    "server/api/workspace/runs/index.get.ts": {
+      "owner": "28"
+    },
+    "server/api/workspace/summary.get.ts": {
+      "owner": "28"
+    }
+  },
+  "builtHttp": [
+    "* /**",
+    "* /__nuxt_error",
+    "* /__nuxt_island/**",
+    "* /api/auth/**",
+    "DELETE /api/admin/pathways/:pathwayId/rules/:ruleId",
+    "DELETE /api/admin/rag/sources/:sourceId",
+    "GET /api/admin/access",
+    "GET /api/admin/audit-trail",
+    "GET /api/admin/audit-trail/:eventId",
+    "GET /api/admin/audit-trail/summary",
+    "GET /api/admin/pathways",
+    "GET /api/admin/pathways/:pathwayId",
+    "GET /api/admin/pathways/:pathwayId/rules",
+    "GET /api/admin/rag/ingestion/batches",
+    "GET /api/admin/rag/ingestion/batches/:batchId",
+    "GET /api/admin/rag/phase0-readiness",
+    "GET /api/admin/rag/sources",
+    "GET /api/admin/rag/sources/:sourceId",
+    "GET /api/admin/rag/sources/admin-status",
+    "GET /api/admin/recommendation-reviews",
+    "GET /api/admin/recommendation-reviews/:runId",
+    "GET /api/admin/recommendation-reviews/:runId/citations",
+    "GET /api/intake/draft",
+    "GET /api/recommendations/runs/:runId/pathways",
+    "GET /api/recommendations/runs/:runId/results",
+    "GET /api/recommendations/runs/:runId/status",
+    "GET /api/workspace/me",
+    "GET /api/workspace/recommendation-runs",
+    "GET /api/workspace/runs",
+    "GET /api/workspace/runs/:runId",
+    "GET /api/workspace/runs/compare",
+    "GET /api/workspace/summary",
+    "PATCH /api/admin/pathways/:pathwayId",
+    "PATCH /api/admin/pathways/:pathwayId/rules/:ruleId",
+    "PATCH /api/admin/pathways/:pathwayId/status",
+    "PATCH /api/admin/rag/sources/:sourceId",
+    "POST /api/admin/pathways",
+    "POST /api/admin/pathways/:pathwayId/rules",
+    "POST /api/admin/rag/ingestion/run",
+    "POST /api/admin/rag/sources",
+    "POST /api/admin/rag/sources/:sourceId/approve",
+    "POST /api/admin/rag/sources/:sourceId/pause",
+    "POST /api/admin/rag/sources/:sourceId/reject",
+    "POST /api/admin/rag/sources/:sourceId/resume",
+    "POST /api/admin/recommendation-reviews/:runId/citations/:citationId/flag",
+    "POST /api/admin/recommendation-reviews/:runId/dismiss",
+    "POST /api/admin/recommendation-reviews/:runId/flag",
+    "POST /api/admin/recommendation-reviews/:runId/resolve",
+    "POST /api/ai-search/query",
+    "POST /api/intake/draft",
+    "POST /api/intake/submit",
+    "POST /api/internal/scheduler/daily-ingestion",
+    "POST /api/recommendations/runs/:runId/refresh",
+    "POST /api/recommendations/runs/:runId/start",
+    "POST /api/recommendations/testing/reset",
+    "POST /api/recommendations/testing/seed",
+    "PUT /api/admin/pathways/:pathwayId/rules"
+  ],
+  "removed": [
+    "ragSources:bootstrapCurrentUserAsAdmin",
+    "ragSourcesInternal:syncAdminFromNuxtAllowlist",
+    "server/api/admin/rag/convex-admin/sync-current-user.post.ts"
+  ]
+}

@@ -95,10 +95,12 @@ export async function createStack() {
     cleanup.push(() => stop(backend))
     await ready(`${backendOrigin}/version`, backend)
     await cp(join(root, 'convex'), join(directory, 'convex'), { recursive: true })
+    await cp(join(root, 'shared'), join(directory, 'shared'), { recursive: true })
     await symlink(join(root, 'node_modules'), join(directory, 'node_modules'), 'dir')
     await cp(join(root, 'package.json'), join(directory, 'package.json'))
     const convex = async (...args) =>
       command(process.execPath, [cli, ...args], { cwd: directory, env })
+    await convex('env', 'set', 'CADET_AUTH_ISSUER', origin)
     await convex(
       'dev',
       '--once',
@@ -165,7 +167,17 @@ export async function createStack() {
       await writeFile(file, JSON.stringify(rows))
       await convex('import', '--table', table, '--replace', '--yes', file)
     }
-    await importTable('rag_admins', [{ userId: admin.id, createdAt: 1 }])
+    await importTable('rag_admins', [
+      {
+        userId: admin.id,
+        createdAt: Date.now(),
+        subjectBinding: {
+          issuer: origin,
+          reviewedAt: Date.now(),
+          operatorEvidence: 'isolated legacy-access operator subject review',
+        },
+      },
+    ])
     const clientFor = (user) => {
       const client = new ConvexHttpClient(backendOrigin, { logger: false })
       if (user.token) client.setAuth(user.token)
@@ -209,14 +221,17 @@ export async function createStack() {
       },
     ])
     for (const user of users) {
+      if (user.role !== 'admin') {
+        await assert.rejects(
+          clientFor(user).query('ragSources:getAdminStatus', {}),
+          /Admin access required/,
+        )
+        continue
+      }
       const status = await clientFor(user).query('ragSources:getAdminStatus', {})
       assert.equal(status.signedIn, true, 'backend admits the genuine JWT')
       assert.equal(status.currentUser.userId, user.id, 'backend recognizes each real subject')
-      assert.equal(
-        status.currentUserIsAdmin,
-        user.role === 'admin',
-        'only the fixture grantee is admin',
-      )
+      assert.equal(status.currentUserIsAdmin, true, 'the reviewed fixture grantee is admin')
     }
     const observations = () => readFile(observationsFile, 'utf8')
     return {

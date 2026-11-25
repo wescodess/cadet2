@@ -1,0 +1,45 @@
+{
+  "baselineHead": "8449549226207527e7ff8bdc1c3734239c929699",
+  "stackedParent": "d632c39d599ea8179c44c582bb1278e27a64f004",
+  "sourceSha256": "723c21f5ad9c79a2f9e84417109a91c26653b632daf56fcb436097a5fd6e8cdf",
+  "freshFrozenInstallExit": 0,
+  "verifyExit": 0,
+  "standaloneSecurityAdminExit": 0,
+  "vitest": {
+    "files": 24,
+    "passed": 125
+  },
+  "red": {
+    "exitCode": 1,
+    "signal": null,
+    "error": null,
+    "counts": {
+      "planned": 42,
+      "tests": 42,
+      "suites": 0,
+      "passed": 29,
+      "failed": 13,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  },
+  "green": {
+    "exitCode": 0,
+    "signal": null,
+    "error": null,
+    "counts": {
+      "planned": 58,
+      "tests": 58,
+      "suites": 0,
+      "passed": 58,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  },
+  "baselinesUnchanged": true,
+  "lockfileSha256": "246fc4cbf801e5f1574a9f789a48b53487bb34298961fdb0771817997a4d0687",
+  "localConfig": "Ignored clone-local .npmrc keeps pnpm store and TMPDIR inside the clone."
+}

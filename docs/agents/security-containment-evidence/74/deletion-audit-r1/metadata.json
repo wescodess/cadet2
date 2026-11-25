@@ -1,0 +1,49 @@
+{
+  "beforeHead": "afac5d3f50c7e4d2b2c5782678395958294d4db6",
+  "localCandidate": "verified working tree; pushed commit and exact-head CI linked in PR body",
+  "node": "v24.20.0",
+  "pnpm": "9.12.3",
+  "cleanFrozenInstall": {
+    "command": "pnpm install --frozen-lockfile",
+    "exitCode": 0,
+    "state": "fresh isolated clone, no prior node_modules"
+  },
+  "red": {
+    "command": "pnpm security:admin",
+    "exitCode": 1,
+    "passed": 23,
+    "failed": 2,
+    "skipped": 0
+  },
+  "green": {
+    "command": "BETTER_AUTH_SECRET=$(openssl rand -hex 32) NUXT_PUBLIC_SITE_URL=http://127.0.0.1:3000 CONVEX_SITE_URL=http://127.0.0.1:3000 pnpm verify",
+    "exitCode": 0,
+    "verificationRows": 9,
+    "unitComponentTests": 125,
+    "adminBoundaryTests": 25,
+    "boundarySkips": 0
+  },
+  "changedSourceDigests": {
+    "convex/lib/ragAdmin.ts": "affc99ea5a72e1095b4a4ed9779664cc35b33659f2fafda05b2d5d872af539c8",
+    "convex/ragSourceAudit.ts": "22be90068ba7a0eb770d55e76b319472401e433b9b34ed240bb01ff1f1e7ec63",
+    "convex/ragSources.ts": "4c9c4aa7ddec76a09e68cf9cd9185439970e5c5eeba52da9c66692b83b9d0e2c",
+    "convex/schema.ts": "5ea1f5de4721c82197f900e35eb3141f6379dea1d34a0cc6d86c30479e4bdd47",
+    "scripts/security/admin-surfaces.json": "1903569034f6b89cd0867e439f6c32102a35b900a02fd01cc8621c915533b465",
+    "scripts/security/boundary-results.mjs": "bdf508e4ee4e8322859340feb0f3027858eec9ae58709a0aaeebf3689a811dc7",
+    "scripts/security/run-boundaries.mjs": "17e8029e2b720874ea85629a2e9d34c6fc42b917c3ab7fda486f9375ea136ada",
+    "server/api/admin/audit-trail/[eventId].get.ts": "e15ba9673d8c53fa808d15a011cc5b7f2be00f924b83ba2d18162bc118505919",
+    "server/api/admin/audit-trail/index.get.ts": "9c92d4089500e76d69d5eab1f17ec4f90539b4b1bd44a2e65789b0adb1cc99c8",
+    "server/api/admin/audit-trail/summary.get.ts": "5f8577cc6e07c499f70a6b42843e9f1c0b03e16e9b7456b92f0b99185f8ebb19",
+    "server/api/admin/rag/sources/[sourceId].delete.ts": "be436acb4b5363b5b12bbc782d23efba44c15a54221a813cbc50e5c5f1dc4a5a",
+    "server/utils/audit/auditLogStore.ts": "c66a5d098156367b19a38fd8f4cd3aa4128c8c4399bb6db048ee1919681054a9",
+    "server/utils/audit/auditTrailService.ts": "e288ce3313d0182fb911bf6c44039497824aefe1c5a180eefabd6c9f549808ae",
+    "server/utils/audit/sourceDeletionEvents.ts": "5707ce2dc139aa028c463088de80c3b5e2b61a615aa10613318759843658a91a",
+    "tests/security/admin-rag.test.mjs": "c3f7246ae49e1f320f2ff88db69c454d8dc28988d09bd124bdb1f1ca7d7432c6"
+  },
+  "reason": "Existing HTTP source DELETE handler collects no deletion reason.",
+  "unrun": ["deployed migrations", "staging/provider/browser QA", "independent review"],
+  "baselineManifestsUnchanged": {
+    "count": 7,
+    "proof": "No baseline file differs from the before-fix commit; before/after checksum vectors retained externally."
+  }
+}

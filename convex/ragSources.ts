@@ -1,19 +1,17 @@
-import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
-
-type IdentityLike = {
-  subject?: string
-  email?: string
-  tokenIdentifier?: string
-  name?: string
-}
+import { ConvexError, v } from 'convex/values'
+import { boundedChange, validateSourceSizes } from '../shared/utils/governanceAudit'
+import { sourceActionType, sourcePayloadDigest, writeSourceEvent } from './lib/sourceAudit'
+import { mutation, query, type MutationCtx } from './_generated/server'
+import type { Doc, Id } from './_generated/dataModel'
+import { isReviewedRagAdminGrant, requireRagAdmin } from './lib/ragAdmin'
+import { hasControlCharacters } from './lib/sourceText'
 
 function toSafeString(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
 function uniqueStrings(values: string[]) {
-  return [...new Set(values.map(v => v.trim()).filter(Boolean))]
+  return [...new Set(values.map((v) => v.trim()).filter(Boolean))]
 }
 
 function normalizeSchedule(schedule: {
@@ -31,80 +29,50 @@ function normalizeSchedule(schedule: {
   return { frequency }
 }
 
-function computeNextRunAt(now: number, schedule: { frequency: 'daily' | 'manual' | 'interval', intervalHours?: number }) {
+function computeNextRunAt(
+  now: number,
+  schedule: { frequency: 'daily' | 'manual' | 'interval'; intervalHours?: number },
+) {
   if (schedule.frequency === 'manual') {
     return undefined
   }
 
   if (schedule.frequency === 'interval') {
-    return now + ((schedule.intervalHours ?? 24) * 60 * 60 * 1000)
+    return now + (schedule.intervalHours ?? 24) * 60 * 60 * 1000
   }
 
-  return now + (24 * 60 * 60 * 1000)
+  return now + 24 * 60 * 60 * 1000
 }
 
-async function requireIdentity(ctx: { auth: { getUserIdentity: () => Promise<unknown> } }) {
-  const identity = await ctx.auth.getUserIdentity() as IdentityLike | null
-  const userId = identity?.subject || identity?.tokenIdentifier || ''
-
-  if (!userId) {
-    throw new Error('Authentication required')
-  }
-
-  return {
-    userId,
-    email: toSafeString(identity?.email).toLowerCase() || undefined,
-    raw: identity,
-  }
-}
-
-async function isAdmin(ctx: { db: any }, userId: string, email?: string) {
-  const byUserId = await ctx.db
-    .query('rag_admins')
-    .withIndex('by_userId', (q: any) => q.eq('userId', userId))
-    .first()
-
-  if (byUserId) {
-    return true
-  }
-
-  if (email) {
-    const byEmail = await ctx.db
-      .query('rag_admins')
-      .withIndex('by_email', (q: any) => q.eq('email', email))
-      .first()
-
-    if (byEmail) {
-      return true
-    }
-  }
-
-  return false
-}
-
-async function requireAdmin(ctx: { db: any, auth: { getUserIdentity: () => Promise<unknown> } }) {
-  const identity = await requireIdentity(ctx)
-  const allowed = await isAdmin(ctx, identity.userId, identity.email)
-
-  if (!allowed) {
-    throw new Error('Admin access required')
-  }
-
-  return identity
-}
-
-async function writeAudit(ctx: { db: any }, input: {
-  sourceId: any
-  actorUserId: string
-  actorEmail?: string
-  action: 'submit' | 'approve' | 'reject' | 'pause' | 'resume' | 'edit'
-  reason?: string
-  note?: string
-  diffSummary?: string
-}) {
-  await ctx.db.insert('approval_audit_log', {
+async function writeAudit(
+  ctx: MutationCtx,
+  input: {
+    sourceId: Id<'sources'>
+    actorUserId: string
+    actorEmail?: string
+    action: 'submit' | 'approve' | 'reject' | 'pause' | 'resume' | 'edit'
+    reason?: string
+    note?: string
+    diffSummary?: string
+    governance: { before: Doc<'sources'> | null; after: Doc<'sources'> | null }
+  },
+) {
+  const bounded = await boundedChange(input.governance.before, input.governance.after)
+  const auditId = await ctx.db.insert('approval_audit_log', {
     ...input,
+    projected: true,
+    governance: bounded.changeContext,
     timestamp: Date.now(),
+  })
+  await writeSourceEvent(ctx, {
+    eventId: `rag-approval:${auditId}`,
+    actorId: input.actorUserId,
+    actorEmail: input.actorEmail,
+    actionType: sourceActionType(input.action),
+    entityId: input.sourceId,
+    before: input.governance.before,
+    after: input.governance.after,
+    reason: input.reason ?? input.note,
   })
 }
 
@@ -146,7 +114,7 @@ function sanitizeWebsiteConfig(config: {
 }) {
   return {
     seedUrls: uniqueStrings(config.seedUrls),
-    allowedDomains: uniqueStrings(config.allowedDomains.map(value => value.toLowerCase())),
+    allowedDomains: uniqueStrings(config.allowedDomains.map((value) => value.toLowerCase())),
     includePatterns: uniqueStrings(config.includePatterns),
     excludePatterns: uniqueStrings(config.excludePatterns),
     maxDepth: Math.max(0, Math.min(10, Math.floor(config.maxDepth))),
@@ -157,72 +125,46 @@ function sanitizeWebsiteConfig(config: {
   }
 }
 
-function sanitizeYoutubeConfig(config: {
-  channelId: string
-  channelUrl: string
-  maxVideosPerRun: number
-  includeShorts: boolean
-  preferredLanguage?: string
-}) {
-  return {
-    channelId: toSafeString(config.channelId),
-    channelUrl: toSafeString(config.channelUrl),
-    maxVideosPerRun: Math.max(1, Math.min(200, Math.floor(config.maxVideosPerRun))),
-    includeShorts: Boolean(config.includeShorts),
-    preferredLanguage: toSafeString(config.preferredLanguage) || undefined,
-  }
-}
-
 export const getAdminStatus = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity() as IdentityLike | null
-    const userId = identity?.subject || identity?.tokenIdentifier || ''
-    const email = toSafeString(identity?.email).toLowerCase() || undefined
-
-    const adminCount = (await ctx.db.query('rag_admins').collect()).length
-    const signedIn = Boolean(userId)
-    const currentUserIsAdmin = signedIn ? await isAdmin(ctx, userId, email) : false
-
+    const identity = await requireRagAdmin(ctx)
+    const userId = identity.userId
+    const email = identity.email
+    const adminCount = (await ctx.db.query('rag_admins').collect()).filter((grant) =>
+      isReviewedRagAdminGrant(grant, identity.issuer),
+    ).length
     return {
-      signedIn,
+      signedIn: true,
       adminCount,
-      currentUserIsAdmin,
-      currentUser: signedIn ? {
-        userId,
-        email: email ?? null,
-      } : null,
+      currentUserIsAdmin: true,
+      currentUser: { userId, email: email ?? null },
       bootstrapAvailable: false,
     }
   },
 })
 
-export const bootstrapCurrentUserAsAdmin = mutation({
-  args: {},
-  handler: async () => {
-    throw new Error('Public bootstrap is disabled. Use the Nuxt admin sync endpoint.')
-  },
-})
-
 export const listSources = query({
   args: {
-    status: v.optional(v.union(
-      v.literal('pending_approval'),
-      v.literal('approved'),
-      v.literal('rejected'),
-      v.literal('paused'),
-    )),
+    status: v.optional(
+      v.union(
+        v.literal('pending_approval'),
+        v.literal('approved'),
+        v.literal('rejected'),
+        v.literal('paused'),
+      ),
+    ),
     type: v.optional(v.union(v.literal('website'), v.literal('youtube_channel'))),
     tenantId: v.optional(v.string()),
     includeAllForAdmin: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const identity = await requireIdentity(ctx)
-    const currentUserIsAdmin = await isAdmin(ctx, identity.userId, identity.email)
+    const identity = await requireRagAdmin(ctx)
+    const currentUserIsAdmin = true
 
     let rows = await ctx.db.query('sources').collect()
 
-    if (!currentUserIsAdmin || !args.includeAllForAdmin) {
+    if (!args.includeAllForAdmin) {
       rows = rows.filter((row: any) => row.createdByUserId === identity.userId)
     }
 
@@ -252,16 +194,12 @@ export const getSource = query({
     sourceId: v.id('sources'),
   },
   handler: async (ctx, args) => {
-    const identity = await requireIdentity(ctx)
-    const currentUserIsAdmin = await isAdmin(ctx, identity.userId, identity.email)
+    await requireRagAdmin(ctx)
+    const currentUserIsAdmin = true
     const source = await ctx.db.get(args.sourceId)
 
     if (!source) {
       return null
-    }
-
-    if (!currentUserIsAdmin && source.createdByUserId !== identity.userId) {
-      throw new Error('Not authorized to view this source')
     }
 
     const audit = await ctx.db
@@ -281,6 +219,7 @@ export const getSource = query({
 
 export const createSourceSubmission = mutation({
   args: {
+    idempotencyKey: v.string(),
     type: v.union(v.literal('website'), v.literal('youtube_channel')),
     name: v.string(),
     description: v.optional(v.string()),
@@ -294,7 +233,30 @@ export const createSourceSubmission = mutation({
     enabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const identity = await requireIdentity(ctx)
+    const identity = await requireRagAdmin(ctx)
+    if (hasControlCharacters([args.name, args.websiteConfig, args.youtubeConfig])) {
+      throw new Error('Source names and config must not contain control characters')
+    }
+    const { idempotencyKey, ...sourceInput } = args
+    validateSourceSizes(sourceInput)
+    if (!/^[A-Za-z0-9:_-]{8,128}$/.test(idempotencyKey))
+      throw new ConvexError({
+        code: 'INVALID_INPUT',
+        message: 'A valid idempotency key is required',
+      })
+    const payloadDigest = await sourcePayloadDigest(args)
+    const receipt = await ctx.db
+      .query('rag_create_receipts')
+      .withIndex('by_actor_key', (q) => q.eq('actorId', identity.userId).eq('key', idempotencyKey))
+      .unique()
+    if (receipt) {
+      if (receipt.payloadDigest !== payloadDigest)
+        throw new ConvexError({
+          code: 'IDEMPOTENCY_CONFLICT',
+          message: 'Idempotency key was already used with a different payload',
+        })
+      return receipt.receipt
+    }
     const now = Date.now()
     const name = toSafeString(args.name)
 
@@ -304,39 +266,23 @@ export const createSourceSubmission = mutation({
 
     const schedule = normalizeSchedule(args.schedule)
     const type = args.type
+    if (type === 'youtube_channel')
+      throw new ConvexError({ code: 'YOUTUBE_FROZEN', message: 'YouTube ingestion is frozen' })
 
-    let crawlConfig: Record<string, unknown>
-    if (type === 'website') {
-      if (!args.websiteConfig) {
-        throw new Error('websiteConfig is required for website sources')
-      }
-      crawlConfig = sanitizeWebsiteConfig(args.websiteConfig)
-      if ((crawlConfig.seedUrls as string[]).length === 0) {
-        throw new Error('At least one seed URL is required')
-      }
-      if ((crawlConfig.allowedDomains as string[]).length === 0) {
-        throw new Error('At least one allowed domain is required')
-      }
-    }
-    else {
-      if (!args.youtubeConfig) {
-        throw new Error('youtubeConfig is required for youtube_channel sources')
-      }
-      crawlConfig = sanitizeYoutubeConfig(args.youtubeConfig)
-      if (!toSafeString(crawlConfig.channelId)) {
-        throw new Error('YouTube channel ID is required')
-      }
-      if (!toSafeString(crawlConfig.channelUrl)) {
-        throw new Error('YouTube channel URL is required')
-      }
-    }
+    if (!args.websiteConfig) throw new Error('websiteConfig is required for website sources')
+    const crawlConfig = sanitizeWebsiteConfig(args.websiteConfig)
+    if (crawlConfig.seedUrls.length === 0) throw new Error('At least one seed URL is required')
+    if (crawlConfig.allowedDomains.length === 0)
+      throw new Error('At least one allowed domain is required')
 
     const sourceId = await ctx.db.insert('sources', {
       type,
       status: 'pending_approval',
       name,
       description: toSafeString(args.description) || undefined,
-      trustScore: Number.isFinite(args.trustScore) ? Math.max(0, Math.min(100, Math.round(args.trustScore!))) : undefined,
+      trustScore: Number.isFinite(args.trustScore)
+        ? Math.max(0, Math.min(100, Math.round(args.trustScore!)))
+        : undefined,
       tenantId: toSafeString(args.tenantId) || 'default',
       tags: uniqueStrings(args.tags ?? []),
       linkedPathwayIds: uniqueStrings(args.linkedPathwayIds ?? []),
@@ -354,14 +300,18 @@ export const createSourceSubmission = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'submit',
+      governance: { before: null, after: await ctx.db.get(sourceId) },
       note: 'Initial source submission',
     })
 
-    return {
-      ok: true,
-      sourceId,
-      status: 'pending_approval' as const,
-    }
+    const result = { ok: true as const, sourceId, status: 'pending_approval' as const }
+    await ctx.db.insert('rag_create_receipts', {
+      actorId: identity.userId,
+      key: idempotencyKey,
+      payloadDigest,
+      receipt: result,
+    })
+    return result
   },
 })
 
@@ -380,11 +330,23 @@ export const updateSourceConfig = mutation({
     youtubeConfig: v.optional(youtubeConfigValidator),
   },
   handler: async (ctx, args) => {
-    const identity = await requireAdmin(ctx)
-    const source = await ctx.db.get(args.sourceId)
+    const identity = await requireRagAdmin(ctx)
+    if (hasControlCharacters([args.name, args.websiteConfig, args.youtubeConfig])) {
+      throw new Error('Source names and config must not contain control characters')
+    }
+    const { sourceId, ...sourceInput } = args
+    validateSourceSizes(sourceInput)
+    const source = await ctx.db.get(sourceId)
 
     if (!source) {
       throw new Error('Source not found')
+    }
+
+    if (
+      source.type === 'youtube_channel' &&
+      (args.enabled === true || args.schedule || args.youtubeConfig)
+    ) {
+      throw new ConvexError({ code: 'YOUTUBE_FROZEN', message: 'YouTube ingestion is frozen' })
     }
 
     const patch: Record<string, unknown> = {
@@ -439,17 +401,13 @@ export const updateSourceConfig = mutation({
       diffParts.push('websiteConfig')
     }
 
-    if (source.type === 'youtube_channel' && args.youtubeConfig) {
-      patch.crawlConfig = sanitizeYoutubeConfig(args.youtubeConfig)
-      diffParts.push('youtubeConfig')
-    }
-
     await ctx.db.patch(args.sourceId, patch)
     await writeAudit(ctx, {
       sourceId: args.sourceId,
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'edit',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       diffSummary: diffParts.join(', ') || 'none',
     })
 
@@ -465,18 +423,26 @@ export const approveSource = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await requireAdmin(ctx)
+    const identity = await requireRagAdmin(ctx)
+    validateSourceSizes({ schedule: args.schedule })
+    if ((args.note?.length ?? 0) > 500)
+      throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)
 
     if (!source) {
       throw new Error('Source not found')
     }
 
+    if (source.type === 'youtube_channel')
+      throw new ConvexError({ code: 'YOUTUBE_FROZEN', message: 'YouTube ingestion is frozen' })
+
     const now = Date.now()
-    const schedule = args.schedule ? normalizeSchedule(args.schedule) : (source.schedule as {
-      frequency: 'daily' | 'manual' | 'interval'
-      intervalHours?: number
-    })
+    const schedule = args.schedule
+      ? normalizeSchedule(args.schedule)
+      : (source.schedule as {
+          frequency: 'daily' | 'manual' | 'interval'
+          intervalHours?: number
+        })
 
     await ctx.db.patch(args.sourceId, {
       status: 'approved',
@@ -496,6 +462,7 @@ export const approveSource = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'approve',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       note: toSafeString(args.note) || undefined,
     })
 
@@ -509,7 +476,8 @@ export const rejectSource = mutation({
     reason: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await requireAdmin(ctx)
+    const identity = await requireRagAdmin(ctx)
+    if (args.reason.length > 500) throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)
     if (!source) {
       throw new Error('Source not found')
@@ -534,6 +502,7 @@ export const rejectSource = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'reject',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       reason,
     })
 
@@ -547,7 +516,9 @@ export const pauseSource = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await requireAdmin(ctx)
+    const identity = await requireRagAdmin(ctx)
+    if ((args.note?.length ?? 0) > 500)
+      throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)
     if (!source) {
       throw new Error('Source not found')
@@ -564,6 +535,7 @@ export const pauseSource = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'pause',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       note: toSafeString(args.note) || undefined,
     })
 
@@ -577,11 +549,16 @@ export const resumeSource = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await requireAdmin(ctx)
+    const identity = await requireRagAdmin(ctx)
+    if ((args.note?.length ?? 0) > 500)
+      throw new Error('Decision text exceeds the 500 character limit')
     const source = await ctx.db.get(args.sourceId)
     if (!source) {
       throw new Error('Source not found')
     }
+
+    if (source.type === 'youtube_channel')
+      throw new ConvexError({ code: 'YOUTUBE_FROZEN', message: 'YouTube ingestion is frozen' })
 
     const now = Date.now()
     const schedule = source.schedule as {
@@ -600,9 +577,63 @@ export const resumeSource = mutation({
       actorUserId: identity.userId,
       actorEmail: identity.email,
       action: 'resume',
+      governance: { before: source, after: await ctx.db.get(args.sourceId) },
       note: toSafeString(args.note) || undefined,
     })
 
     return { ok: true, status: 'approved' as const }
+  },
+})
+
+export const removeSource = mutation({
+  args: {
+    sourceId: v.id('sources'),
+  },
+  handler: async (ctx, args) => {
+    const actor = await requireRagAdmin(ctx)
+    const source = await ctx.db.get(args.sourceId)
+    if (!source) {
+      throw new Error('Source not found')
+    }
+
+    if (source.type === 'youtube_channel')
+      throw new ConvexError({
+        code: 'YOUTUBE_FROZEN',
+        message: 'YouTube history is restricted pending retention review',
+      })
+
+    const sourceItems = await ctx.db
+      .query('source_items')
+      .withIndex('by_sourceId', (q) => q.eq('sourceId', args.sourceId))
+      .collect()
+
+    for (const sourceItem of sourceItems) {
+      await ctx.db.delete(sourceItem._id)
+    }
+
+    await ctx.db.delete(args.sourceId)
+    const bounded = await boundedChange(source, null)
+    const deletionId = await ctx.db.insert('rag_source_deletions', {
+      sourceId: args.sourceId,
+      source: bounded.changeContext.before,
+      projected: true,
+      actorId: actor.userId,
+      actorEmail: actor.email,
+      timestamp: Date.now(),
+    })
+    await writeSourceEvent(ctx, {
+      eventId: `rag-deletion:${deletionId}`,
+      actorId: actor.userId,
+      actorEmail: actor.email,
+      actionType: 'EVIDENCE_SOURCE_DELETED',
+      entityId: args.sourceId,
+      before: source,
+      after: null,
+    })
+
+    return {
+      ok: true,
+      sourceId: args.sourceId,
+    }
   },
 })

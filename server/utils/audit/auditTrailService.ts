@@ -1,201 +1,198 @@
+import { createHash } from 'node:crypto'
+import type { ConvexHttpClient } from 'convex/browser'
+import { z } from 'zod'
+import { canonicalJson } from '../../../shared/utils/governanceAudit'
 import {
   getStoredAuditEvent,
   getStoredAuditSummary,
   listStoredAuditEvents,
+  normalizeOptionalString,
+  type StoredAuditEvent,
+  type AuditStoreFilters,
+  type AuditPosition,
 } from './auditLogStore'
+import {
+  getSourceAuditEvent,
+  getSourceAuditSummary,
+  listSourceAuditEvents,
+} from './sourceAuditEvents'
 import type {
-  AuditChangeContext,
-  AuditEntityType,
-  AuditTrailDetailItem,
   AuditTrailDetailResponse,
   AuditTrailFilters,
   AuditTrailListItem,
   AuditTrailListResponse,
-  AuditTrailRelatedEvent,
   AuditTrailSummaryResponse,
+  AuditEntityType,
 } from './types'
 
-type RawAuditEvent = {
-  eventId: string
-  actorId: string
-  actorEmail?: string
-  actorRole?: string
-  actionType: AuditTrailListItem['actionType']
-  entityType: AuditTrailListItem['entityType']
-  entityId: string
-  entityLabel: string
-  changeContext: AuditChangeContext
-  reason?: string
-  timestamp: number
+const positionSchema = z
+  .object({ timestamp: z.number().int().nonnegative().safe(), eventId: z.string().max(255) })
+  .strict()
+const cursorSchema = z
+  .object({
+    v: z.literal(1),
+    filters: z.string().length(64),
+    sql: positionSchema.nullable(),
+    convex: positionSchema.nullable(),
+    before: positionSchema,
+    totalCount: z.number().int().nonnegative(),
+    totalCountCapped: z.boolean().default(false),
+  })
+  .strict()
+
+function compare(a: AuditPosition, b: AuditPosition) {
+  return b.timestamp - a.timestamp || (a.eventId === b.eventId ? 0 : a.eventId < b.eventId ? 1 : -1)
 }
 
-type RawAuditEventListResult = {
-  items: RawAuditEvent[]
-  totalCount: number
-  nextCursor: string | null
-}
-
-type RawAuditSummaryResult = {
-  eventsToday: number
-  eventsThisWeek: number
-  mostActiveActor: {
-    userId: string
-    email: string
-    eventCount: number
-  } | null
-  mostChangedEntityType: AuditEntityType
-}
-
-function toIsoTimestamp(value: number) {
-  return new Date(value).toISOString()
-}
-
-function toDisplayValue(value: unknown) {
-  if (value === null) {
-    return 'null'
-  }
-
-  if (value === undefined) {
-    return 'unset'
-  }
-
-  if (typeof value === 'string') {
-    return value
-  }
-
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return String(value)
-  }
-
-  if (Array.isArray(value)) {
-    return value.join(', ')
-  }
-
-  try {
-    return JSON.stringify(value)
-  }
-  catch {
-    return '[unserializable]'
-  }
-}
-
-function buildChangeSummary(changeContext: AuditChangeContext) {
-  if (!changeContext.before && changeContext.after) {
-    const keys = Object.keys(changeContext.after)
-    return keys.length > 0
-      ? `created ${keys.slice(0, 3).join(', ')}`
-      : 'created record'
-  }
-
-  if (changeContext.before && !changeContext.after) {
-    const keys = Object.keys(changeContext.before)
-    return keys.length > 0
-      ? `deleted ${keys.slice(0, 3).join(', ')}`
-      : 'deleted record'
-  }
-
-  if (!changeContext.before || !changeContext.after) {
-    return 'changed governed record'
-  }
-
-  const beforeKeys = Object.keys(changeContext.before)
-  const afterKeys = Object.keys(changeContext.after)
-  const allKeys = [...new Set([...beforeKeys, ...afterKeys])]
-  const differences = allKeys
-    .filter((key) => JSON.stringify(changeContext.before?.[key]) !== JSON.stringify(changeContext.after?.[key]))
-    .slice(0, 3)
-    .map((key) => `${key} ${toDisplayValue(changeContext.before?.[key])} -> ${toDisplayValue(changeContext.after?.[key])}`)
-
-  return differences.length > 0 ? differences.join('; ') : 'no field-level changes captured'
-}
-
-function toListItem(event: RawAuditEvent): AuditTrailListItem {
+function toListItem(event: StoredAuditEvent): AuditTrailListItem {
   return {
     eventId: event.eventId,
-    timestamp: toIsoTimestamp(event.timestamp),
+    timestamp: new Date(event.timestamp).toISOString(),
     actionType: event.actionType,
     entityType: event.entityType,
     entityId: event.entityId,
     entityLabel: event.entityLabel,
     actorUserId: event.actorId,
-    actorEmail: event.actorEmail || null,
-    actorRole: event.actorRole || null,
-    reason: event.reason || null,
-    changeSummary: buildChangeSummary(event.changeContext),
+    actorEmail: event.actorEmail ?? null,
+    actorRole: event.actorRole ?? null,
+    reason: event.reason ?? null,
+    changeSummary: event.changeSummary ?? 'Historical governance change; open details',
   }
 }
 
-function toRelatedEvent(event: RawAuditEvent): AuditTrailRelatedEvent {
-  const item = toListItem(event)
+function filtersFor(input: AuditTrailFilters): AuditStoreFilters {
   return {
-    eventId: item.eventId,
-    timestamp: item.timestamp,
-    actionType: item.actionType,
-    entityType: item.entityType,
-    entityLabel: item.entityLabel,
+    actionType: input.actionType,
+    entityType: input.entityType,
+    actorId: normalizeOptionalString(input.actorId) ?? undefined,
+    entityId: normalizeOptionalString(input.entityId) ?? undefined,
+    search: normalizeOptionalString(input.search) ?? undefined,
+    dateFrom: input.dateFrom,
+    dateTo: input.dateTo,
   }
 }
 
-async function queryAuditEvents(filters: AuditTrailFilters) {
-  return await listStoredAuditEvents({
-    actionType: filters.actionType,
-    entityType: filters.entityType,
-    actorId: filters.actorId,
-    entityId: filters.entityId,
-    search: filters.search?.trim() || undefined,
-    dateFrom: filters.dateFrom,
-    dateTo: filters.dateTo,
-    cursor: filters.cursor?.trim() || undefined,
-    pageSize: filters.pageSize,
-  }) as RawAuditEventListResult
+function decodeCursor(value: string | undefined, fingerprint: string) {
+  if (!value) return null
+  try {
+    if (value.length > 4096) throw new Error('Cursor is too long')
+    const cursor = cursorSchema.parse(JSON.parse(Buffer.from(value, 'base64url').toString('utf8')))
+    if (cursor.filters !== fingerprint) throw new Error('Cursor filters changed')
+    return cursor
+  } catch {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid audit cursor for these filters' })
+  }
 }
 
-export async function listAuditTrailEvents(filters: AuditTrailFilters = {}): Promise<AuditTrailListResponse> {
-  const result = await queryAuditEvents(filters)
+export async function listAuditTrailEvents(
+  convex: ConvexHttpClient,
+  input: AuditTrailFilters = {},
+): Promise<AuditTrailListResponse> {
+  const filters = filtersFor(input)
+  const fingerprint = createHash('sha256').update(canonicalJson(filters)).digest('hex')
+  const cursor = decodeCursor(input.cursor, fingerprint)
+  const limit = Math.max(1, Math.min(100, Math.round(input.pageSize ?? 25)))
+  const common = { limit: limit + 1, before: cursor?.before, includeCount: !cursor }
+  const [sql, source] = await Promise.all([
+    cursor && !cursor.sql
+      ? { items: [], totalCount: 0, upper: undefined }
+      : listStoredAuditEvents(filters, { ...common, upper: cursor?.sql ?? undefined }),
+    cursor && !cursor.convex
+      ? {
+          items: [],
+          totalCount: 0,
+          upper: undefined,
+          scanBoundary: undefined,
+          totalCountCapped: false,
+        }
+      : listSourceAuditEvents(convex, filters, { ...common, upper: cursor?.convex ?? undefined }),
+  ])
+  const boundary = source.scanBoundary
+  const merged = [...sql.items, ...source.items]
+    .filter((row) => !boundary || compare(row, boundary) <= 0)
+    .sort(compare)
+  const items = merged.slice(0, limit)
+  const totalCount = cursor?.totalCount ?? sql.totalCount + source.totalCount
+  const totalCountCapped = cursor?.totalCountCapped ?? source.totalCountCapped
+  const last = items.at(-1)
+  const before = merged.length > limit && last ? last : boundary
+  const nextCursor = before
+    ? Buffer.from(
+        JSON.stringify({
+          v: 1,
+          filters: fingerprint,
+          sql: cursor?.sql ?? sql.upper ?? null,
+          convex: cursor?.convex ?? source.upper ?? null,
+          before: { timestamp: before.timestamp, eventId: before.eventId },
+          totalCount,
+          totalCountCapped,
+        }),
+      ).toString('base64url')
+    : null
+  return { ok: true, items: items.map(toListItem), totalCount, totalCountCapped, nextCursor }
+}
 
+export async function getAuditTrailEvent(
+  eventId: string,
+  convex: ConvexHttpClient,
+): Promise<AuditTrailDetailResponse | null> {
+  const isSource = eventId.startsWith('rag-approval:') || eventId.startsWith('rag-deletion:')
+  const event = isSource
+    ? await getSourceAuditEvent(convex, eventId)
+    : await getStoredAuditEvent(eventId)
+  if (!event) return null
+  const relatedFilters = { entityId: event.entityId }
+  const options = { limit: 6, includeCount: false }
+  const related = isSource
+    ? await listSourceAuditEvents(convex, relatedFilters, options)
+    : await listStoredAuditEvents(relatedFilters, options)
   return {
     ok: true,
-    items: result.items.map(toListItem),
-    totalCount: result.totalCount,
-    nextCursor: result.nextCursor,
+    event: {
+      ...toListItem(event),
+      changeContext: event.changeContext,
+      stateDigests: event.stateDigests,
+      truncated: event.truncated ?? false,
+      relatedEvents: related.items
+        .filter((item) => item.eventId !== eventId)
+        .slice(0, 5)
+        .map((item) => {
+          const row = toListItem(item)
+          return {
+            eventId: row.eventId,
+            timestamp: row.timestamp,
+            actionType: row.actionType,
+            entityType: row.entityType,
+            entityLabel: row.entityLabel,
+          }
+        }),
+    },
   }
 }
 
-export async function getAuditTrailEvent(eventId: string): Promise<AuditTrailDetailResponse | null> {
-  const event = await getStoredAuditEvent(eventId) as RawAuditEvent | null
-
-  if (!event) {
-    return null
+export async function getAuditTrailSummary(
+  convex: ConvexHttpClient,
+): Promise<AuditTrailSummaryResponse> {
+  const [sql, source] = await Promise.all([getStoredAuditSummary(), getSourceAuditSummary(convex)])
+  const actors = new Map<string, { userId: string; email: string; eventCount: number }>()
+  const entities = new Map<AuditEntityType, number>()
+  for (const row of [...sql.actors, ...source.actors]) {
+    const previous = actors.get(row.userId)
+    actors.set(row.userId, { ...row, eventCount: row.eventCount + (previous?.eventCount ?? 0) })
   }
-
-  const related = await queryAuditEvents({
-    entityId: event.entityId,
-    pageSize: 6,
-  })
-
-  const detail: AuditTrailDetailItem = {
-    ...toListItem(event),
-    changeContext: event.changeContext,
-    relatedEvents: related.items
-      .filter(item => item.eventId !== eventId)
-      .slice(0, 5)
-      .map(toRelatedEvent),
-  }
-
+  for (const row of [...sql.entities, ...source.entities])
+    entities.set(row.entityType, (entities.get(row.entityType) ?? 0) + row.eventCount)
+  const mostActiveActor =
+    [...actors.values()].sort(
+      (a, b) => b.eventCount - a.eventCount || a.userId.localeCompare(b.userId),
+    )[0] ?? null
+  const mostChangedEntityType =
+    [...entities].sort(([a, x], [b, y]) => y - x || a.localeCompare(b))[0]?.[0] ?? 'PATHWAY'
   return {
     ok: true,
-    event: detail,
-  }
-}
-
-export async function getAuditTrailSummary(): Promise<AuditTrailSummaryResponse> {
-  const summary = await getStoredAuditSummary() as RawAuditSummaryResult
-
-  return {
-    ok: true,
-    eventsToday: summary.eventsToday,
-    eventsThisWeek: summary.eventsThisWeek,
-    mostActiveActor: summary.mostActiveActor,
-    mostChangedEntityType: summary.mostChangedEntityType,
+    eventsToday: sql.eventsToday + source.eventsToday,
+    eventsThisWeek: sql.eventsThisWeek + source.eventsThisWeek,
+    mostActiveActor,
+    mostChangedEntityType,
   }
 }

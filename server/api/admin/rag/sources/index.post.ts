@@ -1,15 +1,13 @@
-import { anyApi } from 'convex/server'
-import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
+import { throwSourceError } from '../../../../utils/admin/sourceError'
+import { api } from '../../../../../convex/_generated/api'
+import { requireIdempotencyKey } from '../../../../utils/admin/createReceipt'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import { createConvexAdminClientActingAs } from '../../../../utils/convex-admin-client'
 import { createEvidenceSourceSchema } from '../../../../utils/admin/evidenceSourceSchema'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
-  const { session } = adminSession
-  const body = await readBody<unknown>(event)
+  const adminSession = await requireAdminSession(event)
+  const { convex } = adminSession
+  const body: unknown = await readBody<unknown>(event)
   const parsed = createEvidenceSourceSchema.safeParse(body ?? {})
 
   if (!parsed.success) {
@@ -22,42 +20,14 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const convex = await createConvexAdminClientActingAs(event, {
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
-  })
+  const idempotencyKey = requireIdempotencyKey(event)
+  const result = await convex
+    .mutation(api.ragSources.createSourceSubmission, {
+      ...parsed.data,
+      description: parsed.data.description ?? undefined,
+      idempotencyKey,
+    })
+    .catch(throwSourceError)
 
-  const result = await convex.mutation(
-    (anyApi as any).ragSources.createSourceSubmission,
-    parsed.data,
-  )
-
-  const detail = await convex.query(
-    (anyApi as any).ragSources.getSource,
-    { sourceId: result.sourceId },
-  ) as {
-    source: Record<string, unknown> | null
-  } | null
-
-  await recordGovernanceAction(event, {
-    actionType: 'EVIDENCE_SOURCE_CREATED',
-    entityType: 'EVIDENCE_SOURCE',
-    entityId: result.sourceId,
-    entityLabel: parsed.data.name,
-    changeContext: {
-      before: null,
-      after: detail?.source || {
-        sourceId: result.sourceId,
-        name: parsed.data.name,
-        type: parsed.data.type,
-        status: result.status,
-      },
-    },
-  }, adminSession)
-
-  return {
-    ok: true,
-    ...result,
-  }
+  return { ...result }
 })

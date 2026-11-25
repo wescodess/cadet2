@@ -1,0 +1,129 @@
+{
+  "red": {
+    "nul-snapshot": [
+      {
+        "endpoint": "list",
+        "status": 500
+      },
+      {
+        "endpoint": "summary",
+        "status": 500
+      },
+      {
+        "endpoint": "existing-event detail",
+        "status": 500
+      },
+      {
+        "endpoint": "pathway-filtered list",
+        "status": 500
+      }
+    ],
+    "nameless-snapshot": [
+      {
+        "endpoint": "list",
+        "status": 500
+      },
+      {
+        "endpoint": "summary",
+        "status": 500
+      },
+      {
+        "endpoint": "existing-event detail",
+        "status": 500
+      },
+      {
+        "endpoint": "pathway-filtered list",
+        "status": 500
+      }
+    ]
+  },
+  "firstGreen": {
+    "nul-snapshot": [
+      {
+        "endpoint": "list",
+        "status": 200
+      },
+      {
+        "endpoint": "summary",
+        "status": 200
+      },
+      {
+        "endpoint": "existing-event detail",
+        "status": 200
+      },
+      {
+        "endpoint": "pathway-filtered list",
+        "status": 200
+      }
+    ],
+    "nameless-snapshot": [
+      {
+        "endpoint": "list",
+        "status": 200
+      },
+      {
+        "endpoint": "summary",
+        "status": 200
+      },
+      {
+        "endpoint": "existing-event detail",
+        "status": 200
+      },
+      {
+        "endpoint": "pathway-filtered list",
+        "status": 200
+      }
+    ]
+  },
+  "finalGreen": {
+    "nul-snapshot": [
+      {
+        "endpoint": "list",
+        "status": 200
+      },
+      {
+        "endpoint": "summary",
+        "status": 200
+      },
+      {
+        "endpoint": "existing-event detail",
+        "status": 200
+      },
+      {
+        "endpoint": "pathway-filtered list",
+        "status": 200
+      }
+    ],
+    "nameless-snapshot": [
+      {
+        "endpoint": "list",
+        "status": 200
+      },
+      {
+        "endpoint": "summary",
+        "status": 200
+      },
+      {
+        "endpoint": "existing-event detail",
+        "status": 200
+      },
+      {
+        "endpoint": "pathway-filtered list",
+        "status": 200
+      }
+    ]
+  },
+  "baselineHead": "d8b5b95dcfa135371c64ce112d3cd843cae2daaa",
+  "redBoundaryCounts": {
+    "passed": 25,
+    "failed": 2,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "finalBoundaryCounts": {
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  }
+}

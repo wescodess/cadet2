@@ -4,11 +4,17 @@ import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 import { getAuditTrailEvent } from '../../../utils/audit/auditTrailService'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const { convex } = await requireAdminSession(event)
 
-  const eventId = getRouterParam(event, 'eventId')?.trim() || ''
+  let eventId: string
+  try {
+    eventId = decodeURIComponent(getRouterParam(event, 'eventId') ?? '').trim()
+  } catch {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'eventId is malformed',
+    })
+  }
   if (!eventId) {
     throw createError({
       statusCode: 400,
@@ -16,7 +22,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const detail = await getAuditTrailEvent(eventId)
+  const detail = await getAuditTrailEvent(eventId, convex)
   if (!detail) {
     throw createError({
       statusCode: 404,

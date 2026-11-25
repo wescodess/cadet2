@@ -1,8 +1,9 @@
 import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
-import { listRecommendationReviews } from '../../../utils/recommendations/recommendationReviewService'
 
 export default defineEventHandler(async (event) => {
   await requireAdminSession(event)
-
-  return await listRecommendationReviews(event)
+  throw createError({
+    statusCode: 503,
+    statusMessage: 'Governance review is currently unavailable',
+  })
 })

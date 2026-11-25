@@ -1,7 +1,4 @@
-import {
-  getDefaultStatusMessage,
-  type RecommendationLifecycleStatus,
-} from './lifecycle'
+import { getDefaultStatusMessage, type RecommendationLifecycleStatus } from './lifecycle'
 
 type DirectPathwayOutcome = {
   pathwayId: string
@@ -87,21 +84,8 @@ export function seedFallbackRecommendationRun(input: {
   return record
 }
 
-export function readFallbackRecommendationRun(input: {
-  userId: string
-  runId: string
-}) {
+export function readFallbackRecommendationRun(input: { userId: string; runId: string }) {
   return getFallbackStore().get(toKey(input.userId, input.runId)) || null
-}
-
-export function listFallbackRecommendationRuns() {
-  return Array.from(getFallbackStore().values()).sort((left, right) => {
-    if (left.createdAt !== right.createdAt) {
-      return right.createdAt - left.createdAt
-    }
-
-    return right.updatedAt - left.updatedAt
-  })
 }
 
 export function writeFallbackRecommendationRunEvaluation(input: {
@@ -128,9 +112,10 @@ export function writeFallbackRecommendationRunEvaluation(input: {
     ...existing,
     status,
     statusMessage: input.statusMessage?.trim() || getDefaultStatusMessage(status),
-    resumable: typeof input.resumable === 'boolean'
-      ? input.resumable
-      : status === 'queued' || status === 'evaluating',
+    resumable:
+      typeof input.resumable === 'boolean'
+        ? input.resumable
+        : status === 'queued' || status === 'evaluating',
     processingHeartbeatAt: now,
     updatedAt: now,
     pathwayEvaluation: {

@@ -8,7 +8,7 @@ type Phase0Response = {
   viewer: {
     userId: string
     email: string
-    authorizationSource: 'rag_admins' | 'allowlist'
+    authorizationSource: 'rag_admins'
   }
   readiness: {
     overallReady: boolean
@@ -76,8 +76,8 @@ const sectionEntries = computed(() => {
       <p class="text-xs uppercase tracking-[0.2em] text-amber-300">RAG Foundation</p>
       <h1 class="text-2xl font-semibold text-white">Phase 0 Readiness Check</h1>
       <p class="text-sm text-slate-400">
-        Verifies environment naming, AI Search / AI Gateway / OpenRouter config presence, and admin
-        allowlist access.
+        Verifies environment naming, AI Search / AI Gateway / OpenRouter config presence, and
+        current admin access.
       </p>
     </header>
 

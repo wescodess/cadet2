@@ -1,17 +1,11 @@
+import { throwSourceError } from '../../../../utils/admin/sourceError'
 import { anyApi } from 'convex/server'
 
-import { recordGovernanceAction } from '../../../../utils/audit/recordGovernanceAction'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
-import {
-  createConvexAdminClient,
-  createConvexAdminClientActingAs,
-} from '../../../../utils/convex-admin-client'
 
 export default defineEventHandler(async (event) => {
-  const adminSession = await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
-  const { session } = adminSession
+  const adminSession = await requireAdminSession(event)
+  const { convex } = adminSession
   const sourceId = getRouterParam(event, 'sourceId')
 
   if (!sourceId) {
@@ -21,33 +15,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const actingAsClient = await createConvexAdminClientActingAs(event, {
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.name,
-  })
-  const beforeDetail = await actingAsClient.query(
-    (anyApi as any).ragSources.getSource,
-    { sourceId },
-  ) as {
-    source: Record<string, unknown> | null
-  } | null
-  const convex = await createConvexAdminClient()
-  const result = await convex.mutation(
-    (anyApi as any).ragSourcesInternal.removeSourceAsNuxtAdmin,
-    { sourceId },
-  )
-
-  await recordGovernanceAction(event, {
-    actionType: 'EVIDENCE_SOURCE_DELETED',
-    entityType: 'EVIDENCE_SOURCE',
-    entityId: sourceId,
-    entityLabel: String((beforeDetail?.source as { name?: unknown } | null)?.name || sourceId),
-    changeContext: {
-      before: beforeDetail?.source || null,
-      after: null,
-    },
-  }, adminSession)
+  const result = await convex
+    .mutation((anyApi as any).ragSources.removeSource, { sourceId })
+    .catch(throwSourceError)
 
   return {
     ok: true,

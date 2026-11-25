@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import SignOutButton from '@/components/auth/SignOutButton.vue'
+import { createAdminOperation } from '@/lib/admin/createOperation'
+
 import { adminNavigationLinks } from '@/lib/admin/navigation'
 
 type SourceStatus = 'pending_approval' | 'approved' | 'rejected' | 'paused'
@@ -16,6 +18,8 @@ type AdminStatusResult = {
   currentUser: { userId: string; email: string | null } | null
   bootstrapAvailable: boolean
 }
+
+const createOperation = createAdminOperation()
 
 definePageMeta({
   middleware: ['auth', 'admin'],
@@ -317,21 +321,6 @@ async function runManualIngestion(sourceIds?: string[]) {
   }
 }
 
-async function bootstrapAdmin() {
-  actionPending.value = true
-  errorMessage.value = ''
-  try {
-    await $fetch('/api/admin/rag/convex-admin/sync-current-user', {
-      method: 'POST',
-    })
-    await refreshAll()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Admin sync failed'
-  } finally {
-    actionPending.value = false
-  }
-}
-
 async function submitSource() {
   actionPending.value = true
   errorMessage.value = ''
@@ -377,8 +366,10 @@ async function submitSource() {
 
     await $fetch('/api/admin/rag/sources', {
       method: 'POST',
+      headers: createOperation.headers(payload),
       body: payload,
     })
+    createOperation.complete()
     sourceName.value = ''
     tagsCsv.value = ''
     await refreshAll()
@@ -601,7 +592,7 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="space-y-1">
           <p class="text-sm text-slate-300">
-            Phase 0 allowlist access:
+            Reviewed admin grant:
             <span :class="phase0Ready ? 'text-emerald-300' : 'text-rose-300'">{{
               phase0Ready ? 'ok' : 'failed'
             }}</span>
@@ -625,15 +616,6 @@ watch([showOnlyMine, statusFilter, typeFilter, batchStatusFilter], async () => {
             @click="runManualIngestion()"
           >
             Run Due Sources (Phase 2)
-          </button>
-          <button
-            v-if="phase0Ready && adminStatus && !adminStatus.currentUserIsAdmin"
-            type="button"
-            class="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100 hover:bg-amber-500/20 disabled:opacity-60"
-            :disabled="actionPending"
-            @click="bootstrapAdmin"
-          >
-            Sync Allowlisted Admin To Convex
           </button>
           <button
             type="button"

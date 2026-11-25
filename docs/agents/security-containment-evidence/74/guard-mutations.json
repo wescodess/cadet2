@@ -1,0 +1,74 @@
+[
+  {
+    "case": "clean control",
+    "expectedExit": 0,
+    "exit": 0,
+    "output": "Admin surface guard: PASS (45 Convex registrations, 53 HTTP files, 57 built routes)\n"
+  },
+  {
+    "case": "unguarded public export",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:99\n  if (!expected) throw new Error(`Unclassified Convex registration: ${name}`)\n                       ^\n\nError: Unclassified Convex registration: ragSources:leaked\n    at checkRegistration (file://<workspace>/scripts/security/admin-surfaces.mjs:99:24)\n    at inspectConvex (file://<workspace>/scripts/security/admin-surfaces.mjs:119:7)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:195:18)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "alias",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:62\n    throw new Error(`Unclassified Convex export alias: ${path}`)\n          ^\n\nError: Unclassified Convex export alias: <probe>/convex/ragSources.ts\n    at registration (file://<workspace>/scripts/security/admin-surfaces.mjs:62:11)\n    at file://<workspace>/scripts/security/admin-surfaces.mjs:91:9\n    at Array.map (<anonymous>)\n    at registrations (file://<workspace>/scripts/security/admin-surfaces.mjs:90:44)\n    at inspectConvex (file://<workspace>/scripts/security/admin-surfaces.mjs:117:23)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:195:18)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "default registration",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:86\n      throw new Error(`Unclassified Convex default export: ${path}`)\n            ^\n\nError: Unclassified Convex default export: <probe>/convex/ragSources.ts\n    at registrations (file://<workspace>/scripts/security/admin-surfaces.mjs:86:13)\n    at inspectConvex (file://<workspace>/scripts/security/admin-surfaces.mjs:117:23)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:195:18)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "baseline admin-count disclosure",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:106\n    throw new Error(`Missing admin admission before reads: ${name}`)\n          ^\n\nError: Missing admin admission before reads: ragSources:getAdminStatus\n    at checkRegistration (file://<workspace>/scripts/security/admin-surfaces.mjs:106:11)\n    at inspectConvex (file://<workspace>/scripts/security/admin-surfaces.mjs:119:7)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:195:18)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "generic internal wrapper",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:99\n  if (!expected) throw new Error(`Unclassified Convex registration: ${name}`)\n                       ^\n\nError: Unclassified Convex registration: ragSources:dispatch\n    at checkRegistration (file://<workspace>/scripts/security/admin-surfaces.mjs:99:24)\n    at inspectConvex (file://<workspace>/scripts/security/admin-surfaces.mjs:119:7)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:195:18)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "dormant ingestion import",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:171\n    throw new Error(`Removed execution or bootstrap reference: ${relative(root, path)}`)\n          ^\n\nError: Removed execution or bootstrap reference: server/utils/dormant.ts\n    at rejectSourceReference (file://<workspace>/scripts/security/admin-surfaces.mjs:171:11)\n    at rejectExecutionImports (file://<workspace>/scripts/security/admin-surfaces.mjs:180:7)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:201:3)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "missing HTTP guard",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:136\n      throw new Error(`Missing HTTP admission: ${name}`)\n            ^\n\nError: Missing HTTP admission: server/api/admin/access.get.ts\n    at checkHttpAdmission (file://<workspace>/scripts/security/admin-surfaces.mjs:136:13)\n    at inspectHttp (file://<workspace>/scripts/security/admin-surfaces.mjs:154:7)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:196:20)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "request-time DDL",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:189\n      throw new Error(`Request-time initialization: ${name}`)\n            ^\n\nError: Request-time initialization: pathwayDefinitionService\n    at rejectRequestInitialization (file://<workspace>/scripts/security/admin-surfaces.mjs:189:13)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:202:3)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "internal made public",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:104\n    throw new Error(`Changed Convex visibility: ${name}`)\n          ^\n\nError: Changed Convex visibility: ragIngestionInternal:prepareScheduledBatch\n    at checkRegistration (file://<workspace>/scripts/security/admin-surfaces.mjs:104:11)\n    at inspectConvex (file://<workspace>/scripts/security/admin-surfaces.mjs:119:7)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:195:18)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "AI Search provider reintroduced",
+    "expectedExit": 1,
+    "exit": 1,
+    "output": "file://<workspace>/scripts/security/admin-surfaces.mjs:165\n    throw new Error(`Disabled AI Search provider reference: ${relative(root, path)}`)\n          ^\n\nError: Disabled AI Search provider reference: server/api/ai-search/query.post.ts\n    at rejectSourceReference (file://<workspace>/scripts/security/admin-surfaces.mjs:165:11)\n    at rejectExecutionImports (file://<workspace>/scripts/security/admin-surfaces.mjs:180:7)\n    at inspectAdminSources (file://<workspace>/scripts/security/admin-surfaces.mjs:201:3)\n    at file://<workspace>/scripts/security/check-admin-surfaces.mjs:5:17\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n"
+  },
+  {
+    "case": "restored control",
+    "expectedExit": 0,
+    "exit": 0,
+    "output": "Admin surface guard: PASS (45 Convex registrations, 53 HTTP files, 57 built routes)\n"
+  }
+]

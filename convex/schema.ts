@@ -175,20 +175,24 @@ export default defineSchema({
     resumable: v.optional(v.boolean()),
     processingStartedAt: v.optional(v.number()),
     processingHeartbeatAt: v.optional(v.number()),
-    pathwayEvaluation: v.optional(v.object({
-      evaluatedAt: v.number(),
-      evaluatorVersion: v.string(),
-      direct: v.array(pathwayDirectOutcomeValidator),
-      blocked: v.array(pathwayBlockedOutcomeValidator),
-    })),
-    recommendationResults: v.optional(v.object({
-      rankedAt: v.number(),
-      rankerVersion: v.string(),
-      noComposedReason: v.optional(v.string()),
-      direct: v.array(rankedDirectRecommendationValidator),
-      blocked: v.array(rankedBlockedRecommendationValidator),
-      composed: v.array(rankedComposedRecommendationValidator),
-    })),
+    pathwayEvaluation: v.optional(
+      v.object({
+        evaluatedAt: v.number(),
+        evaluatorVersion: v.string(),
+        direct: v.array(pathwayDirectOutcomeValidator),
+        blocked: v.array(pathwayBlockedOutcomeValidator),
+      }),
+    ),
+    recommendationResults: v.optional(
+      v.object({
+        rankedAt: v.number(),
+        rankerVersion: v.string(),
+        noComposedReason: v.optional(v.string()),
+        direct: v.array(rankedDirectRecommendationValidator),
+        blocked: v.array(rankedBlockedRecommendationValidator),
+        composed: v.array(rankedComposedRecommendationValidator),
+      }),
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -243,6 +247,13 @@ export default defineSchema({
     email: v.optional(v.string()),
     createdAt: v.number(),
     grantedByUserId: v.optional(v.string()),
+    subjectBinding: v.optional(
+      v.object({
+        issuer: v.string(),
+        reviewedAt: v.number(),
+        operatorEvidence: v.string(),
+      }),
+    ),
   })
     .index('by_userId', ['userId'])
     .index('by_email', ['email']),
@@ -284,7 +295,72 @@ export default defineSchema({
     .index('by_status_tenantId', ['status', 'tenantId'])
     .index('by_createdByUserId', ['createdByUserId']),
 
+  rag_audit_events: defineTable({
+    eventId: v.string(),
+    actorId: v.string(),
+    actorEmail: v.optional(v.string()),
+    actionType: v.string(),
+    entityType: v.literal('EVIDENCE_SOURCE'),
+    entityId: v.string(),
+    entityLabel: v.string(),
+    timestamp: v.number(),
+    orderKey: v.string(),
+    changeSummary: v.string(),
+    reason: v.optional(v.string()),
+  })
+    .index('by_eventId', ['eventId'])
+    .index('by_orderKey', ['orderKey'])
+    .index('by_action_order', ['actionType', 'orderKey'])
+    .index('by_actor_order', ['actorId', 'orderKey'])
+    .index('by_actor_action_order', ['actorId', 'actionType', 'orderKey'])
+    .index('by_entity_order', ['entityId', 'orderKey'])
+    .index('by_entity_action_order', ['entityId', 'actionType', 'orderKey'])
+    .index('by_entity_actor_order', ['entityId', 'actorId', 'orderKey'])
+    .index('by_entity_actor_action_order', ['entityId', 'actorId', 'actionType', 'orderKey']),
+
+  rag_audit_details: defineTable({
+    eventId: v.string(),
+    changeContext: auditChangeContextValidator,
+    stateDigests: v.object({ before: v.string(), after: v.string() }),
+    truncated: v.boolean(),
+  }).index('by_eventId', ['eventId']),
+
+  rag_audit_counts: defineTable({
+    key: v.string(),
+    kind: v.string(),
+    day: v.optional(v.number()),
+    count: v.number(),
+    email: v.optional(v.string()),
+  })
+    .index('by_key', ['key'])
+    .index('by_kind', ['kind', 'key'])
+    .index('by_kind_day', ['kind', 'day']),
+
+  rag_create_receipts: defineTable({
+    actorId: v.string(),
+    key: v.string(),
+    payloadDigest: v.string(),
+    receipt: v.object({
+      ok: v.literal(true),
+      sourceId: v.id('sources'),
+      status: v.literal('pending_approval'),
+    }),
+  }).index('by_actor_key', ['actorId', 'key']),
+
+  rag_source_deletions: defineTable({
+    projected: v.optional(v.boolean()),
+    sourceId: v.id('sources'),
+    source: v.any(),
+    actorId: v.string(),
+    actorEmail: v.optional(v.string()),
+    timestamp: v.number(),
+  })
+    .index('by_projected', ['projected'])
+    .index('by_sourceId', ['sourceId'])
+    .index('by_timestamp', ['timestamp']),
+
   approval_audit_log: defineTable({
+    projected: v.optional(v.boolean()),
     sourceId: v.id('sources'),
     actorUserId: v.string(),
     actorEmail: v.optional(v.string()),
@@ -300,7 +376,9 @@ export default defineSchema({
     reason: v.optional(v.string()),
     note: v.optional(v.string()),
     diffSummary: v.optional(v.string()),
+    governance: v.optional(v.object({ before: v.any(), after: v.any() })),
   })
+    .index('by_projected', ['projected'])
     .index('by_sourceId', ['sourceId'])
     .index('by_timestamp', ['timestamp']),
 
@@ -406,12 +484,14 @@ export default defineSchema({
       transcriptSucceededWithTimestamps: v.optional(v.number()),
       transcriptDescriptionFallback: v.optional(v.number()),
     }),
-    errors: v.array(v.object({
-      code: v.string(),
-      message: v.string(),
-      retryable: v.optional(v.boolean()),
-      timestamp: v.number(),
-    })),
+    errors: v.array(
+      v.object({
+        code: v.string(),
+        message: v.string(),
+        retryable: v.optional(v.boolean()),
+        timestamp: v.number(),
+      }),
+    ),
     attempt: v.number(),
     maxAttempts: v.number(),
     retryOfSourceRunId: v.optional(v.id('source_runs')),

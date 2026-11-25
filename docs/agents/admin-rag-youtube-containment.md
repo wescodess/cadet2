@@ -1,0 +1,97 @@
+# Admin, RAG and YouTube containment (#74)
+
+Stacked on #55; merge after #55. This is interim containment under spec #72 and the legacy-removal and tenancy decisions. It does not authorize a pilot or complete #28, #53, #75, #78, #79, #87 or #149.
+
+```text
+admin HTTP / private page
+  actual Nuxt session -> same user's JWT -> current issuer-bound, operator-reviewed rag_admins row
+RAG public registration
+  actual JWT subject -> current operator-reviewed rag_admins row -> source transaction + approval audit
+YouTube
+  submission / activation / prepare / old claim / completion / retry -> denied
+AI Search query / corpus sync
+  disabled, including with credentials and obsolete enable flags
+```
+
+## Boundaries
+
+All ten current `ragSources` exports and both batch-history queries require a stored subject grant independently of Nuxt. Legacy rows without an explicit `subjectBinding` review are denied; the binding must match the JWT issuer and contain a non-future review time and operator evidence reference. No request can create that binding. Existing rows are preserved for the separately authorized operator review, not automatically promoted. No email, `tokenIdentifier`, caller actor ID or Nuxt allowlist supplies admin authority. Mutating HTTP requests also require the configured same origin; an admitted cookie cannot authorize a foreign-origin request. Anonymous users cannot obtain an admin count. A removed grant denies the same session/JWT on its next call. The HTTP guard uses an in-process token endpoint with the configured origin; no request-origin token fetch, deployment key, acting-as identity or internal fallback is used by these admin operations.
+
+The public bootstrap, `sync-current-user`, internal allowlist sync, unused allowlist helper and impersonation helper are deleted. The RAG screen has no grant-creation action. Existing admin pages and AI Search have server admission and private no-store responses before rendering. Phase-0 remains available to admitted admins, reports configuration presence, redacts configured gateway URLs and cannot report overall activation readiness.
+
+Website source maintenance, source approval history, batch diagnostics, pathway/rule maintenance and public-source/rule governance audits remain available. Audit list/count/filter/detail/summary queries exclude historical recommendation-run and unknown setting records. Their contents cannot become a Case browser or signature. The legacy governance-review data/actions and HTTP manual/scheduled ingestion return unavailable pending their scoped adapters; their deployment-key/raw-result transports cannot safely continue during containment. The screens remain for restoration under #87.
+
+YouTube is excluded before preparation, including scheduled/force selection and idempotent reuse. Every old execution plan, batch/source claim, completion, retry and sync boundary rejects frozen work. Source approval, resume, configuration activation and new submissions cannot restart it. Frozen source/item/batch history is retained for restricted diagnostics; its deletion is unavailable pending retention review. The old feed/watch/transcript/description executor, anonymous proxy, embedded-key default and deployed sync caller are deleted. Existing YouTube objects/index entries have not been deleted or certified as excluded. **All AI Search queries and sync remain off.** No environment flag, client model/prompt/filter or admin grant enables them.
+
+Pathway/rule and governance-audit services perform no request-time DDL or demo seeding and provide no missing-table/catalog fallback. Missing schema returns 503. Apply the reviewed SQL through the separately authorized operator migration process; `0006_governance_audit_log.sql` supplies the former audit DDL. Existing `0004`/`0005` contain legacy catalog fixtures and are used explicitly only by the isolated boundary harness here. No deployed initialization route is introduced. Hosted RAG storage reports unavailable instead of writing to the local filesystem.
+
+## Verification and evidence
+
+`pnpm verify` retains all #55 rows and adds `pnpm security:admin` after the production build. It runs the reviewed source/built registration guard and a real isolated Nitro + Better Auth + Convex boundary suite. It cannot be skipped by `ENABLE_CONTRACT_TESTS`. The local backend is pinned to `precompiled-2026-11-16-80befbc`; its data, identities, keys and SQL fixtures are disposable. No test registration is added to the application. The harness deploys the actual `convex/` tree, records its function specification, uses normal signup/cookies/minted JWTs for every human probe and uses an operator client only for isolated fixtures and internal-worker probes. It tears down its processes and state.
+
+The [classification manifest](../../scripts/security/admin-surfaces.json) inventories current HTTP, generated auth/service and Convex registrations. Legacy entries owned by #28/#75 are named inputs, **not certified closures**. The guard rejects new unclassified registrations, aliases/re-exports/default exports, removed admission, generic internal wrappers, dormant ingestion/provider imports, runtime DDL and changed internal visibility. Its classification schema rejects unknown or malformed fields and cannot relabel a RAG/admin entry as legacy. Built-artifact checks reject the removed transcript/key implementation. Runtime tests check all current admin HTTP files, source operations, restricted page payload paths, old jobs, current grant removal, backend outage and admitted positive controls for every enabled admin route. The separate #75 integrated guard remains responsible for the complete deployed test/fallback and portal-field contract.
+
+The retained pre-fix logs are local TDD diagnostics on incremental uncommitted states based on `97bbfa26194e4eb1e870e465520ab5d90486b9e5`; they are not staging acceptance or an immutable deployed candidate. Each records an actually observed behavioral failure:
+
+| Failure before its fix                                                                           | Evidence                                                                                  |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| Anonymous admin-count disclosure                                                                 | [Red status](security-containment-evidence/74/red-rag-status.txt)                         |
+| Ordinary source access and HTTP email-allowlist promotion                                        | [Red source/HTTP](security-containment-evidence/74/red-source-and-http.txt)               |
+| YouTube submission, preparation/reuse, schedule and old-job claim                                | [Red YouTube](security-containment-evidence/74/red-youtube.txt)                           |
+| Unguarded search, existing bootstrap route, shipped key caller and read-time demo initialization | [Red search/bootstrap/DDL](security-containment-evidence/74/red-search-bootstrap-ddl.txt) |
+| Local-file storage reported success without hosted storage                                       | [Red storage](security-containment-evidence/74/red-storage.txt)                           |
+| Phase-0 disclosed a configured gateway URL                                                       | [Red diagnostics](security-containment-evidence/74/red-diagnostics.txt)                   |
+| Governance audit exposed historical Client-run fields                                            | [Red audit](security-containment-evidence/74/red-audit.txt)                               |
+
+The additional [legacy-grant red](security-containment-evidence/74/red-legacy-grant.txt), [YouTube item injection red](security-containment-evidence/74/red-youtube-item.txt), [foreign-origin red](security-containment-evidence/74/red-admin-origin.txt) and [provider guard red](security-containment-evidence/74/red-provider-guard.txt) cover the subsequent containment fixes. The [guard ledger](security-containment-evidence/74/guard-mutations.json) records ten rejected mutations plus clean/restored controls.
+
+The [green command summary](security-containment-evidence/74/green-verification.txt), [complete verification manifest](security-containment-evidence/74/verification.json) and [candidate metadata](security-containment-evidence/74/metadata.json) record all nine commands passing, including 20 real boundary cases, on the pinned implementation head. Later changes isolate storage fixtures and explicitly type the Convex runtime environment without changing its behavior. The PR links the final exact-head CI run. Failed setup attempts and fixture-expectation corrections are not counted as behavioral red proof. Baselines and allowances are not raised.
+
+The [first Linux CI run](https://github.com/wescodess/cadet2/actions/runs/44207832423) passed all 20 real boundary cases but rejected two additional static diagnostics for the untyped `process.env` access in `convex/auth.config.ts`. Its runtime environment now has an explicit module-local type, so a clean runner does not depend on ambient Node types. No baseline exception was added.
+
+A subsequent local run exposed a [false-green launcher result](security-containment-evidence/74/red-runner.txt): piped Convex function-spec JSON was truncated at 65,536 bytes and all 20 Node cases failed during setup, while Convex returned exit 0. That run is rejected as failed. Function-spec capture now uses the CLI's complete file output. The launcher independently validates the actual Node exit status and TAP completion record, requiring exactly 29 passing cases with zero failures, skips, cancellations or todos after the Stage A corrections below. Both raw records are retained in the quality-output artifact. The [runner ledger](security-containment-evidence/74/runner-probes.json) records a real 20-case positive run and a temporary skipped-case probe that makes the actual outer command exit 1, even though Node itself exits 0. Five focused real-child regression cases cover success, failure, skip, incomplete population and absent completion evidence.
+
+## Stage A deletion audit correction
+
+[Round 1 evidence](security-containment-evidence/74/deletion-audit-r1/README.md) records the test-first deletion finding and its correction. Direct and HTTP deletion now share one guarded Convex transaction: preserve approval/governance history, delete the source/items and record the authenticated stored-grant actor, source snapshot and server time together. The HTTP handler writes no separate deletion event. Audit reads combine the canonical Convex deletion records with existing SQL history; filters, pagination, detail and summary include both. The independently guarded deletion reader adds one classified query, with no new public mutation.
+
+All seven `ragSources.ts` mutations were checked; only `removeSource` erased history. The other six append approval history, including rejection history when reapproval clears current source fields. Five additional real-boundary cases bring the mandatory population to 25 and cover both deletion transports, actor injection/non-admin denial, post-delete rollback and retained transition history. The fault is inserted only into the disposable backend copy. Baselines and allowances are unchanged; staging/provider/browser and independent acceptance gates remain separate.
+
+## Stage A audit snapshot robustness
+
+[Round 2 evidence](security-containment-evidence/74/audit-read-r2/README.md) records failing built-HTTP regressions for NUL and nameless deletion snapshots, followed by passing reads. Audit SQL projections normalize unsupported string characters and Convex extended values without changing the canonical snapshots. Missing or invalid display names fall back to the source ID. All audit JSONB writes and text bindings share the normalization, and source names/config reject control characters at creation and update.
+
+Four additional boundary cases bring the mandatory population to 29. The source guard reads concurrently and shares fixture setup; specific mutation failures remain mandatory, with no timeout increase. The retained successful fresh-install verification passes all nine rows, 125 Vitest cases and 29 boundary cases. Baselines and allowances are unchanged. Concurrent verification and the exact-head CI result are recorded in the PR.
+
+## Stage A atomic audit correction
+
+[Round 3 evidence](security-containment-evidence/74/atomic-audit-r3/README.md) inventories all 13 split writes. The pinned production build reproduced 13 rollback failures with 29 passing controls. All seven pathway/rule HTTP writes now commit their mutation, parent timestamp and mandatory audit through one SQL transaction, locking the parent before reading the old state and rechecking rule binding inside it. All six source HTTP transitions commit their governance snapshots on the existing Convex approval rows and write no separate SQL audit. The audit views combine those canonical events, retained deletion events and legacy SQL history without projecting old approval rows twice.
+
+The mandatory boundary population is 58, including 13 rollback and 13 one-event controls, partial bulk audit failure, missing audit storage, cross-parent IDs, serialized concurrent snapshots, duplicate creation and unavailable review/ingestion transports. The built-app suite passes all 58 with zero failures, skips, cancellations or todos. Source deletion remains atomic; review and ingestion transports remain unavailable before mutation. Baselines, allowances and the test timeout are unchanged. Final clean-install verification and exact-head CI are recorded with the evidence and PR.
+
+## Remaining gates
+
+- The owner must review and revoke/rotate affected controlled credentials through #22's access process. Code removal is **not revocation evidence**; no key was tested or copied into fixtures/configuration.
+- Full component auth, live-session/logout fencing, audited stable-principal grant provisioning and secure worker/diagnostics adapters remain with #53/#78/#79/#87. This interim subject/grant check is not pilot authorization.
+- Actual Canadian staging/provider/corpus proof, browser QA and the independent High-risk security review remain unrun by this implementation. Owner and independent acceptance evidence must be supplied before activation or merge approval.
+- Merge #55 first. Complete #28 and #75 before treating the parent security containment as closed. Rollback must keep these legacy admin escapes, YouTube and AI Search closed.
+
+## Round 7 cancellation and availability
+
+Admin requests share one 10-second budget across session retrieval, token minting, reviewed Convex authority and subsequent Convex operations. Auth HTTP reads use the configured site origin. The request-scoped transport consumes complete response bodies under a combined deadline/disconnect signal; periodic bytes cannot extend the budget. Expiry cancels the upstream fetch and returns the existing 503 unavailable state. Client disconnect cancels pending auth and Convex reads. A timed-out mutation may already have committed; create callers must retain their existing idempotency key when recovering a lost response. This transport does not undo a committed write or cancel local SQL statements.
+
+The boundary launcher owns a detached CLI process group and handles SIGINT, SIGTERM and SIGHUP through one awaited cleanup path. The CLI acquires the startup gate in a preload before spawning setup descendants, recording its group identity. Cleanup stops the entire owned group before recovering startup state and removing its workspace. Dead waiting claims are swept without removing live contenders. Recovery retains a dead owner's gate while that owner's setup group still exists; SIGKILL cannot be handled by the killed process and does not authorize overlapping startup.
+
+Six additional mandatory cases bring `security:admin` to 76: four built-HTTP network cases and two launcher process cases. They cover incomplete streams at audit list/summary/detail, source query/mutation, authority, session and token seams; actual upstream cancellation on downstream disconnect; and SIGINT/SIGTERM during active setup and lock waiting. All groups retain complete native TAP validation and the existing 120-second deadline. The original 70 cases remain mandatory. Local red/green and final verification evidence is retained externally for ticket #74.
+
+## Stage B audit corrections
+
+Stage B round 1 added six mandatory cases, bringing `security:admin` to 82. Round 2 adds two more, bringing it to 84. Round 3 replaces the sparse-filter case with two cases at 600 and 2,100 newer non-matching events, bringing it to 85 (80 runtime cases in 10 groups plus 5 launcher cases). The detail route decodes the event ID the audit page encodes, so evidence-source events open from the page; malformed encodings return 400. Every combination of actor, action type and entity ID filters reads an ordered compound Convex index, so filtered pages return their matches without depending on a scan budget. Only free-text search is filtered after the index read, and it resumes across bounded scans. Non-source action types skip the source store. Browser checks open audit pages directly and wait for Nuxt's deferred app-manifest fetch before leaving a page, so no document is discarded with that request in flight.
+
+## Private errors and frozen YouTube conflicts
+
+Successful server admission marks only the request context. A root Nitro error handler wraps Nuxt's existing error renderer and Nitro's JSON defaults so admitted errors, including 404 page documents and API responses, retain `Cache-Control: private, no-store`. The marker carries no session fields and is not added to error data. Denied requests continue through the existing redirect/error handling.
+
+Frozen YouTube submission, enable/schedule/config changes, approval, resume and deletion throw a structured Convex error before writing. The five source HTTP routes map `YOUTUBE_FROZEN` to HTTP **409 Conflict**, status message `YouTube source actions are frozen`, and `data.code: YOUTUBE_FROZEN`. This is a deliberate unavailable action, so retrying the same action cannot enable ingestion or remove retained history. Other error codes retain their existing behavior, including create-receipt conflicts.
+
+Three additional mandatory native cases bring `security:admin` to **88** (83 runtime cases in 10 groups plus 5 launcher cases). They cover admitted private 404 documents and JSON, non-404 errors and denied redirects, and all seven frozen actions across the five routes with unchanged source and audit state.

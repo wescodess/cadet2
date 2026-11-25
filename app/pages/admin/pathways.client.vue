@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { createAdminOperation } from '@/lib/admin/createOperation'
+
 import { computed, ref } from 'vue'
 
 import PathwayDefinitionTable from '@/components/admin/PathwayDefinitionTable.vue'
@@ -25,6 +27,8 @@ type NuxtErrorLike = {
     statusMessage?: string
   }
 }
+
+const createOperation = createAdminOperation()
 
 definePageMeta({
   middleware: ['auth', 'admin'],
@@ -79,9 +83,11 @@ async function handleCreate(payload: CreatePathwayDefinitionPayload) {
   try {
     const created = await $fetch<PathwayDefinitionRecord>('/api/admin/pathways', {
       method: 'POST',
+      headers: createOperation.headers(payload),
       body: payload,
     })
 
+    createOperation.complete()
     upsertItem(created)
     feedback.value = {
       tone: 'success',

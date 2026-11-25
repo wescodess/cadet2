@@ -29,6 +29,7 @@ const rows = [
   'test:components',
   'build',
   'test:legacy-access',
+  'security:admin',
 ]
 afterEach(cleanup)
 async function until(fn) {
@@ -93,11 +94,14 @@ for (const mode of ['timeout', 'SIGTERM']) {
           readFileSync(join(directory, 'evidence/verification.json'), 'utf8'),
         )
         expect(record.baselinePolicy.status).toBe('pass')
-        expect(record.rows).toHaveLength(12)
+        expect(record.rows).toHaveLength(13)
         const active = record.rows.find((row) => row.row === 'dead-code:check')
         expect(active.status).toBe(mode === 'timeout' ? 'fail' : 'interrupted')
         expect(record.status).toBe(mode === 'timeout' ? 'fail' : 'aborted')
         expect(record.rows.find((row) => row.row === 'test:legacy-access').status).toBe(
+          mode === 'timeout' ? 'pass' : 'not_run',
+        )
+        expect(record.rows.find((row) => row.row === 'security:admin').status).toBe(
           mode === 'timeout' ? 'pass' : 'not_run',
         )
         await until(() => existsSync(join(directory, 'evidence/aggregate-hang-execution.json')))

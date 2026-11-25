@@ -1,0 +1,70 @@
+{
+  "reviewerPolicyBefore": [
+    {
+      "name": "classifies the actual source registrations",
+      "milliseconds": 5512.593666,
+      "status": "failed"
+    },
+    {
+      "name": "rejects dormant ingestion import at the real source-manifest guard",
+      "milliseconds": 5002.532999999999,
+      "status": "failed"
+    },
+    {
+      "name": "rejects runtime demo DDL at the real source-manifest guard",
+      "milliseconds": 7963.248749999995,
+      "status": "failed"
+    }
+  ],
+  "ownBaselineDuringBuild": [
+    {
+      "name": "classifies the actual source registrations",
+      "milliseconds": 9359.212709,
+      "status": "failed"
+    },
+    {
+      "name": "rejects dormant ingestion import at the real source-manifest guard",
+      "milliseconds": 3497.5783329999977,
+      "status": "passed"
+    },
+    {
+      "name": "rejects runtime demo DDL at the real source-manifest guard",
+      "milliseconds": 2470.239958000002,
+      "status": "passed"
+    }
+  ],
+  "focusedAfterDuringBuild": [
+    {
+      "name": "classifies the actual source registrations",
+      "milliseconds": 162.388459,
+      "status": "passed"
+    },
+    {
+      "name": "rejects dormant ingestion import at the real source-manifest guard",
+      "milliseconds": 35.79162500000007,
+      "status": "passed"
+    },
+    {
+      "name": "rejects runtime demo DDL at the real source-manifest guard",
+      "milliseconds": 38.19295899999997,
+      "status": "passed"
+    }
+  ],
+  "cleanVerifyPolicyAfter": [
+    {
+      "name": "classifies the actual source registrations",
+      "milliseconds": 58.98033299999997,
+      "status": "passed"
+    },
+    {
+      "name": "rejects dormant ingestion import at the real source-manifest guard",
+      "milliseconds": 51.47149999999988,
+      "status": "passed"
+    },
+    {
+      "name": "rejects runtime demo DDL at the real source-manifest guard",
+      "milliseconds": 51.614417,
+      "status": "passed"
+    }
+  ]
+}

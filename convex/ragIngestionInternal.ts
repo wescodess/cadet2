@@ -1,5 +1,8 @@
 import { v } from 'convex/values'
-import { internalMutation, internalQuery } from './_generated/server'
+import { internalMutation, internalQuery, query } from './_generated/server'
+import { requireRagAdmin } from './lib/ragAdmin'
+import type { QueryCtx, MutationCtx } from './_generated/server'
+import type { Id } from './_generated/dataModel'
 
 type SourceSchedule = {
   frequency: 'daily' | 'manual' | 'interval'
@@ -48,7 +51,7 @@ type SourceRunError = {
 }
 
 type SourceRow = {
-  _id: any
+  _id: Id<'sources'>
   _creationTime: number
   type: 'website' | 'youtube_channel'
   status: 'pending_approval' | 'approved' | 'rejected' | 'paused'
@@ -115,15 +118,37 @@ function computeNextRunAt(now: number, schedule: SourceSchedule) {
   }
 
   if (schedule.frequency === 'interval') {
-    const hours = Number.isFinite(schedule.intervalHours) ? Math.max(1, Math.floor(schedule.intervalHours!)) : 24
-    return now + (hours * 60 * 60 * 1000)
+    const hours = Number.isFinite(schedule.intervalHours)
+      ? Math.max(1, Math.floor(schedule.intervalHours!))
+      : 24
+    return now + hours * 60 * 60 * 1000
   }
 
-  return now + (24 * 60 * 60 * 1000)
+  return now + 24 * 60 * 60 * 1000
+}
+
+async function requireWebsiteSource(ctx: Pick<QueryCtx, 'db'>, sourceId: Id<'sources'>) {
+  const source = await ctx.db.get(sourceId)
+  if (!source) throw new Error('Source unavailable')
+  if (source.type !== 'website') throw new Error('YouTube ingestion is frozen')
+  if (source.status !== 'approved' || !source.enabled)
+    throw new Error('Source is not approved and enabled')
+  return source
+}
+
+async function requireWebsiteBatch(ctx: Pick<QueryCtx, 'db'>, batchId: Id<'ingestion_batches'>) {
+  const batch = await ctx.db.get(batchId)
+  if (!batch) throw new Error('Batch not found')
+  const runs = await ctx.db
+    .query('source_runs')
+    .withIndex('by_batchId', (q) => q.eq('batchId', batchId))
+    .collect()
+  const sourceIds = new Set([...batch.dueSourceIds, ...runs.map((run) => run.sourceId)])
+  for (const sourceId of sourceIds) await requireWebsiteSource(ctx, sourceId)
 }
 
 function isSourceDue(source: SourceRow, now: number) {
-  if (source.status !== 'approved' || !source.enabled) {
+  if (source.type !== 'website' || source.status !== 'approved' || !source.enabled) {
     return false
   }
 
@@ -145,7 +170,11 @@ function toErrorMessage(error: unknown) {
   return typeof error === 'string' && error.trim() ? error.trim() : 'Unknown error'
 }
 
-function batchIdempotencyResult(batch: any, reused: boolean, reason: 'active' | 'terminal' | 'created') {
+function batchIdempotencyResult(
+  batch: any,
+  reused: boolean,
+  reason: 'active' | 'terminal' | 'created',
+) {
   return {
     ok: true,
     reused,
@@ -158,7 +187,7 @@ function batchIdempotencyResult(batch: any, reused: boolean, reason: 'active' | 
   }
 }
 
-async function getLatestBatchByIdempotencyKey(ctx: { db: any }, idempotencyKey: string) {
+async function getLatestBatchByIdempotencyKey(ctx: Pick<QueryCtx, 'db'>, idempotencyKey: string) {
   const matches = await ctx.db
     .query('ingestion_batches')
     .withIndex('by_idempotencyKey', (q: any) => q.eq('idempotencyKey', idempotencyKey))
@@ -170,18 +199,24 @@ async function getLatestBatchByIdempotencyKey(ctx: { db: any }, idempotencyKey: 
 
 async function selectSourcesForBatch(
   ctx: { db: any },
-  input: { now: number, sourceIds?: any[] | undefined, includeOnlyDue: boolean },
+  input: { now: number; sourceIds?: Id<'sources'>[] | undefined; includeOnlyDue: boolean },
 ) {
-  let rows = await ctx.db.query('sources').collect() as SourceRow[]
-  rows = rows.filter(row => row.status === 'approved' && row.enabled)
+  let rows = (await ctx.db.query('sources').collect()) as SourceRow[]
+  if (input.sourceIds?.length) {
+    const requested = new Set(input.sourceIds.map(String))
+    if (rows.some((row) => requested.has(String(row._id)) && row.type !== 'website')) {
+      throw new Error('YouTube ingestion is frozen')
+    }
+  }
+  rows = rows.filter((row) => row.type === 'website' && row.status === 'approved' && row.enabled)
 
   if (input.sourceIds?.length) {
     const requested = new Set(input.sourceIds.map(String))
-    rows = rows.filter(row => requested.has(String(row._id)))
+    rows = rows.filter((row) => requested.has(String(row._id)))
   }
 
   if (input.includeOnlyDue) {
-    rows = rows.filter(row => isSourceDue(row, input.now))
+    rows = rows.filter((row) => isSourceDue(row, input.now))
   }
 
   rows.sort((a, b) => {
@@ -196,21 +231,24 @@ async function selectSourcesForBatch(
   return rows
 }
 
-async function createBatchWithQueuedRuns(ctx: { db: any }, input: {
-  now: number
-  scheduledFor: number
-  trigger: 'scheduled' | 'manual'
-  idempotencyKey: string
-  sources: SourceRow[]
-  requestedByUserId?: string
-  requestedByEmail?: string
-}) {
+async function createBatchWithQueuedRuns(
+  ctx: MutationCtx,
+  input: {
+    now: number
+    scheduledFor: number
+    trigger: 'scheduled' | 'manual'
+    idempotencyKey: string
+    sources: SourceRow[]
+    requestedByUserId?: string
+    requestedByEmail?: string
+  },
+) {
   const batchId = await ctx.db.insert('ingestion_batches', {
     status: 'queued',
     scheduledFor: input.scheduledFor,
     trigger: input.trigger,
     sourceCount: input.sources.length,
-    dueSourceIds: input.sources.map(source => source._id),
+    dueSourceIds: input.sources.map((source) => source._id),
     summary: zeroSummary(),
     idempotencyKey: input.idempotencyKey,
     requestedByUserId: input.requestedByUserId,
@@ -234,17 +272,15 @@ async function createBatchWithQueuedRuns(ctx: { db: any }, input: {
   return batchId
 }
 
-function aggregateBatchSummary(sourceRuns: Array<{ status: string, stats: SourceRunStats }>) {
+function aggregateBatchSummary(sourceRuns: Array<{ status: string; stats: SourceRunStats }>) {
   const summary = zeroSummary()
 
   for (const run of sourceRuns) {
     if (run.status === 'succeeded') {
       summary.sourcesSucceeded += 1
-    }
-    else if (run.status === 'partial') {
+    } else if (run.status === 'partial') {
       summary.sourcesPartial += 1
-    }
-    else if (run.status === 'failed') {
+    } else if (run.status === 'failed') {
       summary.sourcesFailed += 1
     }
 
@@ -269,12 +305,15 @@ async function executeSourceRunScaffold(source: SourceRow): Promise<SourceRunTer
   throw new Error(`Adapter not implemented for source type "${source.type}" (Phase 2 scaffold)`)
 }
 
-async function finalizeSourceTimestamps(ctx: { db: any }, input: {
-  source: SourceRow
-  runStatus: 'succeeded' | 'partial' | 'failed'
-  finishedAt: number
-  lastError?: string
-}) {
+async function finalizeSourceTimestamps(
+  ctx: { db: any },
+  input: {
+    source: SourceRow
+    runStatus: 'succeeded' | 'partial' | 'failed'
+    finishedAt: number
+    lastError?: string
+  },
+) {
   const patch: Record<string, unknown> = {
     lastRunAt: input.finishedAt,
     nextRunAt: computeNextRunAt(input.finishedAt, input.source.schedule),
@@ -283,8 +322,7 @@ async function finalizeSourceTimestamps(ctx: { db: any }, input: {
   if (input.runStatus === 'failed') {
     patch.lastFailureAt = input.finishedAt
     patch.lastFailureReason = input.lastError || 'Source run failed'
-  }
-  else {
+  } else {
     patch.lastSuccessAt = input.finishedAt
     patch.lastFailureReason = undefined
   }
@@ -292,7 +330,8 @@ async function finalizeSourceTimestamps(ctx: { db: any }, input: {
   await ctx.db.patch(input.source._id, patch)
 }
 
-async function processBatchRuns(ctx: { db: any }, batchId: any) {
+async function processBatchRuns(ctx: MutationCtx, batchId: Id<'ingestion_batches'>) {
+  await requireWebsiteBatch(ctx, batchId)
   const batch = await ctx.db.get(batchId)
   if (!batch) {
     throw new Error('Batch not found')
@@ -315,7 +354,7 @@ async function processBatchRuns(ctx: { db: any }, batchId: any) {
   queuedRuns.sort((a: any, b: any) => a._creationTime - b._creationTime)
 
   for (const run of queuedRuns) {
-    const source = await ctx.db.get(run.sourceId) as SourceRow | null
+    const source = (await ctx.db.get(run.sourceId)) as SourceRow | null
     const runStartedAt = Date.now()
 
     await ctx.db.patch(run._id, {
@@ -333,12 +372,14 @@ async function processBatchRuns(ctx: { db: any }, batchId: any) {
           ...zeroStats(),
           failed: 1,
         },
-        errors: [{
-          code: 'source_missing',
-          message,
-          retryable: false,
-          timestamp: finishedAt,
-        }],
+        errors: [
+          {
+            code: 'source_missing',
+            message,
+            retryable: false,
+            timestamp: finishedAt,
+          },
+        ],
         lastError: message,
       })
       continue
@@ -362,8 +403,7 @@ async function processBatchRuns(ctx: { db: any }, batchId: any) {
         finishedAt,
         lastError: result.lastError,
       })
-    }
-    catch (error) {
+    } catch (error) {
       const finishedAt = Date.now()
       const message = toErrorMessage(error)
       const retryable = false
@@ -386,7 +426,7 @@ async function processBatchRuns(ctx: { db: any }, batchId: any) {
       }
 
       if (run.attempt < run.maxAttempts && retryable) {
-        patch.nextRetryAt = finishedAt + (60 * 1000)
+        patch.nextRetryAt = finishedAt + 60 * 1000
       }
 
       await ctx.db.patch(run._id, patch)
@@ -405,15 +445,20 @@ async function processBatchRuns(ctx: { db: any }, batchId: any) {
     .withIndex('by_batchId', (q: any) => q.eq('batchId', batchId))
     .collect()
 
-  const summary = aggregateBatchSummary(finalRuns as Array<{ status: string, stats: SourceRunStats }>)
+  const summary = aggregateBatchSummary(
+    finalRuns as Array<{ status: string; stats: SourceRunStats }>,
+  )
   const changedCount = summary.itemsNew + summary.itemsChanged
-  const terminalStatus = finalRuns.length === 0
-    ? 'completed'
-    : (summary.sourcesFailed === finalRuns.length && summary.sourcesSucceeded === 0 && summary.sourcesPartial === 0)
+  const terminalStatus =
+    finalRuns.length === 0
+      ? 'completed'
+      : summary.sourcesFailed === finalRuns.length &&
+          summary.sourcesSucceeded === 0 &&
+          summary.sourcesPartial === 0
         ? 'failed'
         : changedCount > 0
-            ? 'sync_pending'
-            : 'completed'
+          ? 'sync_pending'
+          : 'completed'
 
   await ctx.db.patch(batchId, {
     status: terminalStatus,
@@ -424,23 +469,28 @@ async function processBatchRuns(ctx: { db: any }, batchId: any) {
   return await ctx.db.get(batchId)
 }
 
-async function createOrReuseAndProcessBatch(ctx: { db: any }, input: {
-  trigger: 'manual' | 'scheduled'
-  now: number
-  scheduledFor: number
-  sourceIds?: any[]
-  includeOnlyDue: boolean
-  idempotencyKey: string
-  force?: boolean
-  requestedByUserId?: string
-  requestedByEmail?: string
-}) {
+async function createOrReuseBatch(
+  ctx: MutationCtx,
+  mode: 'prepare' | 'process',
+  input: {
+    trigger: 'manual' | 'scheduled'
+    now: number
+    scheduledFor: number
+    sourceIds?: Id<'sources'>[]
+    includeOnlyDue: boolean
+    idempotencyKey: string
+    force?: boolean
+    requestedByUserId?: string
+    requestedByEmail?: string
+  },
+) {
   const idempotencyKey = toSafeString(input.idempotencyKey)
   if (!idempotencyKey) {
     throw new Error('idempotencyKey is required')
   }
 
   const existing = await getLatestBatchByIdempotencyKey(ctx, idempotencyKey)
+  if (existing) await requireWebsiteBatch(ctx, existing._id)
   if (existing && !input.force) {
     if (isBatchActive(existing.status)) {
       return batchIdempotencyResult(existing, true, 'active')
@@ -468,61 +518,10 @@ async function createOrReuseAndProcessBatch(ctx: { db: any }, input: {
     requestedByEmail: input.requestedByEmail,
   })
 
-  const batch = await processBatchRuns(ctx, batchId)
+  const batch =
+    mode === 'process' ? await processBatchRuns(ctx, batchId) : await ctx.db.get(batchId)
   if (!batch) {
-    throw new Error('Failed to load processed batch')
-  }
-
-  return batchIdempotencyResult(batch, false, 'created')
-}
-
-async function createOrReuseBatchOnly(ctx: { db: any }, input: {
-  trigger: 'manual' | 'scheduled'
-  now: number
-  scheduledFor: number
-  sourceIds?: any[]
-  includeOnlyDue: boolean
-  idempotencyKey: string
-  force?: boolean
-  requestedByUserId?: string
-  requestedByEmail?: string
-}) {
-  const idempotencyKey = toSafeString(input.idempotencyKey)
-  if (!idempotencyKey) {
-    throw new Error('idempotencyKey is required')
-  }
-
-  const existing = await getLatestBatchByIdempotencyKey(ctx, idempotencyKey)
-  if (existing && !input.force) {
-    if (isBatchActive(existing.status)) {
-      return batchIdempotencyResult(existing, true, 'active')
-    }
-    return batchIdempotencyResult(existing, true, 'terminal')
-  }
-
-  const sources = await selectSourcesForBatch(ctx, {
-    now: input.now,
-    sourceIds: input.sourceIds,
-    includeOnlyDue: input.includeOnlyDue,
-  })
-
-  if ((input.sourceIds?.length ?? 0) > 0 && sources.length === 0) {
-    throw new Error('No approved + enabled sources matched the requested sourceIds')
-  }
-
-  const batchId = await createBatchWithQueuedRuns(ctx, {
-    now: input.now,
-    scheduledFor: input.scheduledFor,
-    trigger: input.trigger,
-    idempotencyKey,
-    sources,
-    requestedByUserId: input.requestedByUserId,
-    requestedByEmail: input.requestedByEmail,
-  })
-
-  const batch = await ctx.db.get(batchId)
-  if (!batch) {
-    throw new Error('Failed to load prepared batch')
+    throw new Error(`Failed to load ${mode === 'process' ? 'processed' : 'prepared'} batch`)
   }
 
   return batchIdempotencyResult(batch, false, 'created')
@@ -576,7 +575,7 @@ const sourceItemStatusValidator = v.union(
 )
 
 const sourceItemUpsertValidator = v.object({
-  itemType: v.union(v.literal('web_page'), v.literal('youtube_video')),
+  itemType: v.literal('web_page'),
   externalId: v.string(),
   canonicalUrl: v.string(),
   title: v.optional(v.string()),
@@ -601,23 +600,25 @@ const aiSearchSyncJobStatusValidator = v.union(
   v.literal('timeout'),
 )
 
+const manualBatchArgs = {
+  idempotencyKey: v.string(),
+  sourceIds: v.optional(v.array(v.id('sources'))),
+  force: v.optional(v.boolean()),
+  actorUserId: v.string(),
+  actorEmail: v.optional(v.string()),
+  scheduledFor: v.optional(v.number()),
+}
+
 export const runManualBatchAsNuxtAdmin = internalMutation({
-  args: {
-    idempotencyKey: v.string(),
-    sourceIds: v.optional(v.array(v.id('sources'))),
-    force: v.optional(v.boolean()),
-    actorUserId: v.string(),
-    actorEmail: v.optional(v.string()),
-    scheduledFor: v.optional(v.number()),
-  },
+  args: manualBatchArgs,
   handler: async (ctx, args) => {
     const now = Date.now()
-    return await createOrReuseAndProcessBatch(ctx, {
+    return await createOrReuseBatch(ctx, 'process', {
       trigger: 'manual',
       now,
       scheduledFor: args.scheduledFor ?? now,
       sourceIds: args.sourceIds,
-      includeOnlyDue: !(args.sourceIds?.length),
+      includeOnlyDue: !args.sourceIds?.length,
       idempotencyKey: args.idempotencyKey,
       force: args.force,
       requestedByUserId: args.actorUserId,
@@ -634,7 +635,7 @@ export const runScheduledBatch = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    return await createOrReuseAndProcessBatch(ctx, {
+    return await createOrReuseBatch(ctx, 'process', {
       trigger: 'scheduled',
       now,
       scheduledFor: args.scheduledFor ?? now,
@@ -646,22 +647,15 @@ export const runScheduledBatch = internalMutation({
 })
 
 export const prepareManualBatchAsNuxtAdmin = internalMutation({
-  args: {
-    idempotencyKey: v.string(),
-    sourceIds: v.optional(v.array(v.id('sources'))),
-    force: v.optional(v.boolean()),
-    actorUserId: v.string(),
-    actorEmail: v.optional(v.string()),
-    scheduledFor: v.optional(v.number()),
-  },
+  args: manualBatchArgs,
   handler: async (ctx, args) => {
     const now = Date.now()
-    return await createOrReuseBatchOnly(ctx, {
+    return await createOrReuseBatch(ctx, 'prepare', {
       trigger: 'manual',
       now,
       scheduledFor: args.scheduledFor ?? now,
       sourceIds: args.sourceIds,
-      includeOnlyDue: !(args.sourceIds?.length),
+      includeOnlyDue: !args.sourceIds?.length,
       idempotencyKey: args.idempotencyKey,
       force: args.force,
       requestedByUserId: args.actorUserId,
@@ -678,7 +672,7 @@ export const prepareScheduledBatch = internalMutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now()
-    return await createOrReuseBatchOnly(ctx, {
+    return await createOrReuseBatch(ctx, 'prepare', {
       trigger: 'scheduled',
       now,
       scheduledFor: args.scheduledFor ?? now,
@@ -694,6 +688,7 @@ export const startBatchExecutionFromNuxt = internalMutation({
     batchId: v.id('ingestion_batches'),
   },
   handler: async (ctx, args) => {
+    await requireWebsiteBatch(ctx, args.batchId)
     const batch = await ctx.db.get(args.batchId)
     if (!batch) {
       throw new Error('Batch not found')
@@ -730,6 +725,7 @@ export const getBatchExecutionPlanFromNuxt = internalQuery({
     batchId: v.id('ingestion_batches'),
   },
   handler: async (ctx, args) => {
+    await requireWebsiteBatch(ctx, args.batchId)
     const batch = await ctx.db.get(args.batchId)
     if (!batch) {
       return null
@@ -784,6 +780,7 @@ export const markSourceRunStartedFromNuxt = internalMutation({
     if (!sourceRun) {
       throw new Error('Source run not found')
     }
+    await requireWebsiteSource(ctx, sourceRun.sourceId)
 
     if (['succeeded', 'partial', 'failed', 'cancelled'].includes(sourceRun.status)) {
       return {
@@ -821,15 +818,18 @@ export const completeSourceRunFromNuxt = internalMutation({
     if (!sourceRun) {
       throw new Error('Source run not found')
     }
+    await requireWebsiteSource(ctx, sourceRun.sourceId)
 
-    const source = await ctx.db.get(sourceRun.sourceId) as SourceRow | null
+    const source = (await ctx.db.get(sourceRun.sourceId)) as SourceRow | null
     const finishedAt = args.finishedAt ?? Date.now()
 
     if (source) {
       for (const item of args.sourceItemUpserts ?? []) {
         const existing = await ctx.db
           .query('source_items')
-          .withIndex('by_sourceId_externalId', (q: any) => q.eq('sourceId', sourceRun.sourceId).eq('externalId', item.externalId))
+          .withIndex('by_sourceId_externalId', (q: any) =>
+            q.eq('sourceId', sourceRun.sourceId).eq('externalId', item.externalId),
+          )
           .first()
 
         const patch = {
@@ -854,8 +854,7 @@ export const completeSourceRunFromNuxt = internalMutation({
 
         if (existing) {
           await ctx.db.patch(existing._id, patch)
-        }
-        else {
+        } else {
           await ctx.db.insert('source_items', patch)
         }
       }
@@ -895,6 +894,7 @@ export const finalizeBatchExecutionFromNuxt = internalMutation({
     finishedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    await requireWebsiteBatch(ctx, args.batchId)
     const batch = await ctx.db.get(args.batchId)
     if (!batch) {
       throw new Error('Batch not found')
@@ -905,15 +905,20 @@ export const finalizeBatchExecutionFromNuxt = internalMutation({
       .withIndex('by_batchId', (q: any) => q.eq('batchId', args.batchId))
       .collect()
 
-    const summary = aggregateBatchSummary(finalRuns as Array<{ status: string, stats: SourceRunStats }>)
+    const summary = aggregateBatchSummary(
+      finalRuns as Array<{ status: string; stats: SourceRunStats }>,
+    )
     const changedCount = summary.itemsNew + summary.itemsChanged
-    const terminalStatus = finalRuns.length === 0
-      ? 'completed'
-      : (summary.sourcesFailed === finalRuns.length && summary.sourcesSucceeded === 0 && summary.sourcesPartial === 0)
+    const terminalStatus =
+      finalRuns.length === 0
+        ? 'completed'
+        : summary.sourcesFailed === finalRuns.length &&
+            summary.sourcesSucceeded === 0 &&
+            summary.sourcesPartial === 0
           ? 'failed'
           : changedCount > 0
-              ? 'sync_pending'
-              : 'completed'
+            ? 'sync_pending'
+            : 'completed'
 
     const finishedAt = args.finishedAt ?? Date.now()
 
@@ -938,43 +943,8 @@ export const createOrReuseAiSearchSyncJobForBatchFromNuxt = internalMutation({
   args: {
     batchId: v.id('ingestion_batches'),
   },
-  handler: async (ctx, args) => {
-    const batch = await ctx.db.get(args.batchId)
-    if (!batch) {
-      throw new Error('Batch not found')
-    }
-
-    if (batch.syncJobId) {
-      const existing = await ctx.db.get(batch.syncJobId)
-      if (existing) {
-        return {
-          ok: true,
-          reused: true,
-          syncJob: existing,
-          syncJobId: existing._id,
-          batchStatus: batch.status,
-        }
-      }
-    }
-
-    const syncJobId = await ctx.db.insert('ai_search_sync_jobs', {
-      batchId: args.batchId,
-      status: 'queued',
-      attempts: 0,
-    })
-
-    await ctx.db.patch(args.batchId, {
-      syncJobId,
-    })
-
-    const syncJob = await ctx.db.get(syncJobId)
-    return {
-      ok: true,
-      reused: false,
-      syncJob,
-      syncJobId,
-      batchStatus: batch.status,
-    }
+  handler: () => {
+    throw new Error('AI Search is disabled pending provider and corpus approval')
   },
 })
 
@@ -984,32 +954,8 @@ export const markAiSearchSyncJobSubmittedFromNuxt = internalMutation({
     cloudflareJobId: v.optional(v.string()),
     submittedAt: v.optional(v.number()),
   },
-  handler: async (ctx, args) => {
-    const syncJob = await ctx.db.get(args.syncJobId)
-    if (!syncJob) {
-      throw new Error('Sync job not found')
-    }
-
-    const submittedAt = args.submittedAt ?? Date.now()
-    await ctx.db.patch(args.syncJobId, {
-      status: 'submitted',
-      cloudflareJobId: args.cloudflareJobId ?? syncJob.cloudflareJobId,
-      submittedAt,
-      attempts: (syncJob.attempts ?? 0) + 1,
-      lastPolledAt: submittedAt,
-      error: undefined,
-    })
-
-    await ctx.db.patch(syncJob.batchId, {
-      status: 'syncing',
-    })
-
-    return {
-      ok: true,
-      syncJobId: args.syncJobId,
-      batchId: syncJob.batchId,
-      submittedAt,
-    }
+  handler: () => {
+    throw new Error('AI Search is disabled pending provider and corpus approval')
   },
 })
 
@@ -1023,59 +969,18 @@ export const updateAiSearchSyncJobFromNuxt = internalMutation({
     error: v.optional(v.string()),
     logSummary: v.optional(v.array(v.string())),
   },
-  handler: async (ctx, args) => {
-    const syncJob = await ctx.db.get(args.syncJobId)
-    if (!syncJob) {
-      throw new Error('Sync job not found')
-    }
-
-    const patch: Record<string, unknown> = {
-      status: args.status,
-      cloudflareJobId: args.cloudflareJobId ?? syncJob.cloudflareJobId,
-      lastPolledAt: args.lastPolledAt ?? Date.now(),
-    }
-
-    if (args.status === 'succeeded' || args.status === 'failed' || args.status === 'timeout') {
-      patch.finishedAt = args.finishedAt ?? Date.now()
-    }
-
-    if (args.error !== undefined) {
-      patch.error = args.error
-    }
-
-    if (args.logSummary !== undefined) {
-      patch.logSummary = args.logSummary
-    }
-
-    await ctx.db.patch(args.syncJobId, patch)
-
-    const batchStatus = args.status === 'succeeded'
-      ? 'completed'
-      : args.status === 'failed' || args.status === 'timeout'
-        ? 'failed'
-        : 'syncing'
-
-    await ctx.db.patch(syncJob.batchId, {
-      status: batchStatus,
-      finishedAt: batchStatus === 'syncing' ? undefined : (args.finishedAt ?? Date.now()),
-    })
-
-    return {
-      ok: true,
-      syncJobId: args.syncJobId,
-      batchId: syncJob.batchId,
-      batchStatus,
-      syncStatus: args.status,
-    }
+  handler: () => {
+    throw new Error('AI Search is disabled pending provider and corpus approval')
   },
 })
 
-export const listBatchesAsNuxtAdmin = internalQuery({
+export const listBatchesAsNuxtAdmin = query({
   args: {
     limit: v.optional(v.number()),
     status: v.optional(batchStatusValidator),
   },
   handler: async (ctx, args) => {
+    await requireRagAdmin(ctx)
     let rows = await ctx.db.query('ingestion_batches').collect()
 
     if (args.status) {
@@ -1096,11 +1001,12 @@ export const listBatchesAsNuxtAdmin = internalQuery({
   },
 })
 
-export const getBatchDetailAsNuxtAdmin = internalQuery({
+export const getBatchDetailAsNuxtAdmin = query({
   args: {
     batchId: v.id('ingestion_batches'),
   },
   handler: async (ctx, args) => {
+    await requireRagAdmin(ctx)
     const batch = await ctx.db.get(args.batchId)
     if (!batch) {
       return null
@@ -1113,7 +1019,7 @@ export const getBatchDetailAsNuxtAdmin = internalQuery({
 
     sourceRuns.sort((a: any, b: any) => a._creationTime - b._creationTime)
 
-    const sourceMap = new Map<string, { _id: any, name: string, type: string }>()
+    const sourceMap = new Map<string, { _id: any; name: string; type: string }>()
     for (const run of sourceRuns) {
       const key = String(run.sourceId)
       if (sourceMap.has(key)) {
@@ -1153,6 +1059,7 @@ export const queueSourceRunRetryScaffold = internalMutation({
     if (!sourceRun) {
       throw new Error('Source run not found')
     }
+    await requireWebsiteSource(ctx, sourceRun.sourceId)
 
     if (sourceRun.status !== 'failed') {
       throw new Error('Only failed source runs can be queued for retry')
@@ -1162,7 +1069,7 @@ export const queueSourceRunRetryScaffold = internalMutation({
       throw new Error('Max attempts reached for source run')
     }
 
-    const nextRetryAt = Date.now() + (60 * 1000)
+    const nextRetryAt = Date.now() + 60 * 1000
     await ctx.db.patch(args.sourceRunId, {
       nextRetryAt,
     })

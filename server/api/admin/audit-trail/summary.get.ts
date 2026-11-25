@@ -2,9 +2,7 @@ import { requireAdminSession } from '../../../utils/auth/requireAdminSession'
 import { getAuditTrailSummary } from '../../../utils/audit/auditTrailService'
 
 export default defineEventHandler(async (event) => {
-  await requireAdminSession(event, {
-    allowBootstrapFromAllowlist: true,
-  })
+  const { convex } = await requireAdminSession(event)
 
-  return await getAuditTrailSummary()
+  return await getAuditTrailSummary(convex)
 })
