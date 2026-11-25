@@ -1,3 +1,4 @@
+import { throwSourceError } from '../../../../utils/admin/sourceError'
 import { anyApi } from 'convex/server'
 
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
@@ -14,7 +15,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const result = await convex.mutation((anyApi as any).ragSources.removeSource, { sourceId })
+  const result = await convex
+    .mutation((anyApi as any).ragSources.removeSource, { sourceId })
+    .catch(throwSourceError)
 
   return {
     ok: true,

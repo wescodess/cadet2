@@ -266,7 +266,8 @@ export const createSourceSubmission = mutation({
 
     const schedule = normalizeSchedule(args.schedule)
     const type = args.type
-    if (type === 'youtube_channel') throw new Error('YouTube ingestion is frozen')
+    if (type === 'youtube_channel')
+      throw new ConvexError({ code: 'YOUTUBE_FROZEN', message: 'YouTube ingestion is frozen' })
 
     if (!args.websiteConfig) throw new Error('websiteConfig is required for website sources')
     const crawlConfig = sanitizeWebsiteConfig(args.websiteConfig)
@@ -345,7 +346,7 @@ export const updateSourceConfig = mutation({
       source.type === 'youtube_channel' &&
       (args.enabled === true || args.schedule || args.youtubeConfig)
     ) {
-      throw new Error('YouTube ingestion is frozen')
+      throw new ConvexError({ code: 'YOUTUBE_FROZEN', message: 'YouTube ingestion is frozen' })
     }
 
     const patch: Record<string, unknown> = {
@@ -432,7 +433,8 @@ export const approveSource = mutation({
       throw new Error('Source not found')
     }
 
-    if (source.type === 'youtube_channel') throw new Error('YouTube ingestion is frozen')
+    if (source.type === 'youtube_channel')
+      throw new ConvexError({ code: 'YOUTUBE_FROZEN', message: 'YouTube ingestion is frozen' })
 
     const now = Date.now()
     const schedule = args.schedule
@@ -555,7 +557,8 @@ export const resumeSource = mutation({
       throw new Error('Source not found')
     }
 
-    if (source.type === 'youtube_channel') throw new Error('YouTube ingestion is frozen')
+    if (source.type === 'youtube_channel')
+      throw new ConvexError({ code: 'YOUTUBE_FROZEN', message: 'YouTube ingestion is frozen' })
 
     const now = Date.now()
     const schedule = source.schedule as {
@@ -594,7 +597,10 @@ export const removeSource = mutation({
     }
 
     if (source.type === 'youtube_channel')
-      throw new Error('YouTube history is restricted pending retention review')
+      throw new ConvexError({
+        code: 'YOUTUBE_FROZEN',
+        message: 'YouTube history is restricted pending retention review',
+      })
 
     const sourceItems = await ctx.db
       .query('source_items')

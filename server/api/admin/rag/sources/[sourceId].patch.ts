@@ -1,3 +1,4 @@
+import { throwSourceError } from '../../../../utils/admin/sourceError'
 import { anyApi } from 'convex/server'
 
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
@@ -33,11 +34,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await convex.mutation((anyApi as any).ragSources.updateSourceConfig, {
-    sourceId,
-    ...parsed.data,
-    description: parsed.data.description === null ? '' : parsed.data.description,
-  })
+  await convex
+    .mutation((anyApi as any).ragSources.updateSourceConfig, {
+      sourceId,
+      ...parsed.data,
+      description: parsed.data.description === null ? '' : parsed.data.description,
+    })
+    .catch(throwSourceError)
 
   const detail = (await convex.query((anyApi as any).ragSources.getSource, { sourceId })) as {
     source: Record<string, unknown> | null

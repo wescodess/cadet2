@@ -87,3 +87,11 @@ Six additional mandatory cases bring `security:admin` to 76: four built-HTTP net
 ## Stage B audit corrections
 
 Stage B round 1 added six mandatory cases, bringing `security:admin` to 82. Round 2 adds two more, bringing it to 84. Round 3 replaces the sparse-filter case with two cases at 600 and 2,100 newer non-matching events, bringing it to 85 (80 runtime cases in 10 groups plus 5 launcher cases). The detail route decodes the event ID the audit page encodes, so evidence-source events open from the page; malformed encodings return 400. Every combination of actor, action type and entity ID filters reads an ordered compound Convex index, so filtered pages return their matches without depending on a scan budget. Only free-text search is filtered after the index read, and it resumes across bounded scans. Non-source action types skip the source store. Browser checks open audit pages directly and wait for Nuxt's deferred app-manifest fetch before leaving a page, so no document is discarded with that request in flight.
+
+## Private errors and frozen YouTube conflicts
+
+Successful server admission marks only the request context. A root Nitro error handler wraps Nuxt's existing error renderer and Nitro's JSON defaults so admitted errors, including 404 page documents and API responses, retain `Cache-Control: private, no-store`. The marker carries no session fields and is not added to error data. Denied requests continue through the existing redirect/error handling.
+
+Frozen YouTube submission, enable/schedule/config changes, approval, resume and deletion throw a structured Convex error before writing. The five source HTTP routes map `YOUTUBE_FROZEN` to HTTP **409 Conflict**, status message `YouTube source actions are frozen`, and `data.code: YOUTUBE_FROZEN`. This is a deliberate unavailable action, so retrying the same action cannot enable ingestion or remove retained history. Other error codes retain their existing behavior, including create-receipt conflicts.
+
+Three additional mandatory native cases bring `security:admin` to **88** (83 runtime cases in 10 groups plus 5 launcher cases). They cover admitted private 404 documents and JSON, non-404 errors and denied redirects, and all seven frozen actions across the five routes with unchanged source and audit state.

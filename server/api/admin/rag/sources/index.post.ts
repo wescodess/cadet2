@@ -1,5 +1,5 @@
+import { throwSourceError } from '../../../../utils/admin/sourceError'
 import { api } from '../../../../../convex/_generated/api'
-import { ConvexError } from 'convex/values'
 import { requireIdempotencyKey } from '../../../../utils/admin/createReceipt'
 import { requireAdminSession } from '../../../../utils/auth/requireAdminSession'
 import { createEvidenceSourceSchema } from '../../../../utils/admin/evidenceSourceSchema'
@@ -21,29 +21,13 @@ export default defineEventHandler(async (event) => {
   }
 
   const idempotencyKey = requireIdempotencyKey(event)
-  try {
-    const result = await convex.mutation(api.ragSources.createSourceSubmission, {
+  const result = await convex
+    .mutation(api.ragSources.createSourceSubmission, {
       ...parsed.data,
       description: parsed.data.description ?? undefined,
       idempotencyKey,
     })
+    .catch(throwSourceError)
 
-    return {
-      ...result,
-    }
-  } catch (error) {
-    const data: unknown = error instanceof ConvexError ? error.data : null
-    if (
-      typeof data === 'object' &&
-      data !== null &&
-      'code' in data &&
-      data.code === 'IDEMPOTENCY_CONFLICT'
-    ) {
-      throw createError({
-        statusCode: 409,
-        statusMessage: 'Idempotency key was already used with a different payload',
-      })
-    }
-    throw error
-  }
+  return { ...result }
 })

@@ -1,3 +1,4 @@
+import { throwSourceError } from '../../../../../utils/admin/sourceError'
 import { anyApi } from 'convex/server'
 import { requireAdminSession } from '../../../../../utils/auth/requireAdminSession'
 import { resumeEvidenceSourceActionSchema } from '../../../../../utils/admin/evidenceSourceSchema'
@@ -27,10 +28,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const result = await convex.mutation((anyApi as any).ragSources.resumeSource, {
-    sourceId,
-    note: parsed.data.note,
-  })
+  const result = await convex
+    .mutation((anyApi as any).ragSources.resumeSource, {
+      sourceId,
+      note: parsed.data.note,
+    })
+    .catch(throwSourceError)
 
   return {
     ok: true,
