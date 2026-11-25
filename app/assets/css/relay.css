@@ -15,6 +15,7 @@
   --text-chip: var(--chip-fs);
   --text-chip--line-height: 1.25;
   --spacing-pad: var(--pad);
+  --spacing-check-row: var(--check-row, 44px);
   --default-transition-duration: var(--dur-1);
   --default-transition-timing-function: var(--ease);
 }

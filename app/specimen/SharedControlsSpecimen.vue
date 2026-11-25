@@ -62,16 +62,16 @@ const id = (name: string) => `${props.idPrefix}-${name}`
           <option>First option</option>
         </NativeSelect>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex min-h-check-row items-center gap-3">
         <Checkbox :id="id('checkbox')" v-model="checked" />
         <Label :for="id('checkbox')">I have checked these details</Label>
       </div>
       <RadioGroup default-value="first" aria-label="Example choices">
-        <div class="flex items-center gap-3">
+        <div class="flex min-h-check-row items-center gap-3">
           <RadioGroupItem :id="id('radio-first')" value="first" />
           <Label :for="id('radio-first')">First choice</Label>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex min-h-check-row items-center gap-3">
           <RadioGroupItem :id="id('radio-second')" value="second" />
           <Label :for="id('radio-second')">Second choice</Label>
         </div>
