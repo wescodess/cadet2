@@ -115,7 +115,11 @@ function readScript(facts: SourceFacts, code: string) {
     if (node.type === 'Identifier' && facts.lucide.has(String(node.name)))
       facts.scriptUses.add(String(node.name))
     const callee = node.type === 'CallExpression' ? (node.callee as AstNode) : undefined
-    if (facts.lucide.size && callee?.type === 'Identifier' && renderFunctions.has(String(callee.name)))
+    if (
+      facts.lucide.size &&
+      callee?.type === 'Identifier' &&
+      renderFunctions.has(String(callee.name))
+    )
       facts.problems.push(
         `${facts.file}: renders through ${String(callee.name)}(), so its stroke cannot be checked`,
       )
