@@ -5,6 +5,7 @@ import type { WorkspaceResolvedAction } from '~/lib/workspace/workspace-summary'
 import type { WorkspaceSummary } from '~~/shared/types/workspace-summary'
 
 import { ArrowRight, Clock3, GitCompareArrows, History, Sparkles } from 'lucide-vue-next'
+import { interfaceIconStroke } from '~/lib/relay/icons'
 import { computed } from 'vue'
 
 import {
@@ -55,14 +56,14 @@ function handlePrimaryAction() {
               variant="outline"
               class="rounded-full border-accent bg-accent px-3 py-1 text-primary"
             >
-              <Sparkles class="mr-2 size-3.5" />
+              <Sparkles :stroke-width="interfaceIconStroke" class="mr-2 size-3.5" />
               {{ getWorkspaceStateLabel(summary) }}
             </Badge>
             <Badge
               variant="outline"
               class="rounded-full border-slate-200 bg-slate-50 px-3 py-1 text-slate-700"
             >
-              <Clock3 class="mr-2 size-3.5" />
+              <Clock3 :stroke-width="interfaceIconStroke" class="mr-2 size-3.5" />
               {{ formatWorkspaceSummaryTimestamp(lastActivity?.occurredAt) }}
             </Badge>
           </div>
@@ -83,7 +84,7 @@ function handlePrimaryAction() {
           @click="handlePrimaryAction"
         >
           {{ primaryAction.label }}
-          <ArrowRight class="size-4" />
+          <ArrowRight :stroke-width="interfaceIconStroke" class="size-4" />
         </Button>
       </div>
 
@@ -93,7 +94,7 @@ function handlePrimaryAction() {
             <div
               class="flex size-10 items-center justify-center rounded-2xl bg-accent text-primary"
             >
-              <History class="size-4" />
+              <History :stroke-width="interfaceIconStroke" class="size-4" />
             </div>
             <div>
               <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -111,7 +112,7 @@ function handlePrimaryAction() {
             <div
               class="flex size-10 items-center justify-center rounded-2xl bg-positive-soft text-positive"
             >
-              <Sparkles class="size-4" />
+              <Sparkles :stroke-width="interfaceIconStroke" class="size-4" />
             </div>
             <div>
               <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -129,7 +130,7 @@ function handlePrimaryAction() {
             <div
               class="flex size-10 items-center justify-center rounded-2xl bg-caution-soft text-caution"
             >
-              <GitCompareArrows class="size-4" />
+              <GitCompareArrows :stroke-width="interfaceIconStroke" class="size-4" />
             </div>
             <div>
               <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">

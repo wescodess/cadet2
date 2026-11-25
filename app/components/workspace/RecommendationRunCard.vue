@@ -2,6 +2,7 @@
 import type { RecommendationRunSummary } from '~/lib/workspace/recommendation-run-history'
 
 import { ChevronDown, Clock3, Eye, GitCompareArrows, Lock } from 'lucide-vue-next'
+import { interfaceIconStroke } from '~/lib/relay/icons'
 import { computed, ref } from 'vue'
 
 import RunStatusBadge from '~/components/workspace/RunStatusBadge.vue'
@@ -110,7 +111,11 @@ function emitCompareRuns() {
         :aria-controls="panelId"
         @click="toggleExpanded"
       >
-        <ChevronDown class="size-4 transition-transform" :class="isExpanded ? 'rotate-180' : ''" />
+        <ChevronDown
+          :stroke-width="interfaceIconStroke"
+          class="size-4 transition-transform"
+          :class="isExpanded ? 'rotate-180' : ''"
+        />
         <span class="sr-only">Toggle archived run details</span>
       </Button>
     </div>
@@ -118,7 +123,11 @@ function emitCompareRuns() {
     <div :id="panelId" class="mt-4 space-y-4" :class="isExpanded ? 'block' : 'hidden md:block'">
       <div class="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4">
         <div class="flex items-start gap-3">
-          <Clock3 class="mt-0.5 size-4 shrink-0 text-slate-500" aria-hidden="true" />
+          <Clock3
+            :stroke-width="interfaceIconStroke"
+            class="mt-0.5 size-4 shrink-0 text-slate-500"
+            aria-hidden="true"
+          />
           <p
             class="text-sm leading-relaxed text-slate-700"
             :class="!props.run.isAvailable ? 'text-slate-500' : ''"
@@ -133,7 +142,11 @@ function emitCompareRuns() {
         data-testid="run-unavailable-reason"
         class="flex items-start gap-2 text-sm text-slate-600"
       >
-        <Lock class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+        <Lock
+          :stroke-width="interfaceIconStroke"
+          class="mt-0.5 size-4 shrink-0"
+          aria-hidden="true"
+        />
         <span>{{
           props.run.unavailableReason || 'Archived run data is no longer available.'
         }}</span>
@@ -146,7 +159,7 @@ function emitCompareRuns() {
           class="min-h-[44px] w-full justify-center rounded-xl border-slate-300 bg-white text-slate-900 hover:bg-slate-100"
           @click="emit('view-results', props.run.id)"
         >
-          <Eye class="size-4" />
+          <Eye :stroke-width="interfaceIconStroke" class="size-4" />
           View Results
         </Button>
 
@@ -157,7 +170,7 @@ function emitCompareRuns() {
           class="min-h-[44px] w-full justify-center rounded-xl border-primary/25 bg-accent text-primary hover:bg-accent/80"
           @click="emitCompareRuns"
         >
-          <GitCompareArrows class="size-4" />
+          <GitCompareArrows :stroke-width="interfaceIconStroke" class="size-4" />
           Compare
         </Button>
       </div>

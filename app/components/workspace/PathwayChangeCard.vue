@@ -9,6 +9,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-vue-next'
+import { interfaceIconStroke } from '~/lib/relay/icons'
 import { computed } from 'vue'
 
 import {
@@ -58,7 +59,12 @@ const badgeIcon = computed(() => {
           class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
           :class="badgeClasses"
         >
-          <component :is="badgeIcon" class="size-3.5" aria-hidden="true" />
+          <component
+            :stroke-width="interfaceIconStroke"
+            :is="badgeIcon"
+            class="size-3.5"
+            aria-hidden="true"
+          />
           <span>{{ presentation.label }}</span>
         </div>
 
@@ -83,7 +89,11 @@ const badgeIcon = computed(() => {
           >
             {{ formatTierLabel(props.change.beforeTier) }}
           </Badge>
-          <ArrowRight class="size-4 text-slate-400" aria-hidden="true" />
+          <ArrowRight
+            :stroke-width="interfaceIconStroke"
+            class="size-4 text-slate-400"
+            aria-hidden="true"
+          />
           <Badge variant="outline" class="rounded-full border-primary/20 bg-accent text-primary">
             {{ formatTierLabel(props.change.afterTier) }}
           </Badge>

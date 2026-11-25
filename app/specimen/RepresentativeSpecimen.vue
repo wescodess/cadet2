@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CircleAlert } from 'lucide-vue-next'
+import { interfaceIconStroke } from '~/lib/relay/icons'
 
 import { Button } from '~/components/ui/button'
 import FieldDescription from '~/components/ui/field/FieldDescription.vue'
@@ -104,7 +105,7 @@ const rows = [
           <FieldError :id="id('licence-error')">
             <CircleAlert
               :size="18"
-              :stroke-width="1.75"
+              :stroke-width="interfaceIconStroke"
               class="mt-0.5 shrink-0"
               aria-hidden="true"
             />

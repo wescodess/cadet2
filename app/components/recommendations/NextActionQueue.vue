@@ -6,16 +6,20 @@ import type {
 } from '~/lib/recommendations/comparison'
 
 import { ChevronDown } from 'lucide-vue-next'
+import { interfaceIconStroke } from '~/lib/relay/icons'
 
-const props = withDefaults(defineProps<{
-  plan?: RecommendationNextStepPlan | null
-  actions?: RecommendationImprovementAction[]
-  panelIdBase?: string
-}>(), {
-  plan: null,
-  actions: () => [],
-  panelIdBase: 'recommendation-next-step-plan',
-})
+const props = withDefaults(
+  defineProps<{
+    plan?: RecommendationNextStepPlan | null
+    actions?: RecommendationImprovementAction[]
+    panelIdBase?: string
+  }>(),
+  {
+    plan: null,
+    actions: () => [],
+    panelIdBase: 'recommendation-next-step-plan',
+  },
+)
 
 const isMobilePlanOpen = ref(false)
 
@@ -44,7 +48,8 @@ const resolvedPlan = computed<RecommendationNextStepPlan>(() => {
     .map((action, index) => ({
       id: action.id,
       title: action.title,
-      detail: `${action.detail}${action.expectedImpact ? ` Expected impact: ${action.expectedImpact}` : ''}`.trim(),
+      detail:
+        `${action.detail}${action.expectedImpact ? ` Expected impact: ${action.expectedImpact}` : ''}`.trim(),
       priority: action.priority,
       sequence: index + 1,
     }))
@@ -94,14 +99,9 @@ function toggleMobilePlan() {
     class="rounded-lg border border-slate-200 bg-white p-3"
     aria-label="Recommendation next-step plan"
   >
-    <div
-      data-testid="recommendation-actions-queue"
-      class="space-y-3"
-    >
+    <div data-testid="recommendation-actions-queue" class="space-y-3">
       <div class="space-y-1">
-        <h5 class="text-xs font-semibold uppercase tracking-wide text-slate-600">
-          Next-step plan
-        </h5>
+        <h5 class="text-xs font-semibold uppercase tracking-wide text-slate-600">Next-step plan</h5>
         <p
           data-testid="recommendation-next-step-summary"
           class="text-sm leading-relaxed text-slate-800"
@@ -127,11 +127,10 @@ function toggleMobilePlan() {
         :aria-controls="detailsPanelId"
         @click="toggleMobilePlan"
       >
-        <span class="text-sm text-slate-700">
-          Show ordered next steps
-        </span>
+        <span class="text-sm text-slate-700"> Show ordered next steps </span>
 
         <ChevronDown
+          :stroke-width="interfaceIconStroke"
           class="size-4 shrink-0 text-slate-500 transition-transform"
           :class="isMobilePlanOpen ? 'rotate-180' : ''"
         />
@@ -165,10 +164,7 @@ function toggleMobilePlan() {
         </li>
       </ol>
 
-      <p
-        v-else
-        class="text-sm leading-relaxed text-slate-600"
-      >
+      <p v-else class="text-sm leading-relaxed text-slate-600">
         No next-step plan is available for this recommendation yet.
       </p>
     </div>

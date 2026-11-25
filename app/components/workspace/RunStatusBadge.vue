@@ -2,6 +2,7 @@
 import type { RecommendationRunHistoryStatus } from '~/lib/workspace/recommendation-run-history'
 
 import { AlertTriangle, CheckCircle2, CircleX } from 'lucide-vue-next'
+import { interfaceIconStroke } from '~/lib/relay/icons'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -40,7 +41,12 @@ const statusConfig = computed(() => {
     class="min-h-[32px] gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
     :class="statusConfig.classes"
   >
-    <component :is="statusConfig.icon" class="size-3.5" aria-hidden="true" />
+    <component
+      :stroke-width="interfaceIconStroke"
+      :is="statusConfig.icon"
+      class="size-3.5"
+      aria-hidden="true"
+    />
     <span>{{ statusConfig.label }}</span>
   </Badge>
 </template>

@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import {
-  ArrowUpDownIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-  SearchIcon,
-} from 'lucide-vue-next'
+import { ArrowUpDownIcon, MoreHorizontalIcon, PlusIcon, SearchIcon } from 'lucide-vue-next'
+import { interfaceIconStroke } from '@/lib/relay/icons'
 
 import PathwayStatusBadge from '@/components/admin/PathwayStatusBadge.vue'
 import {
@@ -27,11 +23,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
-import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableEmpty,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import type {
   CreatePathwayDefinitionPayload,
   PathwayDefinitionRecord,
@@ -47,21 +56,24 @@ import {
 type SortKey = 'pathwayId' | 'displayName' | 'status' | 'updatedAt'
 type SortDirection = 'asc' | 'desc'
 
-const props = withDefaults(defineProps<{
-  items: PathwayDefinitionRecord[]
-  loading?: boolean
-  submitting?: boolean
-  statusUpdatingPathwayId?: string | null
-}>(), {
-  loading: false,
-  submitting: false,
-  statusUpdatingPathwayId: null,
-})
+const props = withDefaults(
+  defineProps<{
+    items: PathwayDefinitionRecord[]
+    loading?: boolean
+    submitting?: boolean
+    statusUpdatingPathwayId?: string | null
+  }>(),
+  {
+    loading: false,
+    submitting: false,
+    statusUpdatingPathwayId: null,
+  },
+)
 
 const emit = defineEmits<{
   (event: 'create', payload: CreatePathwayDefinitionPayload): void
-  (event: 'edit', payload: { pathwayId: string, values: UpdatePathwayDefinitionPayload }): void
-  (event: 'update-status', payload: { pathwayId: string, status: PathwayDefinitionStatus }): void
+  (event: 'edit', payload: { pathwayId: string; values: UpdatePathwayDefinitionPayload }): void
+  (event: 'update-status', payload: { pathwayId: string; status: PathwayDefinitionStatus }): void
 }>()
 
 const searchQuery = ref('')
@@ -95,9 +107,11 @@ const filteredItems = computed(() => {
         return true
       }
 
-      return item.pathwayId.toLowerCase().includes(normalizedSearch)
-        || item.displayName.toLowerCase().includes(normalizedSearch)
-        || (item.description || '').toLowerCase().includes(normalizedSearch)
+      return (
+        item.pathwayId.toLowerCase().includes(normalizedSearch) ||
+        item.displayName.toLowerCase().includes(normalizedSearch) ||
+        (item.description || '').toLowerCase().includes(normalizedSearch)
+      )
     })
     .sort((left, right) => {
       if (!sortKey.value) {
@@ -107,7 +121,9 @@ const filteredItems = computed(() => {
       const direction = sortDirection.value === 'asc' ? 1 : -1
 
       if (sortKey.value === 'updatedAt') {
-        return (new Date(left.updatedAt).getTime() - new Date(right.updatedAt).getTime()) * direction
+        return (
+          (new Date(left.updatedAt).getTime() - new Date(right.updatedAt).getTime()) * direction
+        )
       }
 
       return String(left[sortKey.value]).localeCompare(String(right[sortKey.value])) * direction
@@ -174,8 +190,7 @@ function submitForm() {
       description: description || null,
       status: form.status,
     })
-  }
-  else {
+  } else {
     emit('edit', {
       pathwayId,
       values: {
@@ -238,10 +253,15 @@ watch(dialogOpen, (isOpen) => {
 
 <template>
   <section class="space-y-5">
-    <div class="relative flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm">
+    <div
+      class="relative flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm"
+    >
       <div class="flex flex-col gap-3 md:flex-row md:items-center">
         <div class="relative flex-1">
-          <SearchIcon class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <SearchIcon
+            :stroke-width="interfaceIconStroke"
+            class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+          />
           <Input
             v-model="searchQuery"
             :data-testid="pathwayInventoryTestIds.search"
@@ -254,14 +274,8 @@ watch(dialogOpen, (isOpen) => {
           :data-testid="pathwayInventoryTestIds.statusFilter"
           class="w-full md:w-48"
         >
-          <option value="all">
-            All statuses
-          </option>
-          <option
-            v-for="status in pathwayDefinitionStatusValues"
-            :key="status"
-            :value="status"
-          >
+          <option value="all">All statuses</option>
+          <option v-for="status in pathwayDefinitionStatusValues" :key="status" :value="status">
             {{ formatPathwayStatusLabel(status) }}
           </option>
         </NativeSelect>
@@ -274,7 +288,7 @@ watch(dialogOpen, (isOpen) => {
         size="sm"
         @click="openCreateDialog"
       >
-        <PlusIcon class="size-4" />
+        <PlusIcon :stroke-width="interfaceIconStroke" class="size-4" />
         Add pathway
       </Button>
     </div>
@@ -284,33 +298,59 @@ watch(dialogOpen, (isOpen) => {
         <TableHeader>
           <TableRow class="bg-slate-50/80">
             <TableHead>
-              <button type="button" class="inline-flex items-center gap-1" @click="toggleSort('pathwayId')">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1"
+                @click="toggleSort('pathwayId')"
+              >
                 Pathway ID
-                <ArrowUpDownIcon class="size-3.5 text-slate-500" />
+                <ArrowUpDownIcon
+                  :stroke-width="interfaceIconStroke"
+                  class="size-3.5 text-slate-500"
+                />
               </button>
             </TableHead>
             <TableHead>
-              <button type="button" class="inline-flex items-center gap-1" @click="toggleSort('displayName')">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1"
+                @click="toggleSort('displayName')"
+              >
                 Display name
-                <ArrowUpDownIcon class="size-3.5 text-slate-500" />
+                <ArrowUpDownIcon
+                  :stroke-width="interfaceIconStroke"
+                  class="size-3.5 text-slate-500"
+                />
               </button>
             </TableHead>
             <TableHead>Description</TableHead>
             <TableHead>
-              <button type="button" class="inline-flex items-center gap-1" @click="toggleSort('status')">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1"
+                @click="toggleSort('status')"
+              >
                 Status
-                <ArrowUpDownIcon class="size-3.5 text-slate-500" />
+                <ArrowUpDownIcon
+                  :stroke-width="interfaceIconStroke"
+                  class="size-3.5 text-slate-500"
+                />
               </button>
             </TableHead>
             <TableHead>
-              <button type="button" class="inline-flex items-center gap-1" @click="toggleSort('updatedAt')">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1"
+                @click="toggleSort('updatedAt')"
+              >
                 Updated
-                <ArrowUpDownIcon class="size-3.5 text-slate-500" />
+                <ArrowUpDownIcon
+                  :stroke-width="interfaceIconStroke"
+                  class="size-3.5 text-slate-500"
+                />
               </button>
             </TableHead>
-            <TableHead class="text-right">
-              Actions
-            </TableHead>
+            <TableHead class="text-right"> Actions </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -351,7 +391,7 @@ watch(dialogOpen, (isOpen) => {
                       size="icon"
                       variant="ghost"
                     >
-                      <MoreHorizontalIcon class="size-4" />
+                      <MoreHorizontalIcon :stroke-width="interfaceIconStroke" class="size-4" />
                       <span class="sr-only">Open pathway actions</span>
                     </Button>
                   </DropdownMenuTrigger>
@@ -361,7 +401,9 @@ watch(dialogOpen, (isOpen) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       :disabled="statusUpdatingPathwayId === item.pathwayId"
-                      @click="requestStatusChange(item, item.status === 'active' ? 'inactive' : 'active')"
+                      @click="
+                        requestStatusChange(item, item.status === 'active' ? 'inactive' : 'active')
+                      "
                     >
                       {{ statusActionLabel(item) }}
                     </DropdownMenuItem>
@@ -378,9 +420,7 @@ watch(dialogOpen, (isOpen) => {
           </template>
           <TableEmpty v-else :colspan="6">
             <div :data-testid="pathwayInventoryTestIds.emptyState" class="space-y-2 text-center">
-              <p class="font-semibold text-slate-900">
-                No pathways match your filters.
-              </p>
+              <p class="font-semibold text-slate-900">No pathways match your filters.</p>
               <p class="text-sm text-slate-500">
                 Clear the search or switch the status filter to review the full inventory.
               </p>
@@ -434,12 +474,12 @@ watch(dialogOpen, (isOpen) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" class="w-48">
-                <DropdownMenuItem @click="openEditDialog(item)">
-                  Edit details
-                </DropdownMenuItem>
+                <DropdownMenuItem @click="openEditDialog(item)"> Edit details </DropdownMenuItem>
                 <DropdownMenuItem
                   :disabled="statusUpdatingPathwayId === item.pathwayId"
-                  @click="requestStatusChange(item, item.status === 'active' ? 'inactive' : 'active')"
+                  @click="
+                    requestStatusChange(item, item.status === 'active' ? 'inactive' : 'active')
+                  "
                 >
                   {{ statusActionLabel(item) }}
                 </DropdownMenuItem>
@@ -459,9 +499,7 @@ watch(dialogOpen, (isOpen) => {
         :data-testid="pathwayInventoryTestIds.emptyState"
         class="rounded-2xl border border-dashed border-slate-300 bg-white/90 px-4 py-10 text-center"
       >
-        <p class="font-semibold text-slate-900">
-          No pathways match your filters.
-        </p>
+        <p class="font-semibold text-slate-900">No pathways match your filters.</p>
         <p class="mt-2 text-sm text-slate-500">
           Adjust the search or filter to bring the full inventory back into view.
         </p>
@@ -475,7 +513,8 @@ watch(dialogOpen, (isOpen) => {
             {{ dialogMode === 'create' ? 'Add managed pathway' : 'Edit pathway details' }}
           </DialogTitle>
           <DialogDescription>
-            Keep the inventory to minimum governance fields only. Rule logic and evidence stay in later stories.
+            Keep the inventory to minimum governance fields only. Rule logic and evidence stay in
+            later stories.
           </DialogDescription>
         </DialogHeader>
 
@@ -512,11 +551,7 @@ watch(dialogOpen, (isOpen) => {
           <div v-if="dialogMode === 'create'" class="space-y-2">
             <Label for="pathway-status">Initial status</Label>
             <NativeSelect id="pathway-status" v-model="form.status" class="w-full">
-              <option
-                v-for="status in pathwayDefinitionStatusValues"
-                :key="status"
-                :value="status"
-              >
+              <option v-for="status in pathwayDefinitionStatusValues" :key="status" :value="status">
                 {{ formatPathwayStatusLabel(status) }}
               </option>
             </NativeSelect>
@@ -528,9 +563,7 @@ watch(dialogOpen, (isOpen) => {
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="outline" @click="closeDialog">
-            Cancel
-          </Button>
+          <Button type="button" variant="outline" @click="closeDialog"> Cancel </Button>
           <Button type="button" :disabled="submitting" @click="submitForm">
             {{ dialogMode === 'create' ? 'Create pathway' : 'Save changes' }}
           </Button>
@@ -541,17 +574,14 @@ watch(dialogOpen, (isOpen) => {
     <AlertDialog v-model:open="confirmOpen">
       <AlertDialogContent :data-testid="pathwayInventoryTestIds.confirmDialog">
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Confirm live status change
-          </AlertDialogTitle>
+          <AlertDialogTitle> Confirm live status change </AlertDialogTitle>
           <AlertDialogDescription>
-            {{ confirmTarget?.displayName || 'This pathway' }} is currently active in live recommendation scope. Confirm before changing its status.
+            {{ confirmTarget?.displayName || 'This pathway' }} is currently active in live
+            recommendation scope. Confirm before changing its status.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="confirmTarget = null">
-            Keep pathway live
-          </AlertDialogCancel>
+          <AlertDialogCancel @click="confirmTarget = null"> Keep pathway live </AlertDialogCancel>
           <AlertDialogAction @click="confirmStatusChange">
             Confirm status change
           </AlertDialogAction>

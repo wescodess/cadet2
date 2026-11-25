@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CalendarDays, CircleAlert, ShieldCheck } from 'lucide-vue-next'
+import { interfaceIconStroke } from '@/lib/relay/icons'
 
 import { Badge } from '@/components/ui/badge'
 import {
@@ -75,9 +76,11 @@ function freshnessClasses(value: RecommendationReviewRunSummary['freshness']) {
   <button
     :data-testid="recommendationReviewTestIds.runItem"
     class="w-full rounded-[1.35rem] border p-4 text-left shadow-sm transition"
-    :class="selected
-      ? 'border-[#234c76]/30 bg-[#edf4fb] shadow-md'
-      : 'border-slate-200 bg-white/95 hover:border-slate-300 hover:bg-white'"
+    :class="
+      selected
+        ? 'border-[#234c76]/30 bg-[#edf4fb] shadow-md'
+        : 'border-slate-200 bg-white/95 hover:border-slate-300 hover:bg-white'
+    "
     type="button"
     @click="$emit('select', item.runId)"
   >
@@ -93,10 +96,15 @@ function freshnessClasses(value: RecommendationReviewRunSummary['freshness']) {
 
       <Badge
         :data-testid="recommendationReviewTestIds.runStatusBadge"
-        :class="cn('gap-1.5 border text-[11px] font-semibold uppercase tracking-[0.16em]', statusClasses(item.recommendationStatus))"
+        :class="
+          cn(
+            'gap-1.5 border text-[11px] font-semibold uppercase tracking-[0.16em]',
+            statusClasses(item.recommendationStatus),
+          )
+        "
         variant="outline"
       >
-        <ShieldCheck class="size-3.5" />
+        <ShieldCheck :stroke-width="interfaceIconStroke" class="size-3.5" />
         {{ formatRecommendationRunStatus(item.recommendationStatus) }}
       </Badge>
     </div>
@@ -109,39 +117,35 @@ function freshnessClasses(value: RecommendationReviewRunSummary['freshness']) {
       >
         {{ formatRecommendationReviewState(item.reviewState) }}
       </Badge>
-      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-700">
+      <span
+        class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-700"
+      >
         Confidence {{ item.confidence }}
       </span>
       <span
         class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]"
         :class="freshnessClasses(item.freshness)"
       >
-        <CircleAlert class="size-3.5" />
+        <CircleAlert :stroke-width="interfaceIconStroke" class="size-3.5" />
         {{ formatRecommendationReviewFreshness(item.freshness) }}
       </span>
     </div>
 
     <div class="mt-4 grid grid-cols-3 gap-2 text-xs text-slate-600">
       <div class="rounded-2xl bg-slate-50 px-3 py-2">
-        <p class="uppercase tracking-[0.14em] text-slate-400">
-          Citations
-        </p>
+        <p class="uppercase tracking-[0.14em] text-slate-400">Citations</p>
         <p class="mt-1 text-base font-semibold text-slate-900">
           {{ item.citationCount }}
         </p>
       </div>
       <div class="rounded-2xl bg-slate-50 px-3 py-2">
-        <p class="uppercase tracking-[0.14em] text-slate-400">
-          Flagged
-        </p>
+        <p class="uppercase tracking-[0.14em] text-slate-400">Flagged</p>
         <p class="mt-1 text-base font-semibold text-slate-900">
           {{ item.flaggedCitationCount }}
         </p>
       </div>
       <div class="rounded-2xl bg-slate-50 px-3 py-2">
-        <p class="uppercase tracking-[0.14em] text-slate-400">
-          Caveats
-        </p>
+        <p class="uppercase tracking-[0.14em] text-slate-400">Caveats</p>
         <p class="mt-1 text-base font-semibold text-slate-900">
           {{ item.caveatCount }}
         </p>
@@ -149,7 +153,7 @@ function freshnessClasses(value: RecommendationReviewRunSummary['freshness']) {
     </div>
 
     <div class="mt-4 flex items-center gap-2 text-xs text-slate-500">
-      <CalendarDays class="size-3.5" />
+      <CalendarDays :stroke-width="interfaceIconStroke" class="size-3.5" />
       Reviewed run created {{ toDateLabel(item.createdAt) }}
     </div>
   </button>
