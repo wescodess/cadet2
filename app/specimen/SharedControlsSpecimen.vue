@@ -16,7 +16,7 @@ import {
 import { Textarea } from '~/components/ui/textarea'
 import SpecimenSpec from './SpecimenSpec.vue'
 
-const props = defineProps<{ idPrefix: string }>()
+const props = defineProps<{ idPrefix: string; menus?: HTMLElement }>()
 const text = ref('Example')
 const checked = ref(false)
 const selection = ref('first')
@@ -48,7 +48,7 @@ const id = (name: string) => `${props.idPrefix}-${name}`
         <Label :for="id('select')">Choice</Label>
         <Select v-model="selection">
           <SelectTrigger :id="id('select')"><SelectValue /></SelectTrigger>
-          <SelectContent>
+          <SelectContent :to="menus">
             <SelectItem value="first">First option</SelectItem>
             <SelectItem value="second">Second option</SelectItem>
           </SelectContent>

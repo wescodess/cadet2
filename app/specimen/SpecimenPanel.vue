@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useTemplateRef } from 'vue'
 import SharedControlsSpecimen from './SharedControlsSpecimen.vue'
 
 defineProps<{
@@ -6,6 +7,8 @@ defineProps<{
   expression: 'client' | 'representative'
   tag: string
 }>()
+
+const menus = useTemplateRef<HTMLElement>('menus')
 </script>
 
 <template>
@@ -22,7 +25,11 @@ defineProps<{
         <span>{{ tag }}</span>
       </p>
       <slot />
-      <SharedControlsSpecimen :id-prefix="`controls-${expression}-${theme}`" />
+      <SharedControlsSpecimen
+        :id-prefix="`controls-${expression}-${theme}`"
+        :menus="menus ?? undefined"
+      />
     </div>
+    <div ref="menus" data-specimen-menus />
   </div>
 </template>

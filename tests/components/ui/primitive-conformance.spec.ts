@@ -29,7 +29,7 @@ import { Textarea } from '~/components/ui/textarea'
 import SharedControlsSpecimen from '~/specimen/SharedControlsSpecimen.vue'
 import SpecimenPanel from '~/specimen/SpecimenPanel.vue'
 
-import { recordBlocks, repoPath } from '../../unit/design/css-source'
+import { appBlocks, recordBlocks, repoPath } from '../../unit/design/css-source'
 
 const interfaceIconStroke = '1.75'
 const radioDotShare = 0.5
@@ -41,6 +41,8 @@ const checkRow = { client: '44px', representative: '24px' }
 const tailwindSpacing = 4
 
 const relay = readFileSync(repoPath('app/assets/css/relay.css'), 'utf8')
+const darkPopover = { '--popover': '#23262D', '--popover-foreground': '#E8EAEE' }
+const themeBlocks = [...appBlocks()].filter(([selector]) => !selector.startsWith('@'))
 
 function utility(name: string) {
   const start = relay.indexOf(`@utility ${name} {`)
@@ -118,6 +120,25 @@ function expectInterfaceIcons(selector: string, count: number) {
     expect(icon.getAttribute('stroke-width')).toBe(interfaceIconStroke)
     expect(icon.getAttribute('aria-hidden')).toBe('true')
   }
+}
+
+function inheritedToken(element: Element, name: string) {
+  for (let node: Element | null = element; node; node = node.parentElement) {
+    const current = node
+    const declared = themeBlocks.filter(
+      ([selector, declarations]) => declarations.has(name) && current.matches(selector),
+    )
+    const value = declared.at(-1)?.[1].get(name)
+    if (value) return value
+  }
+  throw new Error(`${name} does not resolve on ${element.outerHTML}`)
+}
+
+async function openMenu(trigger: Element) {
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+  await nextTick()
+  await nextTick()
+  return rendered('[data-slot="select-content"]')
 }
 
 enableAutoUnmount(afterEach)
@@ -284,6 +305,31 @@ describe('shared primitives follow the approved elevation, focus colour and radi
     mount(Slider, { attachTo, props: { modelValue: [40] } })
     const thumb = [...rendered('[data-slot="slider-thumb"]').classList]
     expect(thumb.filter((name) => /(^|:)ring-/.test(name))).toEqual([])
+  })
+})
+
+describe('the specimen opens each Select menu inside its own panel theme and expression', () => {
+  it.each(['client', 'representative'] as const)(
+    'resolves the dark popover tokens on the Choice menu of the %s dark panel',
+    async (expression) => {
+      mount(SpecimenPanel, { attachTo, props: { theme: 'dark', expression, tag: expression } })
+      const panel = rendered(`[data-specimen-panel="${expression}-dark"]`)
+      const menu = await openMenu(rendered(`#controls-${expression}-dark-select`))
+      expect(panel.contains(menu)).toBe(true)
+      expect(menu.closest('[data-expression]')?.getAttribute('data-expression')).toBe(expression)
+      expect([...menu.classList]).toEqual(
+        expect.arrayContaining(['bg-popover', 'text-popover-foreground']),
+      )
+      for (const [name, value] of Object.entries(darkPopover))
+        expect(inheritedToken(menu, name)).toBe(value)
+    },
+  )
+
+  it('still teleports a Select menu outside a specimen panel to the document body', async () => {
+    mount(SharedControlsSpecimen, { attachTo, props: { idPrefix: 'portal' } })
+    const menu = await openMenu(rendered('#portal-select'))
+    expect(menu.closest('[data-specimen-controls]')).toBeNull()
+    expect(inheritedToken(menu, '--popover')).toBe('#FFFFFF')
   })
 })
 
