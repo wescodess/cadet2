@@ -45,6 +45,75 @@ const checkbox = 'app/components/ui/checkbox/Checkbox.vue'
 
 const regressions: Regression[] = [
   {
+    name: 'a specimen passes :stroke-width to Spinner, which falls through to its icon',
+    origin: 'R7-F1 fallthrough',
+    files: {
+      [specimenProbe]: sfc(
+        '<Spinner :stroke-width="2" />',
+        `import Spinner from '~/components/ui/spinner/Spinner.vue'`,
+      ),
+    },
+    file: specimenProbe,
+    construct: '<Spinner> has stroke attribute :stroke-width',
+  },
+  {
+    name: 'a specimen passes a camel-case stroke style to Spinner',
+    origin: 'R7-F1 style fallthrough',
+    files: {
+      [specimenProbe]: sfc(
+        '<Spinner :style="{ strokeWidth: 2 }" />',
+        `import Spinner from '~/components/ui/spinner/Spinner.vue'`,
+      ),
+    },
+    file: specimenProbe,
+    construct: '<Spinner> has stroke attribute :style',
+  },
+  {
+    name: 'a specimen passes absolute-stroke-width to Spinner',
+    origin: 'R7-F1 fallthrough',
+    files: {
+      [specimenProbe]: sfc(
+        '<Spinner absolute-stroke-width />',
+        `import Spinner from '~/components/ui/spinner/Spinner.vue'`,
+      ),
+    },
+    file: specimenProbe,
+    construct: '<Spinner> has stroke attribute absolute-stroke-width',
+  },
+  {
+    name: 'a specimen passes even the shared binding to a wrapper rather than an icon',
+    origin: 'R7-F1 fallthrough',
+    files: {
+      [specimenProbe]: sfc(
+        '<Spinner :stroke-width="interfaceIconStroke" />',
+        `import Spinner from '~/components/ui/spinner/Spinner.vue'`,
+        `import { interfaceIconStroke } from '@/lib/relay/icons'`,
+      ),
+    },
+    file: specimenProbe,
+    construct: '<Spinner> has stroke attribute :stroke-width',
+  },
+  {
+    name: 'a specimen passes strokeWidth to a single-root relay wrapper around a bound icon',
+    origin: 'R7-F1 single-root wrapper',
+    files: {
+      [relayProbe]: probe('<ProbeIcon :stroke-width="interfaceIconStroke" />'),
+      [specimenProbe]: sfc(
+        '<Probe strokeWidth="2" />',
+        `import Probe from '~/components/relay/StrokeProbe.vue'`,
+      ),
+    },
+    file: specimenProbe,
+    construct: '<Probe> has stroke attribute strokeWidth',
+  },
+  {
+    name: 'a primitive draws an element with a literal stroke-width',
+    origin: 'R7-F1 any element',
+    files: { [uiProbe]: sfc('<svg viewBox="0 0 24 24"><path d="M0 0" stroke-width="2" /></svg>') },
+    file: uiProbe,
+    construct: '<path> has stroke attribute stroke-width',
+  },
+  {
     name: 'another file named StateGlyph draws a non-approved stroke',
     origin: 'R6-F2 basename exemption',
     files: {
@@ -414,6 +483,14 @@ const regressions: Regression[] = [
 ]
 
 const controls: { name: string; files: Overlay }[] = [
+  {
+    name: 'a stroke colour and a custom property named for a stroke width outside any icon',
+    files: {
+      [specimenProbe]: sfc(
+        `<svg viewBox="0 0 24 24" :style="{ '--chart-stroke-width': '1px' }"><path d="M0 0" stroke="currentColor" /></svg>`,
+      ),
+    },
+  },
   {
     name: 'an inline type-only Lucide import in a TypeScript helper',
     files: {

@@ -18,6 +18,8 @@ const strokeDefinition = 'app/lib/relay/icons.ts'
 const strokeBinding = 'interfaceIconStroke'
 const strokeBindNames = new Set(['stroke-width', 'strokeWidth'])
 const strokeOverride = /(?:^|[\s'"`:!])stroke-(?:\d|\[|\()|stroke-width\s*:/
+const strokeWidthName = /^(?:absolute-?)?stroke-?width$/i
+const strokeWidthStyle = /(?<![\w-])(?:stroke-width|strokeWidth)\b/
 const scriptFile = /\.(?:vue|ts|js|mjs|tsx|jsx)$/
 const scriptExtensions = ['.ts', '.js', '.mjs', '.tsx', '.jsx', '.vue']
 const nameResolvers = new Set(['resolveComponent', 'resolveDynamicComponent'])
@@ -323,6 +325,13 @@ function competingStroke(prop: TemplateProp) {
   return name === 'style' && (prop.type === DIRECTIVE || /stroke/i.test(propText(prop)))
 }
 
+function strokeRelevant(prop: TemplateProp) {
+  if (prop.type === DIRECTIVE && prop.name !== 'bind') return false
+  const name = prop.type === ATTRIBUTE ? prop.name : (prop.arg?.content ?? '')
+  if (strokeWidthName.test(name)) return true
+  return (name === 'style' || name === '') && strokeWidthStyle.test(propText(prop))
+}
+
 function propProblem(prop: TemplateProp, where: string) {
   const raw = prop.rawName ?? prop.name
   if (prop.type === DIRECTIVE && prop.arg && !prop.arg.isStatic)
@@ -542,6 +551,13 @@ function elementProblems(run: Run, facts: Facts, node: TemplateNode, consumer: b
     for (const problem of iconProblems(node, facts)) report(run, facts.file, problem)
     return
   }
+  for (const prop of node.props ?? [])
+    if (strokeRelevant(prop))
+      report(
+        run,
+        facts.file,
+        `${where} <${tag}> has stroke attribute ${prop.rawName ?? prop.name}; only a Lucide icon bound to ${strokeBinding} may set a stroke`,
+      )
   if (tag.includes('.')) {
     report(
       run,
