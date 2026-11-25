@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Check, PenLine, UserRound } from 'lucide-vue-next'
-import { computed } from 'vue'
-
+import { interfaceIconStroke } from '~/lib/relay/icons'
 import { cn } from '~/lib/utils'
 
 import type { RelayTurn } from './turns'
@@ -16,14 +15,6 @@ const props = withDefaults(
   }>(),
   { initials: undefined, size: 24, class: undefined },
 )
-
-const icon = computed(() => {
-  if (props.unassigned) return UserRound
-  if (props.initials) return null
-  if (props.turn === 'done') return Check
-  if (props.turn === 'signed') return PenLine
-  return null
-})
 
 const sizes = { 16: 'disc-16', 20: 'disc-20', 24: 'disc-24', 32: 'disc-32', 36: 'disc-36' } as const
 </script>
@@ -43,7 +34,17 @@ const sizes = { 16: 'disc-16', 20: 'disc-20', 24: 'disc-24', 32: 'disc-32', 36: 
       )
     "
   >
-    <component :is="icon" v-if="icon" :stroke-width="1.75" aria-hidden="true" />
+    <UserRound v-if="unassigned" :stroke-width="interfaceIconStroke" aria-hidden="true" />
+    <Check
+      v-else-if="!initials && turn === 'done'"
+      :stroke-width="interfaceIconStroke"
+      aria-hidden="true"
+    />
+    <PenLine
+      v-else-if="!initials && turn === 'signed'"
+      :stroke-width="interfaceIconStroke"
+      aria-hidden="true"
+    />
     <template v-else>{{ initials ?? (turn === 'none' ? '·' : '') }}</template>
   </span>
 </template>

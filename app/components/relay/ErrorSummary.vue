@@ -2,6 +2,7 @@
 import { CircleAlert } from 'lucide-vue-next'
 import { onMounted, useTemplateRef } from 'vue'
 
+import { interfaceIconStroke } from '~/lib/relay/icons'
 import { cn } from '~/lib/utils'
 
 const props = withDefaults(
@@ -39,7 +40,7 @@ defineExpose({ focus: () => root.value?.focus() })
     <h2 class="mb-2 flex items-center gap-2 text-h3">
       <CircleAlert
         :size="20"
-        :stroke-width="1.75"
+        :stroke-width="interfaceIconStroke"
         class="shrink-0 text-destructive"
         aria-hidden="true"
       />

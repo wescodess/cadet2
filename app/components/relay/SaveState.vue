@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { CloudCheck, CloudOff, LoaderCircle } from 'lucide-vue-next'
 
+import { interfaceIconStroke } from '~/lib/relay/icons'
 import { cn } from '~/lib/utils'
 
 const props = defineProps<{
@@ -9,10 +10,10 @@ const props = defineProps<{
   class?: string
 }>()
 
-const looks = {
-  saving: { icon: LoaderCircle, colour: 'text-muted-foreground', motion: 'animate-spin-save' },
-  saved: { icon: CloudCheck, colour: 'text-positive-ink', motion: '' },
-  offline: { icon: CloudOff, colour: 'text-caution-ink', motion: '' },
+const colours = {
+  saving: 'text-muted-foreground',
+  saved: 'text-positive-ink',
+  offline: 'text-caution-ink',
 } as const
 </script>
 
@@ -21,18 +22,28 @@ const looks = {
     role="status"
     :data-state="state"
     :class="
-      cn(
-        'inline-flex items-center gap-1.5 text-small font-medium',
-        looks[state].colour,
-        props.class,
-      )
+      cn('inline-flex items-center gap-1.5 text-small font-medium', colours[state], props.class)
     "
   >
-    <component
-      :is="looks[state].icon"
+    <LoaderCircle
+      v-if="state === 'saving'"
       :size="16"
-      :stroke-width="1.75"
-      :class="cn('shrink-0', looks[state].motion)"
+      :stroke-width="interfaceIconStroke"
+      class="shrink-0 animate-spin-save"
+      aria-hidden="true"
+    />
+    <CloudCheck
+      v-else-if="state === 'saved'"
+      :size="16"
+      :stroke-width="interfaceIconStroke"
+      class="shrink-0"
+      aria-hidden="true"
+    />
+    <CloudOff
+      v-else
+      :size="16"
+      :stroke-width="interfaceIconStroke"
+      class="shrink-0"
       aria-hidden="true"
     />
     <span>{{ label }}</span>

@@ -46,6 +46,7 @@ describe('SignedPlanHeader', () => {
     expect(mark.classes()).toContain('lucide-badge-check')
     expect(mark.attributes('aria-hidden')).toBe('true')
     expect(mark.attributes('width')).toBe('24')
+    expect(mark.attributes('stroke-width')).toBe('2')
   })
 
   it('never calls a signed plan "not legal advice"', () => {

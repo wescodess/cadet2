@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { BadgeCheck } from 'lucide-vue-next'
-
 import { cn } from '~/lib/utils'
+
+import StateGlyph from './StateGlyph.vue'
 
 interface RelayDate {
   text: string
@@ -30,7 +30,7 @@ const props = defineProps<{
       )
     "
   >
-    <BadgeCheck :size="24" :stroke-width="2" class="shrink-0 text-seal" aria-hidden="true" />
+    <StateGlyph glyph="badge-check" :size="24" class="text-seal" />
     <div class="grid min-w-0 gap-1.5">
       <p>
         Reviewed and signed by <strong class="font-semibold">{{ name }}</strong>, {{ designation }},
