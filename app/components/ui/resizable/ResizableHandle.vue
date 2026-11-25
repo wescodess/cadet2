@@ -28,9 +28,9 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
     "
   >
     <template v-if="props.withHandle">
-      <div class="bg-border z-10 flex h-4 w-3 items-center justify-center rounded-xs border">
+      <div class="bg-border z-10 flex h-6 w-4.5 items-center justify-center rounded-xs border">
         <slot>
-          <GripVertical :stroke-width="interfaceIconStroke" class="size-2.5" />
+          <GripVertical :stroke-width="interfaceIconStroke" class="size-4" />
         </slot>
       </div>
     </template>
