@@ -829,6 +829,118 @@ async function assertCleanDenial(page, problems, { actor, destination, landmark,
   )
 }
 
+test('admitted private namespace 404 documents and API errors retain no-store', async () => {
+  const { sourceId } = await admin.client.mutation(
+    anyApi.ragSources.createSourceSubmission,
+    websiteSubmission,
+  )
+  await admin.client.mutation(anyApi.ragSources.removeSource, { sourceId })
+  const observations = []
+  for (const [path, accept] of [
+    ['/admin/missing-private-page', 'text/html'],
+    ['/ai-search/missing-private-page', 'text/html'],
+    [`/api/admin/rag/sources/${sourceId}`, 'text/html'],
+    [`/api/admin/rag/sources/${sourceId}`, 'application/json'],
+  ]) {
+    const response = await request(path, admin, 'GET', undefined, { accept })
+    await response.text()
+    observations.push({
+      path,
+      accept,
+      status: response.status,
+      cacheControl: response.headers.get('cache-control'),
+    })
+  }
+  assert.deepEqual(
+    observations.map(({ status, cacheControl }) => ({ status, cacheControl })),
+    observations.map(() => ({ status: 404, cacheControl: 'private, no-store' })),
+    JSON.stringify(observations),
+  )
+})
+
+test('admitted non-404 error documents retain no-store and denied pages still redirect', async () => {
+  const unavailable = await request('/api/admin/recommendation-reviews', admin, 'GET', undefined, {
+    accept: 'text/html',
+  })
+  assert.equal(unavailable.status, 503)
+  assert.equal(unavailable.headers.get('cache-control'), 'private, no-store')
+  await unavailable.text()
+  const denied = await request('/admin/missing-private-page', ordinary, 'GET', undefined, {
+    accept: 'text/html',
+  })
+  assert.equal(denied.status, 302)
+  assert.equal(denied.headers.get('location'), '/')
+  assert.equal(denied.headers.get('cache-control'), 'private, no-store')
+})
+
+test('all frozen YouTube HTTP actions return a recoverable conflict without writes', async () => {
+  const youtubeConfig = {
+    channelId: 'synthetic',
+    channelUrl: 'https://www.youtube.com/channel/synthetic',
+    maxVideosPerRun: 1,
+    includeShorts: false,
+  }
+  const before = await admin.client.query(anyApi.ragSources.getSource, { sourceId: youtubeId })
+  const sourcesBefore = await admin.client.query(anyApi.ragSources.listSources, {
+    includeAllForAdmin: true,
+  })
+  const observations = []
+  for (const [action, path, method, body] of [
+    [
+      'create',
+      '/api/admin/rag/sources',
+      'POST',
+      {
+        type: 'youtube_channel',
+        name: 'Frozen submission',
+        schedule: { frequency: 'daily' },
+        youtubeConfig,
+      },
+    ],
+    ['enable', `/api/admin/rag/sources/${youtubeId}`, 'PATCH', { enabled: true }],
+    [
+      'schedule',
+      `/api/admin/rag/sources/${youtubeId}`,
+      'PATCH',
+      { schedule: { frequency: 'daily' } },
+    ],
+    ['config', `/api/admin/rag/sources/${youtubeId}`, 'PATCH', { youtubeConfig }],
+    ['approve', `/api/admin/rag/sources/${youtubeId}/approve`, 'POST', {}],
+    ['resume', `/api/admin/rag/sources/${youtubeId}/resume`, 'POST', {}],
+    ['delete', `/api/admin/rag/sources/${youtubeId}`, 'DELETE', undefined],
+  ]) {
+    const response = await request(path, admin, method, body, { accept: 'application/json' })
+    const result = await response.json()
+    observations.push({
+      action,
+      status: response.status,
+      cacheControl: response.headers.get('cache-control'),
+      statusMessage: result.statusMessage,
+      code: result.data?.code,
+    })
+    assert.deepEqual(
+      await admin.client.query(anyApi.ragSources.getSource, { sourceId: youtubeId }),
+      before,
+      action,
+    )
+    assert.deepEqual(
+      await admin.client.query(anyApi.ragSources.listSources, { includeAllForAdmin: true }),
+      sourcesBefore,
+      action,
+    )
+  }
+  assert.deepEqual(
+    observations,
+    observations.map(({ action }) => ({
+      action,
+      status: 409,
+      cacheControl: 'private, no-store',
+      statusMessage: 'YouTube source actions are frozen',
+      code: 'YOUTUBE_FROZEN',
+    })),
+  )
+})
+
 registrationGroup = 'navigation'
 
 test('denied page documents redirect while payloads and admin APIs keep their denial status', async () => {
