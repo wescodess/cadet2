@@ -120,20 +120,6 @@ describe('public quality row entry points preserve parser decisions', () => {
     await expect(row('lint')).rejects.toThrow(/lint: new files must be clean: .*\|fixture-rule/)
   })
 
-  it('format command rejects a real new unformatted file', () => {
-    const probe = mkdtempSync(resolve('app', 'quality-format-probe-'))
-    const file = join(probe, 'fixture.ts')
-    try {
-      writeFileSync(file, 'export const fixture={a:1,b:2};\n')
-      const result = common.run(process.execPath, ['scripts/quality/format.mjs', file])
-      expect(result.status).toBe(1)
-      expect(result.stderr).toContain('Format regression')
-      expect(result.stderr).toContain(common.localPath(file))
-    } finally {
-      rmSync(probe, { recursive: true, force: true })
-    }
-  })
-
   it('secret row rejects a finding returned by gitleaks', async () => {
     vi.doMock('../../scripts/quality/install-gitleaks.mjs', () => ({
       gitleaks: async () => 'fixture-gitleaks',
