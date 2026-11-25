@@ -86,44 +86,40 @@ function identifiers(expression: string) {
   return expression.match(/[A-Za-z_$][\w$]*/g) ?? []
 }
 
-function readScript(facts: SourceFacts, code: string) {
-  const program = babelParse(code, { sourceType: 'module', plugins: ['typescript'] }).program
-  const staticSources = new Set<unknown>()
-  for (const statement of program.body) {
-    if (statement.type !== 'ImportDeclaration' || statement.importKind === 'type') continue
-    staticSources.add(statement.source)
-    const source = statement.source.value
-    for (const specifier of statement.specifiers) {
-      const local = specifier.local.name
-      if (specifier.type === 'ImportSpecifier' && specifier.importKind === 'type') continue
-      if (lucideSource.test(source)) {
-        if (specifier.type === 'ImportSpecifier') facts.lucide.add(local)
-        else facts.problems.push(`${facts.file}: ${local} imports Lucide as a whole module`)
-        continue
-      }
+type Program = ReturnType<typeof babelParse>['program']
+type Statement = Program['body'][number]
+
+function readImport(facts: SourceFacts, statement: Statement) {
+  if (statement.type !== 'ImportDeclaration' || statement.importKind === 'type') return
+  const source = statement.source.value
+  for (const specifier of statement.specifiers) {
+    const local = specifier.local.name
+    const typeOnly = specifier.type === 'ImportSpecifier' && specifier.importKind === 'type'
+    if (typeOnly) continue
+    if (!lucideSource.test(source)) {
       facts.imports.set(local, source)
       if (strokeModule.test(source) && local === strokeBinding) facts.strokeImported = true
-    }
+    } else if (specifier.type === 'ImportSpecifier') facts.lucide.add(local)
+    else facts.problems.push(`${facts.file}: ${local} imports Lucide as a whole module`)
   }
-  for (const node of walk(program.body)) {
-    if (node.type === 'StringLiteral' && lucideSource.test(String(node.value)))
-      if (!staticSources.has(node))
-        facts.problems.push(`${facts.file}: Lucide is loaded outside a static import`)
-  }
+}
+
+function readScriptNode(facts: SourceFacts, node: AstNode) {
+  if (node.type === 'StringLiteral' && lucideSource.test(String(node.value)))
+    facts.problems.push(`${facts.file}: Lucide is loaded outside a static import`)
+  if (node.type === 'Identifier' && facts.lucide.has(String(node.name)))
+    facts.scriptUses.add(String(node.name))
+  const callee = node.type === 'CallExpression' ? (node.callee as AstNode) : undefined
+  const name = callee?.type === 'Identifier' ? String(callee.name) : ''
+  if (facts.lucide.size && renderFunctions.has(name))
+    facts.problems.push(`${facts.file}: renders through ${name}(), so its stroke cannot be checked`)
+}
+
+function readScript(facts: SourceFacts, code: string) {
+  const program = babelParse(code, { sourceType: 'module', plugins: ['typescript'] }).program
+  for (const statement of program.body) readImport(facts, statement)
   const body = program.body.filter((statement) => statement.type !== 'ImportDeclaration')
-  for (const node of walk(body)) {
-    if (node.type === 'Identifier' && facts.lucide.has(String(node.name)))
-      facts.scriptUses.add(String(node.name))
-    const callee = node.type === 'CallExpression' ? (node.callee as AstNode) : undefined
-    if (
-      facts.lucide.size &&
-      callee?.type === 'Identifier' &&
-      renderFunctions.has(String(callee.name))
-    )
-      facts.problems.push(
-        `${facts.file}: renders through ${String(callee.name)}(), so its stroke cannot be checked`,
-      )
-  }
+  for (const node of walk(body)) readScriptNode(facts, node)
 }
 
 const factsCache = new Map<string, SourceFacts>()
@@ -157,7 +153,7 @@ function sourceFacts(file: string): SourceFacts {
 
 function strokeProblem(node: TemplateNode, facts: SourceFacts) {
   const props = node.props ?? []
-  const where = `${facts.file}:${node.loc.start.line} <${node.tag ?? ''}>`
+  const where = `${facts.file}:${String(node.loc.start.line)} <${node.tag ?? ''}>`
   if (props.some((prop) => prop.type === ATTRIBUTE && strokeNames.has(prop.name)))
     return `${where} sets a literal stroke-width`
   if (props.some((prop) => prop.type === DIRECTIVE && prop.name === 'bind' && !prop.arg))
@@ -183,32 +179,45 @@ function dynamicIcon(node: TemplateNode, facts: SourceFacts) {
   return { is: expression, icon: direct || facts.scriptUses.size > 0 }
 }
 
-function iconProblems(nodes: TemplateNode[], facts: SourceFacts, rendered = new Set<string>()) {
+function valueProblem(where: string, name: string) {
+  return `${where} uses ${name} as a value, so its stroke cannot be checked`
+}
+
+function elementProblems(
+  node: TemplateNode,
+  facts: SourceFacts,
+  rendered: Set<string>,
+  where: string,
+) {
   const problems: string[] = []
-  for (const node of nodes) {
-    const where = `${facts.file}:${node.loc.start.line}`
-    if (node.type === INTERPOLATION)
-      for (const name of identifiers(node.content?.content ?? ''))
-        if (facts.lucide.has(name))
-          problems.push(`${where} uses ${name} as a value, so its stroke cannot be checked`)
-    if (node.type === ELEMENT && node.tag) {
-      const dynamic = dynamicIcon(node, facts)
-      for (const prop of node.props ?? []) {
-        if (prop.type !== DIRECTIVE || !prop.exp?.content) continue
-        for (const name of identifiers(prop.exp.content).filter((id) => facts.lucide.has(id))) {
-          if (dynamic.icon && prop.exp.content === dynamic.is) rendered.add(name)
-          else problems.push(`${where} uses ${name} as a value, so its stroke cannot be checked`)
-        }
-      }
-      if (facts.lucide.has(pascal(node.tag))) rendered.add(pascal(node.tag))
-      if (facts.lucide.has(pascal(node.tag)) || dynamic.icon) {
-        const problem = strokeProblem(node, facts)
-        if (problem) problems.push(problem)
-      }
-    }
-    if (node.children) problems.push(...iconProblems(node.children, facts, rendered))
+  const tag = pascal(node.tag ?? '')
+  const dynamic = dynamicIcon(node, facts)
+  for (const prop of node.props ?? []) {
+    const expression = prop.type === DIRECTIVE ? (prop.exp?.content ?? '') : ''
+    const names = identifiers(expression).filter((name) => facts.lucide.has(name))
+    const asComponent = dynamic.icon && expression === dynamic.is
+    for (const name of names)
+      if (asComponent) rendered.add(name)
+      else problems.push(valueProblem(where, name))
   }
-  return problems
+  if (facts.lucide.has(tag)) rendered.add(tag)
+  const problem = facts.lucide.has(tag) || dynamic.icon ? strokeProblem(node, facts) : null
+  return problem ? [...problems, problem] : problems
+}
+
+function iconProblems(nodes: TemplateNode[], facts: SourceFacts, rendered = new Set<string>()) {
+  return nodes.flatMap((node): string[] => {
+    const where = `${facts.file}:${String(node.loc.start.line)}`
+    const own =
+      node.type === INTERPOLATION
+        ? identifiers(node.content?.content ?? '')
+            .filter((name) => facts.lucide.has(name))
+            .map((name) => valueProblem(where, name))
+        : node.type === ELEMENT && node.tag
+          ? elementProblems(node, facts, rendered, where)
+          : []
+    return [...own, ...iconProblems(node.children ?? [], facts, rendered)]
+  })
 }
 
 function primitiveProblems(file: string) {
@@ -285,7 +294,7 @@ function slotProblems(nodes: TemplateNode[], facts: SourceFacts, host: string): 
       const inner = componentProblems(target)
       if (inner.length)
         problems.push(
-          `${facts.file}:${node.loc.start.line} passes <${node.tag ?? ''}> into <${host}>: ${inner.join('; ')}`,
+          `${facts.file}:${String(node.loc.start.line)} passes <${node.tag ?? ''}> into <${host}>: ${inner.join('; ')}`,
         )
     }
     return [...problems, ...slotProblems(node.children ?? [], facts, host)]
