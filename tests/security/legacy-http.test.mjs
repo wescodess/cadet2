@@ -17,6 +17,101 @@ after(async () => {
   await stack?.close()
 })
 
+test('error privacy: Client and admin sessions are live', async () => {
+  for (const actor of [stack.owner, stack.admin]) {
+    const response = await fetch(`${stack.origin}/api/auth/get-session`, {
+      headers: { cookie: actor.cookie },
+    })
+    assert.equal(response.status, 200)
+    assert.equal((await response.json()).user.id, actor.id)
+  }
+})
+
+for (const role of ['own-client', 'admin']) {
+  for (const [path, method, status] of [
+    ['/api/auth/does-not-exist', 'GET', 404],
+    ['/api/auth/sign-in/email', 'POST', 400],
+    ['/api/auth/sign-up/email', 'POST', 400],
+  ]) {
+    test(`error privacy: returned ${role} ${method} ${path}`, async () => {
+      const actor = stack.actors.find((candidate) => candidate.role === role)
+      const response = await fetch(`${stack.origin}${path}`, {
+        method,
+        redirect: 'manual',
+        headers: {
+          cookie: actor.cookie,
+          accept: 'text/html',
+          origin: stack.origin,
+          ...(method === 'POST' ? { 'content-type': 'application/json' } : {}),
+        },
+        ...(method === 'POST' ? { body: '{}' } : {}),
+      })
+      const body = await response.text()
+      assert.equal(response.status, status, body)
+      if (method === 'GET') assert.equal(body, '')
+      else {
+        assert.equal(response.headers.get('content-type')?.split(';')[0], 'application/json')
+        assert.equal(JSON.parse(body).code, 'VALIDATION_ERROR')
+        assert.match(JSON.parse(body).message, /body.email/)
+      }
+      assert.equal(response.headers.get('cache-control'), 'private, no-store')
+      const session = await fetch(`${stack.origin}/api/auth/get-session`, {
+        headers: { cookie: actor.cookie },
+      })
+      assert.equal((await session.json()).user.id, actor.id, 'error preserves the live session')
+    })
+  }
+  for (const host of ['[', 'bad host', 'localhost:bad']) {
+    for (const path of ['/does-not-exist', '/api/does-not-exist']) {
+      test(`error privacy: malformed authority ${role} ${host} ${path}`, async () => {
+        const actor = stack.actors.find((candidate) => candidate.role === role)
+        const response = await rawRequest(stack.origin, path, {
+          cookie: actor.cookie,
+          accept: 'text/html',
+          host,
+        })
+        assert.equal(response.status, 500)
+        assert.equal(response.headers['cache-control'], 'private, no-store')
+        assert.equal(response.headers['content-type']?.split(';')[0], 'application/json')
+        assert.deepEqual(JSON.parse(response.body), {
+          error: true,
+          statusCode: 500,
+          statusMessage: 'Server Error',
+          message: 'Server Error',
+        })
+        assert.ok(!response.body.includes(actor.id))
+      })
+    }
+  }
+}
+
+for (const path of [
+  '/api',
+  '/api/',
+  '/API/does-not-exist',
+  '/apix/does-not-exist',
+  '/%ZZ',
+  '/api/%ZZ',
+]) {
+  test(`error privacy: default-base classification ${path}`, async () => {
+    const response = await rawRequest(stack.origin, path, {
+      cookie: stack.owner.cookie,
+      accept: 'text/html',
+    })
+    assert.equal(response.status, path.includes('%ZZ') ? 400 : 404)
+    assert.equal(response.headers['cache-control'], 'private, no-store')
+    const json = path !== '/apix/does-not-exist' && path !== '/%ZZ'
+    assert.equal(
+      response.headers['content-type']?.split(';')[0],
+      json ? 'application/json' : 'text/html',
+    )
+    if (json) {
+      assert.equal(JSON.parse(response.body).statusCode, response.status)
+      assert.doesNotMatch(response.body, /__NUXT_DATA__|\$sauth/)
+    } else assert.match(response.body, /__NUXT_DATA__/)
+  })
+}
+
 for (const role of ['own-client', 'admin', 'anonymous']) {
   for (const path of [
     '/does-not-exist',

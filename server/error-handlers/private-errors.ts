@@ -1,20 +1,49 @@
 import '../types/nuxt-error-renderer'
-import { getRequestURL, send, setResponseHeaders, setResponseStatus } from 'h3'
-import { defineNitroErrorHandler } from 'nitropack/runtime'
+import { send, setResponseHeader, setResponseHeaders, setResponseStatus } from 'h3'
+import { defineNitroErrorHandler, useRuntimeConfig } from 'nitropack/runtime'
 import renderNuxtError from '#nuxt-error-renderer'
 
 export default defineNitroErrorHandler(async (error, event, { defaultHandler }) => {
-  const privateHandler: typeof defaultHandler = async (...args) => {
-    const response = await defaultHandler(...args)
-    response.headers['cache-control'] = 'private, no-store'
-    return response
+  setResponseHeader(event, 'cache-control', 'private, no-store')
+  try {
+    const privateHandler: typeof defaultHandler = async (...args) => {
+      const response = await defaultHandler(...args)
+      response.headers['cache-control'] = 'private, no-store'
+      return response
+    }
+    const path = event.path.split('?', 1)[0] || '/'
+    const baseURL = useRuntimeConfig(event).app.baseURL.replace(/\/$/, '')
+    const relativePath =
+      baseURL && (path === baseURL || path.startsWith(`${baseURL}/`))
+        ? path.slice(baseURL.length) || '/'
+        : path
+    if (!/^\/api(?:\/|$)/i.test(relativePath)) {
+      await renderNuxtError(error, event, { defaultHandler: privateHandler })
+    }
+    if (event.handled) return
+    const response = await privateHandler(error, event, { json: true })
+    setResponseHeaders(event, response.headers)
+    setResponseStatus(event, response.status, response.statusText)
+    await send(event, JSON.stringify(response.body, null, 2))
+  } catch {
+    if (event.handled) return
+    setResponseHeaders(event, {
+      'cache-control': 'private, no-store',
+      'content-type': 'application/json',
+      'x-content-type-options': 'nosniff',
+      'x-frame-options': 'DENY',
+      'referrer-policy': 'no-referrer',
+      'content-security-policy': "script-src 'none'; frame-ancestors 'none';",
+    })
+    setResponseStatus(event, 500, 'Server Error')
+    await send(
+      event,
+      JSON.stringify({
+        error: true,
+        statusCode: 500,
+        statusMessage: 'Server Error',
+        message: 'Server Error',
+      }),
+    )
   }
-  if (!/^\/api(?:\/|$)/i.test(getRequestURL(event).pathname)) {
-    await renderNuxtError(error, event, { defaultHandler: privateHandler })
-  }
-  if (event.handled) return
-  const response = await privateHandler(error, event, { json: true })
-  setResponseHeaders(event, response.headers)
-  setResponseStatus(event, response.status, response.statusText)
-  return send(event, JSON.stringify(response.body, null, 2))
 })
