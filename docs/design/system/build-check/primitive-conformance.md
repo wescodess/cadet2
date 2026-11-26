@@ -32,7 +32,7 @@ Every `app/components/ui/*` primitive changed by `git diff c9efe09...9733a95`, p
 
 | Primitive | Stroke | Icon size | Hidden | Sizing | Type | Colour | States | Focus | Elevation | Motion |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Button (`button/index.ts`, `relay.css:137`) | — | ✓ 16 px default (Q6) | — | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Button (`button/index.ts`, `relay.css:138`) | — | ✓ 16 px default (Q6) | — | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Spinner | **F** | ✓ 16 px | ✓ (Q1) | — | — | ✓ | ✓ loading | — | — | ✓ |
 | Kbd | — | — | — | ✓ | ✓ | ✓ | ✓ | — | — | — |
 | Label | — | — | — | — | ✓ | ✓ | Q4 | — | — | — |
