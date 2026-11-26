@@ -79,6 +79,7 @@ for (const [path, status, contentType] of [
   ['/cadet/API/does-not-exist', 404, 'application/json'],
   ['/cadet/api/admin/pathways/does-not-exist', 503, 'application/json'],
   ['/cadet/apix/does-not-exist', 404, 'text/html'],
+  ['/cadet/cadet/api', 404, 'text/html'],
   ['/api/does-not-exist', 302, null],
 ]) {
   test(`error privacy: non-root build ${path}`, async () => {

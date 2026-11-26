@@ -1,6 +1,6 @@
 import '../types/nuxt-error-renderer'
 import { send, setResponseHeader, setResponseHeaders, setResponseStatus } from 'h3'
-import { defineNitroErrorHandler, useRuntimeConfig } from 'nitropack/runtime'
+import { defineNitroErrorHandler } from 'nitropack/runtime'
 import renderNuxtError from '#nuxt-error-renderer'
 
 export default defineNitroErrorHandler(async (error, event, { defaultHandler }) => {
@@ -12,12 +12,7 @@ export default defineNitroErrorHandler(async (error, event, { defaultHandler }) 
       return response
     }
     const path = event.path.split('?', 1)[0] || '/'
-    const baseURL = useRuntimeConfig(event).app.baseURL.replace(/\/$/, '')
-    const relativePath =
-      baseURL && (path === baseURL || path.startsWith(`${baseURL}/`))
-        ? path.slice(baseURL.length) || '/'
-        : path
-    if (!/^\/api(?:\/|$)/i.test(relativePath)) {
+    if (!/^\/api(?:\/|$)/i.test(path)) {
       await renderNuxtError(error, event, { defaultHandler: privateHandler })
     }
     if (event.handled) return
