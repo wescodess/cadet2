@@ -21,7 +21,7 @@ function luminance(hex) {
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
 }
 
-function contrast(a, b) {
+export function contrast(a, b) {
   const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x)
   return (light + 0.05) / (dark + 0.05)
 }
