@@ -21,7 +21,11 @@ export default defineNitroErrorHandler(async (error, event, { defaultHandler }) 
     setResponseHeaders(event, response.headers)
     setResponseStatus(event, response.status, response.statusText)
     await send(event, JSON.stringify(response.body, null, 2))
-  } catch {
+  } catch (failure) {
+    console.error('[private-errors] error response failed; sent the fixed 500', {
+      failure,
+      error,
+    })
     if (event.handled) return
     setResponseHeaders(event, {
       'cache-control': 'private, no-store',

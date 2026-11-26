@@ -65,11 +65,20 @@ for (const role of ['own-client', 'admin']) {
     for (const path of ['/does-not-exist', '/api/does-not-exist']) {
       test(`error privacy: malformed authority ${role} ${host} ${path}`, async () => {
         const actor = stack.actors.find((candidate) => candidate.role === role)
+        const logged = stack.app.output().length
         const response = await rawRequest(stack.origin, path, {
           cookie: actor.cookie,
           accept: 'text/html',
           host,
         })
+        const failureLog = /\[private-errors\] error response failed; sent the fixed 500/
+        for (
+          let attempt = 0;
+          attempt < 20 && !failureLog.test(stack.app.output().slice(logged));
+          attempt++
+        )
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        assert.match(stack.app.output().slice(logged), failureLog)
         assert.equal(response.status, 500)
         assert.equal(response.headers['cache-control'], 'private, no-store')
         assert.equal(response.headers['content-type']?.split(';')[0], 'application/json')
