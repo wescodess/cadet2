@@ -112,6 +112,30 @@ for (const path of [
   })
 }
 
+for (const role of ['own-client', 'admin']) {
+  for (const path of [
+    '/./api/admin/does-not-exist',
+    '/%2e/api/admin/does-not-exist',
+    '/x/../api/admin/does-not-exist',
+    '/x/%2E%2E/api/does-not-exist',
+    '//api/does-not-exist',
+  ]) {
+    test(`error privacy: dot-segment API target ${role} ${path}`, async () => {
+      const actor = stack.actors.find((candidate) => candidate.role === role)
+      const response = await rawRequest(stack.origin, path, {
+        cookie: actor.cookie,
+        accept: 'text/html',
+      })
+      assert.equal(response.status, 404)
+      assert.equal(response.headers['cache-control'], 'private, no-store')
+      assert.equal(response.headers['content-type']?.split(';')[0], 'application/json')
+      assert.equal(JSON.parse(response.body).statusCode, 404)
+      assert.doesNotMatch(response.body, /__NUXT_DATA__|\$sauth/)
+      assert.ok(!response.body.includes(actor.id))
+    })
+  }
+}
+
 for (const role of ['own-client', 'admin', 'anonymous']) {
   for (const path of [
     '/does-not-exist',
