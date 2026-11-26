@@ -22,7 +22,7 @@ Every `app/components/ui/*` primitive changed by `git diff c9efe09...9733a95`, p
 | States | Hover, disabled, invalid and loading as specified | `DESIGN.md:295-297`; `approved.html:37`, `approved.html:296-298` |
 | Focus | 2 px `--ring` outline on `:focus-visible`, offset from the expression | `DESIGN.md:224`; `app/assets/css/tailwind.css:68-71` |
 | Elevation | Only `--shadow-overlay` floats; buttons and inputs carry their named base shadows; nothing else has a drop shadow | `DESIGN.md:216-220` |
-| Motion | 120 ms `--ease` tint; 0.8 s busy spinner; nothing else animates on its own; reduced motion stops it | `DESIGN.md:228-237`; `app/assets/css/tailwind.css:73-82` |
+| Motion | 120 ms `--ease` tint; 0.8 s busy spinner; nothing else animates on its own; under reduced motion slides become fades, fades become instant and spinners stop | `DESIGN.md:228-237`; `app/assets/css/tailwind.css:73-82`, `app/assets/css/relay.css:290-303` |
 
 ## Matrix
 
@@ -152,7 +152,7 @@ Q1, Q2 and Q4 to Q7 still need the owner or the design gate; nothing was changed
 4. **Q4, disabled fields.** Input, Textarea, NativeSelect, SelectTrigger, SelectItem, Checkbox, Radio and Label dim to 50% opacity when disabled. The record defines a disabled style only for Button (`--muted` fill, `DESIGN.md:295`; `approved.html:37`). What should a disabled field look like?
 5. **Q5, FieldError without a slot.** The rule asks for an error “with an icon” (`DESIGN.md:297`). Both specimens pass the 18 px `circle-alert` at 1.75 through the slot. The `errors` prop path renders text only and has no consumer yet. Should the primitive draw the icon itself, and once per list or once per error?
 6. **Q6, icons inside buttons.** Button sizes unsized icons at 16 px, inside the 15 to 18 px range. The specimen's icon buttons draw 18 px on the client (`approved.html:866`) and 15 px on the desk (`approved.html:892`). Should button icons take those per-expression sizes?
-7. **Q7, Select menu motion.** SelectContent opens with fade, a 95% zoom and a 2 px slide. The motion table (`DESIGN.md:228-237`) covers tints, the detail pane, list selection and spinners only. Is an opening menu allowed to animate? Reduced motion already stops it.
+7. **Q7, Select menu motion.** SelectContent opens with fade, a 95% zoom and a 2 px slide. The motion table (`DESIGN.md:228-237`) covers tints, the detail pane, list selection and spinners only. Is an opening menu allowed to animate? Under reduced motion it is already a plain 120 ms fade, with no zoom or slide.
 8. **Q8, resizable grip. Decided by the owner on 2026-11-25:** the grip grows to 16 px, and its well grows to hold it centred and unclipped. Correction 8. The desk panes use `ui/resizable` (`DESIGN.md:310`).
 
 ## Not adopted, recorded for the adopting ticket
