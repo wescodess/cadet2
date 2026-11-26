@@ -40,7 +40,7 @@ const props = defineProps<{
       <p class="flex flex-wrap gap-x-4 gap-y-1 text-small">
         <a
           href="https://register.college-ic.ca/"
-          class="inline-flex min-h-6 items-center font-semibold text-seal-ink client:min-h-8"
+          class="inline-flex min-h-6 items-center font-semibold text-seal-ink underline client:min-h-8"
           >Check this licence on the CICC register</a
         >{{ ' ' }}<span>Sources verified as of {{ verified.text }}.</span>
       </p>

@@ -28,11 +28,17 @@ describe('SignedPlanHeader', () => {
     expectAccessible(wrapper)
   })
 
-  it('links to the CICC public register in seal ink, tall enough to press', () => {
+  it('links to the CICC public register in seal ink, underlined and tall enough to press', () => {
     const link = mount(SignedPlanHeader, { props }).get('a')
     expect(link.attributes('href')).toBe('https://register.college-ic.ca/')
     expect(link.classes()).toEqual(
-      expect.arrayContaining(['text-seal-ink', 'font-semibold', 'min-h-6', 'client:min-h-8']),
+      expect.arrayContaining([
+        'text-seal-ink',
+        'font-semibold',
+        'underline',
+        'min-h-6',
+        'client:min-h-8',
+      ]),
     )
   })
 
