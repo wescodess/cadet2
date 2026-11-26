@@ -358,6 +358,32 @@ describe('the shared-controls specimen gives checkbox and radio rows the approve
   })
 })
 
+describe('the shared-controls specimen sets each checkbox and radio row like the approved .check row', () => {
+  it('tops the box in its row and sets the option text in body type', () => {
+    mount(SharedControlsSpecimen, { attachTo, props: { idPrefix: 'type' } })
+    const rows = [
+      ...document.querySelectorAll<HTMLElement>('[data-specimen-controls] .min-h-check-row'),
+    ]
+    expect(rows).toHaveLength(3)
+    for (const row of rows) {
+      expect(row.classList.contains('items-start')).toBe(true)
+      expect(row.classList.contains('items-center')).toBe(false)
+      const text = [...row.children].find((child) => !child.matches('[data-slot]'))
+      if (!text) throw new Error(`${row.outerHTML} has no option text`)
+      expect(text.classList.contains('text-body')).toBe(true)
+    }
+  })
+
+  it('shows the value of the unavailable native choice', () => {
+    mount(SharedControlsSpecimen, { attachTo, props: { idPrefix: 'unavailable' } })
+    const select = document.querySelector<HTMLSelectElement>('#unavailable-disabled-native')
+    if (!select) throw new Error('Missing the unavailable native choice')
+    expect(select.disabled).toBe(true)
+    expect(select.selectedIndex).toBe(0)
+    expect(select.selectedOptions[0]?.textContent.trim()).toBe('First option')
+  })
+})
+
 describe('the shared-controls specimen activates each checkbox and radio from its whole row', () => {
   it.each(['client', 'representative'] as const)(
     'changes each control exactly once per click on the row surface outside its text, in the %s expression',

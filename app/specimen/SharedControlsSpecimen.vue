@@ -58,22 +58,22 @@ const id = (name: string) => `${props.idPrefix}-${name}`
         <Label :for="id('disabled-input')">Unavailable field</Label>
         <Input :id="id('disabled-input')" default-value="Not editable" disabled />
         <Label :for="id('disabled-native')">Unavailable choice</Label>
-        <NativeSelect :id="id('disabled-native')" disabled>
-          <option>First option</option>
+        <NativeSelect :id="id('disabled-native')" model-value="first" disabled>
+          <option value="first">First option</option>
         </NativeSelect>
       </div>
-      <Label :for="id('checkbox')" class="min-h-check-row cursor-pointer gap-3">
+      <Label :for="id('checkbox')" class="min-h-check-row cursor-pointer items-start gap-3">
         <Checkbox :id="id('checkbox')" v-model="checked" />
-        <span>I have checked these details</span>
+        <span class="text-body">I have checked these details</span>
       </Label>
       <RadioGroup default-value="first" aria-label="Example choices">
-        <Label :for="id('radio-first')" class="min-h-check-row cursor-pointer gap-3">
+        <Label :for="id('radio-first')" class="min-h-check-row cursor-pointer items-start gap-3">
           <RadioGroupItem :id="id('radio-first')" value="first" />
-          <span>First choice</span>
+          <span class="text-body">First choice</span>
         </Label>
-        <Label :for="id('radio-second')" class="min-h-check-row cursor-pointer gap-3">
+        <Label :for="id('radio-second')" class="min-h-check-row cursor-pointer items-start gap-3">
           <RadioGroupItem :id="id('radio-second')" value="second" />
-          <span>Second choice</span>
+          <span class="text-body">Second choice</span>
         </Label>
       </RadioGroup>
     </div>
