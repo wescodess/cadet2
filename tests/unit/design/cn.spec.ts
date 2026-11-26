@@ -17,4 +17,13 @@ describe('cn with the Relay theme', () => {
     expect(cn('h-9', 'h-control')).toBe('h-control')
     expect(cn('p-2', 'p-pad')).toBe('p-pad')
   })
+
+  it('lets a later leading, row height or spinner replace a Relay one', () => {
+    expect(cn('leading-small', 'leading-6')).toBe('leading-6')
+    expect(cn('leading-normal', 'leading-small')).toBe('leading-small')
+    expect(cn('min-h-12', 'min-h-check-row')).toBe('min-h-check-row')
+    expect(cn('min-h-check-row', 'min-h-12')).toBe('min-h-12')
+    expect(cn('animate-spin', 'animate-spin-busy')).toBe('animate-spin-busy')
+    expect(cn('animate-spin-save', 'animate-spin-busy')).toBe('animate-spin-busy')
+  })
 })

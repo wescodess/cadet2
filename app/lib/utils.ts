@@ -7,9 +7,10 @@ const twMerge = extendTailwindMerge({
     theme: {
       text: ['display', 'h1', 'h2', 'h3', 'body', 'ui', 'small', 'label', 'chip'],
       radius: ['control', 'input', 'card', 'chip', 'panel'],
-      spacing: ['control', 'chip', 'pad'],
-      leading: ['compact', 'label'],
+      spacing: ['control', 'chip', 'pad', 'check-row'],
+      leading: ['compact', 'label', 'small'],
       ease: ['standard'],
+      animate: ['spin-save', 'spin-busy'],
     },
   },
 })
