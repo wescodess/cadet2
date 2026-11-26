@@ -11,9 +11,9 @@ export default defineNitroErrorHandler(async (error, event, { defaultHandler }) 
       response.headers['cache-control'] = 'private, no-store'
       return response
     }
-    const target = (event.path.split('?', 1)[0] || '/').replace(/^\/+/, '/')
-    const path = new URL(target, 'http://error.invalid').pathname
-    if (!/^\/api(?:\/|$)/i.test(path)) {
+    const target = event.path.split('?', 1)[0] || '/'
+    const canonical = new URL(target.replace(/^[/\\]+/, '/'), 'http://error.invalid').pathname
+    if (target === canonical && !/^\/api(?:\/|$)/i.test(canonical)) {
       await renderNuxtError(error, event, { defaultHandler: privateHandler })
     }
     if (event.handled) return

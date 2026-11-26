@@ -119,8 +119,14 @@ for (const role of ['own-client', 'admin']) {
     '/x/../api/admin/does-not-exist',
     '/x/%2E%2E/api/does-not-exist',
     '//api/does-not-exist',
+    '/\\api/admin/does-not-exist',
+    '//\\api/admin/does-not-exist',
+    '/\\/api/admin/does-not-exist',
+    '/\\\\API/does-not-exist',
+    '/\\api',
+    '/x/../does-not-exist',
   ]) {
-    test(`error privacy: dot-segment API target ${role} ${path}`, async () => {
+    test(`error privacy: non-canonical target ${role} ${path}`, async () => {
       const actor = stack.actors.find((candidate) => candidate.role === role)
       const response = await rawRequest(stack.origin, path, {
         cookie: actor.cookie,
