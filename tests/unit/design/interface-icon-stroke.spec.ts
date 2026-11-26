@@ -45,6 +45,31 @@ const checkbox = 'app/components/ui/checkbox/Checkbox.vue'
 
 const regressions: Regression[] = [
   {
+    name: 'a specimen spreads a local props object with strokeWidth onto Spinner',
+    origin: 'R8-F1 props object',
+    files: {
+      [specimenProbe]: sfc(
+        '<Spinner v-bind="spinnerProps" />',
+        `import Spinner from '~/components/ui/spinner/Spinner.vue'`,
+        `const spinnerProps = { class: 'size-4', strokeWidth: 2 }`,
+      ),
+    },
+    file: specimenProbe,
+    construct: 'an object whose stroke keys cannot be checked',
+  },
+  {
+    name: 'a specimen spreads an object literal that names stroke-width beside $attrs',
+    origin: 'R8-F1 props object',
+    files: {
+      [specimenProbe]: sfc(
+        `<Spinner v-bind="{ ...$attrs, 'stroke-width': 2 }" />`,
+        `import Spinner from '~/components/ui/spinner/Spinner.vue'`,
+      ),
+    },
+    file: specimenProbe,
+    construct: 'has stroke attribute',
+  },
+  {
     name: 'a specimen passes :stroke-width to Spinner, which falls through to its icon',
     origin: 'R7-F1 fallthrough',
     files: {
@@ -483,6 +508,17 @@ const regressions: Regression[] = [
 ]
 
 const controls: { name: string; files: Overlay }[] = [
+  {
+    name: 'a specimen forwarding $attrs with a named non-stroke key',
+    files: {
+      [specimenProbe]: sfc(
+        '<Spinner v-bind="ready ? $attrs : { ...$attrs, title: label }" />',
+        `import Spinner from '~/components/ui/spinner/Spinner.vue'`,
+        `const ready = true`,
+        `const label = 'Loading'`,
+      ),
+    },
+  },
   {
     name: 'a stroke colour and a custom property named for a stroke width outside any icon',
     files: {

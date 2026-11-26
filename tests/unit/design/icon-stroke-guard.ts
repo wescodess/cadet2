@@ -332,6 +332,33 @@ function strokeRelevant(prop: TemplateProp) {
   return (name === 'style' || name === '') && strokeWidthStyle.test(propText(prop))
 }
 
+function spreadSource(node: AstNode): boolean {
+  if (node.type === 'Identifier') return node.name === '$attrs'
+  if (node.type === 'ConditionalExpression')
+    return spreadSource(node.consequent as AstNode) && spreadSource(node.alternate as AstNode)
+  if (node.type !== 'ObjectExpression') return false
+  return (node.properties as AstNode[]).every((property) => {
+    if (property.type === 'SpreadElement') return spreadSource(property.argument as AstNode)
+    const key = property.key as AstNode
+    const name = key.type === 'Identifier' ? key.name : key.value
+    return (
+      property.type === 'ObjectProperty' &&
+      !property.computed &&
+      !strokeWidthName.test(String(name))
+    )
+  })
+}
+
+function checkableSpread(expression: string) {
+  try {
+    const [statement] = babelParse(`(${expression})`, { plugins: ['typescript'] }).program
+      .body as unknown as AstNode[]
+    return spreadSource(statement?.expression as AstNode)
+  } catch {
+    return false
+  }
+}
+
 function propProblem(prop: TemplateProp, where: string) {
   const raw = prop.rawName ?? prop.name
   if (prop.type === DIRECTIVE && prop.arg && !prop.arg.isStatic)
@@ -551,13 +578,26 @@ function elementProblems(run: Run, facts: Facts, node: TemplateNode, consumer: b
     for (const problem of iconProblems(node, facts)) report(run, facts.file, problem)
     return
   }
-  for (const prop of node.props ?? [])
+  for (const prop of node.props ?? []) {
     if (strokeRelevant(prop))
       report(
         run,
         facts.file,
         `${where} <${tag}> has stroke attribute ${prop.rawName ?? prop.name}; only a Lucide icon bound to ${strokeBinding} may set a stroke`,
       )
+    else if (
+      consumer &&
+      prop.type === DIRECTIVE &&
+      prop.name === 'bind' &&
+      !prop.arg &&
+      !checkableSpread(propText(prop))
+    )
+      report(
+        run,
+        facts.file,
+        `${where} <${tag}> spreads ${propText(prop)}, an object whose stroke keys cannot be checked`,
+      )
+  }
   if (tag.includes('.')) {
     report(
       run,

@@ -124,6 +124,7 @@ Red at `9733a95`: 12 of 12 fail. Green at `a3b22ae`: 12 of 12 pass. The round 4 
 
 The rule is positive. An icon passes only when it is a static template element, its tag resolves to a named import from `lucide-vue-next`, and its only stroke attribute is exactly `:stroke-width="interfaceIconStroke"`, bound to the constant imported under that name from `lib/relay/icons`. Everything else involving Lucide in scope fails, including:
 
+- in the specimens and the Relay components they reach, a `v-bind` object spread on any tag unless it is built only from `$attrs` and literal keys that are not stroke attributes, since a props object can carry `strokeWidth` through a wrapper (round 8);
 - dynamic bind arguments (`:[name]`), `v-bind` or `v-on` object spreads, and any competing stroke attribute on an icon (`stroke-width`, `absolute-stroke-width`, a `:style` binding, or a static style that mentions stroke);
 - any other use of `interfaceIconStroke`: in a template expression, a `v-for` or `v-slot` that shadows it, or anywhere in script, so it cannot be redeclared, aliased or imported from another module;
 - a Lucide import used as a value: in a template expression, `<component :is>`, script, `h()` or another render function;
