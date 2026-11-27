@@ -334,7 +334,7 @@ if (import.meta.client) {
               v-for="group in auditTrailFilterGroups"
               :key="group.key"
               variant="outline"
-              class="rounded-full border-white/10 bg-white/5 text-slate-100 hover:bg-cyan-400/10"
+              class="rounded-full border-white/10 bg-white/5 text-slate-100 hover:bg-cyan-400/10 hover:text-white"
               :class="
                 activeGroup === group.key ? 'border-cyan-300/30 bg-cyan-400/15 text-cyan-50' : ''
               "
@@ -369,7 +369,7 @@ if (import.meta.client) {
                 />
                 <Input
                   v-model="filters.search"
-                  class="h-11 rounded-2xl border-white/10 bg-slate-900/80 pl-10 text-white"
+                  class="h-11 rounded-2xl border-white/10 bg-slate-900/80 pl-10 text-white placeholder:text-slate-400"
                   placeholder="Entity, actor, or reason"
                   @change="refreshAuditTrail(selectedEventId)"
                 />
@@ -380,7 +380,7 @@ if (import.meta.client) {
               <span>Actor filter</span>
               <Input
                 v-model="filters.actorId"
-                class="h-11 rounded-2xl border-white/10 bg-slate-900/80 text-white"
+                class="h-11 rounded-2xl border-white/10 bg-slate-900/80 text-white placeholder:text-slate-400"
                 placeholder="Actor user id"
                 @change="refreshAuditTrail(selectedEventId)"
               />
@@ -408,7 +408,7 @@ if (import.meta.client) {
               </label>
               <Button
                 variant="outline"
-                class="self-end rounded-2xl border-white/10 bg-white/5 text-slate-100 hover:bg-white/10"
+                class="self-end rounded-2xl border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
                 @click="resetFilters"
               >
                 <TimerReset class="mr-2 h-4 w-4" />
@@ -494,7 +494,7 @@ if (import.meta.client) {
               <Button
                 v-if="nextCursor && !loading"
                 variant="outline"
-                class="mt-3 w-full rounded-2xl border-white/10 bg-white/5 text-slate-100 hover:bg-white/10"
+                class="mt-3 w-full rounded-2xl border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
                 :disabled="loadingMore"
                 @click="loadMoreEvents"
               >
@@ -667,7 +667,7 @@ if (import.meta.client) {
               <Button
                 v-if="nextCursor && !loading"
                 variant="outline"
-                class="mt-3 w-full rounded-2xl border-white/10 bg-white/5 text-slate-100 hover:bg-white/10"
+                class="mt-3 w-full rounded-2xl border-white/10 bg-white/5 text-slate-100 hover:bg-white/10 hover:text-white"
                 :disabled="loadingMore"
                 @click="loadMoreEvents"
               >

@@ -36,7 +36,7 @@ function sandbox() {
   const root = mkdtempSync(join(tmpdir(), 'quality-process-'))
   roots.push(root)
   mkdirSync(join(root, 'scripts/quality'), { recursive: true })
-  for (const name of ['common', 'verify'])
+  for (const name of ['baseline-commit', 'common', 'verify'])
     cpSync(resolve(`scripts/quality/${name}.mjs`), join(root, `scripts/quality/${name}.mjs`))
   return root
 }

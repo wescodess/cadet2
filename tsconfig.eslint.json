@@ -7,6 +7,9 @@
   },
   "include": [
     "app/**/*.ts",
+    "app/**/*.tsx",
+    "app/**/*.mts",
+    "app/**/*.cts",
     "app/**/*.vue",
     "server/**/*.ts",
     "shared/**/*.ts",

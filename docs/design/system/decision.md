@@ -2,7 +2,7 @@
 
 Date: 2026-11-17
 Gate: UI design gate, system creation (round 1: five options; round 2: three variations)
-Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)) and 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19))
+Status: approved by the owner; amended on 2026-11-18 (see [Amendments](#amendments-2026-11-18)), 2026-11-19 (see [Amendments 2026-11-19](#amendments-2026-11-19)) and 2026-11-22 (see [Proof timing amendment](#proof-timing-amendment-2026-11-22), [Shadow alias amendment](#shadow-alias-amendment-2026-11-22) and [Holder long names amendment](#holder-long-names-amendment-2026-11-22))
 Approved specimen: [approved.html](approved.html)
 Implementer guide: [DESIGN.md](../../../DESIGN.md)
 Tokens: [tokens.css](tokens.css), [tokens.json](tokens.json) (not yet wired into the app)
@@ -189,7 +189,7 @@ Still open, to be decided at the surface gates (not by implementers):
 
 ## Build requirements recorded in the critiques
 
-These are outside what a static specimen can prove. Every UI ticket that builds on this system must meet them and show the evidence in its build check.
+These are outside what a static specimen can prove. Every UI ticket that builds on this system must meet them and show the evidence in its build check, with platform-proof timing governed by the 2026-11-22 amendment below.
 
 1. **Screen reader output.** Verify in a real assistive technology (VoiceOver on iOS and macOS, NVDA on Windows, TalkBack on Android). Discs and glyphs are `aria-hidden`; the word carries the meaning. Each holder has a visually hidden prefix, "Whose turn:" or "Status:", so it is not read as a bare name. The turn bar is a `nav` landmark labelled "Whose turn". Save state and toasts use `role="status"`; the error summary uses `role="alert"` and takes focus; dialogs use `role="dialog"`, `aria-modal` and `aria-labelledby` with a real focus trap.
 2. **Keyboard order.** Verify traversal order in the built app, not the specimen. Every shortcut has a visible button equivalent. Signing is never a single key: it needs ⌘ Enter (Ctrl Enter) plus a confirm dialog. Single-character shortcuts ("P" preview, "C" ask client) must be possible to turn off or remap, or be active only when the relevant region has focus (WCAG 2.1.4).
@@ -203,6 +203,53 @@ These are outside what a static specimen can prove. Every UI ticket that builds 
 10. **Rails and discs always carry words.** Never a bare dot, never a rail without a label.
 11. **Same turn words on every screen of a portal** (WCAG 3.2.4).
 12. **Research checks** with real applicants and representatives: whether amber "Your turn" reads as "your move" rather than "warning", and whether representatives want the holder column.
+
+## Proof timing amendment 2026-11-22
+
+The owner approved the proposed timing change with these exact words:
+
+> Defer missing platforms to the pilot gate (Recommended)
+
+Before each UI merge, the final-head browser comparison, actual 200% browser zoom, keyboard, axe, reflow, reduced-motion checks and every available required real screen-reader session must pass. At least one real screen-reader session is required. Missing evidence never becomes a pass, and an observed accessibility defect remains blocking.
+
+A required platform session that cannot yet be provided stays blocked/unrun on the ticket, naming the exact head, missing resource and follow-up owner. VoiceOver on macOS and iOS, NVDA on Windows and TalkBack on Android all remain mandatory before the first private pilot activation and release sign-off. Neither gate may proceed with a missing or failed required session.
+
+This changes proof timing only. It does not change tokens, appearance, anatomy, semantics, the required platform set or the accessibility behavior above. On the same date, the owner selected “Mac VoiceOver only (Recommended)” for standing QA access to VoiceOver in Safari on this Mac, using synthetic owned sessions, an exclusive browser lock and restoration of its prior state. The owner handles any required macOS permission prompts. No additional platform availability is implied.
+
+## Shadow alias amendment 2026-11-22
+
+The owner was asked:
+
+> Separately, approve the two token names shown in the shadow comparison: `--shadow-button-base: 0 1px 0 rgba(0,0,0,.04)` and `--shadow-input-base: inset 0 1px 1px rgba(0,0,0,.03)`, in both themes? These values are already approved. Adding the names requires updating the locked token records and their authority check so the app can restore those shadows.
+
+The owner answered with these exact words:
+
+> Approve both exact aliases and record update (Recommended)
+
+`tokens.css` and `tokens.json` now carry `--shadow-button-base: 0 1px 0 rgba(0,0,0,.04)` and `--shadow-input-base: inset 0 1px 1px rgba(0,0,0,.03)` in both the light and dark themes, and the token authority check pins the updated bytes of both files. These are the base shadows already specified in `DESIGN.md` section 7 and `approved.html` (lines 288 and 296), now named so the app can reference them under the token-only colour rule. `approved.html`, every other token value, the palette, the earlier approvals and the Holder rules are unchanged, and no other raw-colour exemption is granted.
+
+## Holder long names amendment 2026-11-22
+
+The owner was asked:
+
+> Is the rendered refined “Split in place” Holder your final design? It keeps the 72 px column and 12 px/600 text, breaks at spaces first and inside a word only when needed, lets the row grow for extreme names, and changes B2’s narrow column from 64 to 72 px. Full text stays available without shrinking or clipping. [Checked full proposal](/Users/wesleyukadike/.orchestrate/scratch/cadet2-holder-refinement-r2-20261122/index.html). Approval covers this design; implementation, full quality checks and real screen-reader QA still follow.
+
+The owner answered with these exact words:
+
+> Approve refined Split in place as final; I am satisfied (Recommended)
+
+The approved design, both rounds and the full record are in [`docs/design/holder-long-names/`](../holder-long-names/decision.md); the canonical approval is [#160, comment 7089068254](https://github.com/wescodess/cadet2/issues/160#issuecomment-7089068254). It amends only the Representative Holder: a fixed 72 px column, words breaking at spaces first and inside a single word only when that word cannot fit 72 px on its own line, no inserted hyphen, clipping, truncation or smaller type, and rows that grow only for extreme words. B2’s narrow Holder column moves from 64 to 72 px. “Words break only at spaces” under [New in Relay](#new-in-relay) and the 72 px column in build requirement 6 now read with this amendment. `approved.html`, `tokens.css`, `tokens.json`, the palette, the Client holder and every other rule are unchanged.
+
+| Section | Spec | Was | Now |
+|---|---|---|---|
+| `DESIGN.md` 12.2, Holder | Desk word breaks | Only at spaces | At spaces first; inside a single word only when it cannot fit 72 px on its own line; never shrunk, hyphenated, clipped or truncated |
+| `DESIGN.md` 12.2, Holder | Desk holder height | Not specified | Grows downward; the row grows only for extreme words |
+| `DESIGN.md` 12.2, QueueRow | Holder column | 72 px | 72 px, unchanged; the word wraps inside it |
+| B2 `decision.md`, build rules | Narrow queue Holder column | 64 px | 72 px |
+
+## Errata
+
+- [2026-11-22, work-status glyph arc syntax](errata/2026-11-22-state-glyph-arc-syntax.md): the half and three-quarter fill paths in `approved.html` and the later approved records carry one extra number in their arc, so browsers stop drawing them. The erratum gives the corrected paths for the fractions already approved; it is a mechanical correction, not an owner decision, and leaves every approved file unchanged.
 
 ## Discrepancies between the approved specimen and the critiques
 

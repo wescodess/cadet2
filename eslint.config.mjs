@@ -30,6 +30,10 @@ export default [
     files: ['**/*.{js,jsx,mjs,cjs}'],
     languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
   },
+  {
+    files: ['app/**/*.{cjs,cts}'],
+    languageOptions: { globals: { module: 'readonly', exports: 'readonly', require: 'readonly' } },
+  },
   ...tseslint.configs.strictTypeChecked.map((config) => ({ ...config, files: typedFiles })),
   ...vue.configs['flat/essential'],
   {

@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import type { NavigationMenuTriggerProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
-import { reactiveOmit } from "@vueuse/core"
-import { ChevronDown } from "lucide-vue-next"
-import {
-  NavigationMenuTrigger,
-  useForwardProps,
-} from "reka-ui"
-import { cn } from "@/lib/utils"
-import { navigationMenuTriggerStyle } from "."
+import type { NavigationMenuTriggerProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
+import { reactiveOmit } from '@vueuse/core'
+import { ChevronDown } from 'lucide-vue-next'
+import { NavigationMenuTrigger, useForwardProps } from 'reka-ui'
+import { interfaceIconStroke } from '@/lib/relay/icons'
+import { cn } from '@/lib/utils'
+import { navigationMenuTriggerStyle } from '.'
 
-const props = defineProps<NavigationMenuTriggerProps & { class?: HTMLAttributes["class"] }>()
+const props = defineProps<NavigationMenuTriggerProps & { class?: HTMLAttributes['class'] }>()
 
-const delegatedProps = reactiveOmit(props, "class")
+const delegatedProps = reactiveOmit(props, 'class')
 
 const forwardedProps = useForwardProps(delegatedProps)
 </script>
@@ -25,7 +23,8 @@ const forwardedProps = useForwardProps(delegatedProps)
   >
     <slot />
     <ChevronDown
-      class="relative top-[1px] ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
+      :stroke-width="interfaceIconStroke"
+      class="relative top-[1px] ml-1 size-4 transition duration-300 group-data-[state=open]:rotate-180"
       aria-hidden="true"
     />
   </NavigationMenuTrigger>

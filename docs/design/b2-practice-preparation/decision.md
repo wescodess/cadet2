@@ -2,7 +2,7 @@
 
 Date: 2026-11-19
 Gate: UI design gate, batch B2 (R01, R02, R03, R05 to R09 and N02), two rounds
-Status: approved by the owner
+Status: approved by the owner; build rule 5 added on 2026-11-22 (the [Holder long names amendment](../holder-long-names/decision.md))
 Approved design: [approved.html](approved.html), round 2, Triage Desk with Client mirror
 Tickets this record serves: #111, #112, #113, #114
 
@@ -82,6 +82,7 @@ Questions and answers quoted exactly.
 2. **Legal wording comes from the registry.** The final wording for `lf.workforce-invitation.v1.en` and `lf.intake-submit-staff.v1.en` comes from the legal-copy registry. Those drafts are in PR #165, pending counsel. The placeholder text in `approved.html` (A3, A4, N3, C3, C4) is not the source. Its "Placeholder text, drafted 19 Nov" tag goes once the registry supplies the strings; the "Draft wording, pending counsel" mark and key stay until counsel approves. S7 shows the action off when the registry can't supply the wording.
 3. **The approved additions lose their flag.** The "Review requested" chip and a colleague's first name as a holder word are approved (round-2 answer 4) and recorded in `DESIGN.md`. In `approved.html` the chip carries a dashed `--seal` outline (`.is-flagged`) that marked it as unapproved. The build drops that outline.
 4. **Error-summary links need real targets.** In `approved.html` some error-summary and conflict-list links point at anchors that don't exist (`#cf1`, `#g1`, `#la1`). The specimen stays as approved. In the build, every such link moves focus to the field or row it names, and that target must exist and be focusable.
+5. **The narrow queue's Holder column is 72 px.** The owner approved refined Split in place on 2026-11-22 with these exact words: “Approve refined Split in place as final; I am satisfied (Recommended)” ([record](../holder-long-names/decision.md), [canonical approval](https://github.com/wescodess/cadet2/issues/160#issuecomment-7089068254)). `approved.html` gives the narrow queue a 64 px Holder column; the build uses 72 px, so the client-name column there is 8 px narrower. The disc column stays aligned and the rest of the row, including the date, state and owner order, is unchanged. Holder words break at spaces first and inside a single word only when it cannot fit 72 px on its own line, and the row grows only for extreme words, as `DESIGN.md` section 12.2 now says.
 
 ## Known weakness
 

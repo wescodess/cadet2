@@ -21,14 +21,14 @@ const statusConfig = computed(() => {
     return {
       label: 'Degraded',
       icon: AlertTriangle,
-      classes: 'border-[var(--warning,#f59e0b)]/30 bg-[var(--warning-soft,#fef3c7)] text-amber-900',
+      classes: 'border-caution/30 bg-caution-soft text-caution-ink',
     }
   }
 
   return {
     label: 'Failed',
     icon: CircleX,
-    classes: 'border-[var(--destructive,#ef4444)]/25 bg-[var(--destructive-soft,#fef2f2)] text-rose-900',
+    classes: 'border-negative/25 bg-negative-soft text-negative-ink',
   }
 })
 </script>
